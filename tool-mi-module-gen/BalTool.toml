@@ -1,0 +1,5 @@
+[tool]
+id = "mi-module-gen"
+
+[[dependency]]
+path = "../tool-mi-module-gen-cli/build/libs/tool-mi-module-gen-cli-0.1.3-SNAPSHOT.jar"

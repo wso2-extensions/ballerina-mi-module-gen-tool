@@ -1,0 +1,5 @@
+[package]
+org = "wso2"
+name = "tool_mi_module_gen"
+version = "0.1.3"
+distribution = "2201.9.2"
