@@ -184,17 +184,11 @@ public class Utils {
     public static void copyResources(ClassLoader classLoader, Path destination, URI jarPath, String org,
                                      String module, String moduleVersion)
             throws IOException, URISyntaxException {
-        System.out.println("1.1.0");
         URI uri = URI.create("jar:" + jarPath.toString());
-        System.out.println("1.2");
         try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
-            System.out.println("1.3");
             copyMediatorClasses(classLoader, fs, destination, org, module, moduleVersion);
-            System.out.println("1.4");
             copyIcons(classLoader, fs, destination);
-            System.out.println("1.5");
             copyResources(classLoader, fs, destination, Connector.LIB_PATH, ".jar");
-            System.out.println("1.6");
         }
     }
 

@@ -71,23 +71,14 @@ public class BalCompilerLifeCycleTask implements CompilerLifecycleTask<CompilerL
 
         try {
             Path destinationPath = Files.createTempDirectory(Connector.TEMP_PATH);
-            System.out.println("1");
-            System.out.println(destinationPath);
             generateXmlFiles(destinationPath, connector);
-            System.out.println("2");
             generateJsonFiles(destinationPath, connector);
-            System.out.println("3");
             URI jarPath = getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
-            System.out.println("4");
             Utils.copyResources(getClass().getClassLoader(), destinationPath, jarPath, connector.getOrgName(),
                     connector.getModuleName(), connector.getModuleVersion());
-            System.out.println("5");
             Files.copy(sourcePath, destinationPath.resolve(Connector.LIB_PATH).resolve(sourcePath.getFileName()));
-            System.out.println("6");
             Utils.zipFolder(destinationPath, connector.getZipFileName());
-            System.out.println("7");
             Utils.deleteDirectory(destinationPath);
-            System.out.println("8");
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
