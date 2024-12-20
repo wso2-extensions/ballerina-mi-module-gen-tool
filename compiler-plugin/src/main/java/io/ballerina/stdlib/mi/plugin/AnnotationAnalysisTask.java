@@ -43,7 +43,6 @@ import io.ballerina.toml.semantic.ast.TomlTableNode;
 import java.util.List;
 import java.util.Optional;
 
-
 public class AnnotationAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
 
     private static final String FUNCTION_NAME = "FunctionName";

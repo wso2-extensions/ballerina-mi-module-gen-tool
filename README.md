@@ -11,7 +11,7 @@ The `mi-module-gen` tools allows generation of modules for WSO2 Micro Integrator
 First, you need to pull the `mi-module-gen` tool which is used to create the module.
 
 ```bash
-bal tool pull mi-module-gen
+$ bal tool pull mi-module-gen
 ```
 
 ### Write Ballerina Transformation
@@ -34,7 +34,7 @@ Ballerina function that contains `@mi:Operation` annotation maps with a componen
 Finally, use the `bal mi-module-gen` command to generate the Module for the WSO2 Micro Integrator.
 
 ```bash
-bal mi-module-gen <path_to_ballerina_project>
+$ bal mi-module-gen <path_to_ballerina_project>
 ```
 
 Above command generates the connector zip in the same location.
@@ -46,13 +46,13 @@ Above command generates the connector zip in the same location.
 2. Build the tool and publish locally:
 
    ```bash
-   ./gradlew clean :tool-mi-module-gen:localPublish
+   $ ./gradlew clean :tool-mi-module-gen:localPublish
    ```
 
 ### Run tests
 
    ```bash
-   ./gradlew test
+   $ ./gradlew test
    ```
 
 ## Contribute to Ballerina
