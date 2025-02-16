@@ -27,3 +27,5 @@ bin
 target
 build
 .gradle
+
+!gradle-wrapper.jar
