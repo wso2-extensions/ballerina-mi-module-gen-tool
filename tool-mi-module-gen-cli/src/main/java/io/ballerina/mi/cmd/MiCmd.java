@@ -61,7 +61,7 @@ public class MiCmd implements BLauncherCmd {
             return;
         }
 
-        Path path = Path.of(sourcePath);
+        Path path = Path.of(sourcePath).normalize();
         Project project = ProjectLoader.loadProject(path);
         Package pkg = project.currentPackage();
         PackageCompilation packageCompilation = pkg.getCompilation();

@@ -16,11 +16,9 @@
 
 package org.ballerina.test;
 
-import io.ballerina.mi.cmd.MiCmd;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import picocli.CommandLine;
 
 import java.io.IOException;
 import java.nio.file.Files;
