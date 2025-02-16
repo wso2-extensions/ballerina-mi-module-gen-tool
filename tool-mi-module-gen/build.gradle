@@ -33,6 +33,77 @@ buildscript {
     }
 }
 
+plugins {
+    id "de.undercouch.download" version "5.4.0"
+}
+
+description = 'Ballerina MI Module Gen Tool'
+
+def packageName = "mi-module-gen"
+def packageOrg = "wso2"
+def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
+
+def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
+def balToolTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/BalTool.toml")
+def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
+def balToolTomlFile = new File("$project.projectDir/BalTool.toml")
+
+apply plugin: 'io.ballerina.plugin'
+
+ballerina {
+    testCoverageParam = "--code-coverage --coverage-format=xml"
+    packageOrganization = packageOrg
+    module = packageName
+    langVersion = ballerinaLangVersion
+}
+
+def stripBallerinaExtensionVersion(String extVersion) {
+    if (extVersion.matches(project.ext.timestampedVersionRegex)) {
+        def splitVersion = extVersion.split('-')
+        if (splitVersion.length > 3) {
+            def strippedValues = splitVersion[0..-4]
+            return strippedValues.join('-')
+        } else {
+            return extVersion
+        }
+    } else {
+        return extVersion.replace("${project.ext.snapshotVersion}", '')
+    }
+}
+
+configurations {
+    balTools
+}
+
+dependencies {
+    balTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+        transitive = false
+    }
+}
+
+task updateTomlFiles {
+    doLast {
+        def newConfig = ballerinaTomlFilePlaceHolder.text.replace("@toml.version@", tomlVersion)
+        ballerinaTomlFile.text = newConfig
+
+        def newToolConfig = balToolTomlFilePlaceHolder.text.replace("@toml.version@", tomlVersion)
+        balToolTomlFile.text = newToolConfig
+    }
+}
+
+task commitTomlFiles {
+    doLast {
+        project.exec {
+            ignoreExitValue true
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the toml files\" Ballerina.toml Dependencies.toml "
+            } else {
+                commandLine 'sh', '-c', "git commit -m '[Automated] Update the toml files' Ballerina.toml Dependencies.toml"
+            }
+        }
+    }
+}
+
 tasks.register('localPublish') {
     doLast {
         exec {
@@ -45,6 +116,8 @@ tasks.register('localPublish') {
         println("Successfully pushed the MI Tool to the local.")
     }
 }
+
+localPublish.dependsOn "build"
 localPublish.dependsOn ":tool-mi-module-gen-cli:build"
 
 task release {
@@ -65,6 +138,7 @@ task publishBallerinaPackage {
     }
 }
 
-task build {
-    dependsOn ":tool-mi-module-gen-cli:build"
-}
+updateTomlFiles.dependsOn copyStdlibs
+build.dependsOn ":tool-mi-module-gen-cli:build"
+publishBallerinaPackage.dependsOn build
+commitTomlFiles.dependsOn updateTomlFiles

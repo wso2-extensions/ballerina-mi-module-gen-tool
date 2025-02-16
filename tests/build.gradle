@@ -26,10 +26,31 @@ dependencies {
 }
 
 def projects = ['project2', 'project3']
+def toolVersion = stripBallerinaExtensionVersion("${project.version}")
+
+def stripBallerinaExtensionVersion(String extVersion) {
+    if (extVersion.matches(project.ext.timestampedVersionRegex)) {
+        def splitVersion = extVersion.split('-')
+        if (splitVersion.length > 3) {
+            def strippedValues = splitVersion[0..-4]
+            return strippedValues.join('-')
+        } else {
+            return extVersion
+        }
+    } else {
+        return extVersion.replace("${project.ext.snapshotVersion}", '')
+    }
+}
 
 task buildBallerinaProjects {
     doLast {
-        def command = projects.collect { "bal build src/test/resources/ballerina/$it" }.join(' && ')
+        def balCommand;
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            balCommand = "${project.rootDir}/target/ballerina-runtime/bin/bal.bat"
+        } else {
+            balCommand = "${project.rootDir}/target/ballerina-runtime/bin/bal"
+        }
+        def command = projects.collect { "$balCommand build src/test/resources/ballerina/$it" }.join(' && ')
         exec {
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', "/c", command
@@ -38,32 +59,6 @@ task buildBallerinaProjects {
             }
         }
     }
-}
-
-test {
-    systemProperty "ballerina.home", "build/ballerina/ballerina-${ballerinaLangVersion}-swan-lake/" +
-            "distributions/ballerina-${ballerinaLangVersion}"
-    useTestNG() {
-        suites 'src/test/resources/testng.xml'
-    }
-    dependencies {
-        implementation fileTree(dir: 'src/test/resources/libs', include: '*.jar')
-    }
-}
-
-task downloadBallerina(type: Download) {
-    src([
-            "https://dist.ballerina.io/downloads/${ballerinaLangVersion}/" +
-                    "ballerina-${ballerinaLangVersion}-swan-lake.zip"
-    ])
-    dest file("build")
-    overwrite false
-}
-
-task unzipFile(type: Copy) {
-    dependsOn("downloadBallerina")
-    from(zipTree("build/ballerina-${ballerinaLangVersion}-swan-lake.zip"))
-    into("build/ballerina")
 }
 
 task copyBallerinaJars(type: Copy) {
@@ -76,16 +71,32 @@ task copyBallerinaJars(type: Copy) {
 compileTestJava.dependsOn("copyBallerinaJars")
 processTestResources.dependsOn("copyBallerinaJars")
 
-test.dependsOn("unzipFile")
-test.dependsOn("copyBallerinaJars")
-
-task deleteFiles(type: Delete) {
-    doLast {
-        projects.each { project ->
-            delete("src/test/resources/libs/${project}.jar")
-            delete("src/test/resources/ballerina/${project}/target")
+test {
+    try {
+        exec {
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                systemProperty "bal.command", "${project.rootDir}/target/ballerina-runtime/bin/bal.bat"
+                commandLine 'cmd', "/c", "${project.rootDir}/target/ballerina-runtime/bin/bal.bat tool remove mi-module-gen"
+                commandLine 'cmd', "/c", "${project.rootDir}/target/ballerina-runtime/bin/bal.bat tool pull mi-module-gen:$toolVersion --repository=local"
+            } else {
+                systemProperty "bal.command", "${project.rootDir}/target/ballerina-runtime/bin/bal"
+                commandLine 'cmd', "/c", "${project.rootDir}/target/ballerina-runtime/bin/bal tool remove mi-module-gen"
+                commandLine 'sh', '-c', "${project.rootDir}/target/ballerina-runtime/bin/bal tool pull mi-module-gen:$toolVersion --repository=local"
+            }
         }
+    } catch (Exception e) {
+        println("Test Run failed: " + e.message)
+    }
+
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+    }
+
+    dependencies {
+        implementation fileTree(dir: 'src/test/resources/libs', include: '*.jar')
     }
 }
 
-clean.dependsOn("deleteFiles")
+test.dependsOn(":tool-mi-module-gen:build")
+test.dependsOn(":tool-mi-module-gen-cli:build")
+test.dependsOn(":tool-compiler-plugin:build")

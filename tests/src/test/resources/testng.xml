@@ -18,9 +18,8 @@
   -->
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
 
-<suite name="ballerina-new-parser-test-suite" time-out="120000">
-    <test name="jballerina-test">
-        <parameter name="enableJBallerinaTests" value="true"/>
+<suite name="ballerina-mi-module-gen-tool-test-suite" time-out="120000">
+    <test name="ballerina-mi-module-gen-tool-test">
         <packages>
             <package name="org.ballerina.test.*"/>
         </packages>

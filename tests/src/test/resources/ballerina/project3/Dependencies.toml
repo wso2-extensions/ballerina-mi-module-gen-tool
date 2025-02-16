@@ -8,10 +8,10 @@ dependencies-toml-version = "2"
 distribution-version = "2201.10.3"
 
 [[package]]
-org = "wso2"
-name = "tool_mi_module_gen"
-version = "0.2.0"
+org = "testOrg"
+name = "project3"
+version = "1.0.0"
 modules = [
-	{org = "wso2", packageName = "tool_mi_module_gen", moduleName = "tool_mi_module_gen"}
+	{org = "testOrg", packageName = "project3", moduleName = "project3"}
 ]
 

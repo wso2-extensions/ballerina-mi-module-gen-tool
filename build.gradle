@@ -50,6 +50,18 @@ allprojects {
                 password System.getenv("packagePAT")
             }
         }
+
+        maven {
+            url = 'https://maven.pkg.github.com/wso2-extensions/*'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
 
     ext {
@@ -59,6 +71,21 @@ allprojects {
 }
 
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
+
+subprojects {
+
+    configurations {
+        jbalTools
+        ballerinaStdLibs
+    }
+
+    dependencies {
+        jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+            transitive = false
+        }
+        ballerinaStdLibs "io.ballerina.lib:mi-ballerina:${moduleWso2MiVersion}"
+    }
+}
 
 release {
     failOnSnapshotDependencies = true
@@ -73,3 +100,6 @@ release {
 task build {
     dependsOn ":tool-mi-module-gen:build"
 }
+
+publishToMavenLocal.dependsOn build
+publish.dependsOn build

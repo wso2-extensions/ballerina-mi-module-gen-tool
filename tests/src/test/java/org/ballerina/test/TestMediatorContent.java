@@ -32,12 +32,13 @@ public class TestMediatorContent {
     public static final Path RES_DIR = Paths.get("src/test/resources/ballerina").toAbsolutePath();
 
     @Test(dataProvider = "data-provider")
-    public void test(String project) throws IOException {
+    public void test(String project) throws IOException, InterruptedException {
+        String balCommand = System.getProperty("bal.command");
         Path projectDir = RES_DIR.resolve(project).toAbsolutePath();
-        String[] args = {"-i", projectDir.toString()};
-        MiCmd miCmd = new MiCmd();
-        new CommandLine(miCmd).parseArgs(args);
-        miCmd.execute();
+        String[] command = { balCommand, "mi-module-gen", "-i", projectDir.toString()};
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        Process process1 = processBuilder.start();
+        process1.waitFor();
         Path zipPath = Path.of(project + "-connector-0.0.1.zip");
         Assert.assertTrue(Files.exists(zipPath));
         Files.deleteIfExists(zipPath);
