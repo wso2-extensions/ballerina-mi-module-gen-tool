@@ -20,26 +20,64 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 public class TestMediatorContent {
 
     public static final Path RES_DIR = Paths.get("src/test/resources/ballerina").toAbsolutePath();
+    private static final boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
+
 
     @Test(dataProvider = "data-provider")
     public void test(String project) throws IOException, InterruptedException {
-        String balCommand = System.getProperty("bal.command");
+        Path balHome =
+                Paths.get(System.getProperty("user.dir")).getParent().resolve("target").resolve("ballerina-runtime")
+                        .resolve("bin");
+        Path balExecutable = isWindows ? balHome.resolve("bal.bat") : balHome.resolve("bal");
+
         Path projectDir = RES_DIR.resolve(project).toAbsolutePath();
-        String[] command = { balCommand, "mi-module-gen", "-i", projectDir.toString()};
-        ProcessBuilder processBuilder = new ProcessBuilder(command);
-        Process process1 = processBuilder.start();
-        process1.waitFor();
+        ProcessBuilder processBuilder = new ProcessBuilder()
+                .command(balExecutable.toString(), "mi-module-gen", "-i", projectDir.toString());
+
+        processBuilder.redirectErrorStream(true);
+        Process process = processBuilder.start();
+
+        OutputStream outputStream = process.getOutputStream();
+        InputStream inputStream = process.getInputStream();
+        InputStream errorStream = process.getErrorStream();
+
+        printStream(inputStream);
+        printStream(errorStream);
+
+        boolean isFinished = process.waitFor(10, TimeUnit.SECONDS);
+        outputStream.flush();
+        outputStream.close();
+
+        if (!isFinished) {
+            process.destroyForcibly();
+        }
+
         Path zipPath = Path.of(project + "-connector-0.0.1.zip");
         Assert.assertTrue(Files.exists(zipPath));
         Files.deleteIfExists(zipPath);
+    }
+
+    private static void printStream(InputStream inputStream) throws IOException {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+        }
     }
 
     @DataProvider(name = "data-provider")

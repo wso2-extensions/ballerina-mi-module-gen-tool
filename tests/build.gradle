@@ -66,18 +66,20 @@ compileTestJava.dependsOn("copyBallerinaJars")
 processTestResources.dependsOn("copyBallerinaJars")
 
 test {
-    systemProperty "bal.command", "$balCommand"
+    systemProperty "bal.command", balCommand
 
-    try {
-        exec {
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', "/c", "$balCommand tool pull mi-module-gen:$toolVersion --repository=local"
-            } else {
-                commandLine 'sh', '-c', "$balCommand tool pull mi-module-gen:$toolVersion --repository=local"
+    doFirst {
+        try {
+            exec {
+                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                    commandLine 'cmd', "/c", "$balCommand tool pull mi-module-gen:$toolVersion --repository=local"
+                } else {
+                    commandLine 'sh', '-c', "$balCommand tool pull mi-module-gen:$toolVersion --repository=local"
+                }
             }
+        } catch (Exception e) {
+            println("Test Run failed: " + e.message)
         }
-    } catch (Exception e) {
-        println("Test Run failed: " + e.message)
     }
 
     useTestNG() {
@@ -89,6 +91,6 @@ test {
     }
 }
 
-test.dependsOn(":tool-mi-module-gen:build")
+test.dependsOn(":tool-mi-module-gen:testLocalPublish")
 test.dependsOn(":tool-mi-module-gen-cli:build")
 test.dependsOn(":tool-compiler-plugin:build")

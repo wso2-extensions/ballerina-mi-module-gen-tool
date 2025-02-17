@@ -117,6 +117,19 @@ tasks.register('localPublish') {
     }
 }
 
+tasks.register('testLocalPublish') {
+    doLast {
+        exec {
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', "/c", "$balCommand pack && $balCommand push --repository=local"
+            } else {
+                commandLine 'sh', "-c", "$balCommand pack && $balCommand push --repository=local"
+            }
+        }
+        println("Successfully pushed the MI Tool to the local.")
+    }
+}
+
 localPublish.dependsOn "build"
 localPublish.dependsOn ":tool-mi-module-gen-cli:build"
 
@@ -137,6 +150,8 @@ task publishBallerinaPackage {
         println("Successfully pushed the MI Tool to the central.")
     }
 }
+
+
 
 updateTomlFiles.dependsOn copyStdlibs
 build.dependsOn ":tool-mi-module-gen-cli:build"
