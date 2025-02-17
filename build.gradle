@@ -16,6 +16,8 @@
  * under the License.
  */
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
     id "com.github.spotbugs-base" version "${spotbugsPluginVersion}"
     id "com.github.johnrengelman.shadow" version "${shadowJarPluginVersion}"
@@ -67,6 +69,9 @@ allprojects {
     ext {
         snapshotVersion = '-SNAPSHOT'
         timestampedVersionRegex = '.*-\\d{8}-\\d{6}-\\w.*\$'
+        balCommand = Os.isFamily(Os.FAMILY_WINDOWS)
+                ? "${rootProject.projectDir}/target/ballerina-runtime/bin/bal.bat"
+                : "${rootProject.projectDir}/target/ballerina-runtime/bin/bal"
     }
 }
 
@@ -98,6 +103,10 @@ release {
 }
 
 task build {
+    dependsOn ":tool-mi-module-gen:build"
+}
+
+task test {
     dependsOn ":tool-mi-module-gen:build"
 }
 

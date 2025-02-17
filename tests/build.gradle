@@ -44,12 +44,6 @@ def stripBallerinaExtensionVersion(String extVersion) {
 
 task buildBallerinaProjects {
     doLast {
-        def balCommand;
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            balCommand = "${project.rootDir}/target/ballerina-runtime/bin/bal.bat"
-        } else {
-            balCommand = "${project.rootDir}/target/ballerina-runtime/bin/bal"
-        }
         def command = projects.collect { "$balCommand build src/test/resources/ballerina/$it" }.join(' && ')
         exec {
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -72,16 +66,14 @@ compileTestJava.dependsOn("copyBallerinaJars")
 processTestResources.dependsOn("copyBallerinaJars")
 
 test {
+    systemProperty "bal.command", "$balCommand"
+
     try {
         exec {
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                systemProperty "bal.command", "${project.rootDir}/target/ballerina-runtime/bin/bal.bat"
-                commandLine 'cmd', "/c", "${project.rootDir}/target/ballerina-runtime/bin/bal.bat tool remove mi-module-gen"
-                commandLine 'cmd', "/c", "${project.rootDir}/target/ballerina-runtime/bin/bal.bat tool pull mi-module-gen:$toolVersion --repository=local"
+                commandLine 'cmd', "/c", "$balCommand tool pull mi-module-gen:$toolVersion --repository=local"
             } else {
-                systemProperty "bal.command", "${project.rootDir}/target/ballerina-runtime/bin/bal"
-                commandLine 'cmd', "/c", "${project.rootDir}/target/ballerina-runtime/bin/bal tool remove mi-module-gen"
-                commandLine 'sh', '-c', "${project.rootDir}/target/ballerina-runtime/bin/bal tool pull mi-module-gen:$toolVersion --repository=local"
+                commandLine 'sh', '-c', "$balCommand tool pull mi-module-gen:$toolVersion --repository=local"
             }
         }
     } catch (Exception e) {

@@ -4,5 +4,3 @@ name = "project3"
 version = "1.0.0"
 distribution = "2201.10.3"
 
-[build-options]
-observabilityIncluded = true
