@@ -38,12 +38,10 @@ jobs:
           BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_ACCESS_TOKEN }}
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
-        run: |
-          ./gradlew release -Prelease.useAutomaticVersion=true
-          ./gradlew -Pversion=${VERSION} publish -x test -PpublishToCentral=true
+        run: ./gradlew release -Prelease.useAutomaticVersion=true
       - name: GitHub Release and Release Sync PR
         env:
           GITHUB_TOKEN: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
-          gh release create v$VERSION --title "graphql-tools-v$VERSION"
+          gh release create v$VERSION --title "mi-module-gen-v$VERSION"
           gh pr create --base main --title "[Automated] Sync main after $VERSION release" --body "Sync main after $VERSION release"
