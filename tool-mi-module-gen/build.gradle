@@ -39,7 +39,7 @@ plugins {
 
 description = 'Ballerina MI Module Gen Tool'
 
-def packageName = "mi-module-gen"
+def packageName = "mi_module_gen"
 def packageOrg = "wso2"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 
