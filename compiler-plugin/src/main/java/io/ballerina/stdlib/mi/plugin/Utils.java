@@ -198,7 +198,6 @@ public class Utils {
     private static void copyMediatorClasses(ClassLoader classLoader, FileSystem fs, Path destination, String org,
                                             String module, String moduleVersion)
             throws IOException {
-        System.out.println("Current path: " + fs.getPath(".").toAbsolutePath());
         List<Path> paths = Files.walk(fs.getPath("mediator-classes"))
                 .filter(f -> f.toString().contains(".class"))
                 .toList();
