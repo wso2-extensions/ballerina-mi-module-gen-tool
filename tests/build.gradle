@@ -44,12 +44,6 @@ def stripBallerinaExtensionVersion(String extVersion) {
 
 task buildBallerinaProjects {
     doLast {
-        def balCommand;
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            balCommand = "${project.rootDir}/target/ballerina-runtime/bin/bal.bat"
-        } else {
-            balCommand = "${project.rootDir}/target/ballerina-runtime/bin/bal"
-        }
         def command = projects.collect { "$balCommand build src/test/resources/ballerina/$it" }.join(' && ')
         exec {
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -72,20 +66,20 @@ compileTestJava.dependsOn("copyBallerinaJars")
 processTestResources.dependsOn("copyBallerinaJars")
 
 test {
-    try {
-        exec {
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                systemProperty "bal.command", "${project.rootDir}/target/ballerina-runtime/bin/bal.bat"
-                commandLine 'cmd', "/c", "${project.rootDir}/target/ballerina-runtime/bin/bal.bat tool remove mi-module-gen"
-                commandLine 'cmd', "/c", "${project.rootDir}/target/ballerina-runtime/bin/bal.bat tool pull mi-module-gen:$toolVersion --repository=local"
-            } else {
-                systemProperty "bal.command", "${project.rootDir}/target/ballerina-runtime/bin/bal"
-                commandLine 'cmd', "/c", "${project.rootDir}/target/ballerina-runtime/bin/bal tool remove mi-module-gen"
-                commandLine 'sh', '-c', "${project.rootDir}/target/ballerina-runtime/bin/bal tool pull mi-module-gen:$toolVersion --repository=local"
+    systemProperty "bal.command", balCommand
+
+    doFirst {
+        try {
+            exec {
+                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                    commandLine 'cmd', "/c", "$balCommand tool pull mi-module-gen:$toolVersion --repository=local"
+                } else {
+                    commandLine 'sh', '-c', "$balCommand tool pull mi-module-gen:$toolVersion --repository=local"
+                }
             }
+        } catch (Exception e) {
+            println("Test Run failed: " + e.message)
         }
-    } catch (Exception e) {
-        println("Test Run failed: " + e.message)
     }
 
     useTestNG() {
@@ -97,6 +91,6 @@ test {
     }
 }
 
-test.dependsOn(":tool-mi-module-gen:build")
+test.dependsOn(":tool-mi-module-gen:testLocalPublish")
 test.dependsOn(":tool-mi-module-gen-cli:build")
 test.dependsOn(":tool-compiler-plugin:build")
