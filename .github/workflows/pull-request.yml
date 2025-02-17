@@ -16,6 +16,11 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17.0.7
+      
+      - name: Set Up Ballerina
+        uses: ballerina-platform/setup-ballerina@v1.1.0
+        with:
+          version: 2201.10.3
 
       - name: Build with Gradle
         env:
@@ -36,6 +41,11 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17.0.7
+
+      - name: Set Up Ballerina
+        uses: ballerina-platform/setup-ballerina@v1.1.0
+        with:
+          version: 2201.10.3
 
       - name: Build with Gradle
         env:
