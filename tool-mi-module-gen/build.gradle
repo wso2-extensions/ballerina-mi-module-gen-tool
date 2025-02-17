@@ -142,9 +142,9 @@ task publishBallerinaPackage {
     doLast {
         exec {
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', "/c", "bal pack && bal push"
+                commandLine 'cmd', "/c", "$balCommand pack && $balCommand push"
             } else {
-                commandLine 'sh', "-c", "bal pack && bal push"
+                commandLine 'sh', "-c", "$balCommand pack && $balCommand push"
             }
         }
         println("Successfully pushed the MI Tool to the central.")
