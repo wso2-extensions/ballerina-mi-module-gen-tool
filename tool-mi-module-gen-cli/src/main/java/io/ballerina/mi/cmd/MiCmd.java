@@ -69,7 +69,7 @@ public class MiCmd implements BLauncherCmd {
             printStream.println(diagnostic.toString());
             return;
         }
-        JBallerinaBackend jBallerinaBackend = JBallerinaBackend.from(packageCompilation, JvmTarget.JAVA_17);
+        JBallerinaBackend jBallerinaBackend = JBallerinaBackend.from(packageCompilation, JvmTarget.JAVA_21);
         Path bin = path.resolve("target").resolve("bin");
         try {
             createBinFolder(bin);
