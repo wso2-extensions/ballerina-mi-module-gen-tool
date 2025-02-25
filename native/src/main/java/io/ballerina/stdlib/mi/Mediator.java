@@ -20,7 +20,6 @@ package io.ballerina.stdlib.mi;
 
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
@@ -36,7 +35,6 @@ import org.apache.synapse.mediators.template.TemplateContext;
 
 import java.util.Objects;
 import java.util.Stack;
-import java.util.concurrent.CountDownLatch;
 
 import static io.ballerina.stdlib.mi.Constants.BOOLEAN;
 import static io.ballerina.stdlib.mi.Constants.DECIMAL;
@@ -48,6 +46,7 @@ import static io.ballerina.stdlib.mi.Constants.XML;
 
 public class Mediator extends AbstractMediator {
     private static volatile Runtime rt = null;
+    private static Module module = null;
 
     public Mediator() {
         if (rt == null) {
@@ -71,38 +70,24 @@ public class Mediator extends AbstractMediator {
 
     public boolean mediate(MessageContext context) {
         String balFunctionReturnType = context.getProperty(Constants.RETURN_TYPE).toString();
-        final CountDownLatch latch = new CountDownLatch(1);
-        Callback returnCallback = new Callback() {
-            public void notifySuccess(Object result) {
-                Object res = result;
-                if (Objects.equals(balFunctionReturnType, XML)) {
-                    res = BXmlConverter.toOMElement((BXml) result);
-                } else if (Objects.equals(balFunctionReturnType, DECIMAL)) {
-                    res = ((BDecimal) result).value().toString();
-                } else if (Objects.equals(balFunctionReturnType, STRING)) {
-                    res = ((BString) res).getValue();
-                } else if (result instanceof BMap) {
-                    res = result.toString();
-                }
-                context.setProperty(getResultProperty(context), res);
-                latch.countDown();
-            }
-
-            public void notifyFailure(BError result) {
-                handleException(result.getMessage(), context);
-                latch.countDown();
-            }
-        };
-
         Object[] args = new Object[Integer.parseInt(context.getProperty(Constants.SIZE).toString())];
         if (!setParameters(args, context)) {
             return false;
         }
-        rt.invokeMethodAsync(context.getProperty(Constants.FUNCTION_NAME).toString(), returnCallback, args);
         try {
-            latch.await();
-        } catch (InterruptedException e) {
-            log.error(e.getMessage());
+            Object result = rt.callFunction(module, context.getProperty(Constants.FUNCTION_NAME).toString(), null, args);
+            if (Objects.equals(balFunctionReturnType, XML)) {
+                result = BXmlConverter.toOMElement((BXml) result);
+            } else if (Objects.equals(balFunctionReturnType, DECIMAL)) {
+                result = ((BDecimal) result).value().toString();
+            } else if (Objects.equals(balFunctionReturnType, STRING)) {
+                result = ((BString) result).getValue();
+            } else if (result instanceof BMap) {
+                result = result.toString();
+            }
+            context.setProperty(getResultProperty(context), result);
+        } catch (BError bError) {
+            handleException(bError.getMessage(), context);
         }
         return true;
     }
@@ -170,7 +155,7 @@ public class Mediator extends AbstractMediator {
     }
 
     private void init(ModuleInfo moduleInfo) {
-        Module module = new Module(moduleInfo.getOrgName(), moduleInfo.getModuleName(), moduleInfo.getModuleVersion());
+        module = new Module(moduleInfo.getOrgName(), moduleInfo.getModuleName(), moduleInfo.getModuleVersion());
         rt = Runtime.from(module);
         rt.init();
         rt.start();

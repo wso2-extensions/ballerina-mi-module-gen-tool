@@ -2,10 +2,10 @@
 id = "mi-module-gen"
 
 [[dependency]]
-path = "../tool-mi-module-gen-cli/build/libs/tool-mi-module-gen-cli-0.2.0-SNAPSHOT.jar"
+path = "../tool-mi-module-gen-cli/build/libs/tool-mi-module-gen-cli-0.3.0-SNAPSHOT.jar"
 
 [[dependency]]
-path = "../compiler-plugin/build/libs/tool-compiler-plugin-0.2.0-SNAPSHOT.jar"
+path = "../compiler-plugin/build/libs/tool-compiler-plugin-0.3.0-SNAPSHOT.jar"
 
 [[dependency]]
 path = "../compiler-plugin/build/antlr4-runtime-4.5.1-1.jar"

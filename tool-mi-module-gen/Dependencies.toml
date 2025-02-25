@@ -5,12 +5,12 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.10.3"
+distribution-version = "2201.11.0"
 
 [[package]]
 org = "wso2"
 name = "mi_module_gen"
-version = "0.2.0"
+version = "0.3.0"
 modules = [
 	{org = "wso2", packageName = "mi_module_gen", moduleName = "mi_module_gen"}
 ]
