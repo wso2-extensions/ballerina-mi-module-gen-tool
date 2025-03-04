@@ -119,4 +119,12 @@ public class Component extends ModelElement {
         }
         Utils.generateJson(TYPE_NAME, file + File.separator + this.name, this);
     }
+
+    public void generateOutputSchemaJson(File connectorFolder) {
+        File file = new File(connectorFolder, "outputschema");
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        Utils.generateJson(TYPE_NAME + "_outputschema", file + File.separator + this.name, this);
+    }
 }

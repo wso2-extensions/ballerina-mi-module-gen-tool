@@ -52,6 +52,7 @@ public class BalCompilerLifeCycleTask implements CompilerLifecycleTask<CompilerL
         File connectorFolder = new File(connectorFolderPath.toUri());
         for (Component component : connector.getComponents()) {
             component.generateUIJson(connectorFolder);
+            component.generateOutputSchemaJson(connectorFolder);
         }
     }
 

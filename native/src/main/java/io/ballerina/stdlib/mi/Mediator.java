@@ -29,6 +29,8 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BXml;
 import org.apache.axiom.om.OMElement;
+import org.apache.synapse.data.connector.ConnectorResponse;
+import org.apache.synapse.data.connector.DefaultConnectorResponse;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.mediators.template.TemplateContext;
@@ -65,7 +67,7 @@ public class Mediator extends AbstractMediator {
     }
 
     private static String getResultProperty(MessageContext context) {
-        return lookupTemplateParameter(context, Constants.RESULT).toString();
+        return lookupTemplateParameter(context, Constants.RESPONSE_VARIABLE).toString();
     }
 
     public boolean mediate(MessageContext context) {
@@ -85,7 +87,9 @@ public class Mediator extends AbstractMediator {
             } else if (result instanceof BMap) {
                 result = result.toString();
             }
-            context.setProperty(getResultProperty(context), result);
+            ConnectorResponse connectorResponse = new DefaultConnectorResponse();
+            connectorResponse.setPayload(result);
+            context.setVariable(getResultProperty(context), connectorResponse);
         } catch (BError bError) {
             handleException(bError.getMessage(), context);
         }
