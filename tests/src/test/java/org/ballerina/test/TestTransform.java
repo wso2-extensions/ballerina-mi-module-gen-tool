@@ -19,6 +19,7 @@ package org.ballerina.test;
 import io.ballerina.stdlib.mi.Mediator;
 import io.ballerina.stdlib.mi.ModuleInfo;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.synapse.data.connector.DefaultConnectorResponse;
 import org.apache.synapse.mediators.template.TemplateContext;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -27,6 +28,7 @@ import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 public class TestTransform {
@@ -58,12 +60,12 @@ public class TestTransform {
         map.put("xmlA", AXIOMUtil.stringToOM("<name>John</name>"));
         map.put("xmlB", AXIOMUtil.stringToOM("<apr30>8:99999</apr30>"));
         map.put("xmlC", AXIOMUtil.stringToOM("<city>Colombo</city>"));
-        map.put("Result", "res");
+        map.put("responseVariable", "res");
         templateContext.setMappedValues(map);
 
         context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);
         mediator.mediate(context);
-        Assert.assertEquals(context.getProperty("res").toString(),
+        Assert.assertEquals(((DefaultConnectorResponse)context.getVariable("res")).getPayload().toString(),
                 "<may21><time>9:31</time><name>John</name><apr30>8:99999</apr30><city>Colombo</city></may21>");
     }
 
@@ -97,12 +99,12 @@ public class TestTransform {
         map.put("xmlB", AXIOMUtil.stringToOM("<apr30>8:99999</apr30>"));
         map.put("xmlC", AXIOMUtil.stringToOM("<city>Colombo</city>"));
         map.put("xmlD", AXIOMUtil.stringToOM("<country>SriLanka</country>"));
-        map.put("Result", "r");
+        map.put("responseVariable", "r");
         templateContext.setMappedValues(map);
 
         context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);
         mediator.mediate(context);
-        Assert.assertEquals(context.getProperty("r").toString(),
+        Assert.assertEquals(((DefaultConnectorResponse)context.getVariable("r")).getPayload().toString(),
                 "<may22><name>John</name><apr30>8:99999</apr30><city>Colombo</city>" +
                         "<country>SriLanka</country></may22>");
     }
@@ -131,12 +133,12 @@ public class TestTransform {
         HashMap<Object, Object> map = new HashMap<>();
         map.put("i1", "23");
         map.put("i2", "17");
-        map.put("Result", "r");
+        map.put("responseVariable", "r");
         templateContext.setMappedValues(map);
 
         context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);
         mediator.mediate(context);
-        Assert.assertEquals(context.getProperty("r").toString(), "40");
+        Assert.assertEquals(((DefaultConnectorResponse)context.getVariable("r")).getPayload().toString(), "40");
     }
 
     @Test
@@ -163,12 +165,12 @@ public class TestTransform {
         HashMap<Object, Object> map = new HashMap<>();
         map.put("s1", "Hello ");
         map.put("s2", "World");
-        map.put("Result", "r");
+        map.put("responseVariable", "r");
         templateContext.setMappedValues(map);
 
         context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);
         mediator.mediate(context);
-        Assert.assertEquals(context.getProperty("r").toString(), "Hello World");
+        Assert.assertEquals(((DefaultConnectorResponse)context.getVariable("r")).getPayload().toString(), "Hello World");
     }
 
     @Test
@@ -195,12 +197,12 @@ public class TestTransform {
         HashMap<Object, Object> map = new HashMap<>();
         map.put("b1", "true");
         map.put("b2", "false");
-        map.put("Result", "r");
+        map.put("responseVariable", "r");
         templateContext.setMappedValues(map);
 
         context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);
         mediator.mediate(context);
-        Assert.assertEquals(context.getProperty("r").toString(), "false");
+        Assert.assertEquals(((DefaultConnectorResponse)context.getVariable("r")).getPayload().toString(), "false");
     }
 
     @Test
@@ -221,12 +223,12 @@ public class TestTransform {
         stack.push(templateContext);
 
         HashMap<Object, Object> map = new HashMap<>();
-        map.put("Result", "r");
+        map.put("responseVariable", "r");
         templateContext.setMappedValues(map);
 
         context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);
         mediator.mediate(context);
-        Assert.assertNull(context.getProperty("r"));
+        Assert.assertNull(((DefaultConnectorResponse)context.getVariable("r")).getPayload());
     }
 
     @Test
@@ -253,12 +255,12 @@ public class TestTransform {
         HashMap<Object, Object> map = new HashMap<>();
         map.put("f1", "12.3");
         map.put("f2", "3.21");
-        map.put("Result", "r");
+        map.put("responseVariable", "r");
         templateContext.setMappedValues(map);
 
         context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);
         mediator.mediate(context);
-        Assert.assertEquals(context.getProperty("r").toString(), "15.510000000000002");
+        Assert.assertEquals(((DefaultConnectorResponse)context.getVariable("r")).getPayload().toString(), "15.510000000000002");
     }
 
     @Test
@@ -285,12 +287,12 @@ public class TestTransform {
         HashMap<Object, Object> map = new HashMap<>();
         map.put("j1", "{\"name\": \"John\", \"age\": 23}");
         map.put("j2", "{\"city\": \"Colombo\", \"country\": \"Sri Lanka\"}");
-        map.put("Result", "r");
+        map.put("responseVariable", "r");
         templateContext.setMappedValues(map);
 
         context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);
         mediator.mediate(context);
-        Assert.assertEquals(context.getProperty("r").toString(),
+        Assert.assertEquals(((DefaultConnectorResponse)context.getVariable("r")).getPayload().toString(),
                 "{\"name\":\"John\",\"age\":23,\"city\":\"Colombo\",\"country\":\"Sri Lanka\"}");
     }
 
@@ -319,12 +321,12 @@ public class TestTransform {
                 "><CdtTrfTxInf><PmtId><EndToEndId>12348912a456789123</EndToEndId></PmtId><IntrBkSttlmAmt " +
                 "Ccy=\"USD\">500000</IntrBkSttlmAmt><ChrgBr>DEBT</ChrgBr><Dbtr><number>1</number></Dbtr><CdtrAgt" +
                 "><FinInstnId>100009</FinInstnId></CdtrAgt></CdtTrfTxInf></FIToFICstmrCdtTrf></Document>"));
-        map.put("Result", "r");
+        map.put("responseVariable", "r");
         templateContext.setMappedValues(map);
 
         context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);
         mediator.mediate(context);
-        Assert.assertEquals(context.getProperty("r").toString(),
+        Assert.assertEquals(((DefaultConnectorResponse)context.getVariable("r")).getPayload().toString(),
                 "<Document><FIToFICstmrCdtTrf><GrpHdr><MsgId>123489</MsgId><CreDtTm>0111522180</CreDtTm><NbOfTxs>1" +
                         "</NbOfTxs><SttlmInf><SttlmMtd>INDA</SttlmMtd></SttlmInf></GrpHdr><CdtTrfTxInf><PmtId" +
                         "><EndToEndId>12348912a456789123</EndToEndId></PmtId><IntrBkSttlmAmt " +
@@ -356,12 +358,12 @@ public class TestTransform {
         map.put("x", AXIOMUtil.stringToOM("<library xmlns:bk=\"http://example.com/book\" xmlns:auth=\"http://example" +
                 ".com/author\"><bk:Book bk:id=\"001\"><bk:Title>1984</bk:Title><bk:Author " +
                 "auth:country=\"UK\"><auth:Name>George Orwell</auth:Name></bk:Author></bk:Book></library>"));
-        map.put("Result", "r");
+        map.put("responseVariable", "r");
         templateContext.setMappedValues(map);
 
         context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);
         mediator.mediate(context);
-        Assert.assertEquals(context.getProperty("r").toString(),
+        Assert.assertEquals(((DefaultConnectorResponse)context.getVariable("r")).getPayload().toString(),
                 "<library><bk:Book xmlns:bk=\"http://example.com/book\" " +
                         "bk:id=\"001\"><bk:Title>1984</bk:Title><bk:Author xmlns:auth=\"http://example.com/author\" " +
                         "auth:country=\"UK\"><auth:Name>George Orwell</auth:Name></bk:Author></bk:Book></library>");
