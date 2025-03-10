@@ -1,10 +1,10 @@
-# Ballerina Tool for WSO2 Micro Integrator Module Generator
+# Ballerina tool for WSO2 Micro Integrator module generator
 
 ## Overview
 
 The `mi-module-gen` tools allows generation of modules for WSO2 Micro Integrator from Ballerina code.
 
-**Version Compatibility**:
+**Version compatibility**:
 
 **Tool version**|**`wso2/mi` Connector version**|**Ballerina Version**|**Java version**|**WSO2 MI version**|
 :-----:|:-----:|:-----:|:-----:|:-----:
@@ -12,9 +12,9 @@ The `mi-module-gen` tools allows generation of modules for WSO2 Micro Integrator
 0.3| 0.3| 2201.11.0| 21| 4.4.0
 
 
-## Steps to Create Module for WSO2 MI from Ballerina
+## Steps to create a module for WSO2 MI from Ballerina
 
-### Pull `mi-module-gen` Tool
+### Pull `mi-module-gen` tool
 
 First, you need to pull the `mi-module-gen` tool which is used to create the module.
 
@@ -22,7 +22,7 @@ First, you need to pull the `mi-module-gen` tool which is used to create the mod
 $ bal tool pull mi-module-gen
 ```
 
-### Write Ballerina Transformation
+### Write Ballerina transformation
 
 ### Import the `wso2/mi` module
 
@@ -55,7 +55,7 @@ $ bal mi-module-gen -i <path_to_ballerina_project>
 
 Above command generates the connector zip in the same location.
 
-## Local Build
+## Local build
 
 1. Clone the repository [ballerina-mi-module-gen-tool](https://github.com/wso2-extensions/ballerina-mi-module-gen-tool.git)
 
