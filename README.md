@@ -1,12 +1,20 @@
-# Ballerina Tool for WSO2 Micro Integrator Module Generator
+# Ballerina tool for WSO2 Micro Integrator module generator
 
 ## Overview
 
 The `mi-module-gen` tools allows generation of modules for WSO2 Micro Integrator from Ballerina code.
 
-## Steps to Create Module for WSO2 MI from Ballerina
+**Version compatibility**:
 
-### Pull `mi-module-gen` Tool
+**Tool version**|**`wso2/mi` Connector version**|**Ballerina Version**|**Java version**|**WSO2 MI version**|
+:-----:|:-----:|:-----:|:-----:|:-----:
+0.2| 0.2| 2201.10.3| 17| 4.2.0, 4.3.0
+0.3| 0.3| 2201.11.0| 21| 4.4.0
+
+
+## Steps to create a module for WSO2 MI from Ballerina
+
+### Pull `mi-module-gen` tool
 
 First, you need to pull the `mi-module-gen` tool which is used to create the module.
 
@@ -14,13 +22,21 @@ First, you need to pull the `mi-module-gen` tool which is used to create the mod
 $ bal tool pull mi-module-gen
 ```
 
-### Write Ballerina Transformation
+### Write Ballerina transformation
 
-Next, you need to write the Ballerina transformation in a Ballerina project. 
-Create a new Ballerina project or use an existing one and write your transformation logic.
-For example,
+### Import the `wso2/mi` module
 
+Create a new Ballerina project or use an existing one and write your transformation logic. Import the module `wso2/mi` in your Ballerina program.
+
+```ballerina
+import wso2/mi;
 ```
+
+Write Ballerina Transformation. For example,
+
+```ballerina
+import wso2/mi;
+
 @mi:Operation
 public function GPA(xml rawMarks, xml credits) returns xml {
    // Your logic to calculate the GPA
@@ -34,12 +50,12 @@ Ballerina function that contains `@mi:Operation` annotation maps with a componen
 Finally, use the `bal mi-module-gen` command to generate the Module for the WSO2 Micro Integrator.
 
 ```bash
-$ bal mi-module-gen <path_to_ballerina_project>
+$ bal mi-module-gen -i <path_to_ballerina_project>
 ```
 
 Above command generates the connector zip in the same location.
 
-## Local Build
+## Local build
 
 1. Clone the repository [ballerina-mi-module-gen-tool](https://github.com/wso2-extensions/ballerina-mi-module-gen-tool.git)
 
