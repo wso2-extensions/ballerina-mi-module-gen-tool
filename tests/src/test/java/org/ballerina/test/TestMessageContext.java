@@ -37,6 +37,8 @@ import java.util.Stack;
 
 public class TestMessageContext implements MessageContext {
     private Map properties = new HashMap();
+    private Map variables = new HashMap();
+
     @Override
     public SynapseConfiguration getConfiguration() {
         return null;
@@ -103,6 +105,11 @@ public class TestMessageContext implements MessageContext {
     }
 
     @Override
+    public Object getVariable(String s) {
+        return variables.get(s);
+    }
+
+    @Override
     public Object getEntry(String s) {
         return null;
     }
@@ -118,7 +125,17 @@ public class TestMessageContext implements MessageContext {
     }
 
     @Override
+    public void setVariable(String s, Object o) {
+        variables.put(s, o);
+    }
+
+    @Override
     public Set getPropertyKeySet() {
+        return null;
+    }
+
+    @Override
+    public Set getVariableKeySet() {
         return null;
     }
 
@@ -351,4 +368,7 @@ public class TestMessageContext implements MessageContext {
     public void setMessageFlowTracingState(int i) {
 
     }
+
+    @Override
+    public void restoreContinuationStateStack(Stack<ContinuationState> continuationStateStack) {}
 }

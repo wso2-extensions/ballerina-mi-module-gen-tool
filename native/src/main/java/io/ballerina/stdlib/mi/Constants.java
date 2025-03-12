@@ -21,7 +21,8 @@ package io.ballerina.stdlib.mi;
 public class Constants {
     public static final String FUNCTION_NAME = "paramFunctionName";
     public static final String SIZE = "paramSize";
-    public static final String RESULT = "Result";
+    public static final String RESPONSE_VARIABLE = "responseVariable";
+    public static final String OVERWRITE_BODY = "overwriteBody";
     public static final String RETURN_TYPE = "returnType";
     public static final String BOOLEAN = "boolean";
     public static final String INT = "int";

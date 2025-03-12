@@ -1,8 +1,8 @@
 {
   "connectorName": "{{parent.name}}",
   "operationName": "{{name}}",
-  "title": "CSV to Json",
-  "help": "<h1>CSV to JSON</h1> <b>Convert a CSV payload to JSON</b>",
+  "title": "{{name}}",
+  "help": "Input parameters for {{name}} operation",
   "elements": [
     {
       "type": "attributeGroup",
@@ -10,45 +10,54 @@
         "groupName": "General",
         "elements": [
           {
-            "type": "attribute",
+            "type": "attributeGroup",
             "value": {
-              "name": "description",
-              "displayName": "Description",
-              "inputType": "string",
-              "defaultValue": "Ballerina Connector",
-              "required": "false",
-              "helpTip": "Component description"
+              "groupName": "Input Variables",
+              "elements": [
+                {{#each balFuncParams}}
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "{{name}}",
+                    "displayName": "{{name}}",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "Input parameters required to invoke the ballerina function"
+                  }
+                }{{#unless @last}},{{/unless}}
+                {{/each}}
+              ]
             }
           },
           {
             "type": "attributeGroup",
             "value": {
-              "groupName": "Variables",
+              "groupName": "Output",
               "elements": [
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "Result",
-                    "displayName": "Result",
+                    "name": "responseVariable",
+                    "displayName": "Output Variable Name",
                     "inputType": "string",
                     "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "Component description"
+                    "required": "true",
+                    "helpTip": "The target variable in which the output of the operation will be stored"
                   }
-                }
-                {{#each balFuncParams ~}}
-                ,{
+                },
+                {
                   "type": "attribute",
                   "value": {
-                    "name": "{{name}}",
-                    "displayName": "{{name}}",
-                    "inputType": "string",
-                    "defaultValue": "",
+                    "name": "overwriteBody",
+                    "displayName": "Overwrite Message Body",
+                    "inputType": "checkbox",
+                    "defaultValue": "false",
+                    "helpTip": "Replace the Message Body in Message Context with the output payload of the operation (This will remove the payload from the above variable. But other elements such as headers and attributes will remain).",
                     "required": "false",
-                    "helpTip": "Parameter Value (OMElement)"
+                    "hidden": "true"
                   }
                 }
-                {{/each ~}}
               ]
             }
           }
