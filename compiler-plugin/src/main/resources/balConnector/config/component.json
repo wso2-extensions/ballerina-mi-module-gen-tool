@@ -1,0 +1,51 @@
+{
+  "connectorName": "{{parent.name}}",
+  "connectionName": "{{parent.name}}",
+  "title": "{{parent.name}} Connection Config",
+  "help": "<h1>{{parent.name}} Connector</h1> <b>{{parent.description}}</b>",
+  "elements": [
+    {
+      "type": "attribute",
+      "value": {
+        "name": "connectionName",
+        "displayName": "Connection Name",
+        "inputType": "string",
+        "defaultValue": "{{parent.name}}_connection_1",
+        "required": "true",
+        "helpTip": "The name for the {{parent.name}} connection",
+        "validation": "nameWithoutSpecialCharactors"
+      }
+    },
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Basic",
+              "elements": [
+                {{#each parameters}}
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "{{name}}",
+                    "displayName": "{{name}}",
+                    "inputType": "string",
+                    {{#if defaultable}}
+                    "defaultValue": "{{defaultValue}}",
+                    {{/if}}
+                    "required": "{{optional}}",
+                    "helpTip": "Input parameters required to create the ballerina connector client"
+                  }
+                }{{#unless @last}},{{/unless}}
+                {{/each}}
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
