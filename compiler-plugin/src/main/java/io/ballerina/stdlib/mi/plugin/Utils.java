@@ -20,6 +20,10 @@ package io.ballerina.stdlib.mi.plugin;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.*;
+import io.ballerina.compiler.syntax.tree.*;
+import io.ballerina.stdlib.mi.plugin.connectorModel.DataType;
 import io.ballerina.stdlib.mi.plugin.model.Connector;
 import io.ballerina.stdlib.mi.plugin.model.ModelElement;
 import org.objectweb.asm.ClassReader;
@@ -45,8 +49,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -101,6 +104,24 @@ public class Utils {
         }
     }
 
+    private static void generateFileForConnector(String templatePath, String templateName, String outputName, io.ballerina.stdlib.mi.plugin.connectorModel.ModelElement element, String extension) {
+        try {
+            Handlebars handlebar = new Handlebars();
+            handlebar.registerHelper("eq", (context, options) -> context != null && context.equals(options.param(0)));
+            String templateFileName = String.format("%s/%s.%s", templatePath, templateName, extension);
+            String content = readFile(templateFileName);
+            Template template = handlebar.compileInline(content);
+            //TODO: Apply description in connector template
+            // TODO: Apply description and display name for function component xml
+            String output = template.apply(element);
+
+            String outputFileName = String.format("%s.%s", outputName, extension);
+            writeFile(outputFileName, output);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     // Existing methods can now call the new generic method
     public static void generateXml(String templateName, String outputName, ModelElement element) {
         generateFile(templateName, outputName, element, "xml");
@@ -110,22 +131,29 @@ public class Utils {
         generateFile(templateName, outputName, element, "json");
     }
 
+    public static void generateXmlForConnector(String templatePath, String templateName, String outputName, io.ballerina.stdlib.mi.plugin.connectorModel.ModelElement element) {
+        generateFileForConnector(templatePath, templateName, outputName, element, "xml");
+    }
+
+    public static void generateJsonForConnector(String templatePath, String templateName, String outputName, io.ballerina.stdlib.mi.plugin.connectorModel.ModelElement element) {
+        generateFileForConnector(templatePath, templateName, outputName, element, "json");
+    }
+
     /**
      * Zip a folder and its contents.
      *
      * @param sourceDirPath Path to the source directory
      * @param zipFilePath   Path to the output ZIP file
      * @throws IOException If an I/O error occurs
-     * @Note : This method is used to zip the Annotations.CONNECTOR directory and create a zip file using the module
+     * @Note: This method is used to zip the Annotations. CONNECTOR directory and create a zip file using the module
      * name and Annotations.ZIP_FILE_SUFFIX
      */
     public static void zipFolder(Path sourceDirPath, String zipFilePath) throws IOException {
-        Path sourceDir = sourceDirPath;
         try (ZipOutputStream outputStream = new ZipOutputStream(Files.newOutputStream(Paths.get(zipFilePath)))) {
-            Files.walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(sourceDirPath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Path targetFile = sourceDir.relativize(file);
+                    Path targetFile = sourceDirPath.relativize(file);
                     outputStream.putNextEntry(new ZipEntry(targetFile.toString()));
 
                     Files.copy(file, outputStream);
@@ -135,8 +163,8 @@ public class Utils {
 
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    if (!dir.equals(sourceDir)) {
-                        Path targetDir = sourceDir.relativize(dir);
+                    if (!dir.equals(sourceDirPath)) {
+                        Path targetDir = sourceDirPath.relativize(dir);
                         outputStream.putNextEntry(new ZipEntry(targetDir + "/"));
                         outputStream.closeEntry();
                     }
@@ -195,6 +223,7 @@ public class Utils {
     /**
      * This is mediator class copy private utility method
      */
+    //TODO: check and change this method and other related methods
     private static void copyMediatorClasses(ClassLoader classLoader, FileSystem fs, Path destination, String org,
                                             String module, String moduleVersion)
             throws IOException {
@@ -340,4 +369,301 @@ public class Utils {
             return inputStream;
         }
     }
+
+    /**
+     * This is a private utility function for
+     */
+    //TODO
+    public static String getDocFromMetadata(MetadataNode optionalMetadataNode) {
+        StringBuilder doc = new StringBuilder();
+        MarkdownDocumentationNode docLines = optionalMetadataNode.documentationString().isPresent() ?
+                (MarkdownDocumentationNode) optionalMetadataNode.documentationString().get() : null;
+        if (docLines != null) {
+            for (Node docLine : docLines.documentationLines()) {
+                if (docLine instanceof MarkdownDocumentationLineNode) {
+                    doc.append(!((MarkdownDocumentationLineNode) docLine).documentElements().isEmpty() ?
+                            getDocLineString(((MarkdownDocumentationLineNode) docLine).documentElements()) : "\n");
+                } else if (docLine instanceof MarkdownCodeBlockNode) {
+                    doc.append(getDocCodeBlockString((MarkdownCodeBlockNode) docLine));
+                } else {
+                    break;
+                }
+            }
+        }
+
+        return doc.toString();
+    }
+
+    //TODO
+    public static String getDocLineString(NodeList<Node> documentElements) {
+        if (documentElements.isEmpty()) {
+            return null;
+        }
+        StringBuilder doc = new StringBuilder();
+        for (Node docNode : documentElements) {
+            doc.append(docNode.toString());
+        }
+
+        return doc.toString();
+    }
+
+    //TODO
+    public static String getDocCodeBlockString(MarkdownCodeBlockNode markdownCodeBlockNode) {
+        StringBuilder doc = new StringBuilder();
+
+        doc.append(markdownCodeBlockNode.startBacktick().toString());
+        markdownCodeBlockNode.langAttribute().ifPresent(langAttribute -> doc.append(langAttribute.toString()));
+
+        for (MarkdownCodeLineNode codeLineNode : markdownCodeBlockNode.codeLines()) {
+            doc.append(codeLineNode.codeDescription().toString());
+        }
+
+        doc.append(markdownCodeBlockNode.endBacktick().toString());
+        return doc.toString();
+    }
+
+//    private static void processFunctionSymbol(SemanticModel semanticModel, FunctionSymbol functionSymbol, Documentable documentable, int packageId,
+//                                              FunctionType functionType, String packageName,
+//                                              TypeSymbol errorTypeSymbol, Package resolvedPackage) {
+//        //Get function description
+//        String description = documentable.documentation().flatMap(Documentation::description).orElse(String.format("Function for %s", functionSymbol.getName()));
+//        Map<String, String> documentationMap = functionSymbol.documentation().map(Documentation::parameterMap)
+//                .orElse(Map.of());
+//
+//    }
+
+//    public static List<DataType> getFunctionParameters(SeparatedNodeList<ParameterNode> parameterNodes,
+//                                                       Optional<MetadataNode> optionalMetadataNode,
+//                                                       SemanticModel semanticModel) {
+//        List<DataType> parameters = new ArrayList<>();
+//        Optional<DataType> optionalParam;
+//        DataType param;
+//
+//        for (ParameterNode parameterNode : parameterNodes) {
+//            switch (parameterNode.kind()) {
+//                case REQUIRED_PARAM:
+//                    RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
+//                    optionalParam = fromSyntaxNode(requiredParameterNode.typeName(), semanticModel);
+//                    if (optionalParam.isEmpty()) {
+//                        continue;
+//                    }
+//            }
+//        }
+//
+//        return parameters;
+//    }
+
+//    public static Optional<DataType> fromSyntaxNode(Node node, SemanticModel semanticModel) {
+//        Optional<DataType> type = Optional.empty();
+//        switch (node.kind()) {
+//            case SIMPLE_NAME_REFERENCE:
+//            case QUALIFIED_NAME_REFERENCE:
+//                Optional<Symbol> optSymbol = Optional.empty();
+//                try {
+//                    optSymbol = semanticModel.symbol(node);
+//                } catch (NullPointerException ignored) {
+//                }
+//                if (optSymbol != null && optSymbol.isPresent()) {
+//                    Symbol symbol = optSymbol.get();
+//                    type = Optional.of(fromSemanticSymbol(symbol));
+//                    clearVisitedTypeMap();
+//                }
+//                break;
+//            case OPTIONAL_TYPE_DESC:
+//                OptionalTypeDescriptorNode optionalTypeDescriptorNode = (OptionalTypeDescriptorNode) node;
+//                type = fromSyntaxNode(optionalTypeDescriptorNode.typeDescriptor(), semanticModel);
+//                if (type.isPresent()) {
+//                    Type optionalType = type.get();
+//                    optionalType.optional = true;
+//                    type = Optional.of(optionalType);
+//                }
+//                break;
+//            case UNION_TYPE_DESC:
+//                UnionType unionType = new UnionType();
+//                flattenUnionNode(node, semanticModel, unionType.members);
+//                type = Optional.of(unionType);
+//                break;
+//            case INTERSECTION_TYPE_DESC:
+//                IntersectionType intersectionType = new IntersectionType();
+//                flattenIntersectionNode(node, semanticModel, intersectionType.members);
+//                type = Optional.of(intersectionType);
+//                break;
+//            case ARRAY_TYPE_DESC:
+//                ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) node;
+//                Optional<Type> syntaxNode = fromSyntaxNode(arrayTypeDescriptorNode.memberTypeDesc(), semanticModel);
+//                if (syntaxNode.isPresent()) {
+//                    type = Optional.of(new ArrayType(syntaxNode.get()));
+//                }
+//                break;
+//            case STREAM_TYPE_DESC:
+//                StreamTypeDescriptorNode streamNode = (StreamTypeDescriptorNode) node;
+//                StreamTypeParamsNode streamParams = streamNode.streamTypeParamsNode().isPresent() ?
+//                        (StreamTypeParamsNode) streamNode.streamTypeParamsNode().get() : null;
+//                Optional<Type> leftParam = Optional.empty();
+//                Optional<Type> rightParam = Optional.empty();
+//                if (streamParams != null) {
+//                    leftParam = fromSyntaxNode(streamParams.leftTypeDescNode(), semanticModel);
+//                    if (streamParams.rightTypeDescNode().isPresent()) {
+//                        rightParam = fromSyntaxNode(streamParams.rightTypeDescNode().get(), semanticModel);
+//                    }
+//                }
+//                type = Optional.of(new StreamType(leftParam, rightParam));
+//                break;
+//            case RECORD_TYPE_DESC:
+//                RecordTypeDescriptorNode recordNode = (RecordTypeDescriptorNode) node;
+//                List<Type> fields = new ArrayList<>();
+//                recordNode.fields().forEach(node1 -> {
+//                    Optional<Type> optionalType = fromSyntaxNode(node1, semanticModel);
+//                    optionalType.ifPresent(fields::add);
+//                });
+//
+//                Optional<Type> restType = recordNode.recordRestDescriptor().isPresent() ?
+//                        fromSyntaxNode(recordNode.recordRestDescriptor().get().typeName(), semanticModel) :
+//                        Optional.empty();
+//                type = Optional.of(new RecordType(fields, restType));
+//                break;
+//            case RECORD_FIELD:
+//                RecordFieldNode recordField = (RecordFieldNode) node;
+//                type = fromSyntaxNode(recordField.typeName(), semanticModel);
+//                if (type.isPresent()) {
+//                    Type recordType = type.get();
+//                    recordType.name = recordField.fieldName().text();
+//                    type = Optional.of(recordType);
+//                }
+//                break;
+//            case MAP_TYPE_DESC:
+//                MapTypeDescriptorNode mapNode = (MapTypeDescriptorNode) node;
+//                Optional<Type> mapStNode = fromSyntaxNode(mapNode.mapTypeParamsNode().typeNode(), semanticModel);
+//                if (mapStNode.isPresent()) {
+//                    type = Optional.of(new MapType(mapStNode.get()));
+//                }
+//                break;
+//            case TABLE_TYPE_DESC:
+//                TableTypeDescriptorNode tableTypeNode = (TableTypeDescriptorNode) node;
+//                Optional<Symbol> optTableTypeSymbol = Optional.empty();
+//                TableTypeSymbol tableTypeSymbol = null;
+//                List<String> keySpecifiers = null;
+//                try {
+//                    optTableTypeSymbol = semanticModel.symbol(tableTypeNode);
+//                } catch (NullPointerException ignored) {
+//                }
+//                if (optTableTypeSymbol != null && optTableTypeSymbol.isPresent()) {
+//                    tableTypeSymbol = (TableTypeSymbol) optTableTypeSymbol.get();
+//                }
+//                if (tableTypeSymbol != null) {
+//                    keySpecifiers = tableTypeSymbol.keySpecifiers();
+//                }
+//                if (tableTypeNode.keyConstraintNode().isEmpty()) {
+//                    break;
+//                }
+//                Node keyConstraint = tableTypeNode.keyConstraintNode().get();
+//                Optional<Type> tableStNode = fromSyntaxNode(tableTypeNode.rowTypeParameterNode(), semanticModel);
+//                Optional<Type> constraintStNode = fromSyntaxNode(keyConstraint, semanticModel);
+//                if (tableStNode.isPresent() && constraintStNode.isPresent()) {
+//                    type = Optional.of(new TableType(tableStNode.get(), keySpecifiers, constraintStNode.get()));
+//                }
+//                break;
+//            default:
+//                if (node instanceof BuiltinSimpleNameReferenceNode builtinSimpleNameReferenceNode) {
+//                    type = Optional.of(new PrimitiveType(builtinSimpleNameReferenceNode.name().text()));
+//                } else {
+//                    type = Optional.of(new PrimitiveType(node.toSourceCode()));
+//                }
+//                break;
+//        }
+//
+//        return type;
+//    }
+
+//    public static DataType fromSemanticSymbol(Symbol symbol) {
+//        DataType type = null;
+//        if (symbol instanceof TypeReferenceTypeSymbol) {
+//            TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) symbol;
+//            type = getEnumType(typeReferenceTypeSymbol, symbol);
+//        } else if (symbol instanceof RecordTypeSymbol) {
+//            RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) symbol;
+//            String typeName = ((BallerinaRecordTypeSymbol) recordTypeSymbol).getBType().toString();
+//            VisitedType visitedType = getVisitedType(typeName);
+//            if (visitedType != null) {
+//                return geAlreadyVisitedType(symbol, typeName, visitedType, false);
+//            } else {
+//                if (typeName.contains("record {")) {
+//                    type = getRecordType(recordTypeSymbol);
+//                } else {
+//                    visitedTypeMap.put(typeName, new VisitedType());
+//                    type = getRecordType(recordTypeSymbol);
+//                    completeVisitedTypeEntry(typeName, type);
+//                }
+//            }
+//        } else if (symbol instanceof ArrayTypeSymbol) {
+//            ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) symbol;
+//            type = new ArrayType(fromSemanticSymbol(arrayTypeSymbol.memberTypeDescriptor()));
+//        } else if (symbol instanceof MapTypeSymbol) {
+//            MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) symbol;
+//            type = new MapType(fromSemanticSymbol(mapTypeSymbol.typeParam()));
+//        } else if (symbol instanceof TableTypeSymbol) {
+//            TableTypeSymbol tableTypeSymbol = (TableTypeSymbol) symbol;
+//            TypeSymbol keyConstraint = null;
+//            if (tableTypeSymbol.keyConstraintTypeParameter().isPresent()) {
+//                keyConstraint = tableTypeSymbol.keyConstraintTypeParameter().get();
+//            }
+//            type = new TableType(fromSemanticSymbol(tableTypeSymbol.rowTypeParameter()),
+//                    tableTypeSymbol.keySpecifiers(), fromSemanticSymbol(keyConstraint));
+//        } else if (symbol instanceof UnionTypeSymbol) {
+//            UnionTypeSymbol unionSymbol = (UnionTypeSymbol) symbol;
+//            String typeName = ((BallerinaUnionTypeSymbol) unionSymbol).getBType().toString();
+//            VisitedType visitedType = getVisitedType(typeName);
+//            if (visitedType != null) {
+//                return geAlreadyVisitedType(symbol, typeName, visitedType, true);
+//            } else {
+//                visitedTypeMap.put(typeName, new VisitedType());
+//                type = getUnionType(unionSymbol);
+//                completeVisitedTypeEntry(typeName, type);
+//            }
+//        } else if (symbol instanceof ErrorTypeSymbol) {
+//            ErrorTypeSymbol errSymbol = (ErrorTypeSymbol) symbol;
+//            ErrorType errType = new ErrorType();
+//            if (errSymbol.detailTypeDescriptor() instanceof TypeReferenceTypeSymbol) {
+//                errType.detailType = fromSemanticSymbol(errSymbol.detailTypeDescriptor());
+//            }
+//            type = errType;
+//        } else if (symbol instanceof IntersectionTypeSymbol) {
+//            IntersectionTypeSymbol intersectionTypeSymbol = (IntersectionTypeSymbol) symbol;
+//            String typeName = ((BallerinaIntersectionTypeSymbol) intersectionTypeSymbol).getBType().toString();
+//            VisitedType visitedType = getVisitedType(typeName);
+//            if (visitedType != null) {
+//                return geAlreadyVisitedType(symbol, typeName, visitedType, false);
+//            } else {
+//                visitedTypeMap.put(typeName, new VisitedType());
+//                type = getIntersectionType(intersectionTypeSymbol);
+//                completeVisitedTypeEntry(typeName, type);
+//            }
+//        } else if (symbol instanceof StreamTypeSymbol) {
+//            StreamTypeSymbol streamTypeSymbol = (StreamTypeSymbol) symbol;
+//            type = fromSemanticSymbol(streamTypeSymbol.typeParameter());
+//        } else if (symbol instanceof ObjectTypeSymbol) {
+//            ObjectTypeSymbol objectTypeSymbol = (ObjectTypeSymbol) symbol;
+//            ObjectType objectType = new ObjectType();
+//            objectTypeSymbol.fieldDescriptors().forEach((typeName, typeSymbol) -> {
+//                Type semanticSymbol = fromSemanticSymbol(typeSymbol);
+//                if (semanticSymbol != null) {
+//                    objectType.fields.add(semanticSymbol);
+//                }
+//            });
+//            objectTypeSymbol.typeInclusions().forEach(typeSymbol -> {
+//                Type semanticSymbol = fromSemanticSymbol(typeSymbol);
+//                if (semanticSymbol != null) {
+//                    objectType.fields.add(new InclusionType(semanticSymbol));
+//                }
+//            });
+//            type = objectType;
+//        } else if (symbol instanceof TypeSymbol) {
+//            String typeName = ((TypeSymbol) symbol).signature();
+//            if (typeName.startsWith("\"") && typeName.endsWith("\"")) {
+//                typeName = typeName.substring(1, typeName.length() - 1);
+//            }
+//            type = new PrimitiveType(typeName);
+//        }
+//        return type;
+//    }
 }
