@@ -50,6 +50,7 @@ dependencies {
     implementation "org.ballerinalang:value:${ballerinaLangVersion}"
     implementation "org.apache.ws.commons.axiom:axiom-api:${axiomVersion}"
     implementation "org.wso2.carbon.module:module-core:${carbonModuleCoreVersion}"
+    implementation "org.wso2.integration.connector.core:mi-connector-core:${integrationConnectorCoreVersion}"
     implementation "org.apache.axis2.wso2:axis2:${axis2Version}"
     implementation "org.apache.synapse:synapse-core:${synapseVersion}"
     testImplementation 'org.testng:testng:7.7.0'

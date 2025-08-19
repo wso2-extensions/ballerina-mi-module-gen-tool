@@ -2,4 +2,4 @@
 org = "wso2"
 name = "mi_module_gen"
 version = "@toml.version@"
-distribution = "2201.11.0"
+distribution = "2201.12.7.0"
