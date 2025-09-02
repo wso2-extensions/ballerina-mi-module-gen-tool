@@ -1,16 +1,25 @@
 NAME
-       bal mi - Ballerina WSO2 Micro Integrator Tool
+       bal mi-module-gen - Ballerina WSO2 Micro Integrator Tool
 
 SYNOPSIS
-       bal mi [OPTIONS] [<arguments>]
+       bal mi-module-gen [OPTIONS]
 
 DESCRIPTION
-       The 'bal mi' command-line tool generates WSO2 Micro Integrator connector to execute Ballerina transformation.
+       The 'bal mi-module-gen' command-line tool generates WSO2 Micro Integrator connectors
+       for Ballerina transformations and Ballerina connectors.
 
 OPTIONS
        -i, --input <ballerina project>
-           Path to Ballerina project that includes the transformation logic.
+           Path to Ballerina project that includes the transformation logic. This could be either
+           a build project or a bala project.
+
+       -t, --target <target path for generated MI connector>
+           Path to store the generated MI connector. Required when the input Ballerina project
+           is a bala project.
 
 EXAMPLES
-       Generate WSO2 micro integrator connector for Ballerina.
-           $ bal mi -i ballerina/project
+       Generate WSO2 micro integrator connector for Ballerina module.
+           $ bal mi-module-gen -i ballerina/project
+
+       Generate WSO2 Micro Integrator connector for a Ballerina connector.
+           $ bal mi-module-gen -i ballerina/bala/project -t mi/connector/target

@@ -19,11 +19,19 @@
 package io.ballerina.mi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.projects.*;
+import io.ballerina.projects.BuildOptions;
+import io.ballerina.projects.DocumentConfig;
+import io.ballerina.projects.DocumentId;
+import io.ballerina.projects.EmitResult;
+import io.ballerina.projects.JBallerinaBackend;
+import io.ballerina.projects.JvmTarget;
 import io.ballerina.projects.Module;
+import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.Project;
+import io.ballerina.projects.bala.BalaProject;
+import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import picocli.CommandLine;
@@ -54,9 +62,9 @@ public class MiCmd implements BLauncherCmd {
     private boolean helpFlag;
     @CommandLine.Option(names = {"--input", "-i"}, description = "Ballerina project path")
     private String sourcePath;
-    @CommandLine.Option(names = {"--connector", "-c"}, description = "Generate MI module for Ballerina connector")
+    @CommandLine.Option(names = {"--target", "-t"}, description = "Target path for the generated MI connector")
     private String targetPath;
-    Path executablePath;
+    private Path executablePath;
 
     public MiCmd() {
         this.printStream = System.out;
@@ -65,6 +73,7 @@ public class MiCmd implements BLauncherCmd {
     @Override
     public void execute() {
         String miImportDocumentName;
+        Package compilePkg;
         if (sourcePath == null || helpFlag) {
             StringBuilder stringBuilder = new StringBuilder();
             setHelpMessage(stringBuilder);
@@ -75,65 +84,82 @@ public class MiCmd implements BLauncherCmd {
         Path path = Path.of(sourcePath).normalize();
         BuildOptions buildOptions = BuildOptions.builder().setSticky(false).setOffline(false).build();
         Project project = ProjectLoader.loadProject(path, buildOptions);
-        Package pkgBeforeImportAdded = project.currentPackage();
+        compilePkg = project.currentPackage();
+        if (!(project instanceof BuildProject || project instanceof BalaProject)){
+            printStream.println("ERROR: Invalid project path provided");
+            return;
+        }
 
-        if (null != targetPath) {
-            Path miConnectorCache = Paths.get(targetPath, "BalConnectors");
-            executablePath = miConnectorCache.resolve(pkgBeforeImportAdded.descriptor().org().value() +
-                    CONNECTOR_NAME_SEPARATOR + pkgBeforeImportAdded.descriptor().name().value() +
-                    CONNECTOR_NAME_SEPARATOR + pkgBeforeImportAdded.descriptor().version().toString() + ".jar" );
-            if (Files.exists(executablePath)) {
-                // Executable for the specific connector version will not be created if it already exists
-                //TODO: Check if the ZIP exists as well before quiting
-                printStream.println("executable already exists");
+        if (project instanceof BalaProject) {
+            // Project is a Bala project
+            if (targetPath.isEmpty()) {
+                printStream.println("ERROR: Target path for the MI connector not provided");
                 return;
             }
+            Path miConnectorCache = Paths.get(targetPath, "BalConnectors");
+            executablePath = miConnectorCache.resolve(compilePkg.descriptor().org().value() +
+                    CONNECTOR_NAME_SEPARATOR + compilePkg.descriptor().name().value() +
+                    CONNECTOR_NAME_SEPARATOR + compilePkg.descriptor().version().toString() + ".jar" );
+            // Add a new Document to the project with the wso2/mi import
+            Module defaultModule = project.currentPackage().getDefaultModule();
+            List<String> defaultModuleFiles = defaultModule.documentIds()
+                    .stream()
+                    .map(documentId -> defaultModule.document(documentId).name())
+                    .toList();
+            do {
+                miImportDocumentName = String.format("%s-%s.bal", MI_IMPORT_FILE, UUID.randomUUID());
+            } while (defaultModuleFiles.contains(miImportDocumentName));
+
+            ModuleId defaultModuleId = defaultModule.moduleId();
+            DocumentId documentId = DocumentId.create(miImportDocumentName, defaultModuleId);
+            DocumentConfig documentConfig = DocumentConfig.from(documentId, MI_IMPORT,
+                    miImportDocumentName);
+            defaultModule.modify().addDocument(documentConfig).apply();
+            compilePkg = project.currentPackage();
+
             try {
                 Files.createDirectories(miConnectorCache);
             } catch (IOException e) {
                 throw  new RuntimeException(e);
             }
             System.setProperty(CONNECTOR_TARGET_PATH, executablePath.toString());
-        } else {
+        }
+
+        PackageCompilation packageCompilation = compilePkg.getCompilation();
+        for (Diagnostic diagnostic : packageCompilation.diagnosticResult().diagnostics()) {
+            printStream.println(diagnostic.toString());
+        }
+        if (packageCompilation.diagnosticResult().hasErrors()) {
+            printStream.println("ERROR: Ballerina project compilation contains errors");
+            return;
+        }
+        JBallerinaBackend jBallerinaBackend = JBallerinaBackend.from(packageCompilation, JvmTarget.JAVA_21);
+
+        if (project instanceof BuildProject) {
+            // Project is a build project
+            if (null != targetPath) {
+                printStream.println("WARNING: Arguments provided for -t will be ignored.\n");
+            }
             Path bin = path.resolve("target").resolve("bin");
             try {
                 createBinFolder(bin);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            executablePath = bin.resolve(pkgBeforeImportAdded.descriptor().name().value() + ".jar");
+            executablePath = bin.resolve(compilePkg.descriptor().name().value() + ".jar");
         }
-//        TODO: REMOVE-if DOCUMENT adding is not needed
-        // Add new Document with import
-        Module defaultModule = project.currentPackage().getDefaultModule();
-        List<String> defaultModuleFiles = defaultModule.documentIds()
-                .stream()
-                .map(documentId -> defaultModule.document(documentId).name())
-                .toList();
-        do {
-            miImportDocumentName = String.format("%s-%s.bal", MI_IMPORT_FILE, UUID.randomUUID());
-        } while (defaultModuleFiles.contains(miImportDocumentName));
 
-        ModuleId defaultModuleId = defaultModule.moduleId();
-        DocumentId documentId = DocumentId.create(miImportDocumentName, defaultModuleId);
-        DocumentConfig documentConfig = DocumentConfig.from(documentId, MI_IMPORT,
-                miImportDocumentName);
-        defaultModule.modify().addDocument(documentConfig).apply();
-
-        Package pkgAfterImportAdded = project.currentPackage();
-        PackageCompilation packageCompilation = pkgAfterImportAdded.getCompilation();
-        // TODO: FIX-below only prints a single diagnostic before returning
-        for (Diagnostic diagnostic : packageCompilation.diagnosticResult().diagnostics()) {
-            printStream.println(diagnostic.toString());
-            return;
+        EmitResult emitResult = jBallerinaBackend.emit(JBallerinaBackend.OutputType.EXEC, executablePath);
+        if (!jBallerinaBackend.conflictedJars().isEmpty()) {
+            printStream.println("WARNING: Detected conflicting jar files:");
+            for (JBallerinaBackend.JarConflict conflict : jBallerinaBackend.conflictedJars()) {
+                printStream.println(conflict.getWarning(project.buildOptions().listConflictedClasses()));
+            }
         }
-//        TODO: CHECK-How to determine the JvmTarget, does it have any connection with the connector platform?
-        JBallerinaBackend jBallerinaBackend = JBallerinaBackend.from(packageCompilation, JvmTarget.JAVA_21);
 
-        jBallerinaBackend.emit(JBallerinaBackend.OutputType.EXEC, executablePath);
-        // TODO: FIX-check emit result diagnostics and conflicting jars and remove if the below is not needed
-        if (packageCompilation.diagnosticResult().diagnosticCount() > 0) {
-            printStream.println("Errors in compiling Ballerina project");
+        // Print diagnostics found during executable emit
+        if (!emitResult.diagnostics().diagnostics().isEmpty()) {
+            emitResult.diagnostics().diagnostics().forEach(d -> printStream.println("\n" + d.toString()));
         }
     }
 
