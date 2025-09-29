@@ -19,18 +19,18 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="{{name}}">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    {{#each parameters ~}}
+    <!-- TODO: if union, the selected member type becomes a parameter-->
+    {{#each queryParams ~}}
+    <parameter name="{{name}}" description="{{documentation}}"/>
+    {{/each ~}}
+    {{#each pathParams ~}}
     <parameter name="{{name}}" description="{{documentation}}"/>
     {{/each ~}}
     <sequence>
         {{#each params ~}}
-        <property name="param{{index}}" value="{{name}}"/>
+        <property name="param{{@index}}" value="{{name}}"/>
         {{/each ~}}
-        {{#each parameters ~}}
-        <property name="param{{index}}" value="{{name}}"/>
-        <property name="paramType{{index}}" value="{{typeName}}"/>
-        {{/each ~}}
-        <property name="returnType" value="{{returnType.typeName}}"/>
+        {{{writeComponentXmlProperties this}}}
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction"/>
     </sequence>
 </template>

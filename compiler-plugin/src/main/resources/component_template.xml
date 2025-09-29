@@ -21,6 +21,7 @@
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
     {{#each balFuncParams ~}}
     <parameter name="{{name}}" description="Component description"/>
+<!--    TODO: if union, the selected member type becomes a parameter-->
     {{/each ~}}
     <sequence>
         {{#each params ~}}

@@ -18,22 +18,21 @@
   -->
 <template name="init" onError="fault" xmlns="http://ws.apache.org/ns/synapse">
     <parameter name="name" description="Unique name the connection is identified by"/>
-    {{#each parameters ~}}
-    <parameter name="{{name}}" description="init function"/>
+    <parameter name="connectionType" description="Connection type"/>
+    <!-- TODO: if union, the selected member type becomes a parameter-->
+    {{#each connections ~}}
+    {{#each initComponent.queryParams ~}}
+    <parameter name="{{../connectionType}}_{{name}}" description="{{documentation}}"/>
+    {{/each ~}}
     {{/each ~}}
     <sequence>
-        <property name="objectTypeName" value="{{objectTypeName}}"/>
-        {{#each params ~}}
-        <property name="param{{index}}" value="{{name}}"/>
+        {{#each connections ~}}
+        <property name="{{connectionType}}_objectTypeName" value="{{objectTypeName}}"/>
+        {{#each initComponent.params ~}}
+        <property name="{{../connectionType}}_param{{@index}}" value="{{name}}"/>
         {{/each ~}}
-        {{#each parameters ~}}
-        <property name="param{{index}}" value="{{name}}"/>
-        <property name="paramType{{index}}" value="{{typeName}}"/>
-        {{#if (eq typeName "record")}}
-        <property name="recordName{{index}}" value="{{typeInfo.name}}"/>
-        {{/if}}
+        {{writeConfigXmlProperties this}}
         {{/each ~}}
-        <property name="name" expression="$func:name"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorConfig"/>
     </sequence>
 </template>

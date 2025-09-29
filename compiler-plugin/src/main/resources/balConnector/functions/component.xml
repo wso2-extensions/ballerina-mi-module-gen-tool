@@ -18,15 +18,14 @@
   -->
 <component name="functions" type="synapse/template">
     <subComponents>
+        {{#each connections ~}}
         {{#each components ~}}
-        {{#if isConfig ~}}
-        {{else ~}}
         <component name="{{name}}">
-            <displayName>"{{name}}"</displayName>
+            <displayName>{{name}}</displayName>
             <file>{{name}}.xml</file>
             <description>{{documentation}}</description>
         </component>
-        {{/if ~}}
+        {{/each ~}}
         {{/each ~}}
     </subComponents>
 </component>

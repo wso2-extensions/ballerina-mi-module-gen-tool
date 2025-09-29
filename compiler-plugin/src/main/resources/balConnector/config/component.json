@@ -1,8 +1,8 @@
 {
-  "connectorName": "{{parent.name}}",
-  "connectionName": "{{parent.name}}",
-  "title": "{{parent.name}} Connection Config",
-  "help": "<h1>{{parent.name}} Connector</h1> <b>{{parent.description}}</b>",
+  "connectorName": "{{parent.parent.moduleName}}",
+  "connectionName": "{{parent.connectionType}}",
+  "title": "Connection Config for {{parent.connectionType}} connection",
+  "help": "<h1>{{parent.connectionType}} Connection</h1> <b>{{{escapeChars parent.description}}}</b>",
   "elements": [
     {
       "type": "attribute",
@@ -10,9 +10,9 @@
         "name": "connectionName",
         "displayName": "Connection Name",
         "inputType": "string",
-        "defaultValue": "{{parent.name}}_connection_1",
+        "defaultValue": "{{parent.connectionType}}_connection_1",
         "required": "true",
-        "helpTip": "The name for the {{parent.name}} connection",
+        "helpTip": "The name for the {{parent.connectionType}} connection",
         "validation": "nameWithoutSpecialCharactors"
       }
     },
@@ -26,21 +26,7 @@
             "value": {
               "groupName": "Basic",
               "elements": [
-                {{#each parameters}}
-                {
-                  "type": "attribute",
-                  "value": {
-                    "name": "{{name}}",
-                    "displayName": "{{name}}",
-                    "inputType": "string",
-                    {{#if defaultable}}
-                    "defaultValue": "{{defaultValue}}",
-                    {{/if}}
-                    "required": "{{optional}}",
-                    "helpTip": "Input parameters required to create the ballerina connector client"
-                  }
-                }{{#unless @last}},{{/unless}}
-                {{/each}}
+                {{writeConfigJsonProperties this}}
               ]
             }
           }

@@ -1,8 +1,8 @@
 {
-  "connectorName": "{{parent.name}}",
+  "connectorName": "{{parent.parent.moduleName}}",
   "operationName": "{{name}}",
   "title": "{{name}}",
-  "help": "{{documentation}}",
+  "help": "{{{escapeChars documentation}}}",
   "elements": [
     {
       "type": "attributeGroup",
@@ -13,12 +13,12 @@
             "type": "attribute",
             "value": {
               "name": "configRef",
-              "displayName": "{{parent.name}} Connection",
+              "displayName": "{{parent.connectionType}} Connection",
               "inputType": "connection",
               "allowedConnectionTypes": [
-                "{{parent.name}}"
+                "{{parent.connectionType}}"
               ],
-              "defaultType": "connection.{{parent.name}}",
+              "defaultType": "connection.{{parent.connectionType}}",
               "defaultValue": "",
               "required": "true",
               "helpTip": "Connection to be used"
@@ -29,19 +29,7 @@
             "value": {
               "groupName": "Input Variables",
               "elements": [
-                {{#each parameters}}
-                {
-                  "type": "attribute",
-                  "value": {
-                    "name": "{{name}}",
-                    "displayName": "{{name}}",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "{{defaultValue}}",
-                    "required": "{{optional}}",
-                    "helpTip": "Input parameters required to invoke the {{parent.name}} function"
-                  }
-                }{{#unless @last}},{{/unless}}
-                {{/each}}
+                {{writeComponentJsonProperties this}}
               ]
             }
           },

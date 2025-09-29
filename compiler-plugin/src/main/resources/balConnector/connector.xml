@@ -17,11 +17,11 @@
   ~ under the License.
   -->
 <connector>
-    <component name="{{name}}" package="io.ballerina.stdlib.mi">
+    <component name="{{moduleName}}" package="io.ballerina.stdlib.mi">
         <dependency component="config"/>
         <dependency component="functions"/>
-        <description>{{description}}</description>
+        <description>{{{description}}}</description>
     </component>
     <icon>icon/icon-small.gif</icon>
-    <displayName>{{name}}</displayName>
+    <displayName>{{moduleName}}</displayName>
 </connector>

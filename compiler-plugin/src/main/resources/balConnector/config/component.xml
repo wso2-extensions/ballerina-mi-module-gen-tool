@@ -20,7 +20,7 @@
     <subComponents>
         <component name="init">
             <file>init.xml</file>
-            <description>{{documentation}}</description>
+            <description>Client Init Operation</description>
             <hidden>true</hidden>
         </component>
     </subComponents>

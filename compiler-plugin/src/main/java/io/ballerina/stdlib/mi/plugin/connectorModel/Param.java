@@ -8,8 +8,8 @@ public class Param {
     private String index;
 
     public Param(String index, String name) {
-        this.name = name;
         this.index = index;
+        this.name = name;
     }
 
     public String getName() {
