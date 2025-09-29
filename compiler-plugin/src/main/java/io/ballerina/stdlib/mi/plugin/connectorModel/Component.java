@@ -7,50 +7,29 @@ import org.ballerinalang.diagramutil.connector.models.connector.types.PathParamT
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Component extends ModelElement {
     private String name;
-    private String description = "just a description";
-    private ArrayList<Param> params = new ArrayList<>();
-    private ArrayList<FunctionParam> balFuncParams = new ArrayList<>();
-    private FunctionReturn balFuncReturnType;
-    private Connector parent;
-    private boolean isConfig = false;
+    private final String documentation;
+    //TODO: remove if not needed
     private String objectTypeName;
+    private final FunctionType functionType;
+    //TODO: remove if not needed
+    private final String index;
+    private Connection parent;
+    private final ArrayList<Param> params = new ArrayList<>();
+    private final List<PathParamType> pathParams;
+    private final List<Type> queryParams;
+    private final Type returnType;
 
-    //TODO: New fields - handle access
-    public List<PathParamType> pathParams;
-    public List<Type> parameters;
-    public Type returnType;
-    //TODO: remove qualifiers if not needed
-    public String[] qualifiers;
-    public String documentation;
-
-    public Component(String name) {
+    public Component(String name, String documentation, FunctionType functionType, String index, List<PathParamType> pathParams, List<Type> queryParams, Type returnType) {
         this.name = name;
-    }
-
-    public Component(String name, List<Type> queryParams, Type returnType, String[] qualifiers, String documentation) {
-        this.name = name;
-        this.parameters = queryParams;
-        this.returnType = returnType;
-        this.qualifiers = qualifiers;
         this.documentation = documentation;
-    }
-
-    public Component(String name, List<PathParamType> pathParams, List<Type> queryParams, Type returnType, String[] qualifiers, String documentation) {
-        this.name = name;
+        this.functionType = functionType;
+        this.index = index;
         this.pathParams = pathParams;
-        this.parameters = queryParams;
+        this.queryParams = queryParams;
         this.returnType = returnType;
-        this.qualifiers = qualifiers;
-        this.documentation = documentation;
-    }
-
-    public Component(String name, ArrayList<Param> params) {
-        this.name = name;
-        this.params = params;
     }
 
     public ArrayList<Param> getParams() {
@@ -69,41 +48,16 @@ public class Component extends ModelElement {
         this.name = name;
     }
 
-
-    public Connector getParent() {
+    public Connection getParent() {
         return parent;
     }
 
-    public void setParent(Connector parent) {
+    public void setParent(Connection parent) {
         this.parent = parent;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getType() {
         return "component";
-    }
-
-    public FunctionReturn getBalFuncReturnType() {
-        return balFuncReturnType;
-    }
-
-    public void setBalFuncReturnType(FunctionReturn returnType) {
-        this.balFuncReturnType = returnType;
-    }
-
-    public boolean getIsConfig() {
-        return isConfig;
-    }
-
-    public void setIsConfig(boolean isConfig) {
-        this.isConfig = isConfig;
     }
 
     public String getObjectTypeName() {
@@ -114,24 +68,24 @@ public class Component extends ModelElement {
         this.objectTypeName = objectTypeName;
     }
 
-    public ArrayList<FunctionParam> getBalFuncParams() {
-        return balFuncParams;
+    public List<Type> getQueryParams() {
+        return queryParams;
     }
 
-    public void addBalFuncParams(FunctionParam param) {
-        this.balFuncParams.add(param);
+    public List<PathParamType> getPathParams() {
+        return pathParams;
     }
 
-    public List<Type> getParameters() {
-        return parameters;
+    public String getDocumentation() {
+        return documentation;
     }
 
-    public void generateInstanceXml(File connectorFolder, String templatePath, String typeName) {
-        File file = new File(connectorFolder, typeName);
-        if (!file.exists()) {
-            file.mkdir();
-        }
-        Utils.generateXmlForConnector(templatePath, "component", file + File.separator + "component", this);
+    public Type getReturnType() {
+        return returnType;
+    }
+
+    public FunctionType getFunctionType() {
+        return functionType;
     }
 
     public void generateTemplateXml(File connectorFolder, String templatePath, String typeName) {
@@ -156,5 +110,9 @@ public class Component extends ModelElement {
             file.mkdir();
         }
 //        Utils.generateJson(TYPE_NAME + "_outputschema", file + File.separator + this.name, this);
+    }
+
+    public String getIndex() {
+        return index;
     }
 }
