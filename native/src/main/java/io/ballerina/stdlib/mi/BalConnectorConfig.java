@@ -24,7 +24,6 @@ import static io.ballerina.stdlib.mi.Constants.*;
 public class BalConnectorConfig extends AbstractConnector {
     private static volatile Runtime rt = null;
     private static Module module = null;
-    private static HashedMap clientObjMap = new HashedMap();
 
     public BalConnectorConfig() {
         if (rt == null) {
@@ -105,10 +104,6 @@ public class BalConnectorConfig extends AbstractConnector {
         rt.start();
     }
 
-    public static BObject getClient (String connectionName){
-        return (BObject) clientObjMap.get(connectionName);
-    }
-
     public static Runtime getRuntime() {
         return rt;
     }
@@ -137,6 +132,7 @@ public class BalConnectorConfig extends AbstractConnector {
     private Object getParameter(MessageContext context, String value, String type, int index) {
         String paramName = context.getProperty(value).toString();
         Object param = lookupTemplateParamater(context, paramName);
+        String stringParam = ((String) param).replaceAll("^\"(.*)\"$", "$1");
         //TODO: check handling null parameters
 //        if (param == null) {
 //            log.error("Error in getting the ballerina function parameter: " + paramName);
@@ -145,21 +141,20 @@ public class BalConnectorConfig extends AbstractConnector {
         String paramType = context.getProperty(type).toString();
         return switch (paramType) {
             //TODO: Revisit handling union and record types
-            case BOOLEAN -> Boolean.parseBoolean((String) param);
-            case INT -> Long.parseLong((String) param);
-            case STRING, UNION -> StringUtils.fromString((String) param);
-            case FLOAT -> Double.parseDouble((String) param);
-            case DECIMAL -> ValueCreator.createDecimalValue((String) param);
-            case RECORD -> createRecordValue((String) param, context, index);
+            case BOOLEAN -> Boolean.parseBoolean(stringParam);
+            case INT -> Long.parseLong(stringParam);
+            case STRING, UNION -> StringUtils.fromString(stringParam);
+            case FLOAT -> Double.parseDouble(stringParam);
+            case DECIMAL -> ValueCreator.createDecimalValue(stringParam);
+            case RECORD -> createRecordValue(stringParam, context, index);
             default -> null;
         };
     }
 
     private Object createRecordValue(String jsonString, MessageContext context, int paramIndex) {
-        BString jsonBString = StringUtils.fromString(jsonString);
         String recordName = context.getProperty("recordName" + paramIndex).toString();
         BMap<BString, Object> recValue = ValueCreator.createRecordValue(BalConnectorConfig.getModule(), recordName);
         Type recType = recValue.getType();
-        return FromJsonStringWithType.fromJsonStringWithType(jsonBString, ValueCreator.createTypedescValue(recType));
+        return FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(jsonString), ValueCreator.createTypedescValue(recType));
     }
 }
