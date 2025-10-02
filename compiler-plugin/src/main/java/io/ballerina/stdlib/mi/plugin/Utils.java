@@ -20,24 +20,24 @@ package io.ballerina.stdlib.mi.plugin;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.*;
 import io.ballerina.compiler.syntax.tree.*;
-import io.ballerina.stdlib.mi.plugin.connectorModel.DataType;
+import io.ballerina.stdlib.mi.plugin.connectorModel.Component;
+import io.ballerina.stdlib.mi.plugin.connectorModel.Connection;
+import io.ballerina.stdlib.mi.plugin.connectorModel.FunctionType;
+import io.ballerina.stdlib.mi.plugin.connectorModel.attributeModel.Attribute;
+import io.ballerina.stdlib.mi.plugin.connectorModel.attributeModel.AttributeGroup;
+import io.ballerina.stdlib.mi.plugin.connectorModel.attributeModel.Combo;
+import io.ballerina.stdlib.mi.plugin.connectorModel.attributeModel.Table;
 import io.ballerina.stdlib.mi.plugin.model.Connector;
 import io.ballerina.stdlib.mi.plugin.model.ModelElement;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.ballerinalang.diagramutil.connector.models.connector.Type;
+import org.ballerinalang.diagramutil.connector.models.connector.types.EnumType;
+import org.ballerinalang.diagramutil.connector.models.connector.types.PathParamType;
+import org.ballerinalang.diagramutil.connector.models.connector.types.RecordType;
+import org.ballerinalang.diagramutil.connector.models.connector.types.UnionType;
+import org.objectweb.asm.*;
 
-import java.io.BufferedReader;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -53,22 +53,23 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class Utils {
+import static io.ballerina.stdlib.mi.plugin.Constants.*;
 
+public class Utils {
     /**
-     * These are private utility functions used in the generateXml method
+     * These are utility functions used when generating XML and JSON content
      */
-    private static String readFile(String fileName) throws IOException {
+    static String readFile(String fileName) throws IOException {
         InputStream inputStream = Utils.class.getClassLoader().getResourceAsStream(fileName);
         assert inputStream != null;
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        StringBuilder xmlContent = new StringBuilder();
+        StringBuilder fileContent = new StringBuilder();
         int character;
         while ((character = reader.read()) != -1) {
-            xmlContent.append((char) character);
+            fileContent.append((char) character);
         }
         reader.close();
-        return xmlContent.toString();
+        return fileContent.toString();
     }
 
     /**
@@ -104,23 +105,392 @@ public class Utils {
         }
     }
 
-    private static void generateFileForConnector(String templatePath, String templateName, String outputName, io.ballerina.stdlib.mi.plugin.connectorModel.ModelElement element, String extension) {
+    private static void generateFileForConnector(String templatePath, String templateName, String outputName,
+                                                 io.ballerina.stdlib.mi.plugin.connectorModel.ModelElement element,
+                                                 String extension) {
         try {
             Handlebars handlebar = new Handlebars();
-            handlebar.registerHelper("eq", (context, options) -> context != null && context.equals(options.param(0)));
+            handlebar.registerHelper("eq", (context, options) -> context != null &&
+                    context.equals(options.param(0)));
+            handlebar.registerHelper("not", (context, options) -> {
+                if (context instanceof Boolean booleanContext) {
+                    return !booleanContext;
+                }
+                return true; // default value if context is not boolean
+            });
+            handlebar.registerHelper("escapeChars", (context, options) -> {
+                if (context == null) return "";
+                String value = context.toString().replaceAll("^\"(.*)\"$", "$1");
+                if (value.equals("()")) {
+                    return "";
+                }
+                return value.replace("\\", "\\\\")
+                        .replace("\"", "\\\"")
+                        .replace("\b", "\\b")
+                        .replace("\f", "\\f")
+                        .replace("\n", "\\n")
+                        .replace("\r", "\\r")
+                        .replace("\t", "\\t")
+                        .replace("\u0000", "\\u0000");
+            });
+            handlebar.registerHelper("checkFuncType", (context, options) -> {
+                FunctionType functionType = (FunctionType) context;
+                return functionType.toString().equals(options.param(0));
+            });
+            handlebar.registerHelper("writeConfigXmlProperties", (context, options) -> {
+                Connection connection = (Connection) context;
+                StringBuilder result = new StringBuilder();
+                List<Type> initParams = connection.getInitComponent().getQueryParams();
+                for (int i = 0; i < initParams.size(); i++) {
+                    writeConfigXmlProperty(initParams.get(i), i, connection.getConnectionType(), result);
+                }
+                return new Handlebars.SafeString(result.toString());
+            });
+            handlebar.registerHelper("writeComponentXmlProperties", (context, options) -> {
+                Component component = (Component) context;
+                StringBuilder result = new StringBuilder();
+                List<Type> queryParams = component.getQueryParams();
+                for (int i = 0; i < queryParams.size(); i++) {
+                    writeComponentXmlQueryProperty(queryParams.get(i), i, result);
+                }
+                List<PathParamType> pathParams = component.getPathParams();
+                for (int i = 0; i < pathParams.size(); i++) {
+                    writeComponentXmlPathProperty(pathParams.get(i), i, result);
+                }
+                if (templatePath.equals(FUNCTION_TEMPLATE_PATH)) {
+                    result.append(String.format("<property name=\"returnType\" value=\"%s\"/>\n",
+                            component.getReturnType().typeName));
+                }
+                return new Handlebars.SafeString(result.toString());
+            });
+            handlebar.registerHelper("writeConfigJsonProperties", (context, options) -> {
+                Component component = (Component) context;
+                JsonTemplateBuilder builder = new JsonTemplateBuilder();
+                List<Type> queryParams = component.getQueryParams();
+                String helpTip = String.format("Input parameters required for %s connection",
+                        component.getParent().getConnectionType());
+                for (Type configParam: queryParams) {
+                    String paramName = String.format("%s_%s", component.getParent().getConnectionType(),
+                            configParam.name);
+                    writeJsonAttributeForQueryParam(configParam.typeName, configParam, queryParams.indexOf(configParam),
+                            queryParams.size(), builder, paramName, helpTip, false);
+                }
+                return new Handlebars.SafeString(builder.build());
+            });
+            handlebar.registerHelper("writeComponentJsonProperties", (context, options) -> {
+                Component component = (Component) context;
+                JsonTemplateBuilder builder = new JsonTemplateBuilder();
+                List<PathParamType> pathParams = component.getPathParams();
+                for (PathParamType pathParam: pathParams) {
+                    writeJsonAttributeForPathParam(pathParam.typeName, pathParam, pathParams.indexOf(pathParam),
+                            pathParams.size(), builder, pathParam.name, "", false);
+                }
+                List<Type> queryParams = component.getQueryParams();
+                for (Type queryParam: queryParams) {
+                    writeJsonAttributeForQueryParam(queryParam.typeName, queryParam, queryParams.indexOf(queryParam),
+                            queryParams.size(), builder, queryParam.name, queryParam.documentation, false);
+                }
+                return new Handlebars.SafeString(builder.build());
+            });
             String templateFileName = String.format("%s/%s.%s", templatePath, templateName, extension);
             String content = readFile(templateFileName);
             Template template = handlebar.compileInline(content);
-            //TODO: Apply description in connector template
-            // TODO: Apply description and display name for function component xml
             String output = template.apply(element);
-
             String outputFileName = String.format("%s.%s", outputName, extension);
             writeFile(outputFileName, output);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
+    private static void writeComponentXmlPathProperty(PathParamType parameter, int index, StringBuilder result) {
+        result.append(String.format("<property name=\"pathParam%d\" value=\"%s\"/>\n", index, parameter.name));
+        result.append(String.format("<property name=\"pathParamType%d\" value=\"%s\"/>\n", index, parameter.typeName));
+    }
+
+    private static void writeComponentXmlQueryProperty(Type parameter, int index, StringBuilder result) {
+        switch (parameter.typeName) {
+            case STRING:
+            case INT, DECIMAL, FLOAT:
+            case ENUM, ARRAY:
+            case BOOLEAN:
+                result.append(String.format("<property name=\"queryParam%d\" value=\"%s\"/>\n", index,
+                        parameter.name));
+                result.append(String.format("<property name=\"queryParamType%d\" value=\"%s\"/>\n", index,
+                        parameter.typeName));
+                break;
+            case UNION:
+                result.append(String.format("<property name=\"queryParam%d\" value=\"%s\"/>\n", index,
+                        parameter.name));
+                result.append(String.format("<property name=\"queryParamType%d\" value=\"%s\"/>\n", index,
+                        parameter.typeName));
+                result.append(String.format("<property name=\"queryParamDataType%d\" value=\"%s\"/>\n", index,
+                        String.format("%s_%s", parameter.name, "dataType")));
+                break;
+            case RECORD:
+                result.append(String.format("<property name=\"queryParam%d\" value=\"%s\"/>\n", index,
+                        parameter.name));
+                result.append(String.format("<property name=\"queryParamType%d\" value=\"%s\"/>\n", index,
+                        parameter.typeName));
+                if (null != parameter.getTypeInfo()) {
+                    result.append(String.format("<property name=\"queryParamRecordName%d\" value=\"%s\"/>\n", index,
+                            parameter.typeInfo.name));
+                    result.append(String.format("<property name=\"queryParamRecordModule%d\" value=\"%s\"/>\n", index,
+                            parameter.typeInfo.moduleName));
+                    result.append(String.format("<property name=\"queryParamRecordOrg%d\" value=\"%s\"/>\n", index,
+                            parameter.typeInfo.orgName));
+                    result.append(String.format("<property name=\"queryParamRecordVersion%d\" value=\"%s\"/>\n", index,
+                            parameter.typeInfo.version));
+                }
+                break;
+        }
+    }
+
+    private static void writeConfigXmlProperty(Type parameter, int index, String connectionType, StringBuilder result) {
+        switch (parameter.typeName) {
+            case STRING:
+            case INT, DECIMAL, FLOAT, ARRAY:
+            case BOOLEAN:
+                result.append(String.format("<property name=\"%s_param%d\" value=\"%s\"/>\n", connectionType, index,
+                        parameter.name));
+                result.append(String.format("<property name=\"%s_paramType%d\" value=\"%s\"/>\n", connectionType, index,
+                        parameter.typeName));
+                break;
+            case RECORD:
+                result.append(String.format("<property name=\"%s_param%d\" value=\"%s\"/>\n", connectionType, index,
+                        parameter.name));
+                result.append(String.format("<property name=\"%s_paramType%d\" value=\"%s\"/>\n", connectionType,
+                        index, parameter.typeName));
+                result.append(String.format("<property name=\"%s_recordName%d\" value=\"%s\"/>\n", connectionType,
+                        index, parameter.typeInfo.name));
+                result.append(String.format("<property name=\"%s_recordModule%d\" value=\"%s\"/>\n", connectionType,
+                        index, parameter.typeInfo.moduleName));
+                result.append(String.format("<property name=\"%s_recordOrg%d\" value=\"%s\"/>\n", connectionType,
+                        index, parameter.typeInfo.orgName));
+                result.append(String.format("<property name=\"%s_recordVersion%d\" value=\"%s\"/>\n", connectionType,
+                        index, parameter.typeInfo.version));
+//                List<Type> recFields = ((RecordType) parameter).fields;
+//                for (int i = 0; i < recFields.size(); i++) {
+//                    writeConfigXmlProperty(recFields.get(i), i, connectionType, result);
+//                }
+                break;
+            case UNION:
+                result.append(String.format("<property name=\"%s_param%d\" value=\"%s\"/>\n", connectionType, index,
+                        parameter.name));
+                result.append(String.format("<property name=\"%s_paramType%d\" value=\"%s\"/>\n", connectionType, index,
+                        parameter.typeName));
+                result.append(String.format("<property name=\"%s_dataType%d\" value=\"%s\"/>\n", connectionType, index,
+                        String.format("%s_%s", parameter.name, "dataType")));
+                break;
+//            case INTERSECTION:
+            case ENUM:
+                result.append(String.format("<property name=\"%s_param%d\" value=\"%s\"/>\n", connectionType, index,
+                        parameter.name));
+                result.append(String.format("<property name=\"%s_paramType%d\" value=\"%s\"/>\n", connectionType, index,
+                        parameter.typeName));
+                break;
+        }
+    }
+
+    private static void writeJsonAttributeForPathParam(String paramType, PathParamType parameter, int index, int paramLength,
+                                                       JsonTemplateBuilder builder, String paramName, String helpTip,
+                                                       boolean isCombo) throws IOException {
+        switch (paramType) {
+            case STRING:
+                Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);
+                break;
+            case INT:
+                Attribute intAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip, VALIDATE_TYPE_REGEX,
+                        INTEGER_REGEX, isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, intAttr);
+                break;
+            case DECIMAL, FLOAT:
+                Attribute decAttr = new Attribute(paramName, parameter.name,
+                        INPUT_TYPE_STRING_OR_EXPRESSION, "", true,
+                        helpTip, VALIDATE_TYPE_REGEX, DECIMAL_REGEX, isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, decAttr);
+                break;
+            case BOOLEAN:
+                Attribute boolAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_BOOLEAN,
+                        "", true, helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
+                break;
+            default:
+                // error: unidentified data type
+                // log and skip function
+        }
+        builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
+    }
+
+    private static void writeJsonAttributeForQueryParam(String paramType, Type parameter, int index, int paramLength,
+                                                        JsonTemplateBuilder builder, String paramName, String helpTip,
+                                                        boolean isCombo)
+            throws IOException {
+        switch (paramType) {
+            case STRING:
+                Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);
+                break;
+            case INT:
+                Attribute intAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, VALIDATE_TYPE_REGEX,
+                        INTEGER_REGEX, isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, intAttr);
+                break;
+            case DECIMAL, FLOAT:
+                Attribute decAttr = new Attribute(paramName, parameter.name,
+                        INPUT_TYPE_STRING_OR_EXPRESSION, parameter.getDefaultValue(), !parameter.isOptional(),
+                        helpTip, VALIDATE_TYPE_REGEX, DECIMAL_REGEX, isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, decAttr);
+                break;
+            case ARRAY:
+                Table arrayTable = new Table(paramName, parameter.name, parameter.name, helpTip);
+                builder.addFromTemplate(TABLE_TEMPLATE_PATH, arrayTable);
+                //TODO
+//                writeJsonAttributeForQueryParam();
+                break;
+            case UNION:
+                // Gather the data types in the union
+                Combo comboField = getComboField(parameter, paramName, helpTip);
+                builder.addFromTemplate(COMBO_TEMPLATE_PATH, comboField).addSeparator(ATTRIBUTE_SEPARATOR);
+
+                // Add attribute fields for each type with enable conditions
+                List<Type> unionMembers = ((UnionType) parameter).members;
+                for (Type member : unionMembers) {
+                    writeJsonAttributeForQueryParam(member.typeName, parameter, index, paramLength, builder, paramName,
+                            helpTip, true);
+                }
+                break;
+            case ENUM:
+                List<Type> enumMembers = ((EnumType) parameter).members;
+                StringJoiner joiner = new StringJoiner(",", "[", "]");
+                for (Type member : enumMembers) {
+                    joiner.add("\"" + member.typeName + "\"");
+                }
+                String enumComboValues = joiner.toString();
+                Combo enumComboField = new Combo(paramName, parameter.name, INPUT_TYPE_COMBO, enumComboValues,
+                        !parameter.isOptional(), helpTip);
+                builder.addFromTemplate(COMBO_TEMPLATE_PATH, enumComboField);
+                break;
+            case BOOLEAN:
+                Attribute boolAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_BOOLEAN,
+                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
+                break;
+            case RECORD:
+                AttributeGroup recGroup = new AttributeGroup(paramName);
+                builder.addFromTemplate(ATTRIBUTE_GROUP_TEMPLATE_PATH, recGroup);
+                List<Type> recordFields = ((RecordType) parameter).fields;
+                for (Type field: recordFields) {
+                    String fieldName = String.format("%s_%s", paramName, field.name);
+                    writeJsonAttributeForQueryParam(field.typeName, field, recordFields.indexOf(field), paramLength,
+                            builder, fieldName, field.documentation, false);
+                    builder.addConditionalSeparator((recordFields.indexOf(field) < recordFields.size() - 1),
+                            ATTRIBUTE_SEPARATOR);
+                }
+                builder.addSeparator(ATTRIBUTE_GROUP_END);
+                break;
+            default:
+                // error: unidentified data type
+                // log and skip function
+        }
+        builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
+    }
+
+    private static Combo getComboField(Type parameter, String paramName, String helpTip) {
+        List<Type> unionMembers = ((UnionType) parameter).members;
+        StringJoiner unionJoiner = new StringJoiner(",", "[", "]");
+        for (Type member : unionMembers) {
+            String comboItem = member.typeName.equals(RECORD) ? String.format("%s_%s",
+                    member.typeName, member.name) : member.typeName;
+            unionJoiner.add("\"" + comboItem + "\"");
+        }
+        String unionComboValues = unionJoiner.toString();
+
+        // Combo field for selecting the data type
+        String comboName = String.format("%s_%s", paramName, "dataType");
+        Combo comboField = new Combo(comboName, comboName, INPUT_TYPE_COMBO,
+                unionComboValues, !parameter.isOptional(), helpTip);
+        return comboField;
+    }
+
+    //TODO: Remove
+//    private static void writeJsonAttributeForConfigParam(String connectionType, Type parameter, int index,
+//                                                         int paramLength, StringBuilder result) throws IOException {
+//
+//        switch (parameter.typeName) {
+//            case STRING, INT, DECIMAL, FLOAT:
+//                result.append(String.format(template, paramName, parameter.name, INPUT_TYPE_STRING,
+//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
+//                break;
+//            case ARRAY:
+//                helpTip = "Array of values separated by ','";
+//                result.append(String.format(template, paramName, parameter.name, INPUT_TYPE_STRING,
+//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
+//                break;
+//            case UNION:
+//                // TODO: Loading forms dynamically according to the type selected by the user
+//                // Combo field for selecting the data type
+//                template = readFile(COMBO_TEMPLATE_PATH);
+//                List<Type> unionMembers = ((UnionType) parameter).members;
+//                StringJoiner unionJoiner = new StringJoiner(",", "[", "]");
+//                for (Type member : unionMembers) {
+//                    String comboItem = member.typeName.equals(RECORD) ? String.format("%s_%s",
+//                            member.typeName, member.name) : member.typeName;
+//                    unionJoiner.add("\"" + comboItem + "\"");
+//
+//                }
+//                String unionComboValues = unionJoiner.toString();
+//                String comboName = String.format("%s_%s_%s", connectionType, parameter.name, "dataType");
+//                result.append(String.format(template, comboName, comboName, INPUT_TYPE_COMBO, unionComboValues,
+//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
+//                result.append(",");
+//
+//                // String field for the actual value of the parameter
+//                template = readFile(ATTRIBUTE_TEMPLATE_PATH);
+//                result.append(String.format(template, paramName, parameter.name, INPUT_TYPE_STRING,
+//                    parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
+//                break;
+//            case ENUM:
+//                template = readFile(COMBO_TEMPLATE_PATH);
+//                List<Type> enumMembers = ((EnumType) parameter).members;
+//                StringJoiner joiner = new StringJoiner(",", "[", "]");
+//                for (Type member : enumMembers) {
+//                    joiner.add("\"" + member.typeName + "\"");
+//                }
+//                String enumComboValues = joiner.toString();
+//                result.append(String.format(template, paramName, parameter.name, INPUT_TYPE_COMBO, enumComboValues,
+//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
+//                break;
+//            case BOOLEAN:
+//                result.append(String.format(template, paramName, parameter.name, INPUT_TYPE_BOOLEAN,
+//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
+//                break;
+//            case RECORD:
+//                template = readFile(ATTRIBUTE_GROUP_TEMPLATE_PATH);
+//                result.append(String.format(template, paramName, "true"));
+//                List<Type> recordFields = ((RecordType) parameter).fields;
+//                for (int i = 0; i < recordFields.size() ; i++) {
+//                    writeJsonAttributeForQueryParam(recordFields.get(i), i, paramLength, result);
+//                    if (i < recordFields.size() - 1) {
+//                        result.append(",");
+//                    }
+//                }
+//                result.append("\n]\n}\n}\n");
+//                break;
+//        }
+//        if (index < paramLength - 1) {
+//            result.append(",");
+//        }
+//    }
 
     // Existing methods can now call the new generic method
     public static void generateXml(String templateName, String outputName, ModelElement element) {
