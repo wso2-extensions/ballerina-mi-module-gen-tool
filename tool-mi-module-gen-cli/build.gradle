@@ -48,6 +48,7 @@ repositories {
 dependencies {
     implementation "org.ballerinalang:ballerina-cli:${ballerinaLangVersion}"
     implementation 'info.picocli:picocli:4.0.1'
+    implementation 'commons-io:commons-io:2.20.0'
     implementation "org.ballerinalang:ballerina-lang:${ballerinaLangVersion}"
     implementation "org.ballerinalang:ballerina-tools-api:${ballerinaLangVersion}"
 }

@@ -40,6 +40,7 @@ plugins {
 description = 'Ballerina MI Module Gen Tool'
 
 def packageName = "mi_module_gen"
+def toolId = "mi-module-gen"
 def packageOrg = "wso2"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 
@@ -108,9 +109,9 @@ tasks.register('localPublish') {
     doLast {
         exec {
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', "/c", "bal pack && bal push --repository=local"
+                commandLine 'cmd', "/c", "bal pack && bal push --repository=local && bal tool pull ${toolId}:${tomlVersion} --repository=local"
             } else {
-                commandLine 'sh', "-c", "bal pack && bal push --repository=local"
+                commandLine 'sh', "-c", "bal pack && bal push --repository=local && bal tool pull ${toolId}:${tomlVersion} --repository=local"
             }
         }
         println("Successfully pushed the MI Tool to the local.")
