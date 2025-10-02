@@ -72,6 +72,9 @@ public class ClassDefinitionAnalysisTask implements AnalysisTask<SyntaxNodeAnaly
         if (!(optionalClassSymbol.get() instanceof ClassSymbol clientClassSymbol)) return;
 
         //Define the connection type
+        if (clientClassSymbol.getName().isEmpty()) {
+            return;
+        }
         String clientClassName = clientClassSymbol.getName().get();
         String moduleName = syntaxNodeAnalysisContext.currentPackage().module(syntaxNodeAnalysisContext.moduleId()).moduleName().toString();
         String connectionType = String.format("%s_%s", moduleName, clientClassName);
@@ -115,13 +118,15 @@ public class ClassDefinitionAnalysisTask implements AnalysisTask<SyntaxNodeAnaly
 
             String functionName = functionDefinition.functionName().text();
             FunctionSignatureNode functionSignature = functionDefinition.functionSignature();
-            FunctionType functionType = FunctionType.FUNCTION;
+            FunctionType functionType;
             if (functionName.equals(Constants.INIT_FUNCTION_NAME)) {
                 functionType = FunctionType.INIT;
             } else if (containsToken(qualifierList, SyntaxKind.REMOTE_KEYWORD)) {
                 functionType = FunctionType.REMOTE;
             } else if (containsToken(qualifierList, SyntaxKind.RESOURCE_KEYWORD)) {
                 functionType = FunctionType.RESOURCE;
+            } else {
+                functionType = FunctionType.FUNCTION;
             }
             List<PathParamType> pathParams = new ArrayList<>(GeneratorUtils.getPathParameters(
                     functionDefinition.relativeResourcePath()));
