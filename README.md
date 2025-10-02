@@ -6,10 +6,10 @@ The `mi-module-gen` tools allows generation of modules for WSO2 Micro Integrator
 
 **Version compatibility**:
 
-**Tool version**|**`wso2/mi` Connector version**|**Ballerina Version**|**Java version**|**WSO2 MI version**|
-:-----:|:-----:|:-----:|:-----:|:-----:
-0.2| 0.2| 2201.10.3| 17| 4.2.0, 4.3.0
-\>= 0.3| 0.3| 2201.11.0| 21| 4.4.0
+**Tool version**|**`wso2/mi` Connector version**| **Ballerina Version** |**Java version**|**WSO2 MI version**|
+:-----:|:-----:|:---------------------:|:-----:|:-----:
+0.2| 0.2|       2201.10.3       | 17| 4.2.0, 4.3.0
+\>= 0.3| 0.3|     2201.12.7         | 21| 4.4.0
 
 
 ## Steps to create a module for WSO2 MI from Ballerina
