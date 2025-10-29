@@ -249,7 +249,7 @@ public class Utils {
     private static void writeConfigXmlProperty(Type parameter, int index, String connectionType, StringBuilder result) {
         switch (parameter.typeName) {
             case STRING:
-            case INT, DECIMAL, FLOAT, ARRAY:
+            case INT, DECIMAL, FLOAT:
             case BOOLEAN:
                 result.append(String.format("<property name=\"%s_param%d\" value=\"%s\"/>\n", connectionType, index,
                         parameter.name));
@@ -269,6 +269,7 @@ public class Utils {
                         index, parameter.typeInfo.orgName));
                 result.append(String.format("<property name=\"%s_recordVersion%d\" value=\"%s\"/>\n", connectionType,
                         index, parameter.typeInfo.version));
+                //TODO: Generate properties for record fields
 //                List<Type> recFields = ((RecordType) parameter).fields;
 //                for (int i = 0; i < recFields.size(); i++) {
 //                    writeConfigXmlProperty(recFields.get(i), i, connectionType, result);
@@ -289,6 +290,8 @@ public class Utils {
                 result.append(String.format("<property name=\"%s_paramType%d\" value=\"%s\"/>\n", connectionType, index,
                         parameter.typeName));
                 break;
+            case ARRAY:
+                //TODO: Generate properties for array
         }
     }
 
@@ -321,6 +324,7 @@ public class Utils {
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
                 break;
             default:
+                //TODO: Handle unsupported data types
                 // error: unidentified data type
                 // log and skip function
         }

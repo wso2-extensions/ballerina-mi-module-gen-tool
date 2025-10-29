@@ -47,28 +47,11 @@ public class BalConnectorConfig extends AbstractConnector {
          * How to access the connection local entry from the message context
          */
         // get name parameter value
-        System.out.println("In Connector config");
-        //TODO: Do we need the connector name to show this is a ballerina connector?
+        //TODO: Make any updated to support multiple clients
         String connectorName = module.getName();
         String connectionName = lookupTemplateParamater(messageContext, "name");
         //TODO: read parameter args and default values
         //TODO: Use the NodeParser API to generate the argument values
-
-//        BObject clientObject = (BObject) clientObjMap.get(connectionName);
-//        if (clientObject == null) {
-//            synchronized (BalConnectorConfig.class) {
-//                clientObject = (BObject) clientObjMap.get(connectionName);
-//                if (clientObject == null) {
-//                    //TODO: Handle exceptions thrown when creating the client object
-//                    try {
-//                        clientObject = ValueCreator.createObjectValue(module, messageContext.getProperty("objectTypeName").toString(), ValueCreator.createRecordValue(module, "ConnectionConfig"), StringUtils.fromString("https://disease.sh"));
-//                    } catch (BError clientError) {
-//                        handleException(clientError.getMessage(), messageContext);
-//                    }
-//                    clientObjMap.put(connectionName, clientObject);
-//                }
-//            }
-//        }
 
         //TODO: Set fields not set inside the method
         BObject clientObject = null;
