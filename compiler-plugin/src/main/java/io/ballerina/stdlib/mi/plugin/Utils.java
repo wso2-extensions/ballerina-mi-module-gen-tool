@@ -353,7 +353,7 @@ public class Utils {
             case ARRAY:
                 Table arrayTable = new Table(paramName, parameter.name, parameter.name, helpTip);
                 builder.addFromTemplate(TABLE_TEMPLATE_PATH, arrayTable);
-                //TODO
+                //TODO: Generate attribute according to the data type of the array fields
 //                writeJsonAttributeForQueryParam();
                 break;
             case UNION:
@@ -421,76 +421,6 @@ public class Utils {
                 unionComboValues, !parameter.isOptional(), helpTip);
         return comboField;
     }
-
-    //TODO: Remove
-//    private static void writeJsonAttributeForConfigParam(String connectionType, Type parameter, int index,
-//                                                         int paramLength, StringBuilder result) throws IOException {
-//
-//        switch (parameter.typeName) {
-//            case STRING, INT, DECIMAL, FLOAT:
-//                result.append(String.format(template, paramName, parameter.name, INPUT_TYPE_STRING,
-//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
-//                break;
-//            case ARRAY:
-//                helpTip = "Array of values separated by ','";
-//                result.append(String.format(template, paramName, parameter.name, INPUT_TYPE_STRING,
-//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
-//                break;
-//            case UNION:
-//                // TODO: Loading forms dynamically according to the type selected by the user
-//                // Combo field for selecting the data type
-//                template = readFile(COMBO_TEMPLATE_PATH);
-//                List<Type> unionMembers = ((UnionType) parameter).members;
-//                StringJoiner unionJoiner = new StringJoiner(",", "[", "]");
-//                for (Type member : unionMembers) {
-//                    String comboItem = member.typeName.equals(RECORD) ? String.format("%s_%s",
-//                            member.typeName, member.name) : member.typeName;
-//                    unionJoiner.add("\"" + comboItem + "\"");
-//
-//                }
-//                String unionComboValues = unionJoiner.toString();
-//                String comboName = String.format("%s_%s_%s", connectionType, parameter.name, "dataType");
-//                result.append(String.format(template, comboName, comboName, INPUT_TYPE_COMBO, unionComboValues,
-//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
-//                result.append(",");
-//
-//                // String field for the actual value of the parameter
-//                template = readFile(ATTRIBUTE_TEMPLATE_PATH);
-//                result.append(String.format(template, paramName, parameter.name, INPUT_TYPE_STRING,
-//                    parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
-//                break;
-//            case ENUM:
-//                template = readFile(COMBO_TEMPLATE_PATH);
-//                List<Type> enumMembers = ((EnumType) parameter).members;
-//                StringJoiner joiner = new StringJoiner(",", "[", "]");
-//                for (Type member : enumMembers) {
-//                    joiner.add("\"" + member.typeName + "\"");
-//                }
-//                String enumComboValues = joiner.toString();
-//                result.append(String.format(template, paramName, parameter.name, INPUT_TYPE_COMBO, enumComboValues,
-//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
-//                break;
-//            case BOOLEAN:
-//                result.append(String.format(template, paramName, parameter.name, INPUT_TYPE_BOOLEAN,
-//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, ""));
-//                break;
-//            case RECORD:
-//                template = readFile(ATTRIBUTE_GROUP_TEMPLATE_PATH);
-//                result.append(String.format(template, paramName, "true"));
-//                List<Type> recordFields = ((RecordType) parameter).fields;
-//                for (int i = 0; i < recordFields.size() ; i++) {
-//                    writeJsonAttributeForQueryParam(recordFields.get(i), i, paramLength, result);
-//                    if (i < recordFields.size() - 1) {
-//                        result.append(",");
-//                    }
-//                }
-//                result.append("\n]\n}\n}\n");
-//                break;
-//        }
-//        if (index < paramLength - 1) {
-//            result.append(",");
-//        }
-//    }
 
     // Existing methods can now call the new generic method
     public static void generateXml(String templateName, String outputName, ModelElement element) {

@@ -75,6 +75,8 @@ public class BalConnectorConfig extends AbstractConnector {
         ConnectionHandler handler = ConnectionHandler.getConnectionHandler();
         if (!handler.checkIfConnectionExists(connectorName, connectionName)) {
             try {
+
+                // Using json string to create a record value
 //                BString jsonString = StringUtils.fromString("");
 //                BMap<BString, Object> recValue = ValueCreator.createRecordValue(module, "ConnectionConfig");
 ////                TypeCreator.createRecordType(module, StringUtils.fromString("https://disease.sh"))
