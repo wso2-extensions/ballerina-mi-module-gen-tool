@@ -20,6 +20,7 @@ package io.ballerina.stdlib.mi;
 
 public class Constants {
     public static final String FUNCTION_NAME = "paramFunctionName";
+    public static final String METHOD_NAME = "paramMethodName";
     public static final String SIZE = "paramSize";
     public static final String RESPONSE_VARIABLE = "responseVariable";
     public static final String OVERWRITE_BODY = "overwriteBody";
@@ -31,5 +32,7 @@ public class Constants {
     public static final String DECIMAL = "decimal";
     public static final String JSON = "json";
     public static final String XML = "xml";
+    public static final String UNION = "union";
+    public static final String RECORD = "record";
     public static final String SYNAPSE_FUNCTION_STACK = "_SYNAPSE_FUNCTION_STACK";
 }

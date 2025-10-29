@@ -22,11 +22,17 @@ import io.ballerina.projects.plugins.CompilerPlugin;
 import io.ballerina.projects.plugins.CompilerPluginContext;
 
 public class MICompilerPlugin extends CompilerPlugin {
+    static final String CONNECTOR_TARGET_PATH = "CONNECTOR_TARGET_PATH";
 
     @Override
     public void init(CompilerPluginContext compilerPluginContext) {
-        compilerPluginContext.addCodeAnalyzer(new BalMediatorCodeAnalyzer());
-        compilerPluginContext.addCompilerLifecycleListener(new BalLifecycleListener());
+        if (null != System.getProperty(CONNECTOR_TARGET_PATH)) {
+            compilerPluginContext.addCodeAnalyzer(new BalConnectorCodeAnalyzer());
+            compilerPluginContext.addCompilerLifecycleListener(new BalConnectorLifecycleListener());
+        } else {
+            compilerPluginContext.addCodeAnalyzer(new BalMediatorCodeAnalyzer());
+            compilerPluginContext.addCompilerLifecycleListener(new BalLifecycleListener());
+        }
     }
 }
 
