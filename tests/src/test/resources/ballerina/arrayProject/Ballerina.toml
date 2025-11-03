@@ -1,0 +1,5 @@
+[package]
+org = "testOrg"
+name = "arrayProject"
+version = "1.0.0"
+distribution = "2201.12.7"

@@ -55,6 +55,11 @@ public class BalConnectorConfig extends AbstractConnector {
         }
     }
 
+    // This constructor is added to test the connector
+    public BalConnectorConfig(ModuleInfo moduleInfo) {
+        init(moduleInfo);
+    }
+
     @Override
     public void connect(MessageContext messageContext) throws ConnectException {
         /**

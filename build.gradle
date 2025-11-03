@@ -104,10 +104,11 @@ release {
 
 task build {
     dependsOn ":tool-mi-module-gen:build"
+    dependsOn ":mi-tests:test"  // Include tests in build
 }
 
 task test {
-    dependsOn ":tool-mi-module-gen:build"
+    dependsOn ":mi-tests:test"  // Run actual tests
 }
 
 publishToMavenLocal.dependsOn build

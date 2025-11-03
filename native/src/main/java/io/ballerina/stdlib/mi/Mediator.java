@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -38,6 +39,7 @@ import org.apache.synapse.mediators.template.TemplateContext;
 import java.util.Objects;
 import java.util.Stack;
 
+import static io.ballerina.stdlib.mi.Constants.ARRAY;
 import static io.ballerina.stdlib.mi.Constants.BOOLEAN;
 import static io.ballerina.stdlib.mi.Constants.DECIMAL;
 import static io.ballerina.stdlib.mi.Constants.FLOAT;
@@ -84,8 +86,14 @@ public class Mediator extends AbstractMediator {
                 result = ((BDecimal) result).value().toString();
             } else if (Objects.equals(balFunctionReturnType, STRING)) {
                 result = ((BString) result).getValue();
+            } else if (Objects.equals(balFunctionReturnType, ARRAY)) {
+                // Convert BArray to JSON string format for MI consumption
+                result = TypeConverter.arrayToJsonString((BArray) result);
             } else if (result instanceof BMap) {
                 result = result.toString();
+            } else if (result instanceof BArray) {
+                // Handle array return even if type not explicitly set to ARRAY
+                result = TypeConverter.arrayToJsonString((BArray) result);
             }
             ConnectorResponse connectorResponse = new DefaultConnectorResponse();
             connectorResponse.setPayload(result);
@@ -123,6 +131,7 @@ public class Mediator extends AbstractMediator {
             case DECIMAL -> ValueCreator.createDecimalValue((String) param);
             case JSON -> getBMapParameter(param);
             case XML -> getBXmlParameter(context, value);
+            case ARRAY -> getArrayParameter((String) param, context, value);
             default -> null;
         };
     }
@@ -156,6 +165,25 @@ public class Mediator extends AbstractMediator {
         } else {
             return (BMap) JsonUtils.parse(param.toString());
         }
+    }
+
+    /**
+     * Get array parameter from context and convert to Ballerina array.
+     * Delegates to TypeConverter for the actual conversion logic.
+     *
+     * @param jsonArrayString JSON array string
+     * @param context Message context
+     * @param valueKey The property key like "param0" used to extract the parameter
+     */
+    private Object getArrayParameter(String jsonArrayString, MessageContext context, String valueKey) {
+        // Extract parameter index from valueKey (e.g., "param0" -> 0)
+        int paramIndex = Integer.parseInt(valueKey.replaceAll("\\D+", ""));
+
+        // Get the array element type from context
+        String elementType = context.getProperty("arrayElementType" + paramIndex).toString();
+
+        // Use shared TypeConverter for conversion
+        return TypeConverter.convertToArray(jsonArrayString, elementType);
     }
 
     private void init(ModuleInfo moduleInfo) {
