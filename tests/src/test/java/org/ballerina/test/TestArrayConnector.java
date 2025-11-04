@@ -61,10 +61,6 @@ public class TestArrayConnector {
 
         // Use BalConnectorConfig to create the connection
         config.connect(initContext);
-
-        // Now get the runtime and module from BalConnectorConfig
-        Runtime runtime = BalConnectorConfig.getRuntime();
-        Module module = BalConnectorConfig.getModule();
     }
 
     @Test(description = "Test connector with string array parameter")

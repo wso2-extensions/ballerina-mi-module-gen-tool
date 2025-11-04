@@ -95,9 +95,10 @@ public class TypeConverter {
                     ints[i] = Long.parseLong(element.toString());
                 } catch (NumberFormatException e) {
                     throw new IllegalArgumentException(
-                        "Invalid int value at index " + i + ": '" + element + "'", e);
+                            "Invalid int value at index " + i + ": '" + element + "'", e);
                 }
             }
+        }
         return ValueCreator.createArrayValue(ints);
     }
 
