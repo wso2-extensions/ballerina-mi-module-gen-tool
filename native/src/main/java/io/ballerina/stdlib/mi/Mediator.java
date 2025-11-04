@@ -86,14 +86,11 @@ public class Mediator extends AbstractMediator {
                 result = ((BDecimal) result).value().toString();
             } else if (Objects.equals(balFunctionReturnType, STRING)) {
                 result = ((BString) result).getValue();
-            } else if (Objects.equals(balFunctionReturnType, ARRAY)) {
+            } else if (Objects.equals(balFunctionReturnType, ARRAY) || result instanceof BArray) {
                 // Convert BArray to JSON string format for MI consumption
                 result = TypeConverter.arrayToJsonString((BArray) result);
             } else if (result instanceof BMap) {
                 result = result.toString();
-            } else if (result instanceof BArray) {
-                // Handle array return even if type not explicitly set to ARRAY
-                result = TypeConverter.arrayToJsonString((BArray) result);
             }
             ConnectorResponse connectorResponse = new DefaultConnectorResponse();
             connectorResponse.setPayload(result);
@@ -177,7 +174,20 @@ public class Mediator extends AbstractMediator {
      */
     private Object getArrayParameter(String jsonArrayString, MessageContext context, String valueKey) {
         // Extract parameter index from valueKey (e.g., "param0" -> 0)
-        int paramIndex = Integer.parseInt(valueKey.replaceAll("\\D+", ""));
+        int paramIndex = -1;
+        String indexStr = valueKey.replaceAll("\\D+", "");
+        if (!indexStr.isEmpty()) {
+            try {
+                paramIndex = Integer.parseInt(indexStr);
+            } catch (NumberFormatException e) {
+                log.error("Invalid parameter index in valueKey: " + valueKey, e);
+                // Optionally, handle error (e.g., throw, return null, etc.)
+                return null;
+            }
+        } else {
+            log.error("No digits found in valueKey: " + valueKey);
+            return null;
+        }
 
         // Get the array element type from context
         String elementType = context.getProperty("arrayElementType" + paramIndex).toString();

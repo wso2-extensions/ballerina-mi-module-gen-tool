@@ -88,8 +88,16 @@ public class TypeConverter {
         long[] ints = new long[(int) jsonArray.size()];
         for (int i = 0; i < jsonArray.size(); i++) {
             Object element = jsonArray.get(i);
-            ints[i] = element instanceof Long ? (Long) element : Long.parseLong(element.toString());
-        }
+            if (element instanceof Long) {
+                ints[i] = (Long) element;
+            } else {
+                try {
+                    ints[i] = Long.parseLong(element.toString());
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException(
+                        "Invalid int value at index " + i + ": '" + element + "'", e);
+                }
+            }
         return ValueCreator.createArrayValue(ints);
     }
 
@@ -117,7 +125,15 @@ public class TypeConverter {
         double[] floats = new double[(int) jsonArray.size()];
         for (int i = 0; i < jsonArray.size(); i++) {
             Object element = jsonArray.get(i);
-            floats[i] = element instanceof Double ? (Double) element : Double.parseDouble(element.toString());
+            if (element instanceof Double) {
+                floats[i] = (Double) element;
+            } else {
+                try {
+                    floats[i] = Double.parseDouble(element.toString());
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Element at index " + i + " ('" + element + "') cannot be parsed as a double.", e);
+                }
+            }
         }
         return ValueCreator.createArrayValue(floats);
     }

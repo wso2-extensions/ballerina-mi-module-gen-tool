@@ -70,11 +70,8 @@ public class BalConnectorFunction extends AbstractConnector {
                     result = ((BDecimal) result).value().toString();
                 } else if (Objects.equals(balFunctionReturnType, STRING)) {
                     result = ((BString) result).getValue();
-                } else if (Objects.equals(balFunctionReturnType, ARRAY)) {
+                } else if (Objects.equals(balFunctionReturnType, ARRAY) || result instanceof BArray) {
                     // Convert BArray to JSON string format for MI consumption
-                    result = TypeConverter.arrayToJsonString((BArray) result);
-                } else if (result instanceof BArray) {
-                    // Handle array return even if type not explicitly set to ARRAY
                     result = TypeConverter.arrayToJsonString((BArray) result);
                 } else if (result instanceof BMap || result instanceof BObject) {
                     //TODO: handling Ballerina class objects - eg: covid19 method getGovernmentReportedDataByCountry

@@ -38,7 +38,7 @@ dependencies {
 
 def projects = ['project2', 'project3', 'arrayProject']
 def toolVersion = stripBallerinaExtensionVersion("${project.version}")
-// Override balCommand to use the test-specific distribution
+// Define balCommand to use the test-specific distribution
 ext.balCommand = Os.isFamily(Os.FAMILY_WINDOWS)
         ? "${ballerinaDist}/bin/bal.bat"
         : "${ballerinaDist}/bin/bal"
