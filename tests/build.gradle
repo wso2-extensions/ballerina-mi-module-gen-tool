@@ -7,9 +7,18 @@ plugins {
 
 group = project.group
 version = project.version
+def ballerinaDist = "${layout.buildDirectory.get()}/jballerina-tools-${ballerinaLangVersion}"
+def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
+def balToolFile = new File("$project.projectDir/resources/bal-tools.toml")
 
 repositories {
     mavenCentral()
+    maven {
+        url = 'https://maven.wso2.org/nexus/content/repositories/releases/'
+    }
+    maven {
+        url = 'https://maven.wso2.org/nexus/content/groups/wso2-public/'
+    }
 }
 
 dependencies {
@@ -18,6 +27,7 @@ dependencies {
     implementation "org.ballerinalang:ballerina-cli:${ballerinaLangVersion}"
     implementation "org.apache.ws.commons.axiom:axiom-api:${axiomVersion}"
     implementation "org.wso2.carbon.module:module-core:${carbonModuleCoreVersion}"
+    implementation "org.wso2.integration.connector.core:mi-connector-core:${integrationConnectorCoreVersion}"
     implementation "org.apache.axis2.wso2:axis2:${axis2Version}"
     implementation "org.apache.synapse:synapse-core:${synapseVersion}"
 
@@ -26,8 +36,12 @@ dependencies {
     testImplementation project(path: ':tool-mi-module-gen-cli')
 }
 
-def projects = ['project2', 'project3']
+def projects = ['project2', 'project3', 'arrayProject']
 def toolVersion = stripBallerinaExtensionVersion("${project.version}")
+// Define balCommand to use the test-specific distribution
+ext.balCommand = Os.isFamily(Os.FAMILY_WINDOWS)
+        ? "${ballerinaDist}/bin/bal.bat"
+        : "${ballerinaDist}/bin/bal"
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
@@ -43,7 +57,99 @@ def stripBallerinaExtensionVersion(String extVersion) {
     }
 }
 
+task jBallerinaPack {
+    doLast {
+        configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            copy {
+                from project.zipTree(artifact.getFile())
+                into layout.buildDirectory
+            }
+            copy {
+                from(project.zipTree(artifact.getFile())) {
+                    eachFile { fcd ->
+                        fcd.relativePath = new RelativePath(!fcd.file.isDirectory(),
+                            fcd.relativePath.segments.drop(1))
+                    }
+                    includeEmptyDirs = false
+                }
+                into ballerinaDist
+            }
+        }
+    }
+    outputs.dir ballerinaDist
+}
+
+task unpackStdLibs() {
+    dependsOn(jBallerinaPack)
+    doLast {
+        configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            copy {
+                from project.zipTree(artifact.getFile())
+                into layout.buildDirectory.dir("extracted-stdlibs/" + artifact.name + "-zip")
+            }
+        }
+    }
+}
+
+task copyStdlibs() {
+    dependsOn(unpackStdLibs)
+
+    /* Standard Libraries */
+    doLast {
+        configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            def artifactExtractedPath = "${layout.buildDirectory.get()}/extracted-stdlibs/" + artifact.name + "-zip"
+            copy {
+                into ballerinaDist
+                into("repo/bala") {
+                    from "${artifactExtractedPath}/bala"
+                }
+                into("repo/cache") {
+                    from "${artifactExtractedPath}/cache"
+                }
+            }
+        }
+    }
+}
+
+task updateBalToolTomlFile {
+    dependsOn(jBallerinaPack)
+    doLast {
+        def newBallerinaToml = balToolFile.text.replace("@toml.version@", tomlVersion)
+        // Add new bal-tools.toml file to the ballerina-distribution/resources directory
+        def ballerinaTomlFile = new File("${ballerinaDist}/resources/bal-tools.toml")
+        // create new file if it does not exist
+        if (!ballerinaTomlFile.exists()) {
+            ballerinaTomlFile.getParentFile().mkdirs()
+            ballerinaTomlFile.createNewFile()
+        }
+        ballerinaTomlFile.text = newBallerinaToml
+    }
+}
+
+task copyMiTool() {
+    dependsOn(":tool-mi-module-gen:build")
+    // copy bal-tools.toml file to ballerina-distribution/resources directory
+    dependsOn(updateBalToolTomlFile)
+    doLast {
+        def miToolBalaPath = "${project.rootDir}/tool-mi-module-gen/build/bal_build_target/bala"
+        // Copy the .bala file to repo/bala
+        copy {
+            from "${miToolBalaPath}"
+            include "wso2-mi_module_gen-java21-${tomlVersion}.bala"
+            into "${ballerinaDist}/repo/bala/wso2/mi_module_gen/${tomlVersion}/java21"
+        }
+
+        // Extract and copy bala contents for tool resources
+        copy {
+            from zipTree("${miToolBalaPath}/wso2-mi_module_gen-java21-${tomlVersion}.bala")
+            into "${ballerinaDist}/repo/bala/wso2/mi_module_gen/${tomlVersion}/java21"
+        }
+    }
+}
+
 task buildBallerinaProjects {
+    dependsOn copyStdlibs
+    dependsOn copyMiTool
     doLast {
         def command = projects.collect { "$balCommand build src/test/resources/ballerina/$it" }.join(' && ')
         exec {
@@ -67,21 +173,12 @@ compileTestJava.dependsOn("copyBallerinaJars")
 processTestResources.dependsOn("copyBallerinaJars")
 
 test {
-    systemProperty "bal.command", balCommand
+    dependsOn copyMiTool
+    dependsOn copyStdlibs
+    dependsOn(":tool-mi-module-gen-cli:build")
+    dependsOn(":tool-compiler-plugin:build")
 
-    doFirst {
-        try {
-            exec {
-                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    commandLine 'cmd', "/c", "$balCommand tool pull mi-module-gen:$toolVersion --repository=local"
-                } else {
-                    commandLine 'sh', '-c', "$balCommand tool pull mi-module-gen:$toolVersion --repository=local"
-                }
-            }
-        } catch (Exception e) {
-            println("Test Run failed: " + e.message)
-        }
-    }
+    systemProperty "bal.command", balCommand.toString()
 
     useTestNG() {
         suites 'src/test/resources/testng.xml'
@@ -91,7 +188,3 @@ test {
         implementation fileTree(dir: 'src/test/resources/libs', include: '*.jar')
     }
 }
-
-test.dependsOn(":tool-mi-module-gen:testLocalPublish")
-test.dependsOn(":tool-mi-module-gen-cli:build")
-test.dependsOn(":tool-compiler-plugin:build")

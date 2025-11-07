@@ -34,5 +34,6 @@ public class Constants {
     public static final String XML = "xml";
     public static final String UNION = "union";
     public static final String RECORD = "record";
+    public static final String ARRAY = "array";
     public static final String SYNAPSE_FUNCTION_STACK = "_SYNAPSE_FUNCTION_STACK";
 }

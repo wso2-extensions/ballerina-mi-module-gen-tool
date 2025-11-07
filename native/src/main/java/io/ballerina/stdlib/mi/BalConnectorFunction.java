@@ -70,7 +70,10 @@ public class BalConnectorFunction extends AbstractConnector {
                     result = ((BDecimal) result).value().toString();
                 } else if (Objects.equals(balFunctionReturnType, STRING)) {
                     result = ((BString) result).getValue();
-                } else if (result instanceof BMap || result instanceof BArray || result instanceof BObject) {
+                } else if (Objects.equals(balFunctionReturnType, ARRAY) || result instanceof BArray) {
+                    // Convert BArray to JSON string format for MI consumption
+                    result = TypeConverter.arrayToJsonString((BArray) result);
+                } else if (result instanceof BMap || result instanceof BObject) {
                     //TODO: handling Ballerina class objects - eg: covid19 method getGovernmentReportedDataByCountry
                     result = result.toString();
                 }
@@ -111,6 +114,7 @@ public class BalConnectorFunction extends AbstractConnector {
                 case FLOAT -> Double.parseDouble(stringParam);
                 case DECIMAL -> ValueCreator.createDecimalValue(stringParam);
                 case RECORD -> createRecordValue(stringParam, context, index);
+                case ARRAY -> createArrayValue(stringParam, context, index);
                 default -> null;
             };
         } catch (Exception e) {
@@ -125,6 +129,23 @@ public class BalConnectorFunction extends AbstractConnector {
         BMap<BString, Object> recValue = ValueCreator.createRecordValue(BalConnectorConfig.getModule(), recordName);
         Type recType = recValue.getType();
         return FromJsonStringWithType.fromJsonStringWithType(jsonBString, ValueCreator.createTypedescValue(recType));
+    }
+
+    /**
+     * Create a Ballerina array from JSON array string.
+     * Delegates to TypeConverter for the actual conversion logic.
+     *
+     * @param jsonArrayString JSON array string (e.g., "[\"a\", \"b\", \"c\"]")
+     * @param context Message context
+     * @param paramIndex Parameter index
+     * @return Ballerina array (BArray)
+     */
+    private Object createArrayValue(String jsonArrayString, MessageContext context, int paramIndex) {
+        // Get the array element type from context
+        String elementType = context.getProperty("arrayElementType" + paramIndex).toString();
+
+        // Use shared TypeConverter for conversion
+        return TypeConverter.convertToArray(jsonArrayString, elementType);
     }
 
     public static Object lookupTemplateParameter(MessageContext ctx, String paramName) {
