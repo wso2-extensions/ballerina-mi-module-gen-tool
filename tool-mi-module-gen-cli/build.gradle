@@ -18,6 +18,7 @@
 
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = project.group
@@ -45,12 +46,65 @@ repositories {
     }
 }
 
+configurations {
+    // Configuration for MI runtime dependencies that should be packaged as separate JARs
+    // Disable transitive dependencies - we only want the JARs we explicitly specify
+    miRuntimeLibs {
+        transitive = false
+    }
+}
+
 dependencies {
     implementation "org.ballerinalang:ballerina-cli:${ballerinaLangVersion}"
     implementation 'info.picocli:picocli:4.0.1'
     implementation 'commons-io:commons-io:2.20.0'
     implementation "org.ballerinalang:ballerina-lang:${ballerinaLangVersion}"
     implementation "org.ballerinalang:ballerina-tools-api:${ballerinaLangVersion}"
+    implementation "org.ballerinalang:diagram-util:${ballerinaLangVersion}"
+    implementation "com.github.jknack:handlebars:${handlebarsVersion}"
+    implementation "org.apache.commons:commons-compress:${commonsCompressVersion}"
+    implementation "org.ow2.asm:asm:${asmVersion}"
+    implementation project(':mi-native')
+
+    // MI runtime dependencies - these will be copied as separate JARs to lib directory
+    miRuntimeLibs project(':mi-native')
+    miRuntimeLibs "org.wso2.carbon.module:module-core:${carbonModuleCoreVersion}"
 }
 
-build.dependsOn(":tool-compiler-plugin:jar")
+task copyMiRuntimeLibs(type: Copy) {
+    from configurations.miRuntimeLibs
+    into 'src/main/resources/lib'
+}
+
+processResources.dependsOn copyMiRuntimeLibs
+
+shadowJar {
+    archiveClassifier.set('')
+    zip64 = true
+    // Exclude Ballerina dependencies as they're already in the runtime
+    dependencies {
+        exclude(dependency('org.ballerinalang:.*'))
+    }
+    // Exclude Java system classes
+    exclude 'java/**'
+    exclude 'javax/**'
+    exclude 'sun/**'
+    exclude 'com/sun/**'
+    mergeServiceFiles()
+
+    // Shadow JAR treats .jar files as dependencies to merge, so we need to add them post-processing
+    doLast {
+        ant.zip(destfile: archiveFile.get(), update: true) {
+            zipfileset(dir: "${buildDir}/resources/main/lib", prefix: 'lib') {
+                include(name: '*.jar')
+                include(name: '*.mar')
+            }
+        }
+    }
+}
+
+jar {
+    enabled = false
+}
+
+build.dependsOn shadowJar

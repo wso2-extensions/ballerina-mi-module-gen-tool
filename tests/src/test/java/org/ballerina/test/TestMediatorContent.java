@@ -38,7 +38,7 @@ public class TestMediatorContent {
 
     // The test is failing because files are not generated as expected due to compiler plugin issues.
     // TODO: Reenable once we move them to the module repo.
-    @Test(dataProvider = "data-provider", enabled = false)
+    @Test(dataProvider = "data-provider", enabled = true)
     public void test(String project) throws IOException, InterruptedException {
         Path balExecutable =
                 Paths.get(System.getProperty("bal.command"));
@@ -64,9 +64,13 @@ public class TestMediatorContent {
             process.destroyForcibly();
         }
 
-        Path zipPath = Path.of(project + "-connector-0.0.1.zip");
-        Assert.assertTrue(Files.exists(zipPath));
-        Files.deleteIfExists(zipPath);
+        // Zip file is now created in the target directory
+        Path zipPath = projectDir.resolve("target").resolve(project + "-connector-0.0.1.zip");
+        Assert.assertTrue(Files.exists(zipPath), "Zip file not found at: " + zipPath);
+
+        // Verify the MI connector directory also exists
+        Path miConnectorDir = projectDir.resolve("target").resolve(project + "-mi-connector");
+        Assert.assertTrue(Files.exists(miConnectorDir), "MI connector directory not found at: " + miConnectorDir);
     }
 
     private static void printStream(InputStream inputStream) throws IOException {

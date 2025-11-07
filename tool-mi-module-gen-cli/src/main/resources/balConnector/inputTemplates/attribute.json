@@ -1,0 +1,20 @@
+{
+  "type": "attribute",
+  "value": {
+    "name": "{{name}}",
+    "displayName": "{{displayName}}",
+    "inputType": "{{inputType}}",
+    "defaultValue": "{{defaultValue}}",
+    "required": "{{required}}",
+    "helpTip": "{{helpTip}}",
+    "validateType": "{{validateType}}",
+    "matchPattern": "{{matchPattern}}"
+{{#if isCombo}}
+    ,"enableCondition": [
+      {
+      "forwardExistingHeaders": "{{enableCondition}}"
+      }
+    ]
+{{/if}}
+  }
+}

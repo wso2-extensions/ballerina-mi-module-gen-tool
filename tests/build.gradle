@@ -126,30 +126,36 @@ task updateBalToolTomlFile {
     }
 }
 
-task copyMiTool() {
+task pushMiToolToLocal() {
     dependsOn(":tool-mi-module-gen:build")
-    // copy bal-tools.toml file to ballerina-distribution/resources directory
     dependsOn(updateBalToolTomlFile)
     doLast {
-        def miToolBalaPath = "${project.rootDir}/tool-mi-module-gen/build/bal_build_target/bala"
-        // Copy the .bala file to repo/bala
-        copy {
-            from "${miToolBalaPath}"
-            include "wso2-mi_module_gen-java21-${tomlVersion}.bala"
-            into "${ballerinaDist}/repo/bala/wso2/mi_module_gen/${tomlVersion}/java21"
+        // First run bal pack to create the bala file
+        exec {
+            workingDir "${project.rootDir}/tool-mi-module-gen"
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "${balCommand}", 'pack'
+            } else {
+                commandLine 'sh', '-c', "${balCommand} pack"
+            }
         }
 
-        // Extract and copy bala contents for tool resources
-        copy {
-            from zipTree("${miToolBalaPath}/wso2-mi_module_gen-java21-${tomlVersion}.bala")
-            into "${ballerinaDist}/repo/bala/wso2/mi_module_gen/${tomlVersion}/java21"
+        // Then push to local repository
+        // This will automatically update bal-tools.toml
+        exec {
+            workingDir "${project.rootDir}/tool-mi-module-gen"
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "${balCommand}", 'push', '--repository=local'
+            } else {
+                commandLine 'sh', '-c', "${balCommand} push --repository=local"
+            }
         }
     }
 }
 
 task buildBallerinaProjects {
     dependsOn copyStdlibs
-    dependsOn copyMiTool
+    dependsOn pushMiToolToLocal
     doLast {
         def command = projects.collect { "$balCommand build src/test/resources/ballerina/$it" }.join(' && ')
         exec {
@@ -173,10 +179,10 @@ compileTestJava.dependsOn("copyBallerinaJars")
 processTestResources.dependsOn("copyBallerinaJars")
 
 test {
-    dependsOn copyMiTool
+    dependsOn pushMiToolToLocal
     dependsOn copyStdlibs
     dependsOn(":tool-mi-module-gen-cli:build")
-    dependsOn(":tool-compiler-plugin:build")
+    //dependsOn(":tool-compiler-plugin:build")
 
     systemProperty "bal.command", balCommand.toString()
 
