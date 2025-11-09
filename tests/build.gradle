@@ -153,9 +153,26 @@ task pushMiToolToLocal() {
     }
 }
 
+task copyMiToolToCentral() {
+    dependsOn pushMiToolToLocal
+    doLast {
+        // wso2 org tools are resolved from central repository, not local
+        // Copy the tool from local to central repository
+        def homeDir = System.getProperty("user.home")
+        def localRepo = "${homeDir}/.ballerina/repositories/local/bala/wso2/mi_module_gen"
+        def centralRepo = "${homeDir}/.ballerina/repositories/central.ballerina.io/bala/wso2"
+
+        copy {
+            from localRepo
+            into "${centralRepo}/mi_module_gen"
+        }
+        println "Copied MI tool from local to central repository"
+    }
+}
+
 task buildBallerinaProjects {
     dependsOn copyStdlibs
-    dependsOn pushMiToolToLocal
+    dependsOn copyMiToolToCentral  // Ensure tool is available in central repo
     doLast {
         def command = projects.collect { "$balCommand build src/test/resources/ballerina/$it" }.join(' && ')
         exec {
@@ -179,7 +196,7 @@ compileTestJava.dependsOn("copyBallerinaJars")
 processTestResources.dependsOn("copyBallerinaJars")
 
 test {
-    dependsOn pushMiToolToLocal
+    dependsOn copyMiToolToCentral  // This depends on pushMiToolToLocal
     dependsOn copyStdlibs
     dependsOn(":tool-mi-module-gen-cli:build")
     //dependsOn(":tool-compiler-plugin:build")
