@@ -159,14 +159,22 @@ task copyMiToolToCentral() {
         // wso2 org tools are resolved from central repository, not local
         // Copy the tool from local to central repository
         def homeDir = System.getProperty("user.home")
-        def localRepo = "${homeDir}/.ballerina/repositories/local/bala/wso2/mi_module_gen"
-        def centralRepo = "${homeDir}/.ballerina/repositories/central.ballerina.io/bala/wso2"
+        def localRepo = file("${homeDir}/.ballerina/repositories/local/bala/wso2/mi_module_gen")
+        def centralRepo = file("${homeDir}/.ballerina/repositories/central.ballerina.io/bala/wso2")
 
-        copy {
-            from localRepo
-            into "${centralRepo}/mi_module_gen"
+        // Ensure central repo directory exists
+        centralRepo.mkdirs()
+
+        // Only copy if local repo exists
+        if (localRepo.exists()) {
+            copy {
+                from localRepo
+                into "${centralRepo}/mi_module_gen"
+            }
+            println "Copied MI tool from local to central repository"
+        } else {
+            throw new GradleException("MI tool not found in local repository: ${localRepo}")
         }
-        println "Copied MI tool from local to central repository"
     }
 }
 

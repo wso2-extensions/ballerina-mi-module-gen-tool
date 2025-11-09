@@ -59,6 +59,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -237,7 +238,7 @@ public class MiCmd implements BLauncherCmd {
             // Create lib directory and copy the generated executable JAR
             Path libPath = destinationPath.resolve(Connector.LIB_PATH);
             Files.createDirectories(libPath);
-            Files.copy(sourcePath, libPath.resolve(sourcePath.getFileName()));
+            Files.copy(sourcePath, libPath.resolve(sourcePath.getFileName()), StandardCopyOption.REPLACE_EXISTING);
 
             // Create the zip file in the target directory
             Path zipPath = targetPath.resolve(connector.getZipFileName());

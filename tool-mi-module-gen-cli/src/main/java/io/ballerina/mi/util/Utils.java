@@ -47,6 +47,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -546,7 +547,7 @@ public class Utils {
             if (path.getFileName().toString().contains("ModuleInfo.class")) {
                 updateConstants(inputStream, outputPath.toString(), org, module, moduleVersion);
             } else {
-                Files.copy(inputStream, outputPath);
+                Files.copy(inputStream, outputPath, StandardCopyOption.REPLACE_EXISTING);
             }
             inputStream.close();
         }
@@ -639,7 +640,7 @@ public class Utils {
      */
     private static void copyIconToDestination(Path iconPath, Path destination) throws IOException {
         InputStream inputStream = Files.newInputStream(iconPath);
-        Files.copy(inputStream, destination);
+        Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**
@@ -662,7 +663,7 @@ public class Utils {
         Path outputPath = destination.resolve(path.toString());
         Files.createDirectories(outputPath.getParent());
         InputStream inputStream = getFileFromResourceAsStream(classLoader, path.toString());
-        Files.copy(inputStream, outputPath);
+        Files.copy(inputStream, outputPath, StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**
