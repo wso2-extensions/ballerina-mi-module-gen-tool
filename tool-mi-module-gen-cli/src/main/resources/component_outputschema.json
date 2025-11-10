@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Output Schema for {{name}} operation",
+  "description": "Output schema for the {{name}} operation.",
+  "properties": {
+    "payload": {
+      "type": "string",
+      "description": "The output string from the operation."
+    }
+  },
+  "required": ["payload"],
+  "additionalProperties": false
+}

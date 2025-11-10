@@ -1,5 +1,5 @@
 [[tool]]
-id = "mi_module_gen"
+id = "mi-module-gen"
 org = "wso2"
 name = "mi_module_gen"
 version = "@toml.version@"

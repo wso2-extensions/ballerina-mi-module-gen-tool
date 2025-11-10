@@ -19,7 +19,7 @@ jobs:
       
       - name: Get Ballerina Version
         run: |
-          BAL_VERSION=$(grep -w 'ballerinaLangVersion' gradle.properties | cut -d= -f2 | rev | cut --complement -d- -f1 | rev)
+          BAL_VERSION=$(grep -w 'ballerinaLangVersion' gradle.properties | cut -d= -f2)
           if [ -z "$BAL_VERSION" ]; then
             BAL_VERSION="latest"
           fi
@@ -50,6 +50,21 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 21.0.3
+
+      - name: Get Ballerina Version
+        shell: bash
+        run: |
+          BAL_VERSION=$(grep -w 'ballerinaLangVersion' gradle.properties | cut -d= -f2)
+          if [ -z "$BAL_VERSION" ]; then
+            BAL_VERSION="latest"
+          fi
+          echo "BAL_VERSION=$BAL_VERSION" >> $GITHUB_ENV
+          echo "Ballerina Version: $BAL_VERSION"
+
+      - name: Set Up Ballerina
+        uses: ballerina-platform/setup-ballerina@v1.1.3
+        with:
+          version: ${{ env.BAL_VERSION }}
 
       - name: Build with Gradle
         env:

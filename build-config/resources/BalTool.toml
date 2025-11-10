@@ -3,12 +3,3 @@ id = "mi-module-gen"
 
 [[dependency]]
 path = "../tool-mi-module-gen-cli/build/libs/tool-mi-module-gen-cli-@toml.version@-SNAPSHOT.jar"
-
-[[dependency]]
-path = "../compiler-plugin/build/libs/tool-compiler-plugin-@toml.version@-SNAPSHOT.jar"
-
-[[dependency]]
-path = "../compiler-plugin/build/antlr4-runtime-4.5.1-1.jar"
-
-[[dependency]]
-path = "../compiler-plugin/build/handlebars-4.0.6.jar"

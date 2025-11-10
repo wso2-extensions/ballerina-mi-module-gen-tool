@@ -1,0 +1,5 @@
+{
+  "type": "attributeGroup",
+  "value": {
+    "groupName": "{{name}}",
+    "elements": [
