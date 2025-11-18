@@ -91,18 +91,14 @@ public class MiCmd implements BLauncherCmd {
     @Override
     public void execute() {
         try {
-            System.out.println("MI Module Gen starting...");
-            System.err.println("MI Module Gen starting to stderr...");
             executeInternal();
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
             e.printStackTrace(System.err);
             throw new RuntimeException(e);
         }
     }
 
     private void executeInternal() {
-        System.out.println("executeInternal called...");
         String miImportDocumentName;
         Package compilePkg;
         if (sourcePath == null || helpFlag) {
@@ -112,7 +108,6 @@ public class MiCmd implements BLauncherCmd {
             return;
         }
 
-        System.out.println("Input path: " + sourcePath);
         Path path = Path.of(sourcePath).normalize();
         BuildOptions buildOptions = BuildOptions.builder().setSticky(false).setOffline(false).build();
         Project project = ProjectLoader.loadProject(path, buildOptions);
