@@ -129,7 +129,9 @@ public class Component extends ModelElement {
     public void generateOutputSchemaJson(File connectorFolder) {
         File file = new File(connectorFolder, "outputschema");
         if (!file.exists()) {
-            file.mkdir();
+            if (!file.mkdir()) {
+                throw new RuntimeException("Failed to create directory: " + file.getAbsolutePath());
+            }
         }
 //        Utils.generateJson(TYPE_NAME + "_outputschema", file + File.separator + this.name, this);
     }
