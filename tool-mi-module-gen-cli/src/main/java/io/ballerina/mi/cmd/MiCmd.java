@@ -249,7 +249,11 @@ public class MiCmd implements BLauncherCmd {
     private void generateXmlFiles(Path connectorFolderPath, Connector connector) {
         java.io.File connectorFolder = new java.io.File(connectorFolderPath.toUri());
         if (!connectorFolder.exists()) {
-            connectorFolder.mkdir();
+            boolean created = connectorFolder.mkdir();
+            if (!created && !connectorFolder.exists()) {
+                printStream.println("ERROR: Failed to create directory: " + connectorFolder.getAbsolutePath());
+                throw new RuntimeException("Failed to create directory: " + connectorFolder.getAbsolutePath());
+            }
         }
 
         connector.generateInstanceXml(connectorFolder);
