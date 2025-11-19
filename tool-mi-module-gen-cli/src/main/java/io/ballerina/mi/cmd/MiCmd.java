@@ -85,7 +85,6 @@ public class MiCmd implements BLauncherCmd {
 
     public MiCmd() {
         this.printStream = System.out;
-        System.err.println("MiCmd constructor called");
     }
 
     @Override
