@@ -26,10 +26,13 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Collectors;
 
 public class ConnectorZipValidationTest {
 
     private Path ballerinaHome;
+    private static final Path RESOURCES_DIR = Paths.get("src", "test", "resources");
+    private static final Path EXPECTED_DIR = RESOURCES_DIR.resolve("expected");
 
     @BeforeClass
     public void setup() {
@@ -61,6 +64,7 @@ public class ConnectorZipValidationTest {
         // Validate connector.xml
         Path connectorXml = connectorPath.resolve("connector.xml");
         Assert.assertTrue(Files.exists(connectorXml));
+        compareFileContent(connectorXml, EXPECTED_DIR.resolve("connector.xml"));
 
         // Validate component directory
         Path componentDir = connectorPath.resolve("test");
@@ -70,10 +74,12 @@ public class ConnectorZipValidationTest {
         // Validate component xml
         Path testComponentXml = componentDir.resolve("component.xml");
         Assert.assertTrue(Files.exists(testComponentXml));
+        compareFileContent(testComponentXml, EXPECTED_DIR.resolve("test").resolve("component.xml"));
 
         // Validate component template
         Path testComponentTemplate = componentDir.resolve("test_template.xml");
         Assert.assertTrue(Files.exists(testComponentTemplate));
+        compareFileContent(testComponentTemplate, EXPECTED_DIR.resolve("test").resolve("test_template.xml"));
 
         // Validate lib directory and jar
         Path libDir = connectorPath.resolve("lib");
@@ -107,6 +113,7 @@ public class ConnectorZipValidationTest {
 
         Path testUiSchema = uiSchemaDir.resolve("test.json");
         Assert.assertTrue(Files.exists(testUiSchema));
+        compareFileContent(testUiSchema, EXPECTED_DIR.resolve("uischema").resolve("test.json"));
 
         // Validate outputschema directory
         Path outputSchemaDir = connectorPath.resolve("outputschema");
@@ -115,5 +122,12 @@ public class ConnectorZipValidationTest {
 
         Path testOutputSchema = outputSchemaDir.resolve("test.json");
         Assert.assertTrue(Files.exists(testOutputSchema));
+        compareFileContent(testOutputSchema, EXPECTED_DIR.resolve("outputschema").resolve("test.json"));
+    }
+
+    private void compareFileContent(Path actualFilePath, Path expectedFilePath) throws IOException {
+        String actualContent = Files.lines(actualFilePath).collect(Collectors.joining(System.lineSeparator()));
+        String expectedContent = Files.lines(expectedFilePath).collect(Collectors.joining(System.lineSeparator()));
+        Assert.assertEquals(actualContent, expectedContent, "Content mismatch for file: " + actualFilePath.getFileName());
     }
 }
