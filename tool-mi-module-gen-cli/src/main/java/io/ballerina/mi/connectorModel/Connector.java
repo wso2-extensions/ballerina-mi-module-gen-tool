@@ -15,12 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
 package io.ballerina.mi.connectorModel;
 
 import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.Utils;
 import io.ballerina.projects.PackageDescriptor;
+import io.ballerina.projects.SemanticVersion;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,17 +29,20 @@ import java.util.ArrayList;
 public class Connector extends ModelElement {
     public static final String TYPE_NAME = "connector";
     public static final String TEMP_PATH = "connector";
+    public static final String ICON_FOLDER = "icon";
     public static final String SMALL_ICON_NAME = "icon-small.png";
     public static final String LARGE_ICON_NAME = "icon-large.png";
     public static final String LIB_PATH = "lib";
     private static Connector connector = null;
     private final ArrayList<Connection> connections = new ArrayList<>();
+    private final ArrayList<Component> components = new ArrayList<>();
     private String description = "helps to connect with external systems";
     private String iconPath;
     private String version;
     private final String orgName;
     private final String moduleName;
     private final String majorVersion;
+    private boolean isBalModule;
 
     public String getOrgName() {
         return orgName;
@@ -52,9 +56,10 @@ public class Connector extends ModelElement {
         return majorVersion;
     }
 
-    private Connector(String moduleName, String orgName, String majorVersion) {
+    private Connector(String moduleName, String orgName, String version, String majorVersion) {
         this.moduleName = moduleName;
         this.orgName = orgName;
+        this.version = version;
         this.majorVersion = majorVersion;
     }
 
@@ -63,17 +68,35 @@ public class Connector extends ModelElement {
     }
 
     public void setConnection(Connection connection) {
+
         this.connections.add(connection);
+        components.addAll(connection.getComponents());
     }
 
     public static Connector getConnector(PackageDescriptor descriptor) {
         String orgName = descriptor.org().value();
         String moduleName = descriptor.name().value();
-        String majorVersion = String.valueOf(descriptor.version().value().major());
+        SemanticVersion version = descriptor.version().value();
+        String majorVersion = String.valueOf(version.major());
         if (connector == null) {
-            connector = new Connector(moduleName, orgName, majorVersion);
+            connector = new Connector(moduleName, orgName, version.toString(), majorVersion);
         }
         return connector;
+    }
+
+    public static Connector getConnector() {
+        if (connector == null) {
+            throw new IllegalStateException("Connector has not been initialized");
+        }
+        return connector;
+    }
+
+    public boolean isBalModule() {
+        return isBalModule;
+    }
+
+    public void setBalModule(boolean balModule) {
+        isBalModule = balModule;
     }
 
     public String getDescription() {
@@ -95,7 +118,7 @@ public class Connector extends ModelElement {
 
     public String getZipFileName() {
         //TODO: also include org in the zip file name
-        return "ballerina" + "-" + TYPE_NAME + "-" +  getModuleName() + "-" + getVersion() + ".zip";
+        return "ballerina" + "-" + TYPE_NAME + "-" + getModuleName() + "-" + getVersion() + ".zip";
     }
 
     public void setVersion(String version) {
@@ -106,35 +129,35 @@ public class Connector extends ModelElement {
         return version;
     }
 
-    // Commented out: Uses Utils.generateXmlForConnector which is commented out
-//    public void generateInstanceXml(File folder) {
-//        Utils.generateXmlForConnector("balConnector", TYPE_NAME, folder + File.separator + TYPE_NAME, this);
-//    }
+    public ArrayList<Component> getComponents() {
+        return components;
+    }
 
-    // Commented out: Uses Utils.generateXmlForConnector which is commented out
-//    public void generateFunctionsXml(File connectorFolder, String templatePath, String typeName) {
-//        File file = new File(connectorFolder, typeName);
-//        if (!file.exists()) {
-//            file.mkdir();
-//        }
-//        Utils.generateXmlForConnector(templatePath, "component", file + File.separator + "component", this);
-//    }
+    public void generateInstanceXml(File folder) {
+        Utils.generateXmlForConnector("balConnector", TYPE_NAME, folder + File.separator + TYPE_NAME, this);
+    }
 
-    // Commented out: Uses Utils.generateXmlForConnector which is commented out
-//    public void generateConfigInstanceXml(File connectorFolder, String templatePath, String typeName) {
-//        File file = new File(connectorFolder, typeName);
-//        if (!file.exists()) {
-//            file.mkdir();
-//        }
-//        Utils.generateXmlForConnector(templatePath, "component", file + File.separator + "component", this);
-//    }
+    public void generateFunctionsXml(File connectorFolder, String templatePath, String typeName) {
+        File file = new File(connectorFolder, typeName);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        Utils.generateXmlForConnector(templatePath, "component", file + File.separator + "component", this);
+    }
 
-    // Commented out: Uses Utils.generateXmlForConnector which is commented out
-//    public void generateConfigTemplateXml(File connectorFolder, String templatePath, String typeName) {
-//        File file = new File(connectorFolder, typeName);
-//        if (!file.exists()) {
-//            file.mkdir();
-//        }
-//        Utils.generateXmlForConnector(templatePath, typeName + "_template", file + File.separator + Constants.INIT_FUNCTION_NAME, this);
-//    }
+    public void generateConfigInstanceXml(File connectorFolder, String templatePath, String typeName) {
+        File file = new File(connectorFolder, typeName);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        Utils.generateXmlForConnector(templatePath, "component", file + File.separator + "component", this);
+    }
+
+    public void generateConfigTemplateXml(File connectorFolder, String templatePath, String typeName) {
+        File file = new File(connectorFolder, typeName);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        Utils.generateXmlForConnector(templatePath, typeName + "_template", file + File.separator + Constants.INIT_FUNCTION_NAME, this);
+    }
 }

@@ -15,27 +15,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
 package io.ballerina.mi.connectorModel;
 
 public class Param {
-    private String name;
+    private String value;
 
     private String description;
 
-    private String index;
+    private String key;
 
-    public Param(String index, String name) {
-        this.index = index;
-        this.name = name;
+    public Param(String key, String value) {
+        this.key = key;
+        this.value = value;
     }
 
-    public String getName() {
-        return name;
+    public String getValue() {
+        return value;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public String getDescription() {
@@ -46,11 +46,11 @@ public class Param {
         this.description = description;
     }
 
-    public String getIndex() {
-        return index;
+    public String getKey() {
+        return key;
     }
 
-    public void setIndex(String index) {
-        this.index = index;
+    public void setKey(String key) {
+        this.key = key;
     }
 }

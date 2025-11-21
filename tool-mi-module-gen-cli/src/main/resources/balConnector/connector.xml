@@ -18,9 +18,9 @@
   -->
 <connector>
     <component name="{{moduleName}}" package="io.ballerina.stdlib.mi">
-        <dependency component="config"/>
+        {{writeConfigDependency this}}
         <dependency component="functions"/>
-        <description>{{{description}}}</description>
+        <description>{{description}}</description>
     </component>
     <icon>icon/icon-small.gif</icon>
     <displayName>{{moduleName}}</displayName>
