@@ -19,6 +19,17 @@ package io.ballerina.mi.test.util;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+/**
+ * This test class is intended to be run manually by developers when expected artifacts need to be updated.
+ * <p>
+ * <b>Instructions:</b>
+ * <ul>
+ *   <li>By default, all test methods in this class are disabled (enabled = false).</li>
+ *   <li>To run a test, set {@code enabled = true} in the corresponding {@code @Test} annotation.</li>
+ *   <li>Execute the test class using your preferred TestNG runner (e.g., via your IDE or command line).</li>
+ *   <li>After running, verify that the expected artifacts have been updated as intended.</li>
+ * </ul>
+ */
 public class TestArtifactGenerationUtil {
 
     @BeforeClass
