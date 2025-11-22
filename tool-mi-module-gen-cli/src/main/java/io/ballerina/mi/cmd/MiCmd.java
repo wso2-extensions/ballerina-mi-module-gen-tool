@@ -199,6 +199,7 @@ public class MiCmd implements BLauncherCmd {
         printStream.println("Generating MI " + (isBuildProject ? "module" : "connector") + " artifacts...");
 
         Connector connector = Connector.getConnector();
+        connector.clearComponents();
         connector.setName(compilePkg.descriptor().name().value());
         connector.setVersion(compilePkg.descriptor().version().value().toString());
         connector.setOrgName(compilePkg.descriptor().org().value());

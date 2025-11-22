@@ -57,6 +57,7 @@ import java.util.stream.Stream;
  * </p>
  */
 public class ArtifactGenerationUtil {
+    private static final Path RESOURCES_DIR = Paths.get("src", "test", "resources");
     private static final Path EXPECTED_DIR = RESOURCES_DIR.resolve("expected");
 
     public static void generateExpectedArtifacts(String projectPathStr, String projectName) throws Exception {
