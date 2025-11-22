@@ -16,7 +16,7 @@
 
 package io.ballerina.mi.test.util;
 
-import io.ballerina.mi.cmd.MiCmd;
+import io.ballerina.mi.MiCmd;
 import org.testng.Assert;
 
 import java.io.IOException;

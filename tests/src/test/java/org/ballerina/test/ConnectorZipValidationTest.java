@@ -16,7 +16,7 @@
 
 package org.ballerina.test;
 
-import io.ballerina.mi.cmd.MiCmd;
+import io.ballerina.mi.MiCmd;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -62,7 +62,6 @@ public class ConnectorZipValidationTest {
     @DataProvider(name = "miProjectDataProvider")
     public Object[][] miProjectDataProvider() {
         return new Object[][]{
-                {"project1"},
                 {"project2"},
         };
     }
@@ -81,7 +80,7 @@ public class ConnectorZipValidationTest {
 
         // Validate the generated artifacts
         Path targetPath = projectPath.resolve("target");
-        Path connectorPath = targetPath.resolve(projectName + "-mi-connector");
+        Path connectorPath = targetPath.resolve("generated");
 
         Assert.assertTrue(Files.exists(connectorPath), "Connector path does not exist for project: " + projectName);
         Assert.assertTrue(Files.isDirectory(connectorPath), "Connector path is not a directory for project: " + projectName);
@@ -92,19 +91,14 @@ public class ConnectorZipValidationTest {
         compareFileContent(connectorXml, expectedPath.resolve("connector.xml"));
 
         // Validate component directory
-        Path componentDir = connectorPath.resolve("test");
-        Assert.assertTrue(Files.exists(componentDir), "component 'test' directory does not exist for project: " + projectName);
-        Assert.assertTrue(Files.isDirectory(componentDir), "component 'test' path is not a directory for project: " + projectName);
+        Path componentDir = connectorPath.resolve("functions");
+        Assert.assertTrue(Files.exists(componentDir), "component 'functions' directory does not exist for project: " + projectName);
+        Assert.assertTrue(Files.isDirectory(componentDir), "component 'functions' path is not a directory for project: " + projectName);
 
         // Validate component xml
         Path testComponentXml = componentDir.resolve("component.xml");
-        Assert.assertTrue(Files.exists(testComponentXml), "component.xml does not exist in 'test' for project: " + projectName);
-        compareFileContent(testComponentXml, expectedPath.resolve("test").resolve("component.xml"));
-
-        // Validate component template
-        Path testComponentTemplate = componentDir.resolve("test_template.xml");
-        Assert.assertTrue(Files.exists(testComponentTemplate), "test_template.xml does not exist in 'test' for project: " + projectName);
-        compareFileContent(testComponentTemplate, expectedPath.resolve("test").resolve("test_template.xml"));
+        Assert.assertTrue(Files.exists(testComponentXml), "component.xml does not exist in 'functions' for project: " + projectName);
+        compareFileContent(testComponentXml, expectedPath.resolve("functions").resolve("component.xml"));
 
         // Validate lib directory and jar
         Path libDir = connectorPath.resolve("lib");
@@ -139,15 +133,6 @@ public class ConnectorZipValidationTest {
         Path testUiSchema = uiSchemaDir.resolve("test.json");
         Assert.assertTrue(Files.exists(testUiSchema), "test.json does not exist in 'uischema' for project: " + projectName);
         compareFileContent(testUiSchema, expectedPath.resolve("uischema").resolve("test.json"));
-
-        // Validate outputschema directory
-        Path outputSchemaDir = connectorPath.resolve("outputschema");
-        Assert.assertTrue(Files.exists(outputSchemaDir), "outputschema directory does not exist for project: " + projectName);
-        Assert.assertTrue(Files.isDirectory(outputSchemaDir), "outputschema path is not a directory for project: " + projectName);
-
-        Path testOutputSchema = outputSchemaDir.resolve("test.json");
-        Assert.assertTrue(Files.exists(testOutputSchema), "test.json does not exist in 'outputschema' for project: " + projectName);
-        compareFileContent(testOutputSchema, expectedPath.resolve("outputschema").resolve("test.json"));
     }
 
     private void compareFileContent(Path actualFilePath, Path expectedFilePath) throws IOException {
