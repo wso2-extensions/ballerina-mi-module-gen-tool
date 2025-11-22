@@ -15,43 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+ 
+package io.ballerina.mi.connectorModel;
 
-package io.ballerina.mi.model;
+public class FunctionParam extends Param {
 
-public class Param {
+    private final String paramType;
 
-    private String name;
-
-    private String description;
-
-    private String index;
-
-    public Param(String index, String name) {
-        this.name = name;
-        this.index = index;
+    public FunctionParam(String index, String name, String paramType) {
+        super(index, name);
+        this.paramType = paramType;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getIndex() {
-        return index;
-    }
-
-    public void setIndex(String index) {
-        this.index = index;
+    public String getParamType() {
+        return paramType;
     }
 }

@@ -15,17 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+ 
+package io.ballerina.mi.analyzer;
 
-package io.ballerina.mi.model;
+import io.ballerina.projects.Package;
 
-public abstract class ModelElement {
-
-    String getType() {
-        return null;
-    }
-
-    String getName() {
-        return null;
-    }
-
+public interface Analyzer {
+    void analyze(Package compiledPackage);
 }

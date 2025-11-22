@@ -20,15 +20,13 @@ package io.ballerina.mi.util;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import io.ballerina.mi.connectorModel.Component;
-import io.ballerina.mi.connectorModel.Connection;
-import io.ballerina.mi.connectorModel.FunctionType;
+import io.ballerina.compiler.api.symbols.*;
+import io.ballerina.compiler.syntax.tree.*;
+import io.ballerina.mi.connectorModel.*;
 import io.ballerina.mi.connectorModel.attributeModel.Attribute;
 import io.ballerina.mi.connectorModel.attributeModel.AttributeGroup;
 import io.ballerina.mi.connectorModel.attributeModel.Combo;
 import io.ballerina.mi.connectorModel.attributeModel.Table;
-import io.ballerina.mi.model.Connector;
-import io.ballerina.mi.model.ModelElement;
 import org.ballerinalang.diagramutil.connector.models.connector.Type;
 import org.ballerinalang.diagramutil.connector.models.connector.types.EnumType;
 import org.ballerinalang.diagramutil.connector.models.connector.types.PathParamType;
@@ -105,105 +103,177 @@ public class Utils {
         }
     }
 
-    // Commented out: Connector-specific generation with Path/Query parameter helpers
-    // This was used for advanced connector generation but not needed for basic mediator generation
-//    private static void generateFileForConnector(String templatePath, String templateName, String outputName,
-//                                                 io.ballerina.stdlib.mi.plugin.connectorModel.ModelElement element,
-//                                                 String extension) {
-//        try {
-//            Handlebars handlebar = new Handlebars();
-//            handlebar.registerHelper("eq", (context, options) -> context != null &&
-//                    context.equals(options.param(0)));
-//            handlebar.registerHelper("not", (context, options) -> {
-//                if (context instanceof Boolean booleanContext) {
-//                    return !booleanContext;
+//    /**
+//     * This is a private utility function for
+//     */
+//    //TODO
+//    public static String getDocFromMetadata(MetadataNode optionalMetadataNode) {
+//        StringBuilder doc = new StringBuilder();
+//        MarkdownDocumentationNode docLines = optionalMetadataNode.documentationString().isPresent() ?
+//                (MarkdownDocumentationNode) optionalMetadataNode.documentationString().get() : null;
+//        if (docLines != null) {
+//            for (Node docLine : docLines.documentationLines()) {
+//                if (docLine instanceof MarkdownDocumentationLineNode) {
+//                    doc.append(!((MarkdownDocumentationLineNode) docLine).documentElements().isEmpty() ?
+//                            getDocLineString(((MarkdownDocumentationLineNode) docLine).documentElements()) : "\n");
+//                } else if (docLine instanceof MarkdownCodeBlockNode) {
+//                    doc.append(getDocCodeBlockString((MarkdownCodeBlockNode) docLine));
+//                } else {
+//                    break;
 //                }
-//                return true; // default value if context is not boolean
-//            });
-//            handlebar.registerHelper("escapeChars", (context, options) -> {
-//                if (context == null) return "";
-//                String value = context.toString().replaceAll("^\"(.*)\"$", "$1");
-//                if (value.equals("()")) {
-//                    return "";
-//                }
-//                return value.replace("\\", "\\\\")
-//                        .replace("\"", "\\\"")
-//                        .replace("\b", "\\b")
-//                        .replace("\f", "\\f")
-//                        .replace("\n", "\\n")
-//                        .replace("\r", "\\r")
-//                        .replace("\t", "\\t")
-//                        .replace("\u0000", "\\u0000");
-//            });
-//            handlebar.registerHelper("checkFuncType", (context, options) -> {
-//                FunctionType functionType = (FunctionType) context;
-//                return functionType.toString().equals(options.param(0));
-//            });
-//            handlebar.registerHelper("writeConfigXmlProperties", (context, options) -> {
-//                Connection connection = (Connection) context;
-//                StringBuilder result = new StringBuilder();
-//                List<Type> initParams = connection.getInitComponent().getQueryParams();
-//                for (int i = 0; i < initParams.size(); i++) {
-//                    writeConfigXmlProperty(initParams.get(i), i, connection.getConnectionType(), result);
-//                }
-//                return new Handlebars.SafeString(result.toString());
-//            });
-//            handlebar.registerHelper("writeComponentXmlProperties", (context, options) -> {
-//                Component component = (Component) context;
-//                StringBuilder result = new StringBuilder();
-//                List<Type> queryParams = component.getQueryParams();
-//                for (int i = 0; i < queryParams.size(); i++) {
-//                    writeComponentXmlQueryProperty(queryParams.get(i), i, result);
-//                }
-//                List<PathParamType> pathParams = component.getPathParams();
-//                for (int i = 0; i < pathParams.size(); i++) {
-//                    writeComponentXmlPathProperty(pathParams.get(i), i, result);
-//                }
-//                if (templatePath.equals(FUNCTION_TEMPLATE_PATH)) {
-//                    result.append(String.format("<property name=\"returnType\" value=\"%s\"/>\n",
-//                            component.getReturnType().typeName));
-//                }
-//                return new Handlebars.SafeString(result.toString());
-//            });
-//            handlebar.registerHelper("writeConfigJsonProperties", (context, options) -> {
-//                Component component = (Component) context;
-//                JsonTemplateBuilder builder = new JsonTemplateBuilder();
-//                List<Type> queryParams = component.getQueryParams();
-//                String helpTip = String.format("Input parameters required for %s connection",
-//                        component.getParent().getConnectionType());
-//                for (Type configParam: queryParams) {
-//                    String paramName = String.format("%s_%s", component.getParent().getConnectionType(),
-//                            configParam.name);
-//                    writeJsonAttributeForQueryParam(configParam.typeName, configParam, queryParams.indexOf(configParam),
-//                            queryParams.size(), builder, paramName, helpTip, false);
-//                }
-//                return new Handlebars.SafeString(builder.build());
-//            });
-//            handlebar.registerHelper("writeComponentJsonProperties", (context, options) -> {
-//                Component component = (Component) context;
-//                JsonTemplateBuilder builder = new JsonTemplateBuilder();
-//                List<PathParamType> pathParams = component.getPathParams();
-//                for (PathParamType pathParam: pathParams) {
-//                    writeJsonAttributeForPathParam(pathParam.typeName, pathParam, pathParams.indexOf(pathParam),
-//                            pathParams.size(), builder, pathParam.name, "", false);
-//                }
+//            }
+//        }
+//
+//        return doc.toString();
+//    }
+
+//    //TODO
+//    public static String getDocLineString(NodeList<Node> documentElements) {
+//        if (documentElements.isEmpty()) {
+//            return null;
+//        }
+//        StringBuilder doc = new StringBuilder();
+//        for (Node docNode : documentElements) {
+//            doc.append(docNode.toString());
+//        }
+//
+//        return doc.toString();
+//    }
+
+//    //TODO
+//    public static String getDocCodeBlockString(MarkdownCodeBlockNode markdownCodeBlockNode) {
+//        StringBuilder doc = new StringBuilder();
+//
+//        doc.append(markdownCodeBlockNode.startBacktick().toString());
+//        markdownCodeBlockNode.langAttribute().ifPresent(langAttribute -> doc.append(langAttribute.toString()));
+//
+//        for (MarkdownCodeLineNode codeLineNode : markdownCodeBlockNode.codeLines()) {
+//            doc.append(codeLineNode.codeDescription().toString());
+//        }
+//
+//        doc.append(markdownCodeBlockNode.endBacktick().toString());
+//        return doc.toString();
+//    }
+
+    public static boolean containsToken(List<Qualifier> qualifiers, Qualifier kind) {
+        for (Qualifier qualifier : qualifiers) {
+            if (qualifier == kind) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private static void generateFileForConnector(String templatePath, String templateName, String outputName,
+                                                 io.ballerina.mi.connectorModel.ModelElement element,
+                                                 String extension) {
+        try {
+            Handlebars handlebar = new Handlebars();
+            handlebar.registerHelper("eq", (context, options) -> context != null &&
+                    context.equals(options.param(0)));
+            handlebar.registerHelper("not", (context, options) -> {
+                if (context instanceof Boolean booleanContext) {
+                    return !booleanContext;
+                }
+                return true; // default value if context is not boolean
+            });
+            handlebar.registerHelper("escapeChars", (context, options) -> {
+                if (context == null) return "";
+                String value = context.toString().replaceAll("^\"(.*)\"$", "$1");
+                if (value.equals("()")) {
+                    return "";
+                }
+                return value.replace("\\", "\\\\")
+                        .replace("\"", "\\\"")
+                        .replace("\b", "\\b")
+                        .replace("\f", "\\f")
+                        .replace("\n", "\\n")
+                        .replace("\r", "\\r")
+                        .replace("\t", "\\t")
+                        .replace("\u0000", "\\u0000");
+            });
+            handlebar.registerHelper("checkFuncType", (context, options) -> {
+                FunctionType functionType = (FunctionType) context;
+                return functionType.toString().equals(options.param(0));
+            });
+            handlebar.registerHelper("writeConfigXmlProperties", (context, options) -> {
+                Connection connection = (Connection) context;
+                StringBuilder result = new StringBuilder();
+                List<Type> initParams = connection.getInitComponent() != null ? connection.getInitComponent().getQueryParams() : List.of();
+                for (int i = 0; i < initParams.size(); i++) {
+                    writeConfigXmlProperty(initParams.get(i), i, connection.getConnectionType(), result);
+                }
+                return new Handlebars.SafeString(result.toString());
+            });
+            handlebar.registerHelper("writeComponentXmlProperties", (context, options) -> {
+                Component component = (Component) context;
+                StringBuilder result = new StringBuilder();
+                List<Type> queryParams = component.getQueryParams();
+                for (int i = 0; i < queryParams.size(); i++) {
+                    writeComponentXmlQueryProperty(queryParams.get(i), i, result);
+                }
+                List<PathParamType> pathParams = component.getPathParams();
+                for (int i = 0; i < pathParams.size(); i++) {
+                    writeComponentXmlPathProperty(pathParams.get(i), i, result);
+                }
+                if (templatePath.equals(FUNCTION_TEMPLATE_PATH)) {
+                    result.append(String.format("<property name=\"returnType\" value=\"%s\"/>\n",
+                            component.getReturnType()));
+                }
+                return new Handlebars.SafeString(result.toString());
+            });
+            handlebar.registerHelper("writeConfigJsonProperties", (context, options) -> {
+                Component component = (Component) context;
+                JsonTemplateBuilder builder = new JsonTemplateBuilder();
+                List<Type> queryParams = component.getQueryParams();
+                String helpTip = String.format("Input parameters required for %s connection",
+                        component.getParent().getConnectionType());
+                for (Type configParam : queryParams) {
+                    String paramName = String.format("%s_%s", component.getParent().getConnectionType(),
+                            configParam.name);
+                    writeJsonAttributeForQueryParam(configParam.typeName, configParam, queryParams.indexOf(configParam),
+                            queryParams.size(), builder, paramName, helpTip, false);
+                }
+                return new Handlebars.SafeString(builder.build());
+            });
+            handlebar.registerHelper("writeComponentJsonProperties", (context, options) -> {
+                Component component = (Component) context;
+                JsonTemplateBuilder builder = new JsonTemplateBuilder();
+                List<FunctionParam> functionParams = component.getFunctionParams();
+                for (FunctionParam param : functionParams) {
+                    writeJsonAttributeForFunctionParam(param.getParamType(), param.getValue(), functionParams.indexOf(param),
+                            functionParams.size(), builder, param.getValue(), param.getDescription(), false);
+                }
+                List<PathParamType> pathParams = component.getPathParams();
+                for (PathParamType pathParam : pathParams) {
+                    writeJsonAttributeForPathParam(pathParam.typeName, pathParam, pathParams.indexOf(pathParam),
+                            pathParams.size(), builder, pathParam.name, "", false);
+                }
 //                List<Type> queryParams = component.getQueryParams();
 //                for (Type queryParam: queryParams) {
 //                    writeJsonAttributeForQueryParam(queryParam.typeName, queryParam, queryParams.indexOf(queryParam),
 //                            queryParams.size(), builder, queryParam.name, queryParam.documentation, false);
 //                }
-//                return new Handlebars.SafeString(builder.build());
-//            });
-//            String templateFileName = String.format("%s/%s.%s", templatePath, templateName, extension);
-//            String content = readFile(templateFileName);
-//            Template template = handlebar.compileInline(content);
-//            String output = template.apply(element);
-//            String outputFileName = String.format("%s.%s", outputName, extension);
-//            writeFile(outputFileName, output);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+                return new Handlebars.SafeString(builder.build());
+            });
+            handlebar.registerHelper("writeConfigDependency", (context, options) -> {
+                Connector connector = (Connector) context;
+                if (!connector.isBalModule()) {
+                    return new Handlebars.SafeString("<dependency component=\"config\"/>");
+                }
+                return new Handlebars.SafeString("");
+            });
+            String templateFileName = String.format("%s/%s.%s", templatePath, templateName, extension);
+            String content = readFile(templateFileName);
+            Template template = handlebar.compileInline(content);
+            String output = template.apply(element);
+            String outputFileName = String.format("%s.%s", outputName, extension);
+            writeFile(outputFileName, output);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private static void writeComponentXmlPathProperty(PathParamType parameter, int index, StringBuilder result) {
         result.append(String.format("<property name=\"pathParam%d\" value=\"%s\"/>\n", index, parameter.name));
@@ -295,6 +365,42 @@ public class Utils {
             case ARRAY:
                 //TODO: Generate properties for array
         }
+    }
+
+    private static void writeJsonAttributeForFunctionParam(String paramType, String displayName, int index, int paramLength,
+                                                           JsonTemplateBuilder builder, String paramName, String helpTip,
+                                                           boolean isCombo) throws IOException {
+        switch (paramType) {
+            case STRING:
+                Attribute stringAttr = new Attribute(paramName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);
+                break;
+            case INT:
+                Attribute intAttr = new Attribute(paramName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip, VALIDATE_TYPE_REGEX,
+                        INTEGER_REGEX, isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, intAttr);
+                break;
+            case DECIMAL, FLOAT:
+                Attribute decAttr = new Attribute(paramName, displayName,
+                        INPUT_TYPE_STRING_OR_EXPRESSION, "", true,
+                        helpTip, VALIDATE_TYPE_REGEX, DECIMAL_REGEX, isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, decAttr);
+                break;
+            case BOOLEAN:
+                Attribute boolAttr = new Attribute(paramName, displayName, INPUT_TYPE_BOOLEAN,
+                        "", true, helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
+                break;
+            default:
+                //TODO: Handle unsupported data types
+                // error: unidentified data type
+                // log and skip function
+        }
+        builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
 
     private static void writeJsonAttributeForPathParam(String paramType, PathParamType parameter, int index, int paramLength,
@@ -395,7 +501,7 @@ public class Utils {
                 AttributeGroup recGroup = new AttributeGroup(paramName);
                 builder.addFromTemplate(ATTRIBUTE_GROUP_TEMPLATE_PATH, recGroup);
                 List<Type> recordFields = ((RecordType) parameter).fields;
-                for (Type field: recordFields) {
+                for (Type field : recordFields) {
                     String fieldName = String.format("%s_%s", paramName, field.name);
                     writeJsonAttributeForQueryParam(field.typeName, field, recordFields.indexOf(field), paramLength,
                             builder, fieldName, field.documentation, false);
@@ -437,14 +543,13 @@ public class Utils {
         generateFile(templateName, outputName, element, "json");
     }
 
-    // Commented out: Connector-specific generation methods - depend on generateFileForConnector
-//    public static void generateXmlForConnector(String templatePath, String templateName, String outputName, io.ballerina.stdlib.mi.plugin.connectorModel.ModelElement element) {
-//        generateFileForConnector(templatePath, templateName, outputName, element, "xml");
-//    }
-//
-//    public static void generateJsonForConnector(String templatePath, String templateName, String outputName, io.ballerina.stdlib.mi.plugin.connectorModel.ModelElement element) {
-//        generateFileForConnector(templatePath, templateName, outputName, element, "json");
-//    }
+    public static void generateXmlForConnector(String templatePath, String templateName, String outputName, io.ballerina.mi.connectorModel.ModelElement element) {
+        generateFileForConnector(templatePath, templateName, outputName, element, "xml");
+    }
+
+    public static void generateJsonForConnector(String templatePath, String templateName, String outputName, io.ballerina.mi.connectorModel.ModelElement element) {
+        generateFileForConnector(templatePath, templateName, outputName, element, "json");
+    }
 
     /**
      * Zip a folder and its contents.
@@ -676,6 +781,45 @@ public class Utils {
         } else {
             return inputStream;
         }
+    }
+
+    public static String getDocString(Documentation documentation) {
+        //TODO: get the full documenation
+        return documentation.description().orElse("");
+    }
+
+    public static FunctionType getFunctionType(FunctionSymbol functionSymbol) {
+
+        List<Qualifier> qualifierList = functionSymbol.qualifiers();
+        String functionName = functionSymbol.getName().orElse("");
+        if (functionName.equals(Constants.INIT_FUNCTION_NAME)) {
+            return FunctionType.INIT;
+        } else if (containsToken(qualifierList, Qualifier.REMOTE)) {
+            return FunctionType.REMOTE;
+        } else if (containsToken(qualifierList, Qualifier.RESOURCE)) {
+            return FunctionType.RESOURCE;
+        } else {
+            return FunctionType.FUNCTION;
+        }
+    }
+
+    public static String getParamTypeName(TypeDescKind typeKind) {
+        return switch (typeKind) {
+            case BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ARRAY -> typeKind.getName();
+            default -> null;
+        };
+    }
+
+    public static String getReturnTypeName(FunctionSymbol functionSymbol) {
+        Optional<TypeSymbol> functionTypeDescKind = functionSymbol.typeDescriptor().returnTypeDescriptor();
+        TypeDescKind typeKind = TypeDescKind.NIL;
+        if (functionTypeDescKind.isPresent()) {
+            typeKind = functionTypeDescKind.get().typeKind();
+        }
+        return switch (typeKind) {
+            case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, ARRAY -> typeKind.getName();
+            default -> null;
+        };
     }
 
     // Commented out: Syntax tree-dependent documentation extraction methods
