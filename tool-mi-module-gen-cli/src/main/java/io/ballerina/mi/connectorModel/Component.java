@@ -15,10 +15,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
 package io.ballerina.mi.connectorModel;
 
-import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.Utils;
 
 import org.ballerinalang.diagramutil.connector.models.connector.Type;
@@ -34,15 +33,16 @@ public class Component extends ModelElement {
     //TODO: remove if not needed
     private String objectTypeName;
     private final FunctionType functionType;
-    //TODO: remove if not needed
+    //TODO: remove
     private final String index;
     private Connection parent;
     private final ArrayList<Param> params = new ArrayList<>();
+    private final List<FunctionParam> functionParams = new ArrayList<>();
     private final List<PathParamType> pathParams;
     private final List<Type> queryParams;
-    private final Type returnType;
+    private final String returnType;
 
-    public Component(String name, String documentation, FunctionType functionType, String index, List<PathParamType> pathParams, List<Type> queryParams, Type returnType) {
+    public Component(String name, String documentation, FunctionType functionType, String index, List<PathParamType> pathParams, List<Type> queryParams, String returnType) {
         this.name = name;
         this.documentation = documentation;
         this.functionType = functionType;
@@ -58,6 +58,14 @@ public class Component extends ModelElement {
 
     public void setParam(Param param) {
         this.params.add(param);
+    }
+
+    public void setFunctionParam(FunctionParam functionParam) {
+        this.functionParams.add(functionParam);
+    }
+
+    public List<FunctionParam> getFunctionParams() {
+        return functionParams;
     }
 
     public String getName() {
@@ -100,7 +108,7 @@ public class Component extends ModelElement {
         return documentation;
     }
 
-    public Type getReturnType() {
+    public String getReturnType() {
         return returnType;
     }
 
@@ -108,23 +116,21 @@ public class Component extends ModelElement {
         return functionType;
     }
 
-    // Commented out: Uses Utils.generateXmlForConnector which is commented out
-//    public void generateTemplateXml(File connectorFolder, String templatePath, String typeName) {
-//        File file = new File(connectorFolder, typeName);
-//        if (!file.exists()) {
-//            file.mkdir();
-//        }
-//        Utils.generateXmlForConnector(templatePath, typeName + "_template", file + File.separator + this.getName(), this);
-//    }
+    public void generateTemplateXml(File connectorFolder, String templatePath, String typeName) {
+        File file = new File(connectorFolder, typeName);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        Utils.generateXmlForConnector(templatePath, typeName + "_template", file + File.separator + this.getName(), this);
+    }
 
-    // Commented out: Uses Utils.generateJsonForConnector which is commented out
-//    public void generateUIJson(File connectorFolder, String templatePath, String fileName) {
-//        File file = new File(connectorFolder, "uischema");
-//        if (!file.exists()) {
-//            file.mkdir();
-//        }
-//        Utils.generateJsonForConnector(templatePath, "component", file + File.separator + fileName, this);
-//    }
+    public void generateUIJson(File connectorFolder, String templatePath, String fileName) {
+        File file = new File(connectorFolder, "uischema");
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        Utils.generateJsonForConnector(templatePath, "component", file + File.separator + fileName, this);
+    }
 
     public void generateOutputSchemaJson(File connectorFolder) {
         File file = new File(connectorFolder, "outputschema");

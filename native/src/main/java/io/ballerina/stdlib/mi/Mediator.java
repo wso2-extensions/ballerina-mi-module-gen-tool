@@ -51,21 +51,19 @@ import static io.ballerina.stdlib.mi.Constants.XML;
 public class Mediator extends AbstractMediator {
     private static volatile Runtime rt = null;
     private static Module module = null;
+    private String orgName;
+    private String moduleName;
+    private String version;
 
     public Mediator() {
-        if (rt == null) {
-            synchronized (Mediator.class) {
-                if (rt == null) {
-                    ModuleInfo moduleInfo = new ModuleInfo();
-                    init(moduleInfo);
-                }
-            }
-        }
     }
 
     // This constructor is added to test the mediator
     public Mediator(ModuleInfo moduleInfo) {
-        init(moduleInfo);
+        this.orgName = moduleInfo.getOrgName();
+        this.moduleName = moduleInfo.getModuleName();
+        this.version = moduleInfo.getModuleVersion();
+        init();
     }
 
     private static String getResultProperty(MessageContext context) {
@@ -73,6 +71,14 @@ public class Mediator extends AbstractMediator {
     }
 
     public boolean mediate(MessageContext context) {
+
+        if (rt == null) {
+            synchronized (Mediator.class) {
+                if (rt == null) {
+                    init();
+                }
+            }
+        }
         String balFunctionReturnType = context.getProperty(Constants.RETURN_TYPE).toString();
         Object[] args = new Object[Integer.parseInt(context.getProperty(Constants.SIZE).toString())];
         if (!setParameters(args, context)) {
@@ -169,8 +175,8 @@ public class Mediator extends AbstractMediator {
      * Delegates to TypeConverter for the actual conversion logic.
      *
      * @param jsonArrayString JSON array string
-     * @param context Message context
-     * @param valueKey The property key like "param0" used to extract the parameter
+     * @param context         Message context
+     * @param valueKey        The property key like "param0" used to extract the parameter
      */
     private Object getArrayParameter(String jsonArrayString, MessageContext context, String valueKey) {
         // Extract parameter index from valueKey (e.g., "param0" -> 0)
@@ -196,10 +202,34 @@ public class Mediator extends AbstractMediator {
         return TypeConverter.convertToArray(jsonArrayString, elementType);
     }
 
-    private void init(ModuleInfo moduleInfo) {
-        module = new Module(moduleInfo.getOrgName(), moduleInfo.getModuleName(), moduleInfo.getModuleVersion());
+    private void init() {
+        module = new Module(orgName, moduleName, version);
         rt = Runtime.from(module);
         rt.init();
         rt.start();
+    }
+
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

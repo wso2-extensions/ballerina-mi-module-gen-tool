@@ -9,11 +9,11 @@
       "value": {
         "groupName": "General",
         "elements": [
-          {
+          {{#if parent.initComponent}}{
             "type": "attribute",
             "value": {
               "name": "configRef",
-              "displayName": "{{parent.connectionType}} Connection",
+              "displayName": "Connection",
               "inputType": "connection",
               "allowedConnectionTypes": [
                 "{{parent.connectionType}}"
@@ -23,7 +23,7 @@
               "required": "true",
               "helpTip": "Connection to be used"
             }
-          },
+          },{{/if}}
           {
             "type": "attributeGroup",
             "value": {
