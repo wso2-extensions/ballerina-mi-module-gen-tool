@@ -13,7 +13,9 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import wso2/mi;
 
+@mi:Operation
 public function test(xml xmlA, xml xmlB, xml xmlC, xml xmlD) returns xml {
     return xml `<may22>${xmlA}${xmlB}${xmlC}${xmlD}</may22>`;
 }
