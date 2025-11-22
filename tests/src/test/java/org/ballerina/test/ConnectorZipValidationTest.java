@@ -19,6 +19,7 @@ package org.ballerina.test;
 import io.ballerina.mi.cmd.MiCmd;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class ConnectorZipValidationTest {
     private Path ballerinaHome;
     private static final Path RESOURCES_DIR = Paths.get("src", "test", "resources");
     private static final Path EXPECTED_DIR = RESOURCES_DIR.resolve("expected");
+    private static final Path BALLERINA_PROJECTS_DIR = RESOURCES_DIR.resolve("ballerina");
 
     @BeforeClass
     public void setup() {
@@ -43,86 +45,94 @@ public class ConnectorZipValidationTest {
         }
     }
 
-    @Test(description = "Validate the generated connector artifacts")
-    public void testGeneratedConnectorArtifacts() throws IOException, NoSuchFieldException, IllegalAccessException {
-        String projectPath = "src/test/resources/ballerina/project2";
-        Path expectedPath = EXPECTED_DIR.resolve("project2");
+    @DataProvider(name = "miProjectDataProvider")
+    public Object[][] miProjectDataProvider() {
+        return new Object[][]{
+                {"project1"},
+                {"project2"},
+        };
+    }
+
+    @Test(description = "Validate the generated connector artifacts for a project", dataProvider = "miProjectDataProvider")
+    public void testGeneratedConnectorArtifactsForProject(String projectName) throws IOException, NoSuchFieldException, IllegalAccessException {
+        Path projectPath = BALLERINA_PROJECTS_DIR.resolve(projectName);
+        Path expectedPath = EXPECTED_DIR.resolve(projectName);
 
         // Programmatically execute MiCmd
         MiCmd miCmd = new MiCmd();
         Field sourcePathField = MiCmd.class.getDeclaredField("sourcePath");
         sourcePathField.setAccessible(true);
-        sourcePathField.set(miCmd, projectPath);
+        sourcePathField.set(miCmd, projectPath.toString());
         miCmd.execute();
 
         // Validate the generated artifacts
-        Path targetPath = Paths.get(projectPath, "target");
-        Path connectorPath = targetPath.resolve("project2-mi-connector");
+        Path targetPath = projectPath.resolve("target");
+        Path connectorPath = targetPath.resolve(projectName + "-mi-connector");
 
-        Assert.assertTrue(Files.exists(connectorPath));
-        Assert.assertTrue(Files.isDirectory(connectorPath));
+        Assert.assertTrue(Files.exists(connectorPath), "Connector path does not exist for project: " + projectName);
+        Assert.assertTrue(Files.isDirectory(connectorPath), "Connector path is not a directory for project: " + projectName);
 
         // Validate connector.xml
         Path connectorXml = connectorPath.resolve("connector.xml");
-        Assert.assertTrue(Files.exists(connectorXml));
+        Assert.assertTrue(Files.exists(connectorXml), "connector.xml does not exist for project: " + projectName);
         compareFileContent(connectorXml, expectedPath.resolve("connector.xml"));
 
         // Validate component directory
         Path componentDir = connectorPath.resolve("test");
-        Assert.assertTrue(Files.exists(componentDir));
-        Assert.assertTrue(Files.isDirectory(componentDir));
+        Assert.assertTrue(Files.exists(componentDir), "component 'test' directory does not exist for project: " + projectName);
+        Assert.assertTrue(Files.isDirectory(componentDir), "component 'test' path is not a directory for project: " + projectName);
 
         // Validate component xml
         Path testComponentXml = componentDir.resolve("component.xml");
-        Assert.assertTrue(Files.exists(testComponentXml));
+        Assert.assertTrue(Files.exists(testComponentXml), "component.xml does not exist in 'test' for project: " + projectName);
         compareFileContent(testComponentXml, expectedPath.resolve("test").resolve("component.xml"));
 
         // Validate component template
         Path testComponentTemplate = componentDir.resolve("test_template.xml");
-        Assert.assertTrue(Files.exists(testComponentTemplate));
+        Assert.assertTrue(Files.exists(testComponentTemplate), "test_template.xml does not exist in 'test' for project: " + projectName);
         compareFileContent(testComponentTemplate, expectedPath.resolve("test").resolve("test_template.xml"));
 
         // Validate lib directory and jar
         Path libDir = connectorPath.resolve("lib");
-        Assert.assertTrue(Files.exists(libDir));
-        Assert.assertTrue(Files.isDirectory(libDir));
+        Assert.assertTrue(Files.exists(libDir), "lib directory does not exist for project: " + projectName);
+        Assert.assertTrue(Files.isDirectory(libDir), "lib path is not a directory for project: " + projectName);
 
-        Path projectJar = libDir.resolve("project2.jar");
-        Assert.assertTrue(Files.exists(projectJar));
+        Path projectJar = libDir.resolve(projectName + ".jar");
+        Assert.assertTrue(Files.exists(projectJar), "project JAR does not exist in 'lib' for project: " + projectName);
         
         Path miNativeJar = libDir.resolve("mi-native-0.4.1-SNAPSHOT.jar");
-        Assert.assertTrue(Files.exists(miNativeJar));
+        Assert.assertTrue(Files.exists(miNativeJar), "mi-native JAR does not exist in 'lib' for project: " + projectName);
         
         Path moduleCoreJar = libDir.resolve("module-core-1.0.2.jar");
-        Assert.assertTrue(Files.exists(moduleCoreJar));
+        Assert.assertTrue(Files.exists(moduleCoreJar), "module-core JAR does not exist in 'lib' for project: " + projectName);
 
         // Validate icon directory
         Path iconDir = connectorPath.resolve("icon");
-        Assert.assertTrue(Files.exists(iconDir));
-        Assert.assertTrue(Files.isDirectory(iconDir));
+        Assert.assertTrue(Files.exists(iconDir), "icon directory does not exist for project: " + projectName);
+        Assert.assertTrue(Files.isDirectory(iconDir), "icon path is not a directory for project: " + projectName);
         
         Path iconLarge = iconDir.resolve("icon-large.png");
-        Assert.assertTrue(Files.exists(iconLarge));
+        Assert.assertTrue(Files.exists(iconLarge), "icon-large.png does not exist in 'icon' for project: " + projectName);
         
         Path iconSmall = iconDir.resolve("icon-small.png");
-        Assert.assertTrue(Files.exists(iconSmall));
+        Assert.assertTrue(Files.exists(iconSmall), "icon-small.png does not exist in 'icon' for project: " + projectName);
         
         // Validate uischema directory
         Path uiSchemaDir = connectorPath.resolve("uischema");
-        Assert.assertTrue(Files.exists(uiSchemaDir));
-        Assert.assertTrue(Files.isDirectory(uiSchemaDir));
+        Assert.assertTrue(Files.exists(uiSchemaDir), "uischema directory does not exist for project: " + projectName);
+        Assert.assertTrue(Files.isDirectory(uiSchemaDir), "uischema path is not a directory for project: " + projectName);
 
         Path testUiSchema = uiSchemaDir.resolve("test.json");
-        Assert.assertTrue(Files.exists(testUiSchema));
+        Assert.assertTrue(Files.exists(testUiSchema), "test.json does not exist in 'uischema' for project: " + projectName);
         compareFileContent(testUiSchema, expectedPath.resolve("uischema").resolve("test.json"));
 
         // Validate outputschema directory
         Path outputSchemaDir = connectorPath.resolve("outputschema");
-        Assert.assertTrue(Files.exists(outputSchemaDir));
-        Assert.assertTrue(Files.isDirectory(outputSchemaDir));
+        Assert.assertTrue(Files.exists(outputSchemaDir), "outputschema directory does not exist for project: " + projectName);
+        Assert.assertTrue(Files.isDirectory(outputSchemaDir), "outputschema path is not a directory for project: " + projectName);
 
         Path testOutputSchema = outputSchemaDir.resolve("test.json");
-        Assert.assertTrue(Files.exists(testOutputSchema));
+        Assert.assertTrue(Files.exists(testOutputSchema), "test.json does not exist in 'outputschema' for project: " + projectName);
         compareFileContent(testOutputSchema, expectedPath.resolve("outputschema").resolve("test.json"));
     }
 

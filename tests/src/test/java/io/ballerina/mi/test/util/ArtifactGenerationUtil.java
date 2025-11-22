@@ -87,6 +87,7 @@ public class ArtifactGenerationUtil {
             });
         }
         System.out.println("Artifacts copied successfully to: " + expectedOutputPath);
+        System.out.println("--- Completed generateExpectedArtifacts for project: " + projectName + " ---");
     }
 
     public static void setupBallerinaHome() {
