@@ -29,6 +29,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
+/**
+ * Test class for validating the generated connector artifacts for Ballerina projects.
+ * <p>
+ * This test suite is data-driven and supports validation for multiple projects using the
+ * {@link org.testng.annotations.DataProvider} mechanism. Each project to be tested should have
+ * its own directory under {@code src/test/resources/ballerina/}.
+ * <p>
+ * To add a new project to the test suite:
+ * <ol>
+ *   <li>Add the project's source files and expected output files to the appropriate directories under
+ *       {@code src/test/resources/ballerina/} and {@code src/test/resources/expected/}.</li>
+ *   <li>Update the {@code miProjectDataProvider()} method to include the new project name.</li>
+ * </ol>
+ */
 public class ConnectorZipValidationTest {
 
     private Path ballerinaHome;
