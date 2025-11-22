@@ -78,7 +78,9 @@ public class ArtifactGenerationUtil {
             walk.forEach(source -> {
                 Path destination = expectedOutputPath.resolve(generatedConnectorPath.relativize(source));
                 try {
-                    Files.createDirectories(destination.getParent()); // Ensure parent directories exist
+                    if (destination.getParent() != null) {
+                        Files.createDirectories(destination.getParent()); // Ensure parent directories exist
+                    }
                     System.out.println("Copying: " + source + " to " + destination);
                     Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
