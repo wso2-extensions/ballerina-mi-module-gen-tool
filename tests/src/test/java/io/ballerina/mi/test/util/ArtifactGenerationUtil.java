@@ -28,9 +28,35 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
+/**
+ * Utility class for generating and managing expected artifacts for integration tests.
+ * <p>
+ * <b>Purpose:</b> This class provides methods to programmatically generate expected output artifacts
+ * for Ballerina MI connector projects. It is primarily used in test scenarios to ensure that
+ * the expected outputs are up-to-date and consistent with the current project state.
+ * </p>
+ * <p>
+ * <b>Directory Structure Assumptions:</b>
+ * <ul>
+ *   <li>Test resources are located under <code>src/test/resources</code>.</li>
+ *   <li>Expected artifacts are stored in <code>src/test/resources/expected/&lt;projectName&gt;</code>.</li>
+ *   <li>Generated connector artifacts are produced in <code>&lt;projectPath&gt;/target/&lt;projectName&gt;-mi-connector</code>.</li>
+ * </ul>
+ * </p>
+ * <p>
+ * <b>Artifact Generation Process:</b>
+ * <ol>
+ *   <li>Cleans up any existing expected artifacts for the given project.</li>
+ *   <li>Executes the {@link io.ballerina.mi.cmd.MiCmd} command to generate new artifacts.</li>
+ *   <li>Copies the generated artifacts from the build output directory to the expected directory.</li>
+ * </ol>
+ * </p>
+ * <p>
+ * <b>Usage:</b> Call {@link #generateExpectedArtifacts(String, String)} with the project path and name
+ * to refresh the expected artifacts before running assertions in tests.
+ * </p>
+ */
 public class ArtifactGenerationUtil {
-
-    private static final Path RESOURCES_DIR = Paths.get("src", "test", "resources");
     private static final Path EXPECTED_DIR = RESOURCES_DIR.resolve("expected");
 
     public static void generateExpectedArtifacts(String projectPathStr, String projectName) throws Exception {
