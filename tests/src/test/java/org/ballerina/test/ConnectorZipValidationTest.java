@@ -17,6 +17,7 @@
 package org.ballerina.test;
 
 import io.ballerina.mi.MiCmd;
+import io.ballerina.mi.connectorModel.Connector;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -62,12 +63,15 @@ public class ConnectorZipValidationTest {
     @DataProvider(name = "miProjectDataProvider")
     public Object[][] miProjectDataProvider() {
         return new Object[][]{
+                {"project1"},
                 {"project2"},
+                {"project3"},
         };
     }
 
     @Test(description = "Validate the generated connector artifacts for a project", dataProvider = "miProjectDataProvider")
     public void testGeneratedConnectorArtifactsForProject(String projectName) throws IOException, NoSuchFieldException, IllegalAccessException {
+        Connector.reset();
         Path projectPath = BALLERINA_PROJECTS_DIR.resolve(projectName);
         Path expectedPath = EXPECTED_DIR.resolve(projectName);
 

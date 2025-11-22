@@ -26,7 +26,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Utility class for generating and managing expected artifacts for integration tests.
@@ -47,7 +50,7 @@ import java.util.stream.Stream;
  * <b>Artifact Generation Process:</b>
  * <ol>
  *   <li>Cleans up any existing expected artifacts for the given project.</li>
- *   <li>Executes the {@link io.ballerina.mi.cmd.MiCmd} command to generate new artifacts.</li>
+ *   <li>Executes the {@link io.ballerina.mi.MiCmd} command to generate new artifacts.</li>
  *   <li>Copies the generated artifacts from the build output directory to the expected directory.</li>
  * </ol>
  * </p>
@@ -65,10 +68,6 @@ public class ArtifactGenerationUtil {
         System.out.println("ProjectPathStr: " + projectPathStr);
         Path projectPath = Paths.get(projectPathStr);
         Path expectedOutputPath = EXPECTED_DIR.resolve(projectName);
-        Path generatedConnectorPath = projectPath.resolve("target").resolve(projectName + "-mi-connector");
-
-        System.out.println("ExpectedOutputPath: " + expectedOutputPath);
-        System.out.println("GeneratedConnectorPath: " + generatedConnectorPath);
 
         // 1. Clean up existing expected artifacts
         if (Files.exists(expectedOutputPath)) {
@@ -97,24 +96,38 @@ public class ArtifactGenerationUtil {
         miCmd.execute();
         System.out.println("MiCmd execution completed.");
 
-        // 3. Copy generated artifacts to expected directory
-        Assert.assertTrue(Files.exists(generatedConnectorPath), "Generated connector path does not exist: " + generatedConnectorPath);
-        System.out.println("Generated connector path exists. Copying artifacts from " + generatedConnectorPath + " to " + expectedOutputPath);
-        
-        try (Stream<Path> walk = Files.walk(generatedConnectorPath)) {
-            walk.forEach(source -> {
-                Path destination = expectedOutputPath.resolve(generatedConnectorPath.relativize(source));
-                try {
-                    if (destination.getParent() != null) {
-                        Files.createDirectories(destination.getParent()); // Ensure parent directories exist
-                    }
-                    System.out.println("Copying: " + source + " to " + destination);
-                    Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to copy " + source + " to " + destination, e);
-                }
-            });
+        // 3. Find the generated zip file and unzip it to the expected directory
+        Path targetDir = projectPath.resolve("target");
+        Optional<Path> generatedZipFile;
+        try (Stream<Path> files = Files.list(targetDir)) {
+            generatedZipFile = files.filter(p -> p.toString().endsWith(".zip")).findFirst();
         }
+
+        Assert.assertTrue(generatedZipFile.isPresent(), "Generated zip file not found in " + targetDir);
+
+        Path generatedConnectorPath = generatedZipFile.get();
+        Assert.assertTrue(Files.exists(generatedConnectorPath), "Generated connector zip does not exist: " + generatedConnectorPath);
+        System.out.println("Generated connector zip exists. Unzipping artifacts from " + generatedConnectorPath + " to " + expectedOutputPath);
+
+        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(generatedConnectorPath))) {
+            ZipEntry zipEntry = zis.getNextEntry();
+            while (zipEntry != null) {
+                Path newPath = expectedOutputPath.resolve(zipEntry.getName());
+                if (zipEntry.isDirectory()) {
+                    Files.createDirectories(newPath);
+                } else {
+                    if (newPath.getParent() != null) {
+                        if (Files.notExists(newPath.getParent())) {
+                            Files.createDirectories(newPath.getParent());
+                        }
+                    }
+                    Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
+                }
+                zis.closeEntry();
+                zipEntry = zis.getNextEntry();
+            }
+        }
+
         System.out.println("Artifacts copied successfully to: " + expectedOutputPath);
         System.out.println("--- Completed generateExpectedArtifacts for project: " + projectName + " ---");
     }
