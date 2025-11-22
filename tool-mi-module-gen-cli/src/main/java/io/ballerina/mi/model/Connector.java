@@ -105,10 +105,6 @@ public class Connector extends ModelElement {
         return components;
     }
 
-    public void clearComponents() {
-        components.clear();
-    }
-
     public void setComponent(Component component) {
         component.setParent(this);
         this.components.add(component);
