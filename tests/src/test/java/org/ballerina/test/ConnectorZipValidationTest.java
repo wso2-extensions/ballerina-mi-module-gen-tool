@@ -63,7 +63,7 @@ public class ConnectorZipValidationTest {
     public Object[][] miProjectDataProvider() {
         return new Object[][]{
                 {"project1"},
-                {"project2"},
+                {"project2"},,
         };
     }
 
