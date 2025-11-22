@@ -16,6 +16,7 @@
 <connector>
     <component name="project2" package="io.ballerina.stdlib.mi">
         <dependency component="test"/>
+        <dependency component="test"/>
         <description>helps to connect with external systems</description>
     </component>
     <icon>icon/icon-small.gif</icon>
