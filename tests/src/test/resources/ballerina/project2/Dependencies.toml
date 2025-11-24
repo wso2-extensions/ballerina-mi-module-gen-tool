@@ -11,7 +11,18 @@ distribution-version = "2201.13.1"
 org = "testOrg"
 name = "project2"
 version = "1.0.0"
+dependencies = [
+	{org = "wso2", name = "mi"}
+]
 modules = [
 	{org = "testOrg", packageName = "project2", moduleName = "project2"}
+]
+
+[[package]]
+org = "wso2"
+name = "mi"
+version = "0.3.0"
+modules = [
+	{org = "wso2", packageName = "mi", moduleName = "mi"}
 ]
 

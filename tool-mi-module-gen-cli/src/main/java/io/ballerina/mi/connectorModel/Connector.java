@@ -91,6 +91,10 @@ public class Connector extends ModelElement {
         return connector;
     }
 
+    public static void reset() {
+        connector = null;
+    }
+
     public boolean isBalModule() {
         return isBalModule;
     }
