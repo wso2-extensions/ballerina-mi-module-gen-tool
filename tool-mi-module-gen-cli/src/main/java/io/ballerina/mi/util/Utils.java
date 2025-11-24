@@ -58,7 +58,7 @@ public class Utils {
      * These are utility functions used when generating XML and JSON content
      */
     static String readFile(String fileName) throws IOException {
-        InputStream inputStream = Utils.class.getClassLoader().getResourceAsStream(fileName);
+        InputStream inputStream = Utils.class.getClassLoader().getResourceAsStream(fileName.replace("\\", "/"));
         assert inputStream != null;
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         StringBuilder fileContent = new StringBuilder();
