@@ -50,5 +50,10 @@
             <file>validateDecimalOperations.xml</file>
             <description></description>
         </component>
+        <component name="validateStringOperations">
+            <displayName>validateStringOperations</displayName>
+            <file>validateStringOperations.xml</file>
+            <description></description>
+        </component>
         </subComponents>
 </component>

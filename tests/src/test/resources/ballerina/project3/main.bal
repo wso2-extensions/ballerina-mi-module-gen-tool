@@ -239,3 +239,64 @@ public function validateDecimalOperations(decimal inputA, decimal inputB) return
     decimal combinedResult = (addResult * 0.3d + multiplyResult * 0.5d + averageResult * 0.2d);
     return combinedResult;
 }
+
+// Function to validate receiving and returning string values
+@mi:Operation
+public function validateStringOperations(string inputA, string inputB) returns string {
+    // Test string concatenation
+    string concatenated = inputA + inputB;
+    io:println("String Concatenation: \"" + inputA + "\" + \"" + inputB + "\" = \"" + concatenated + "\"");
+    
+    // Test string concatenation with separator
+    string joinedWithSpace = inputA + " " + inputB;
+    io:println("String Join with space: \"" + inputA + "\" + \" \" + \"" + inputB + "\" = \"" + joinedWithSpace + "\"");
+    
+    // Test string length
+    int lengthA = inputA.length();
+    int lengthB = inputB.length();
+    io:println("String Length: \"" + inputA + "\".length() = " + lengthA.toString());
+    io:println("String Length: \"" + inputB + "\".length() = " + lengthB.toString());
+    
+    // Test substring operation
+    if lengthA > 0 {
+        string substringA = inputA.substring(0, lengthA > 3 ? 3 : lengthA);
+        io:println("Substring: \"" + inputA + "\".substring(0, 3) = \"" + substringA + "\"");
+    }
+    
+    // Test string comparison
+    boolean isEqual = inputA == inputB;
+    io:println("String Equality: \"" + inputA + "\" == \"" + inputB + "\" = " + isEqual.toString());
+    
+    // Test case conversion
+    string upperA = inputA.toUpperAscii();
+    string lowerB = inputB.toLowerAscii();
+    io:println("To Upper: \"" + inputA + "\".toUpperAscii() = \"" + upperA + "\"");
+    io:println("To Lower: \"" + inputB + "\".toLowerAscii() = \"" + lowerB + "\"");
+    
+    // Test string trimming
+    string paddedString = "  " + inputA + "  ";
+    string trimmedString = paddedString.trim();
+    io:println("Trim: \"" + paddedString + "\".trim() = \"" + trimmedString + "\"");
+    
+    // Test string contains/includes
+    boolean containsCheck = joinedWithSpace.includes(inputA);
+    io:println("Includes: \"" + joinedWithSpace + "\".includes(\"" + inputA + "\") = " + containsCheck.toString());
+    
+    // Test indexOf
+    int? indexPosition = joinedWithSpace.indexOf(inputB);
+    if indexPosition is int {
+        io:println("IndexOf: \"" + joinedWithSpace + "\".indexOf(\"" + inputB + "\") = " + indexPosition.toString());
+    } else {
+        io:println("IndexOf: \"" + inputB + "\" not found in \"" + joinedWithSpace + "\"");
+    }
+    
+    // Test startsWith and endsWith
+    boolean startsWithA = joinedWithSpace.startsWith(inputA);
+    boolean endsWithB = joinedWithSpace.endsWith(inputB);
+    io:println("StartsWith: \"" + joinedWithSpace + "\".startsWith(\"" + inputA + "\") = " + startsWithA.toString());
+    io:println("EndsWith: \"" + joinedWithSpace + "\".endsWith(\"" + inputB + "\") = " + endsWithB.toString());
+    
+    // Return combined result
+    string combinedResult = "Result: [" + upperA + " + " + lowerB + "] = " + concatenated;
+    return combinedResult;
+}
