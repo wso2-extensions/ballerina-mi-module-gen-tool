@@ -45,8 +45,8 @@ public class Constants {
     public static final String INPUT_TYPE_BOOLEAN = "boolean";
     public static final String INPUT_TYPE_COMBO = "combo";
     public static final String VALIDATE_TYPE_REGEX = "regex";
-    public static final String INTEGER_REGEX = "^(-?\\d+|\\$\\{.+\\})$";
-    public static final String DECIMAL_REGEX = "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$";
+    public static final String INTEGER_REGEX = "^(-?\\\\d+|\\\\$\\\\{.+\\\\}\\\\)$";
+    public static final String DECIMAL_REGEX = "^(-?\\\\d+(\\\\.\\\\d+)?|\\\\$\\\\{.+\\\\}\\\\)$";
     public static final String ATTRIBUTE_SEPARATOR = ",";
     public static final String ATTRIBUTE_GROUP_END = "\n]\n}\n}\n";
 
