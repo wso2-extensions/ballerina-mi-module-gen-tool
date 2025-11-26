@@ -14,12 +14,20 @@
 // specific language governing permissions and limitations
 // under the License.
 import wso2/mi;
+import ballerina/io;
 
 @mi:Operation
 public function test(xml xmlA, xml xmlB, xml xmlC, xml xmlD) returns xml {
     return xml `<may22>${xmlA}${xmlB}${xmlC}${xmlD}</may22>`;
 }
-
+@mi:Operation
 public function testXmlReturn(xml x) returns xml {
     return x;
+}
+
+// Test function to handle absence of input/return values
+@mi:Operation
+public function testAbsenceOfValues() {
+    // Test with optional parameters
+   io:println("Testing with absent value:");
 }

@@ -20,5 +20,15 @@
             <file>test.xml</file>
             <description></description>
         </component>
+        <component name="testXmlReturn">
+            <displayName>testXmlReturn</displayName>
+            <file>testXmlReturn.xml</file>
+            <description></description>
+        </component>
+        <component name="testAbsenceOfValues">
+            <displayName>testAbsenceOfValues</displayName>
+            <file>testAbsenceOfValues.xml</file>
+            <description></description>
+        </component>
         </subComponents>
 </component>
