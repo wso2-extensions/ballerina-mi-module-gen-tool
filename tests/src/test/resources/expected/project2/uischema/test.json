@@ -15,7 +15,39 @@
             "value": {
               "groupName": "Input Variables",
               "elements": [
-                ,,
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "xmlA",
+                    "displayName": "xmlA",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "Input parameters required to invoke the ballerina function"
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "xmlB",
+                    "displayName": "xmlB",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "Input parameters required to invoke the ballerina function"
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "xmlC",
+                    "displayName": "xmlC",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "Input parameters required to invoke the ballerina function"
+                  }
+                }
               ]
             }
           },

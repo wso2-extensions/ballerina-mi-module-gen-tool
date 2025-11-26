@@ -300,6 +300,7 @@ public class Utils {
                                                        boolean isCombo) throws IOException {
         switch (paramType) {
             case STRING:
+            case XML:
                 Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
                         "", true, helpTip, "",
                         "", isCombo);
@@ -337,6 +338,7 @@ public class Utils {
             throws IOException {
         switch (paramType) {
             case STRING:
+            case XML:
                 Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
                         parameter.getDefaultValue(), !parameter.isOptional(), helpTip, "",
                         "", isCombo);
