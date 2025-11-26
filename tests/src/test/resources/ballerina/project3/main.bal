@@ -66,4 +66,51 @@ public function validateBooleanOperations(boolean inputA, boolean inputB) return
     return andResult || orResult;
 }
 
-
+@mi:Operation
+public function validateIntegerOperations(int inputA, int inputB) returns int {
+    // Test addition
+    int addResult = inputA + inputB;
+    io:println("Addition: " + inputA.toString() + " + " + inputB.toString() + " = " + addResult.toString());
+    
+    // Test subtraction
+    int subtractResult = inputA - inputB;
+    io:println("Subtraction: " + inputA.toString() + " - " + inputB.toString() + " = " + subtractResult.toString());
+    
+    // Test multiplication
+    int multiplyResult = inputA * inputB;
+    io:println("Multiplication: " + inputA.toString() + " * " + inputB.toString() + " = " + multiplyResult.toString());
+    
+    // Test division (with zero check)
+    if inputB != 0 {
+        int divideResult = inputA / inputB;
+        io:println("Division: " + inputA.toString() + " / " + inputB.toString() + " = " + divideResult.toString());
+    } else {
+        io:println("Division: Cannot divide by zero");
+    }
+    
+    // Test modulo (with zero check)
+    if inputB != 0 {
+        int moduloResult = inputA % inputB;
+        io:println("Modulo: " + inputA.toString() + " % " + inputB.toString() + " = " + moduloResult.toString());
+    } else {
+        io:println("Modulo: Cannot perform modulo with zero");
+    }
+    
+    // Test absolute value
+    int absA = inputA < 0 ? -inputA : inputA;
+    int absB = inputB < 0 ? -inputB : inputB;
+    io:println("Absolute value: |" + inputA.toString() + "| = " + absA.toString());
+    io:println("Absolute value: |" + inputB.toString() + "| = " + absB.toString());
+    
+    // Test comparison operations
+    boolean isGreater = inputA > inputB;
+    boolean isLess = inputA < inputB;
+    boolean isEqual = inputA == inputB;
+    io:println("Comparison: " + inputA.toString() + " > " + inputB.toString() + " = " + isGreater.toString());
+    io:println("Comparison: " + inputA.toString() + " < " + inputB.toString() + " = " + isLess.toString());
+    io:println("Comparison: " + inputA.toString() + " == " + inputB.toString() + " = " + isEqual.toString());
+    
+    // Return combined result (sum of all operations)
+    int combinedResult = addResult + subtractResult + multiplyResult;
+    return combinedResult;
+}
