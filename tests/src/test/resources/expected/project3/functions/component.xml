@@ -45,5 +45,10 @@
             <file>validateFloatOperations.xml</file>
             <description></description>
         </component>
+        <component name="validateDecimalOperations">
+            <displayName>validateDecimalOperations</displayName>
+            <file>validateDecimalOperations.xml</file>
+            <description></description>
+        </component>
         </subComponents>
 </component>

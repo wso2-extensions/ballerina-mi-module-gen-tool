@@ -175,3 +175,67 @@ public function validateFloatOperations(float inputA, float inputB) returns floa
     float combinedResult = (addResult + multiplyResult) / 2.0;
     return combinedResult;
 }
+
+// Function to validate high-precision decimal handling and arithmetic
+@mi:Operation
+public function validateDecimalOperations(decimal inputA, decimal inputB) returns decimal {
+    // Test addition with high precision
+    decimal addResult = inputA + inputB;
+    io:println("Decimal Addition: " + inputA.toString() + " + " + inputB.toString() + " = " + addResult.toString());
+    
+    // Test subtraction with high precision
+    decimal subtractResult = inputA - inputB;
+    io:println("Decimal Subtraction: " + inputA.toString() + " - " + inputB.toString() + " = " + subtractResult.toString());
+    
+    // Test multiplication with high precision
+    decimal multiplyResult = inputA * inputB;
+    io:println("Decimal Multiplication: " + inputA.toString() + " * " + inputB.toString() + " = " + multiplyResult.toString());
+    
+    // Test division with high precision (with zero check)
+    if inputB != 0d {
+        decimal divideResult = inputA / inputB;
+        io:println("Decimal Division: " + inputA.toString() + " / " + inputB.toString() + " = " + divideResult.toString());
+    } else {
+        io:println("Decimal Division: Cannot divide by zero");
+    }
+    
+    // Test modulo with high precision (with zero check)
+    if inputB != 0d {
+        decimal moduloResult = inputA % inputB;
+        io:println("Decimal Modulo: " + inputA.toString() + " % " + inputB.toString() + " = " + moduloResult.toString());
+    } else {
+        io:println("Decimal Modulo: Cannot perform modulo with zero");
+    }
+    
+    // Test absolute value with high precision
+    decimal absA = inputA < 0d ? -inputA : inputA;
+    decimal absB = inputB < 0d ? -inputB : inputB;
+    io:println("Decimal Absolute value: |" + inputA.toString() + "| = " + absA.toString());
+    io:println("Decimal Absolute value: |" + inputB.toString() + "| = " + absB.toString());
+    
+    // Test power operation (squared) with high precision
+    decimal squareA = inputA * inputA;
+    decimal squareB = inputB * inputB;
+    io:println("Decimal Square: " + inputA.toString() + "^2 = " + squareA.toString());
+    io:println("Decimal Square: " + inputB.toString() + "^2 = " + squareB.toString());
+    
+    // Test comparison operations
+    boolean isGreater = inputA > inputB;
+    boolean isLess = inputA < inputB;
+    boolean isEqual = inputA == inputB;
+    io:println("Decimal Comparison: " + inputA.toString() + " > " + inputB.toString() + " = " + isGreater.toString());
+    io:println("Decimal Comparison: " + inputA.toString() + " < " + inputB.toString() + " = " + isLess.toString());
+    io:println("Decimal Comparison: " + inputA.toString() + " == " + inputB.toString() + " = " + isEqual.toString());
+    
+    // Test average calculation with high precision
+    decimal averageResult = (inputA + inputB) / 2d;
+    io:println("Decimal Average: (" + inputA.toString() + " + " + inputB.toString() + ") / 2 = " + averageResult.toString());
+    
+    // Test precision preservation in complex calculation
+    decimal complexResult = (inputA * inputB + inputA - inputB) / 2d;
+    io:println("Complex Calculation: (" + inputA.toString() + " * " + inputB.toString() + " + " + inputA.toString() + " - " + inputB.toString() + ") / 2 = " + complexResult.toString());
+    
+    // Return combined result with high precision (weighted average)
+    decimal combinedResult = (addResult * 0.3d + multiplyResult * 0.5d + averageResult * 0.2d);
+    return combinedResult;
+}
