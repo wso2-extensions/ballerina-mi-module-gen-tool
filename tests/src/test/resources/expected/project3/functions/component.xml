@@ -30,5 +30,30 @@
             <file>testAbsenceOfValues.xml</file>
             <description></description>
         </component>
+        <component name="validateBooleanOperations">
+            <displayName>validateBooleanOperations</displayName>
+            <file>validateBooleanOperations.xml</file>
+            <description></description>
+        </component>
+        <component name="test">
+            <displayName>test</displayName>
+            <file>test.xml</file>
+            <description></description>
+        </component>
+        <component name="testXmlReturn">
+            <displayName>testXmlReturn</displayName>
+            <file>testXmlReturn.xml</file>
+            <description></description>
+        </component>
+        <component name="testAbsenceOfValues">
+            <displayName>testAbsenceOfValues</displayName>
+            <file>testAbsenceOfValues.xml</file>
+            <description></description>
+        </component>
+        <component name="validateBooleanOperations">
+            <displayName>validateBooleanOperations</displayName>
+            <file>validateBooleanOperations.xml</file>
+            <description></description>
+        </component>
         </subComponents>
 </component>

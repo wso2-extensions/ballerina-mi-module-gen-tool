@@ -31,3 +31,39 @@ public function testAbsenceOfValues() {
     // Test with optional parameters
    io:println("Testing with absent value:");
 }
+
+
+// Function to validate boolean operations and logical output
+@mi:Operation
+public function validateBooleanOperations(boolean inputA, boolean inputB) returns boolean {
+    // Test AND operation
+    boolean andResult = inputA && inputB;
+    io:println("AND operation: " + inputA.toString() + " && " + inputB.toString() + " = " + andResult.toString());
+    
+    // Test OR operation
+    boolean orResult = inputA || inputB;
+    io:println("OR operation: " + inputA.toString() + " || " + inputB.toString() + " = " + orResult.toString());
+    
+    // Test NOT operation
+    boolean notA = !inputA;
+    boolean notB = !inputB;
+    io:println("NOT operation: !" + inputA.toString() + " = " + notA.toString());
+    io:println("NOT operation: !" + inputB.toString() + " = " + notB.toString());
+    
+    // Test XOR operation (exclusive OR)
+    boolean xorResult = (inputA || inputB) && !(inputA && inputB);
+    io:println("XOR operation: " + inputA.toString() + " XOR " + inputB.toString() + " = " + xorResult.toString());
+    
+    // Test NAND operation
+    boolean nandResult = !(inputA && inputB);
+    io:println("NAND operation: !(" + inputA.toString() + " && " + inputB.toString() + ") = " + nandResult.toString());
+    
+    // Test NOR operation
+    boolean norResult = !(inputA || inputB);
+    io:println("NOR operation: !(" + inputA.toString() + " || " + inputB.toString() + ") = " + norResult.toString());
+    
+    // Return combined logical result
+    return andResult || orResult;
+}
+
+
