@@ -66,6 +66,7 @@ public function validateBooleanOperations(boolean inputA, boolean inputB) return
     return andResult || orResult;
 }
 
+// Function to validate integer operations and arithmetic output
 @mi:Operation
 public function validateIntegerOperations(int inputA, int inputB) returns int {
     // Test addition
@@ -112,5 +113,65 @@ public function validateIntegerOperations(int inputA, int inputB) returns int {
     
     // Return combined result (sum of all operations)
     int combinedResult = addResult + subtractResult + multiplyResult;
+    return combinedResult;
+}
+
+// Function to validate floating-point math and correct float output
+@mi:Operation
+public function validateFloatOperations(float inputA, float inputB) returns float {
+    // Test addition
+    float addResult = inputA + inputB;
+    io:println("Float Addition: " + inputA.toString() + " + " + inputB.toString() + " = " + addResult.toString());
+    
+    // Test subtraction
+    float subtractResult = inputA - inputB;
+    io:println("Float Subtraction: " + inputA.toString() + " - " + inputB.toString() + " = " + subtractResult.toString());
+    
+    // Test multiplication
+    float multiplyResult = inputA * inputB;
+    io:println("Float Multiplication: " + inputA.toString() + " * " + inputB.toString() + " = " + multiplyResult.toString());
+    
+    // Test division (with zero check)
+    if inputB != 0.0 {
+        float divideResult = inputA / inputB;
+        io:println("Float Division: " + inputA.toString() + " / " + inputB.toString() + " = " + divideResult.toString());
+    } else {
+        io:println("Float Division: Cannot divide by zero");
+    }
+    
+    // Test modulo (with zero check)
+    if inputB != 0.0 {
+        float moduloResult = inputA % inputB;
+        io:println("Float Modulo: " + inputA.toString() + " % " + inputB.toString() + " = " + moduloResult.toString());
+    } else {
+        io:println("Float Modulo: Cannot perform modulo with zero");
+    }
+    
+    // Test absolute value
+    float absA = inputA < 0.0 ? -inputA : inputA;
+    float absB = inputB < 0.0 ? -inputB : inputB;
+    io:println("Float Absolute value: |" + inputA.toString() + "| = " + absA.toString());
+    io:println("Float Absolute value: |" + inputB.toString() + "| = " + absB.toString());
+    
+    // Test power operation (inputA squared)
+    float squareA = inputA * inputA;
+    float squareB = inputB * inputB;
+    io:println("Square: " + inputA.toString() + "^2 = " + squareA.toString());
+    io:println("Square: " + inputB.toString() + "^2 = " + squareB.toString());
+    
+    // Test comparison operations
+    boolean isGreater = inputA > inputB;
+    boolean isLess = inputA < inputB;
+    boolean isEqual = inputA == inputB;
+    io:println("Float Comparison: " + inputA.toString() + " > " + inputB.toString() + " = " + isGreater.toString());
+    io:println("Float Comparison: " + inputA.toString() + " < " + inputB.toString() + " = " + isLess.toString());
+    io:println("Float Comparison: " + inputA.toString() + " == " + inputB.toString() + " = " + isEqual.toString());
+    
+    // Test average calculation
+    float averageResult = (inputA + inputB) / 2.0;
+    io:println("Average: (" + inputA.toString() + " + " + inputB.toString() + ") / 2 = " + averageResult.toString());
+    
+    // Return combined result (average of addition and multiplication)
+    float combinedResult = (addResult + multiplyResult) / 2.0;
     return combinedResult;
 }
