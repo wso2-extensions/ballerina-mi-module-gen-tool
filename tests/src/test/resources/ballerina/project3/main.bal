@@ -300,3 +300,156 @@ public function validateStringOperations(string inputA, string inputB) returns s
     string combinedResult = "Result: [" + upperA + " + " + lowerB + "] = " + concatenated;
     return combinedResult;
 }
+
+// Record types for validation
+public type Person record {|
+    string name;
+    int age;
+    string city;
+|};
+
+public type Employee record {|
+    string employeeId;
+    string department;
+    decimal salary;
+    boolean isActive;
+|};
+
+public type CombinedData record {|
+    Person person;
+    Employee employee;
+    string processedBy;
+    int timestamp;
+|};
+
+// Function to validate record type input and output
+
+public function validateRecordOperations(Person personInput, Employee employeeInput) returns CombinedData {
+    io:println("=== Record Type Validation ===");
+    
+    // Access and print person record fields
+    string personName = personInput.name;
+    int personAge = personInput.age;
+    string personCity = personInput.city;
+    io:println("Person: name=" + personName + ", age=" + personAge.toString() + ", city=" + personCity);
+    
+    // Access and print employee record fields
+    string empId = employeeInput.employeeId;
+    string empDept = employeeInput.department;
+    decimal empSalary = employeeInput.salary;
+    boolean empActive = employeeInput.isActive;
+    io:println("Employee: id=" + empId + ", dept=" + empDept + ", salary=" + empSalary.toString() + ", active=" + empActive.toString());
+    
+    // Modify and create new record
+    Person modifiedPerson = {
+        name: personName.toUpperAscii(),
+        age: personAge + 1,
+        city: personCity
+    };
+    io:println("Modified Person: name=" + modifiedPerson.name + ", age=" + modifiedPerson.age.toString());
+    
+    // Create combined result record
+    CombinedData resultRecord = {
+        person: modifiedPerson,
+        employee: employeeInput,
+        processedBy: "validateRecordOperations",
+        timestamp: 1234567890
+    };
+    
+    io:println("Combined record created successfully");
+    return resultRecord;
+}
+
+// Function to validate JSON type input and output
+@mi:Operation
+public function validateJsonOperations(json inputJsonA, json inputJsonB) returns json {
+    io:println("=== JSON Type Validation ===");
+    
+    // Convert JSON to string for display
+    string jsonAString = inputJsonA.toJsonString();
+    string jsonBString = inputJsonB.toJsonString();
+    io:println("Input JSON A: " + jsonAString);
+    io:println("Input JSON B: " + jsonBString);
+    
+    // Create a new JSON object combining inputs
+    json combinedJson = {
+        "inputA": inputJsonA,
+        "inputB": inputJsonB,
+        "processed": true,
+        "timestamp": 1234567890,
+        "metadata": {
+            "operation": "validateJsonOperations",
+            "version": "1.0"
+        }
+    };
+    
+    // Convert combined JSON to string
+    string combinedJsonString = combinedJson.toJsonString();
+    io:println("Combined JSON: " + combinedJsonString);
+    
+    // Test JSON array creation
+    json jsonArray = [inputJsonA, inputJsonB, "additional", 123, true];
+    string arrayString = jsonArray.toJsonString();
+    io:println("JSON Array: " + arrayString);
+    
+    // Return combined JSON
+    return combinedJson;
+}
+
+// Function to validate map<anydata> type input and output
+
+public function validateMapOperations(map<anydata> inputMapA, map<anydata> inputMapB) returns map<anydata> {
+    io:println("=== Map<anydata> Type Validation ===");
+    
+    // Get and display map keys
+    string[] keysA = inputMapA.keys();
+    string[] keysB = inputMapB.keys();
+    io:println("Map A keys: " + keysA.toString());
+    io:println("Map B keys: " + keysB.toString());
+    
+    // Get map length
+    int lengthA = inputMapA.length();
+    int lengthB = inputMapB.length();
+    io:println("Map A length: " + lengthA.toString());
+    io:println("Map B length: " + lengthB.toString());
+    
+    // Access map values
+    foreach string keyItem in keysA {
+        anydata valueItem = inputMapA.get(keyItem);
+        io:println("Map A[" + keyItem + "] = " + valueItem.toString());
+    }
+    
+    // Check if map has specific key
+    if keysA.length() > 0 {
+        string firstKey = keysA[0];
+        boolean hasKey = inputMapA.hasKey(firstKey);
+        io:println("Map A has key '" + firstKey + "': " + hasKey.toString());
+    }
+    
+    // Create a new combined map
+    map<anydata> combinedMap = {
+        "mapAData": inputMapA,
+        "mapBData": inputMapB,
+        "totalKeys": lengthA + lengthB,
+        "processed": true,
+        "operation": "validateMapOperations"
+    };
+    
+    // Add individual entries from both maps
+    foreach string keyItem in keysA {
+        anydata valueItem = inputMapA.get(keyItem);
+        combinedMap["a_" + keyItem] = valueItem;
+    }
+    
+    foreach string keyItem in keysB {
+        anydata valueItem = inputMapB.get(keyItem);
+        combinedMap["b_" + keyItem] = valueItem;
+    }
+    
+    // Display combined map info
+    int combinedLength = combinedMap.length();
+    io:println("Combined map length: " + combinedLength.toString());
+    io:println("Combined map keys: " + combinedMap.keys().toString());
+    
+    return combinedMap;
+}
