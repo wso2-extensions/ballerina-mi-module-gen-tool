@@ -1,10 +1,10 @@
 {
-  "type": "table",
-  "value": {
-    "name": "{{}}",
-    "displayName": "{{}}",
-    "title": "{{}}",
-    "description": "{{}}",
-    "tableKey": "{row.number}",
-    "tableValue": "argumentValue",
-    "elements": [
+                  "type": "table",
+                  "value": {
+                    "name": "{{}}",
+                    "displayName": "{{}}",
+                    "title": "{{}}",
+                    "description": "{{}}",
+                    "tableKey": "{row.number}",
+                    "tableValue": "argumentValue",
+                    "elements": [

@@ -1,11 +1,11 @@
 {
-  "type": "attribute",
-  "value": {
-    "name": "{{name}}",
-    "displayName": "{{displayName}}",
-    "inputType": "{{inputType}}",
-    "comboValues": {{comboValues}},
-    "required": "{{required}}",
-    "helpTip": "{{helpTip}}"
-  }
-}
+                  "type": "attribute",
+                  "value": {
+                    "name": "{{name}}",
+                    "displayName": "{{displayName}}",
+                    "inputType": "{{inputType}}",
+                    "comboValues": {{comboValues}},
+                    "required": "{{required}}",
+                    "helpTip": "{{helpTip}}"
+                  }
+                }
