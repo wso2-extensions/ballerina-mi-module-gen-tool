@@ -6,15 +6,13 @@
     "inputType": "{{inputType}}",
     "defaultValue": "{{defaultValue}}",
     "required": "{{required}}",
-    "helpTip": "{{helpTip}}",
-    "validateType": "{{validateType}}",
-    "matchPattern": "{{matchPattern}}"
-{{#if isCombo}}
-    ,"enableCondition": [
+    "helpTip": "{{helpTip}}"{{#if validateType}},
+    "validateType": "{{validateType}}"{{/if}}{{#if matchPattern}},
+    "matchPattern": "{{matchPattern}}"{{/if}}{{#if isCombo}},
+    "enableCondition": [
       {
       "forwardExistingHeaders": "{{enableCondition}}"
       }
-    ]
-{{/if}}
+    ]{{/if}}
   }
 }
