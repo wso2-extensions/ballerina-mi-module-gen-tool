@@ -9,7 +9,6 @@
       "value": {
         "groupName": "General",
         "elements": [
-          
           {
             "type": "attributeGroup",
             "value": {
@@ -23,10 +22,11 @@
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
-                    "helpTip": "Input parameters required to invoke the ballerina function"
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
                   }
-                },
-                {
+                },{
                   "type": "attribute",
                   "value": {
                     "name": "xmlB",
@@ -34,10 +34,11 @@
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
-                    "helpTip": "Input parameters required to invoke the ballerina function"
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
                   }
-                },
-                {
+                },{
                   "type": "attribute",
                   "value": {
                     "name": "xmlC",
@@ -45,10 +46,11 @@
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
-                    "helpTip": "Input parameters required to invoke the ballerina function"
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
                   }
-                },
-                {
+                },{
                   "type": "attribute",
                   "value": {
                     "name": "xmlD",
@@ -56,7 +58,9 @@
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
-                    "helpTip": "Input parameters required to invoke the ballerina function"
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
                   }
                 }
               ]

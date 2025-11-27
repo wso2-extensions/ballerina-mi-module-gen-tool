@@ -1,18 +1,18 @@
 {
-  "type": "attribute",
-  "value": {
-    "name": "{{name}}",
-    "displayName": "{{displayName}}",
-    "inputType": "{{inputType}}",
-    "defaultValue": "{{defaultValue}}",
-    "required": "{{required}}",
-    "helpTip": "{{helpTip}}"{{#if validateType}},
-    "validateType": "{{validateType}}"{{/if}}{{#if matchPattern}},
-    "matchPattern": "{{matchPattern}}"{{/if}}{{#if isCombo}},
-    "enableCondition": [
-      {
-      "forwardExistingHeaders": "{{enableCondition}}"
-      }
-    ]{{/if}}
-  }
-}
+                  "type": "attribute",
+                  "value": {
+                    "name": "{{name}}",
+                    "displayName": "{{displayName}}",
+                    "inputType": "{{inputType}}",
+                    "defaultValue": "{{defaultValue}}",
+                    "required": "{{required}}",
+                    "helpTip": "{{helpTip}}",
+                    "validateType": "{{validateType}}",
+                    "matchPattern": "{{matchPattern}}"{{#if isCombo}},
+                    "enableCondition": [
+                      {
+                      "forwardExistingHeaders": "{{enableCondition}}"
+                      }
+                    ]{{/if}}
+                  }
+                }

@@ -141,7 +141,9 @@ public class ConnectorZipValidationTest {
 
     private void compareFileContent(Path actualFilePath, Path expectedFilePath) throws IOException {
         String actualContent = new String(Files.readAllBytes(actualFilePath)).replaceAll("\\r\\n", "\n");
+        System.out.println("Actual Content:\n" + actualContent);
         String expectedContent = new String(Files.readAllBytes(expectedFilePath)).replaceAll("\\r\\n", "\n");
+        System.out.println("Expected Content:\n" + expectedContent);
         Assert.assertEquals(actualContent, expectedContent, "Content mismatch for file: " + actualFilePath.getFileName());
     }
 }

@@ -48,6 +48,6 @@ public class Constants {
     public static final String INTEGER_REGEX = "^(-?\\d+|\\$\\{.+\\})$";
     public static final String DECIMAL_REGEX = "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$";
     public static final String ATTRIBUTE_SEPARATOR = ",";
-    public static final String ATTRIBUTE_GROUP_END = "\n]\n}\n}\n";
+    public static final String ATTRIBUTE_GROUP_END = "\n                    ]\n                  }\n                }";
     public static final String CONNECTOR_TARGET_PATH = "CONNECTOR_TARGET_PATH";
 }
