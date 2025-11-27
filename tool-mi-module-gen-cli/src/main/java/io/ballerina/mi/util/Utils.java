@@ -373,6 +373,7 @@ public class Utils {
         switch (paramType) {
             case STRING:
             case XML:
+            case JSON:
                 Attribute stringAttr = new Attribute(paramName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
                         "", true, helpTip, "",
                         "", isCombo);
@@ -410,6 +411,7 @@ public class Utils {
         switch (paramType) {
             case STRING:
             case XML:
+            case JSON:
                 Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
                         "", true, helpTip, "",
                         "", isCombo);
@@ -448,6 +450,7 @@ public class Utils {
         switch (paramType) {
             case STRING:
             case XML:
+            case JSON:
                 Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
                         parameter.getDefaultValue(), !parameter.isOptional(), helpTip, "",
                         "", isCombo);
