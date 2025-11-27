@@ -805,7 +805,7 @@ public class Utils {
 
     public static String getParamTypeName(TypeDescKind typeKind) {
         return switch (typeKind) {
-            case BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ARRAY -> typeKind.getName();
+            case BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ARRAY, RECORD, MAP -> typeKind.getName();
             default -> null;
         };
     }

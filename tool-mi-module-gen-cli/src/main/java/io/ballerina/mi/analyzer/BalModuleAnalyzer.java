@@ -97,11 +97,25 @@ public class BalModuleAnalyzer implements Analyzer {
 
             for (int i = 0; i < noOfParams; i++) {
                 ParameterSymbol parameterSymbol = parameterSymbols.get(i);
-                String paramType = Utils.getParamTypeName(parameterSymbol.typeDescriptor().typeKind());
+                TypeSymbol typeSymbol = parameterSymbol.typeDescriptor();
+                String paramType = Utils.getParamTypeName(typeSymbol.typeKind());
+
                 if (paramType != null) {
                     Optional<String> optParamName = parameterSymbol.getName();
                     if (optParamName.isPresent()) {
-                        component.setFunctionParam(new FunctionParam(Integer.toString(i), optParamName.get(), parameterSymbol.typeDescriptor().typeKind().getName()));
+                        String paramName = optParamName.get();
+                        FunctionParam functionParam = new FunctionParam(Integer.toString(i), paramName, paramType);
+                        functionParam.setParamKind(parameterSymbol.paramKind());
+                        component.setFunctionParam(functionParam);
+                        if (typeSymbol.typeKind() == TypeDescKind.RECORD) {
+                            RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeSymbol;
+                            Map<String, RecordFieldSymbol> recordFields = recordTypeSymbol.fieldDescriptors();
+                            for (Map.Entry<String, RecordFieldSymbol> field : recordFields.entrySet()) {
+                                FunctionParam fieldParam = new FunctionParam(Integer.toString(i), field.getKey(),
+                                        field.getValue().typeDescriptor().typeKind().getName());
+                                component.setFunctionParam(fieldParam);
+                            }
+                        }
                     }
                 }
             }

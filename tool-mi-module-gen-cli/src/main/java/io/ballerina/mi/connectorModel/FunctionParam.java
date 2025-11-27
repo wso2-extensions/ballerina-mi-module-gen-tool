@@ -18,9 +18,12 @@
  
 package io.ballerina.mi.connectorModel;
 
+import io.ballerina.compiler.api.symbols.ParameterKind;
+
 public class FunctionParam extends Param {
 
     private final String paramType;
+    private ParameterKind paramKind;
 
     public FunctionParam(String index, String name, String paramType) {
         super(index, name);
@@ -29,5 +32,13 @@ public class FunctionParam extends Param {
 
     public String getParamType() {
         return paramType;
+    }
+
+    public void setParamKind(ParameterKind paramKind) {
+        this.paramKind = paramKind;
+    }
+
+    public ParameterKind getParamKind() {
+        return paramKind;
     }
 }
