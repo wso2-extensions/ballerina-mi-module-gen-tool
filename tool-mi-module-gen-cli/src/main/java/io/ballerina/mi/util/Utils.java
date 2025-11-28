@@ -315,6 +315,12 @@ public class Utils {
                             parameter.typeInfo.version));
                 }
                 break;
+            case MAP:
+                result.append(String.format("<property name=\"queryParam%d\" value=\"%s\"/>\n", index,
+                        parameter.name));
+                result.append(String.format("<property name=\"queryParamType%d\" value=\"%s\"/>\n", index,
+                        parameter.typeName));
+                break;
         }
     }
 
@@ -362,6 +368,12 @@ public class Utils {
                 result.append(String.format("<property name=\"%s_paramType%d\" value=\"%s\"/>\n", connectionType, index,
                         parameter.typeName));
                 break;
+            case MAP:
+                result.append(String.format("<property name=\"%s_param%d\" value=\"%s\"/>\n", connectionType, index,
+                        parameter.name));
+                result.append(String.format("<property name=\"%s_paramType%d\" value=\"%s\"/>\n", connectionType, index,
+                        parameter.typeName));
+                break;
             case ARRAY:
                 //TODO: Generate properties for array
         }
@@ -395,10 +407,14 @@ public class Utils {
                         "", isCombo);
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
                 break;
+            case MAP:
+                Attribute mapAttr = new Attribute(paramName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip + " (JSON format)", "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, mapAttr);
+                break;
             default:
-                //TODO: Handle unsupported data types
-                // error: unidentified data type
-                // log and skip function
+                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
@@ -431,10 +447,14 @@ public class Utils {
                         "", isCombo);
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
                 break;
+            case MAP:
+                Attribute mapPathAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip + " (JSON format)", "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, mapPathAttr);
+                break;
             default:
-                //TODO: Handle unsupported data types
-                // error: unidentified data type
-                // log and skip function
+                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
@@ -510,9 +530,14 @@ public class Utils {
                 }
                 builder.addSeparator(ATTRIBUTE_GROUP_END);
                 break;
+            case MAP:
+                Attribute mapQueryAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip + " (JSON format)", "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, mapQueryAttr);
+                break;
             default:
-                // error: unidentified data type
-                // log and skip function
+                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
@@ -817,7 +842,7 @@ public class Utils {
             typeKind = functionTypeDescKind.get().typeKind();
         }
         return switch (typeKind) {
-            case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, ARRAY -> typeKind.getName();
+            case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, ARRAY, MAP -> typeKind.getName();
             default -> null;
         };
     }
