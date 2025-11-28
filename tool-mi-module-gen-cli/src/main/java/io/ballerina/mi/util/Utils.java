@@ -315,6 +315,12 @@ public class Utils {
                             parameter.typeInfo.version));
                 }
                 break;
+            case MAP:
+                result.append(String.format("<property name=\"queryParam%d\" value=\"%s\"/>\n", index,
+                        parameter.name));
+                result.append(String.format("<property name=\"queryParamType%d\" value=\"%s\"/>\n", index,
+                        parameter.typeName));
+                break;
         }
     }
 
@@ -362,6 +368,12 @@ public class Utils {
                 result.append(String.format("<property name=\"%s_paramType%d\" value=\"%s\"/>\n", connectionType, index,
                         parameter.typeName));
                 break;
+            case MAP:
+                result.append(String.format("<property name=\"%s_param%d\" value=\"%s\"/>\n", connectionType, index,
+                        parameter.name));
+                result.append(String.format("<property name=\"%s_paramType%d\" value=\"%s\"/>\n", connectionType, index,
+                        parameter.typeName));
+                break;
             case ARRAY:
                 //TODO: Generate properties for array
         }
@@ -395,10 +407,20 @@ public class Utils {
                         "", isCombo);
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
                 break;
+            case MAP:
+                Attribute mapAttr = new Attribute(paramName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, mapAttr);
+                break;
+            case RECORD:
+                Attribute recAttr = new Attribute(paramName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, recAttr);
+                break;
             default:
-                //TODO: Handle unsupported data types
-                // error: unidentified data type
-                // log and skip function
+                // throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
@@ -431,10 +453,20 @@ public class Utils {
                         "", isCombo);
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
                 break;
+            case MAP:
+                Attribute mapPathAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, mapPathAttr);
+                break;
+            case RECORD:
+                Attribute recPathAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, recPathAttr);
+                break;
             default:
-                //TODO: Handle unsupported data types
-                // error: unidentified data type
-                // log and skip function
+                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
@@ -510,9 +542,14 @@ public class Utils {
                 }
                 builder.addSeparator(ATTRIBUTE_GROUP_END);
                 break;
+            case MAP:
+                Attribute mapQueryAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip + " (JSON format)", "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, mapQueryAttr);
+                break;
             default:
-                // error: unidentified data type
-                // log and skip function
+                // throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
@@ -567,7 +604,6 @@ public class Utils {
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Path targetFile = sourceDirPath.relativize(file);
                     outputStream.putNextEntry(new ZipEntry(targetFile.toString()));
-
                     Files.copy(file, outputStream);
                     outputStream.closeEntry();
                     return FileVisitResult.CONTINUE;
@@ -805,19 +841,47 @@ public class Utils {
 
     public static String getParamTypeName(TypeDescKind typeKind) {
         return switch (typeKind) {
-            case BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ARRAY -> typeKind.getName();
+            case BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ARRAY, RECORD, MAP -> typeKind.getName();
             default -> null;
         };
+    }
+
+    /**
+     * Get the actual TypeDescKind by resolving type references recursively.
+     */
+    public static TypeDescKind getActualTypeKind(TypeSymbol typeSymbol) {
+        TypeDescKind typeKind = typeSymbol.typeKind();
+        // System.err.println("DEBUG: getActualTypeKind: " + typeKind + " for symbol: " + typeSymbol.getName().orElse("anon"));
+        if (typeKind == TypeDescKind.TYPE_REFERENCE) {
+            if (typeSymbol instanceof io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol typeRef) {
+                TypeDescKind resolved = getActualTypeKind(typeRef.typeDescriptor());
+                // System.err.println("DEBUG: Resolved TYPE_REFERENCE to: " + resolved);
+                return resolved;
+            }
+        }
+        return typeKind;
+    }
+
+    /**
+     * Get the actual TypeSymbol by resolving type references recursively.
+     */
+    public static TypeSymbol getActualTypeSymbol(TypeSymbol typeSymbol) {
+        if (typeSymbol.typeKind() == TypeDescKind.TYPE_REFERENCE) {
+            if (typeSymbol instanceof io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol typeRef) {
+                return getActualTypeSymbol(typeRef.typeDescriptor());
+            }
+        }
+        return typeSymbol;
     }
 
     public static String getReturnTypeName(FunctionSymbol functionSymbol) {
         Optional<TypeSymbol> functionTypeDescKind = functionSymbol.typeDescriptor().returnTypeDescriptor();
         TypeDescKind typeKind = TypeDescKind.NIL;
         if (functionTypeDescKind.isPresent()) {
-            typeKind = functionTypeDescKind.get().typeKind();
+            typeKind = getActualTypeKind(functionTypeDescKind.get());
         }
         return switch (typeKind) {
-            case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, ARRAY -> typeKind.getName();
+            case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, ARRAY, MAP -> typeKind.getName();
             default -> null;
         };
     }
