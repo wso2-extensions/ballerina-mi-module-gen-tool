@@ -247,7 +247,7 @@ public class Utils {
             typeKind = functionTypeDescKind.get().typeKind();
         }
         return switch (typeKind) {
-            case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, ARRAY -> typeKind.getName();
+            case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, ARRAY, MAP -> typeKind.getName();
             default -> null;
         };
     }
