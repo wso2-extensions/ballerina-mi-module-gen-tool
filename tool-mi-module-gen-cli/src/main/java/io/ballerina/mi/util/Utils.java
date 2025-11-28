@@ -409,12 +409,18 @@ public class Utils {
                 break;
             case MAP:
                 Attribute mapAttr = new Attribute(paramName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        "", true, helpTip + " (JSON format)", "",
+                        "", true, helpTip, "",
                         "", isCombo);
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, mapAttr);
                 break;
+            case RECORD:
+                Attribute recAttr = new Attribute(paramName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, recAttr);
+                break;
             default:
-                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
+                // throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
@@ -449,9 +455,15 @@ public class Utils {
                 break;
             case MAP:
                 Attribute mapPathAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        "", true, helpTip + " (JSON format)", "",
+                        "", true, helpTip, "",
                         "", isCombo);
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, mapPathAttr);
+                break;
+            case RECORD:
+                Attribute recPathAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, helpTip, "",
+                        "", isCombo);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, recPathAttr);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
@@ -537,7 +549,7 @@ public class Utils {
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, mapQueryAttr);
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
+                // throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
@@ -592,7 +604,6 @@ public class Utils {
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Path targetFile = sourceDirPath.relativize(file);
                     outputStream.putNextEntry(new ZipEntry(targetFile.toString()));
-
                     Files.copy(file, outputStream);
                     outputStream.closeEntry();
                     return FileVisitResult.CONTINUE;
@@ -835,11 +846,39 @@ public class Utils {
         };
     }
 
+    /**
+     * Get the actual TypeDescKind by resolving type references recursively.
+     */
+    public static TypeDescKind getActualTypeKind(TypeSymbol typeSymbol) {
+        TypeDescKind typeKind = typeSymbol.typeKind();
+        // System.err.println("DEBUG: getActualTypeKind: " + typeKind + " for symbol: " + typeSymbol.getName().orElse("anon"));
+        if (typeKind == TypeDescKind.TYPE_REFERENCE) {
+            if (typeSymbol instanceof io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol typeRef) {
+                TypeDescKind resolved = getActualTypeKind(typeRef.typeDescriptor());
+                // System.err.println("DEBUG: Resolved TYPE_REFERENCE to: " + resolved);
+                return resolved;
+            }
+        }
+        return typeKind;
+    }
+
+    /**
+     * Get the actual TypeSymbol by resolving type references recursively.
+     */
+    public static TypeSymbol getActualTypeSymbol(TypeSymbol typeSymbol) {
+        if (typeSymbol.typeKind() == TypeDescKind.TYPE_REFERENCE) {
+            if (typeSymbol instanceof io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol typeRef) {
+                return getActualTypeSymbol(typeRef.typeDescriptor());
+            }
+        }
+        return typeSymbol;
+    }
+
     public static String getReturnTypeName(FunctionSymbol functionSymbol) {
         Optional<TypeSymbol> functionTypeDescKind = functionSymbol.typeDescriptor().returnTypeDescriptor();
         TypeDescKind typeKind = TypeDescKind.NIL;
         if (functionTypeDescKind.isPresent()) {
-            typeKind = functionTypeDescKind.get().typeKind();
+            typeKind = getActualTypeKind(functionTypeDescKind.get());
         }
         return switch (typeKind) {
             case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, ARRAY, MAP -> typeKind.getName();
