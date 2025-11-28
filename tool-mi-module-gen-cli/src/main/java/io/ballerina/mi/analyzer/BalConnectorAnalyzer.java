@@ -136,7 +136,8 @@ public class BalConnectorAnalyzer implements Analyzer {
                 List<ParameterSymbol> parameterSymbols = params.get();
 
                 for (ParameterSymbol parameterSymbol : parameterSymbols) {
-                    String paramType = Utils.getParamTypeName(parameterSymbol.typeDescriptor().typeKind());
+                    TypeDescKind actualTypeKind = Utils.getActualTypeKind(parameterSymbol.typeDescriptor());
+                    String paramType = Utils.getParamTypeName(actualTypeKind);
                     if (paramType == null) {
                         printStream.println("Invalid parameter type for method " + methodSymbol.getName().get());
                         printStream.println("Skipping method " + methodSymbol.getName().get());
@@ -144,7 +145,7 @@ public class BalConnectorAnalyzer implements Analyzer {
                     }
                     Optional<String> optParamName = parameterSymbol.getName();
                     if (optParamName.isPresent()) {
-                        component.setFunctionParam(new FunctionParam(Integer.toString(i), optParamName.get(), parameterSymbol.typeDescriptor().typeKind().getName()));
+                        component.setFunctionParam(new FunctionParam(Integer.toString(i), optParamName.get(), actualTypeKind.getName()));
                     }
                 }
             }
