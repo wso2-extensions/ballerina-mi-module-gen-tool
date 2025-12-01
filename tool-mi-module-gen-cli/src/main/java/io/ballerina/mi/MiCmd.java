@@ -134,6 +134,7 @@ public class MiCmd implements BLauncherCmd {
         }
 
         balAnalyzer.analyze(compilePkg);
+        new BalConnectorAnalyzer().analyze(compilePkg);
 
         JBallerinaBackend jBallerinaBackend = JBallerinaBackend.from(packageCompilation, JvmTarget.JAVA_21);
 
