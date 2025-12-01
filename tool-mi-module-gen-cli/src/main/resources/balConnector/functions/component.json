@@ -8,8 +8,8 @@
       "type": "attributeGroup",
       "value": {
         "groupName": "General",
-        "elements": [
-          {{#if parent.initComponent}}{
+        "elements": [{{#if parent.initComponent}}
+          {
             "type": "attribute",
             "value": {
               "name": "configRef",
