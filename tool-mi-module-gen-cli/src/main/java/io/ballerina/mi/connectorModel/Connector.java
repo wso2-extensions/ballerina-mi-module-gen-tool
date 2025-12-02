@@ -27,7 +27,7 @@ import io.ballerina.projects.SemanticVersion;
 import java.io.File;
 import java.util.ArrayList;
 
-public class  Connector extends ModelElement {
+public class Connector extends ModelElement {
     public static final String TYPE_NAME = "connector";
     public static final String TEMP_PATH = "connector";
     public static final String ICON_FOLDER = "icon";
