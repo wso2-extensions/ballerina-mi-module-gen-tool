@@ -18,6 +18,7 @@
 
 package io.ballerina.mi.connectorModel;
 
+import io.ballerina.mi.ConnectorSerializer;
 import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.Utils;
 import io.ballerina.projects.PackageDescriptor;
@@ -26,7 +27,7 @@ import io.ballerina.projects.SemanticVersion;
 import java.io.File;
 import java.util.ArrayList;
 
-public class Connector extends ModelElement {
+public class  Connector extends ModelElement {
     public static final String TYPE_NAME = "connector";
     public static final String TEMP_PATH = "connector";
     public static final String ICON_FOLDER = "icon";
@@ -138,7 +139,7 @@ public class Connector extends ModelElement {
     }
 
     public void generateInstanceXml(File folder) {
-        Utils.generateXmlForConnector("balConnector", TYPE_NAME, folder + File.separator + TYPE_NAME, this);
+        ConnectorSerializer.generateXmlForConnector("balConnector", TYPE_NAME, folder + File.separator + TYPE_NAME, this);
     }
 
     public void generateFunctionsXml(File connectorFolder, String templatePath, String typeName) {
@@ -146,7 +147,7 @@ public class Connector extends ModelElement {
         if (!file.exists()) {
             file.mkdir();
         }
-        Utils.generateXmlForConnector(templatePath, "component", file + File.separator + "component", this);
+        ConnectorSerializer.generateXmlForConnector(templatePath, "component", file + File.separator + "component", this);
     }
 
     public void generateConfigInstanceXml(File connectorFolder, String templatePath, String typeName) {
@@ -154,7 +155,7 @@ public class Connector extends ModelElement {
         if (!file.exists()) {
             file.mkdir();
         }
-        Utils.generateXmlForConnector(templatePath, "component", file + File.separator + "component", this);
+        ConnectorSerializer.generateXmlForConnector(templatePath, "component", file + File.separator + "component", this);
     }
 
     public void generateConfigTemplateXml(File connectorFolder, String templatePath, String typeName) {
@@ -162,6 +163,6 @@ public class Connector extends ModelElement {
         if (!file.exists()) {
             file.mkdir();
         }
-        Utils.generateXmlForConnector(templatePath, typeName + "_template", file + File.separator + Constants.INIT_FUNCTION_NAME, this);
+        ConnectorSerializer.generateXmlForConnector(templatePath, typeName + "_template", file + File.separator + Constants.INIT_FUNCTION_NAME, this);
     }
 }
