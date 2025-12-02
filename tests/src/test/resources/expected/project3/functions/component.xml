@@ -55,5 +55,10 @@
             <file>validateStringOperations.xml</file>
             <description></description>
         </component>
+        <component name="validateJsonOperations">
+            <displayName>validateJsonOperations</displayName>
+            <file>validateJsonOperations.xml</file>
+            <description></description>
+        </component>
         </subComponents>
 </component>

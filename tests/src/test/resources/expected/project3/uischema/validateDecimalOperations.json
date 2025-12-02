@@ -9,41 +9,36 @@
       "value": {
         "groupName": "General",
         "elements": [
-          
           {
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
               "elements": [
                 {
-  "type": "attribute",
-  "value": {
-    "name": "inputA",
-    "displayName": "inputA",
-    "inputType": "stringOrExpression",
-    "defaultValue": "",
-    "required": "true",
-    "helpTip": "",
-    "validateType": "regex",
-    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-
-  }
-}
-,{
-  "type": "attribute",
-  "value": {
-    "name": "inputB",
-    "displayName": "inputB",
-    "inputType": "stringOrExpression",
-    "defaultValue": "",
-    "required": "true",
-    "helpTip": "",
-    "validateType": "regex",
-    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-
-  }
-}
-
+                  "type": "attribute",
+                  "value": {
+                    "name": "inputA",
+                    "displayName": "inputA",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "inputB",
+                    "displayName": "inputB",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                }
               ]
             }
           },

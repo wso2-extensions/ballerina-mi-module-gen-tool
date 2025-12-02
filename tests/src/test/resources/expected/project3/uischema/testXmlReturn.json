@@ -9,13 +9,24 @@
       "value": {
         "groupName": "General",
         "elements": [
-          
           {
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
               "elements": [
-                
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "x",
+                    "displayName": "x",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
               ]
             }
           },
