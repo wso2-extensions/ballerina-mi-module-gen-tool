@@ -186,10 +186,15 @@ public class Mediator extends AbstractMediator {
 
     private OMElement getOMElement(MessageContext ctx, String value) {
         String param = ctx.getProperty(value).toString();
-        if (lookupTemplateParameter(ctx, param) != null) {
-            try {
-                return AXIOMUtil.stringToOM((String) lookupTemplateParameter(ctx, param));
-            } catch (Exception ignored) {
+        Object paramValue = lookupTemplateParameter(ctx, param);
+        if (paramValue != null) {
+            if (paramValue instanceof OMElement) {
+                return (OMElement) paramValue;
+            } else {
+                try {
+                    return AXIOMUtil.stringToOM((String) lookupTemplateParameter(ctx, param));
+                } catch (Exception ignored) {
+                }
             }
         }
         log.error("Error in getting the OMElement");
