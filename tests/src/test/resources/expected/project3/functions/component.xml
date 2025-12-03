@@ -55,9 +55,19 @@
             <file>validateStringOperations.xml</file>
             <description></description>
         </component>
+        <component name="validateRecordOperations">
+            <displayName>validateRecordOperations</displayName>
+            <file>validateRecordOperations.xml</file>
+            <description></description>
+        </component>
         <component name="validateJsonOperations">
             <displayName>validateJsonOperations</displayName>
             <file>validateJsonOperations.xml</file>
+            <description></description>
+        </component>
+        <component name="validateMapOperations">
+            <displayName>validateMapOperations</displayName>
+            <file>validateMapOperations.xml</file>
             <description></description>
         </component>
         </subComponents>
