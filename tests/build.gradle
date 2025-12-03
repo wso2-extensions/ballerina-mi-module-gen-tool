@@ -107,13 +107,6 @@ task copyStdlibs() {
                     from "${artifactExtractedPath}/cache"
                 }
             }
-            
-            // Copy to local user repository
-            def userHome = System.getProperty("user.home")
-            copy {
-                into "${userHome}/.ballerina/repositories/local/bala"
-                from "${artifactExtractedPath}/bala"
-            }
         }
     }
 }
