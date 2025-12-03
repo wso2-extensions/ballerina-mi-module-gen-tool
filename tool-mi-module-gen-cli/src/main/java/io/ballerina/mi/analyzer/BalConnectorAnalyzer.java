@@ -145,7 +145,9 @@ public class BalConnectorAnalyzer implements Analyzer {
                     }
                     Optional<String> optParamName = parameterSymbol.getName();
                     if (optParamName.isPresent()) {
-                        component.setFunctionParam(new FunctionParam(Integer.toString(i), optParamName.get(), actualTypeKind.getName()));
+                        FunctionParam functionParam = new FunctionParam(Integer.toString(i), optParamName.get(), actualTypeKind.getName());
+                        functionParam.setParamKind(parameterSymbol.paramKind());
+                        component.setFunctionParam(functionParam);
                     }
                 }
             }
