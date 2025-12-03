@@ -279,7 +279,7 @@ public class ConnectorSerializer {
             case STRING:
             case INT, DECIMAL, FLOAT:
             case ENUM, ARRAY:
-            case BOOLEAN:
+            case BOOLEAN, MAP:
                 result.append(String.format("<property name=\"queryParam%d\" value=\"%s\"/>\n", index,
                         parameter.name));
                 result.append(String.format("<property name=\"queryParamType%d\" value=\"%s\"/>\n", index,
@@ -316,7 +316,7 @@ public class ConnectorSerializer {
         switch (parameter.typeName) {
             case STRING:
             case INT, DECIMAL, FLOAT:
-            case BOOLEAN:
+            case BOOLEAN, MAP:
                 result.append(String.format("<property name=\"%s_param%d\" value=\"%s\"/>\n", connectionType, index,
                         parameter.name));
                 result.append(String.format("<property name=\"%s_paramType%d\" value=\"%s\"/>\n", connectionType, index,
@@ -365,9 +365,7 @@ public class ConnectorSerializer {
                                                            JsonTemplateBuilder builder, String paramName, String helpTip,
                                                            boolean isCombo) throws IOException {
         switch (paramType) {
-            case STRING:
-            case XML:
-            case JSON:
+            case STRING, XML, JSON, MAP, RECORD:
                 Attribute stringAttr = new Attribute(paramName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
                         "", true, helpTip, "",
                         "", isCombo);
@@ -392,9 +390,7 @@ public class ConnectorSerializer {
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
                 break;
             default:
-                //TODO: Handle unsupported data types
-                // error: unidentified data type
-                // log and skip function
+                // throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
@@ -403,9 +399,7 @@ public class ConnectorSerializer {
                                                        JsonTemplateBuilder builder, String paramName, String helpTip,
                                                        boolean isCombo) throws IOException {
         switch (paramType) {
-            case STRING:
-            case XML:
-            case JSON:
+            case STRING, XML, JSON, MAP, RECORD:
                 Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
                         "", true, helpTip, "",
                         "", isCombo);
@@ -430,9 +424,7 @@ public class ConnectorSerializer {
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
                 break;
             default:
-                //TODO: Handle unsupported data types
-                // error: unidentified data type
-                // log and skip function
+                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
@@ -442,9 +434,7 @@ public class ConnectorSerializer {
                                                         boolean isCombo)
             throws IOException {
         switch (paramType) {
-            case STRING:
-            case XML:
-            case JSON:
+            case STRING, XML, JSON, MAP:
                 Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
                         parameter.getDefaultValue(), !parameter.isOptional(), helpTip, "",
                         "", isCombo);
@@ -511,8 +501,7 @@ public class ConnectorSerializer {
                 builder.addSeparator(ATTRIBUTE_GROUP_END);
                 break;
             default:
-                // error: unidentified data type
-                // log and skip function
+                // throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
