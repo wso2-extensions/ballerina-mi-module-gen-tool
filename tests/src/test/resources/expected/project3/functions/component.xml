@@ -20,5 +20,45 @@
             <file>test.xml</file>
             <description></description>
         </component>
+        <component name="testXmlReturn">
+            <displayName>testXmlReturn</displayName>
+            <file>testXmlReturn.xml</file>
+            <description></description>
+        </component>
+        <component name="testAbsenceOfValues">
+            <displayName>testAbsenceOfValues</displayName>
+            <file>testAbsenceOfValues.xml</file>
+            <description></description>
+        </component>
+        <component name="validateBooleanOperations">
+            <displayName>validateBooleanOperations</displayName>
+            <file>validateBooleanOperations.xml</file>
+            <description></description>
+        </component>
+        <component name="validateIntegerOperations">
+            <displayName>validateIntegerOperations</displayName>
+            <file>validateIntegerOperations.xml</file>
+            <description></description>
+        </component>
+        <component name="validateFloatOperations">
+            <displayName>validateFloatOperations</displayName>
+            <file>validateFloatOperations.xml</file>
+            <description></description>
+        </component>
+        <component name="validateDecimalOperations">
+            <displayName>validateDecimalOperations</displayName>
+            <file>validateDecimalOperations.xml</file>
+            <description></description>
+        </component>
+        <component name="validateStringOperations">
+            <displayName>validateStringOperations</displayName>
+            <file>validateStringOperations.xml</file>
+            <description></description>
+        </component>
+        <component name="validateJsonOperations">
+            <displayName>validateJsonOperations</displayName>
+            <file>validateJsonOperations.xml</file>
+            <description></description>
+        </component>
         </subComponents>
 </component>
