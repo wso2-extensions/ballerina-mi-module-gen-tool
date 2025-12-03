@@ -390,7 +390,7 @@ public class ConnectorSerializer {
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
                 break;
             default:
-                // throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
+                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
