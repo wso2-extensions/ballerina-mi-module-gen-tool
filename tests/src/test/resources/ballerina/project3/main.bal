@@ -323,7 +323,7 @@ public type CombinedData record {|
 |};
 
 // Function to validate record type input and output
-
+@mi:Operation
 public function validateRecordOperations(Person personInput, Employee employeeInput) returns CombinedData {
     io:println("=== Record Type Validation ===");
     
@@ -397,7 +397,7 @@ public function validateJsonOperations(json inputJsonA, json inputJsonB) returns
 }
 
 // Function to validate map<anydata> type input and output
-
+@mi:Operation
 public function validateMapOperations(map<anydata> inputMapA, map<anydata> inputMapB) returns map<anydata> {
     io:println("=== Map<anydata> Type Validation ===");
     
