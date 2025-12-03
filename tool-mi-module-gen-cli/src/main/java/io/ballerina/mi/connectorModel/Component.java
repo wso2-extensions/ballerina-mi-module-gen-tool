@@ -18,6 +18,7 @@
 
 package io.ballerina.mi.connectorModel;
 
+import io.ballerina.mi.ConnectorSerializer;
 import io.ballerina.mi.util.Utils;
 
 import org.ballerinalang.diagramutil.connector.models.connector.Type;
@@ -121,7 +122,7 @@ public class Component extends ModelElement {
         if (!file.exists()) {
             file.mkdir();
         }
-        Utils.generateXmlForConnector(templatePath, typeName + "_template", file + File.separator + this.getName(), this);
+        ConnectorSerializer.generateXmlForConnector(templatePath, typeName + "_template", file + File.separator + this.getName(), this);
     }
 
     public void generateUIJson(File connectorFolder, String templatePath, String fileName) {
@@ -129,7 +130,7 @@ public class Component extends ModelElement {
         if (!file.exists()) {
             file.mkdir();
         }
-        Utils.generateJsonForConnector(templatePath, "component", file + File.separator + fileName, this);
+        ConnectorSerializer.generateJsonForConnector(templatePath, "component", file + File.separator + fileName, this);
     }
 
     public void generateOutputSchemaJson(File connectorFolder) {
