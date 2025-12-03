@@ -41,6 +41,9 @@ public class BalConnectorAnalyzer implements Analyzer {
 
     @Override
     public void analyze(Package compilePackage) {
+
+        PackageDescriptor descriptor = compilePackage.descriptor();
+        Connector.getConnector(descriptor);
         for (Module module : compilePackage.modules()) {
             analyzeModule(compilePackage, module);
         }
@@ -65,8 +68,7 @@ public class BalConnectorAnalyzer implements Analyzer {
         String moduleName = moduleSymbol.getName().orElseThrow(() -> new IllegalStateException("Module name not defined"));
         String connectionType = String.format("%s_%s", moduleName, clientClassName);
 
-        PackageDescriptor descriptor = compilePackage.descriptor();
-        Connector connector = Connector.getConnector(descriptor);
+        Connector connector = Connector.getConnector();
         Connection connection = new Connection(connector, connectionType, clientClassName, Integer.toString(connector.getConnections().size()));
 
         // Get the connector description

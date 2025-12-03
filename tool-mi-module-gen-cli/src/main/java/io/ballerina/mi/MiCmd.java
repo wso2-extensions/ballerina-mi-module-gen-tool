@@ -24,14 +24,9 @@ import io.ballerina.mi.analyzer.BalConnectorAnalyzer;
 import io.ballerina.mi.analyzer.BalModuleAnalyzer;
 import io.ballerina.mi.connectorModel.Connector;
 import io.ballerina.mi.util.Constants;
-import io.ballerina.projects.BuildOptions;
-import io.ballerina.projects.EmitResult;
-import io.ballerina.projects.JBallerinaBackend;
-import io.ballerina.projects.JvmTarget;
+import io.ballerina.projects.*;
 import io.ballerina.projects.Package;
-import io.ballerina.projects.PackageCompilation;
-import io.ballerina.projects.Project;
-import io.ballerina.projects.bala.BalaProject;
+import io.ballerina.projects.directory.BalaProject;
 import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -90,11 +85,11 @@ public class MiCmd implements BLauncherCmd {
         }
 
         Path path = Path.of(sourcePath).normalize();
-        // TODO: Migrate the deprecated classes & methods in update 13 to the new ones.
         BuildOptions buildOptions = BuildOptions.builder().setSticky(false).setOffline(false).build();
-        Project project = ProjectLoader.loadProject(path, buildOptions);
+        ProjectLoadResult projectLoadResult = ProjectLoader.load(path.toAbsolutePath(), buildOptions);
+        Project project = projectLoadResult.project();
         compilePkg = project.currentPackage();
-        if (!(project instanceof BuildProject || project instanceof BalaProject)){
+        if (!(project instanceof BuildProject || project instanceof BalaProject)) {
             printStream.println("ERROR: Invalid project path provided");
             return;
         }

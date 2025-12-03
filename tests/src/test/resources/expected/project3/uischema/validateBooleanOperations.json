@@ -1,7 +1,7 @@
 {
-  "connectorName": "project1",
-  "operationName": "test",
-  "title": "test",
+  "connectorName": "project3",
+  "operationName": "validateBooleanOperations",
+  "title": "validateBooleanOperations",
   "help": "",
   "elements": [
     {
@@ -17,9 +17,9 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "xmlA",
-                    "displayName": "xmlA",
-                    "inputType": "stringOrExpression",
+                    "name": "inputA",
+                    "displayName": "inputA",
+                    "inputType": "boolean",
                     "defaultValue": "",
                     "required": "true",
                     "helpTip": "",
@@ -29,21 +29,9 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "xmlB",
-                    "displayName": "xmlB",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "xmlC",
-                    "displayName": "xmlC",
-                    "inputType": "stringOrExpression",
+                    "name": "inputB",
+                    "displayName": "inputB",
+                    "inputType": "boolean",
                     "defaultValue": "",
                     "required": "true",
                     "helpTip": "",

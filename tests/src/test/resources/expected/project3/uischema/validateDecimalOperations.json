@@ -1,7 +1,7 @@
 {
-  "connectorName": "project1",
-  "operationName": "test",
-  "title": "test",
+  "connectorName": "project3",
+  "operationName": "validateDecimalOperations",
+  "title": "validateDecimalOperations",
   "help": "",
   "elements": [
     {
@@ -17,38 +17,26 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "xmlA",
-                    "displayName": "xmlA",
+                    "name": "inputA",
+                    "displayName": "inputA",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
                     "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
                   }
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "xmlB",
-                    "displayName": "xmlB",
+                    "name": "inputB",
+                    "displayName": "inputB",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
                     "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "xmlC",
-                    "displayName": "xmlC",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
                   }
                 }
               ]

@@ -1,7 +1,7 @@
 {
-  "connectorName": "project1",
-  "operationName": "test",
-  "title": "test",
+  "connectorName": "project3",
+  "operationName": "validateStringOperations",
+  "title": "validateStringOperations",
   "help": "",
   "elements": [
     {
@@ -17,8 +17,8 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "xmlA",
-                    "displayName": "xmlA",
+                    "name": "inputA",
+                    "displayName": "inputA",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -29,20 +29,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "xmlB",
-                    "displayName": "xmlB",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "xmlC",
-                    "displayName": "xmlC",
+                    "name": "inputB",
+                    "displayName": "inputB",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
