@@ -136,7 +136,6 @@ public class Utils {
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Path targetFile = sourceDirPath.relativize(file);
                     outputStream.putNextEntry(new ZipEntry(targetFile.toString()));
-
                     Files.copy(file, outputStream);
                     outputStream.closeEntry();
                     return FileVisitResult.CONTINUE;
@@ -235,19 +234,47 @@ public class Utils {
 
     public static String getParamTypeName(TypeDescKind typeKind) {
         return switch (typeKind) {
-            case BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ARRAY -> typeKind.getName();
+            case BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ARRAY, RECORD, MAP -> typeKind.getName();
             default -> null;
         };
+    }
+
+    /**
+     * Get the actual TypeDescKind by resolving type references recursively.
+     */
+    public static TypeDescKind getActualTypeKind(TypeSymbol typeSymbol) {
+        TypeDescKind typeKind = typeSymbol.typeKind();
+        // System.err.println("DEBUG: getActualTypeKind: " + typeKind + " for symbol: " + typeSymbol.getName().orElse("anon"));
+        if (typeKind == TypeDescKind.TYPE_REFERENCE) {
+            if (typeSymbol instanceof io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol typeRef) {
+                TypeDescKind resolved = getActualTypeKind(typeRef.typeDescriptor());
+                // System.err.println("DEBUG: Resolved TYPE_REFERENCE to: " + resolved);
+                return resolved;
+            }
+        }
+        return typeKind;
+    }
+
+    /**
+     * Get the actual TypeSymbol by resolving type references recursively.
+     */
+    public static TypeSymbol getActualTypeSymbol(TypeSymbol typeSymbol) {
+        if (typeSymbol.typeKind() == TypeDescKind.TYPE_REFERENCE) {
+            if (typeSymbol instanceof io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol typeRef) {
+                return getActualTypeSymbol(typeRef.typeDescriptor());
+            }
+        }
+        return typeSymbol;
     }
 
     public static String getReturnTypeName(FunctionSymbol functionSymbol) {
         Optional<TypeSymbol> functionTypeDescKind = functionSymbol.typeDescriptor().returnTypeDescriptor();
         TypeDescKind typeKind = TypeDescKind.NIL;
         if (functionTypeDescKind.isPresent()) {
-            typeKind = functionTypeDescKind.get().typeKind();
+            typeKind = getActualTypeKind(functionTypeDescKind.get());
         }
         return switch (typeKind) {
-            case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, ARRAY -> typeKind.getName();
+            case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, ARRAY, MAP, RECORD -> typeKind.getName();
             default -> null;
         };
     }

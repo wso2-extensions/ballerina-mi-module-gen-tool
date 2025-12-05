@@ -85,14 +85,14 @@ public class AnnotationAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisCo
 
     private static String getParamTypeName(TypeDescKind typeKind) {
         return switch (typeKind) {
-            case BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON -> typeKind.getName();
+            case BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, RECORD, MAP -> typeKind.getName();
             default -> null;
         };
     }
 
     private static String getReturnTypeName(TypeDescKind typeKind) {
         return switch (typeKind) {
-            case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY -> typeKind.getName();
+            case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, RECORD, MAP -> typeKind.getName();
             default -> null;
         };
     }
