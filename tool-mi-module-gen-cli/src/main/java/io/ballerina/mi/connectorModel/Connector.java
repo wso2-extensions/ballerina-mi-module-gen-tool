@@ -123,6 +123,9 @@ public class Connector extends ModelElement {
 
     public String getZipFileName() {
         //TODO: also include org in the zip file name
+        if (isBalModule) {
+            return getModuleName() + "-" + TYPE_NAME + "-" + getVersion() + ".zip";
+        }
         return "ballerina" + "-" + TYPE_NAME + "-" + getModuleName() + "-" + getVersion() + ".zip";
     }
 
