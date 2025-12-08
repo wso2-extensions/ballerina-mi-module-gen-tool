@@ -71,14 +71,12 @@ jobs:
         with:
           version: ${{ env.BAL_VERSION }}
 
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v2
-
-      - name: Verify Docker is available
+      - name: Check Docker availability (optional)
         shell: bash
+        continue-on-error: true
         run: |
-          docker info
-          echo "Docker is available for Testcontainers"
+          docker version || echo "Docker is not available on Windows runner - integration tests will be skipped"
+          docker info || echo "Docker info check failed - integration tests will be skipped"
 
       - name: Build with Gradle
         env:
