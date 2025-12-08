@@ -261,26 +261,32 @@ task buildMiProject(type: Exec) {
     def miProjectDir = new File(project.rootDir, "mi-intergration-test/mi-test-project")
     workingDir miProjectDir
     
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        def mvnwCmd = new File(miProjectDir, "mvnw.cmd")
-        commandLine 'cmd', '/c', mvnwCmd.absolutePath, 'clean', 'package', '-DskipTests'
-    } else {
-        def mvnw = new File(miProjectDir, "mvnw")
-        // Make sure mvnw is executable
-        mvnw.setExecutable(true)
-        commandLine mvnw.absolutePath, 'clean', 'package', '-DskipTests'
-    }
-    
     doFirst {
         println "Building MI project CAR file..."
         println "Working directory: ${workingDir}"
-        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-            def mvnw = new File(miProjectDir, "mvnw")
-            if (!mvnw.exists()) {
-                throw new GradleException("Maven wrapper not found at: ${mvnw.absolutePath}")
+        
+        def mvnCommand
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def mvnwCmd = new File(miProjectDir, "mvnw.cmd")
+            if (mvnwCmd.exists()) {
+                mvnCommand = ['cmd', '/c', mvnwCmd.absolutePath]
+            } else {
+                // Fallback to system Maven
+                mvnCommand = ['mvn.cmd']
             }
-            mvnw.setExecutable(true)
+        } else {
+            def mvnw = new File(miProjectDir, "mvnw")
+            if (mvnw.exists()) {
+                mvnw.setExecutable(true)
+                mvnCommand = [mvnw.absolutePath]
+            } else {
+                // Fallback to system Maven
+                mvnCommand = ['mvn']
+            }
         }
+        
+        commandLine mvnCommand + ['clean', 'package', '-DskipTests']
+        println "Using Maven command: ${mvnCommand.join(' ')}"
     }
     
     doLast {
