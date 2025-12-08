@@ -32,6 +32,11 @@ dependencies {
     implementation "org.apache.synapse:synapse-core:${synapseVersion}"
 
     testImplementation 'org.testng:testng:7.7.0'
+    testImplementation 'org.testcontainers:testcontainers:1.19.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+    testImplementation 'io.rest-assured:rest-assured:5.4.0'
+    testImplementation 'io.rest-assured:json-path:5.4.0'
+    testImplementation 'io.rest-assured:xml-path:5.4.0'
     implementation project(':mi-native')
     testImplementation project(path: ':tool-mi-module-gen-cli')
 }
@@ -203,13 +208,36 @@ task copyBallerinaJars(type: Copy) {
 compileTestJava.dependsOn("copyBallerinaJars")
 processTestResources.dependsOn("copyBallerinaJars")
 
+// Task to build MI project CAR file
+task buildMiProject(type: Exec) {
+    def miProjectDir = "${project.rootDir}/mi-intergration-test/mi-test-project"
+    workingDir miProjectDir
+    
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        commandLine 'cmd', '/c', "${miProjectDir}/mvnw.cmd", 'clean', 'package', '-DskipTests'
+    } else {
+        commandLine 'sh', '-c', "${miProjectDir}/mvnw clean package -DskipTests"
+    }
+    
+    doFirst {
+        println "Building MI project CAR file..."
+    }
+    
+    doLast {
+        println "MI project CAR file built successfully"
+    }
+}
+
 test {
     dependsOn copyMiToolToCentral  // This depends on pushMiToolToLocal
     dependsOn copyStdlibs
     dependsOn(":tool-mi-module-gen-cli:build")
+    dependsOn buildMiProject  // Build MI project before running tests
     //dependsOn(":tool-compiler-plugin:build")
 
     systemProperty "bal.command", balCommand.toString()
+    systemProperty "project.root", project.rootDir.toString()
+    systemProperty "miVersion", project.findProperty("miVersion") ?: "4.5.0"
 
     useTestNG() {
         suites 'src/test/resources/testng.xml'
