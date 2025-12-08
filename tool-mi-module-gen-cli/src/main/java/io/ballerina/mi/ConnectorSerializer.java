@@ -84,7 +84,7 @@ public class ConnectorSerializer {
             String zipFilePath;
             if (connector.isBalModule()) {
                 Files.copy(targetPath.resolve("bin").resolve(connector.getModuleName() + ".jar"), destinationPath.resolve(Connector.LIB_PATH).resolve(connector.getModuleName() + ".jar"));
-                zipFilePath = targetPath.resolve(connector.getZipFileName()).toString();
+                zipFilePath = targetPath.toAbsolutePath().getParent().resolve(connector.getZipFileName()).toString();
             } else {
                 Path generatedArtifactPath = Paths.get(System.getProperty(Constants.CONNECTOR_TARGET_PATH));
                 Files.copy(generatedArtifactPath, destinationPath.resolve(Connector.LIB_PATH).resolve(generatedArtifactPath.getFileName()));
