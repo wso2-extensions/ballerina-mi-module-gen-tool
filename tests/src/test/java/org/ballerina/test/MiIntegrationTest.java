@@ -30,6 +30,7 @@ import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.nio.file.Files;
@@ -53,6 +54,8 @@ public class MiIntegrationTest {
     private static final int MI_HTTPS_PORT = 8253;
     private static final int MI_MANAGEMENT_PORT = 9164;
     
+    private static boolean dockerAvailable = false;
+    private static boolean setupCompleted = false;
     private GenericContainer<?> miContainer;
     private String containerBaseUrl;
     private HttpClient httpClient;
@@ -63,12 +66,15 @@ public class MiIntegrationTest {
         try {
             Process dockerCheck = new ProcessBuilder("docker", "ps").start();
             int exitCode = dockerCheck.waitFor();
-            if (exitCode != 0) {
-                throw new SkipException("Docker daemon is not running. Please start Docker Desktop and try again.");
-            }
+            dockerAvailable = (exitCode == 0);
         } catch (Exception e) {
-            throw new SkipException("Docker is not available or not accessible: " + e.getMessage() + 
-                ". Please ensure Docker is installed and running.");
+            dockerAvailable = false;
+        }
+        
+        if (!dockerAvailable) {
+            System.out.println("Docker is not available. Skipping integration tests.");
+            setupCompleted = false;
+            return; // Exit early, don't throw SkipException in @BeforeClass
         }
         
         // Get the project root directory from system property set by Gradle
@@ -209,6 +215,18 @@ public class MiIntegrationTest {
         
         if (!serverReady) {
             System.out.println("Warning: MI server may not be fully ready, but continuing with tests...");
+        }
+        
+        setupCompleted = true;
+    }
+    
+    @BeforeMethod
+    public void checkDockerAvailability() {
+        if (!dockerAvailable) {
+            throw new SkipException("Docker is not available. Skipping integration test.");
+        }
+        if (!setupCompleted) {
+            throw new SkipException("Test setup was not completed. Skipping integration test.");
         }
     }
 
