@@ -258,17 +258,29 @@ task copyConnectorArtifactsToMiProject {
 // Task to build MI project CAR file
 task buildMiProject(type: Exec) {
     dependsOn copyConnectorArtifactsToMiProject
-    def miProjectDir = "${project.rootDir}/mi-intergration-test/mi-test-project"
+    def miProjectDir = new File(project.rootDir, "mi-intergration-test/mi-test-project")
     workingDir miProjectDir
     
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        commandLine 'cmd', '/c', "${miProjectDir}/mvnw.cmd", 'clean', 'package', '-DskipTests'
+        def mvnwCmd = new File(miProjectDir, "mvnw.cmd")
+        commandLine 'cmd', '/c', mvnwCmd.absolutePath, 'clean', 'package', '-DskipTests'
     } else {
-        commandLine 'sh', '-c', "${miProjectDir}/mvnw clean package -DskipTests"
+        def mvnw = new File(miProjectDir, "mvnw")
+        // Make sure mvnw is executable
+        mvnw.setExecutable(true)
+        commandLine mvnw.absolutePath, 'clean', 'package', '-DskipTests'
     }
     
     doFirst {
         println "Building MI project CAR file..."
+        println "Working directory: ${workingDir}"
+        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+            def mvnw = new File(miProjectDir, "mvnw")
+            if (!mvnw.exists()) {
+                throw new GradleException("Maven wrapper not found at: ${mvnw.absolutePath}")
+            }
+            mvnw.setExecutable(true)
+        }
     }
     
     doLast {
