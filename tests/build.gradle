@@ -208,8 +208,56 @@ task copyBallerinaJars(type: Copy) {
 compileTestJava.dependsOn("copyBallerinaJars")
 processTestResources.dependsOn("copyBallerinaJars")
 
+// Task to copy connector artifacts to MI project
+task copyConnectorArtifactsToMiProject {
+    dependsOn buildBallerinaProjects
+    doLast {
+        def projectRoot = project.rootDir
+        def ballerinaProjectsDir = new File(projectRoot, "tests/src/test/resources/ballerina")
+        def miConnectorsDir = new File(projectRoot, "mi-intergration-test/mi-test-project/src/main/wso2mi/resources/connectors")
+        
+        // Ensure destination directory exists
+        miConnectorsDir.mkdirs()
+        
+        // Projects and their artifact files to copy
+        def connectorProjects = [
+            [project: "project3", artifact: "ballerina-connector-project3-1.0.0.zip"]
+            // Add more projects here in the future:
+            // [project: "project1", artifact: "ballerina-connector-project1-0.0.1.zip"],
+            // [project: "project2", artifact: "ballerina-connector-project2-1.0.0.zip"],
+            // [project: "project4", artifact: "ballerina-connector-project4-0.0.1.zip"],
+        ]
+        
+        connectorProjects.each { config ->
+            def projectName = config.project
+            def artifactName = config.artifact
+            
+            // Try target directory first
+            def sourceFile = new File(ballerinaProjectsDir, "${projectName}/target/${artifactName}")
+            
+            // If not found, try project root
+            if (!sourceFile.exists()) {
+                sourceFile = new File(ballerinaProjectsDir, "${projectName}/${artifactName}")
+            }
+            
+            if (sourceFile.exists()) {
+                def destFile = new File(miConnectorsDir, artifactName)
+                copy {
+                    from sourceFile
+                    into miConnectorsDir
+                    rename { artifactName }
+                }
+                println "Copied connector artifact: ${sourceFile.name} -> ${destFile.absolutePath}"
+            } else {
+                println "Warning: Artifact not found for project ${projectName}: ${artifactName}"
+            }
+        }
+    }
+}
+
 // Task to build MI project CAR file
 task buildMiProject(type: Exec) {
+    dependsOn copyConnectorArtifactsToMiProject
     def miProjectDir = "${project.rootDir}/mi-intergration-test/mi-test-project"
     workingDir miProjectDir
     
