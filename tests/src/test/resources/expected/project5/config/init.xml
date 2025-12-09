@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+  ~
+  ~ WSO2 LLC. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<template name="init" onError="fault" xmlns="http://ws.apache.org/ns/synapse">
+    <parameter name="name" description="Unique name the connection is identified by"/>
+    <parameter name="connectionType" description="Connection type"/>
+    <!-- TODO: if union, the selected member type becomes a parameter-->
+    <sequence>
+        <property name="http_ClientOAuth2Handler_objectTypeName" value="ClientOAuth2Handler"/>
+        
+        <property name="http_ListenerLdapUserStoreBasicAuthHandler_objectTypeName" value="ListenerLdapUserStoreBasicAuthHandler"/>
+        
+        <property name="http_ListenerOAuth2Handler_objectTypeName" value="ListenerOAuth2Handler"/>
+        
+        <property name="http_Client_objectTypeName" value="Client"/>
+        
+        <property name="http_Caller_objectTypeName" value="Caller"/>
+        
+        <property name="http_StatusCodeClient_objectTypeName" value="StatusCodeClient"/>
+        
+        <property name="http_FailoverClient_objectTypeName" value="FailoverClient"/>
+        
+        <property name="http_LoadBalanceClient_objectTypeName" value="LoadBalanceClient"/>
+        
+        <class name="io.ballerina.stdlib.mi.BalConnectorConfig"/>
+    </sequence>
+</template>

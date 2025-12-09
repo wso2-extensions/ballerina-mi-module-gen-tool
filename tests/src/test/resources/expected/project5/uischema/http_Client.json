@@ -1,0 +1,37 @@
+{
+  "connectorName": "http",
+  "connectionName": "http_Client",
+  "title": "Connection Config for http_Client connection",
+  "help": "<h1>http_Client Connection</h1> <b>The HTTP client provides functionality to connect to remote HTTP services and perform requests using standard HTTP methods like GET, POST, PUT, DELETE, etc.\n</b>",
+  "elements": [
+    {
+      "type": "attribute",
+      "value": {
+        "name": "connectionName",
+        "displayName": "Connection Name",
+        "inputType": "string",
+        "defaultValue": "http_Client_connection_1",
+        "required": "true",
+        "helpTip": "The name for the http_Client connection",
+        "validation": "nameWithoutSpecialCharactors"
+      }
+    },
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Basic",
+              "elements": [
+                
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

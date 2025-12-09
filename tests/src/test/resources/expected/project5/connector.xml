@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+  ~
+  ~ WSO2 LLC. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<connector>
+    <component name="http" package="io.ballerina.stdlib.mi">
+        <dependency component="config"/>
+        <dependency component="functions"/>
+        <description>## Overview
+
+This module provides APIs for connecting and interacting with HTTP and HTTP2 endpoints. It
+facilitates two types of network entry points as the &#x60;Client&#x60; and &#x60;Listener&#x60;.
+
+### Client
+
+The &#x60;Client&#x60; is used to connect to and interact with HTTP endpoints. They support connection pooling and can be 
+configured to have a maximum number of active connections that can be made with the remote endpoint. The &#x60;Client&#x60; 
+activates connection eviction after a given idle period and also supports follow-redirects so that you do not 
+have to manually handle 3xx HTTP status codes.
+
+#### Resiliency
+
+The &#x60;Client&#x60; handles resilience in multiple ways such as load balancing, circuit breaking, endpoint timeouts, and via a 
+retry mechanism.
+
+Load balancing is used in the round-robin or failover manner.
+
+When a failure occurs in the remote service, the client connections might wait for some time before a timeout occurs. 
+Awaiting requests consume resources in the system. Circuit Breakers are used to trip after a certain number of failed 
+requests to the remote service. Once a circuit breaker trips, it does not allow the client to send requests to the 
+remote service for a period of time.
+
+The Ballerina circuit breaker supports tripping on HTTP error status codes and I/O errors. Failure thresholds can be 
+configured based on a sliding window (e.g., 5 failures within 10 seconds). The &#x60;Client&#x60; also supports a retry 
+mechanism that allows it to resend failed requests periodically for a given number of times.
+
+#### Security
+
+The &#x60;Client&#x60; supports Server Name Indication (SNI), Certificate Revocation List (CRL), Online Certificate Status 
+Protocol (OCSP), and OCSP Stapling for SSL/TLS connections.
+Also, the &#x60;Client&#x60; can be configured to send authentication information to the endpoint being invoked. Ballerina has 
+built-in support for Basic authentication, JWT authentication, and OAuth2 authentication.
+
+In addition to that, it supports both HTTP/1.1 and HTTP2 protocols and connection keep-alive, content 
+chunking, HTTP caching, data compression/decompression, response payload binding, and authorization can be highlighted as the features of the &#x60;Clients&#x60;.
+
+A &#x60;Client&#x60; can be defined using the URL of the remote service that it needs to connect with as shown below:
+
+&#x60;&#x60;&#x60;ballerina
+http:Client clientEndpoint &#x3D; check new(&quot;https://my-simple-backend.com&quot;);
+&#x60;&#x60;&#x60;
+The defined &#x60;Client&#x60; endpoint can be used to call a remote service as follows:
+
+&#x60;&#x60;&#x60;ballerina
+// Send a GET request to the specified endpoint.
+http:Response response &#x3D; check clientEndpoint-&gt;get(&quot;/get?id&#x3D;123&quot;);
+&#x60;&#x60;&#x60;
+The payload can be retrieved as the return value from the remote function as follows:
+
+&#x60;&#x60;&#x60;ballerina
+// Retrieve payload as json.
+json payload &#x3D; check clientEndpoint-&gt;post(&quot;/backend/Json&quot;, &quot;foo&quot;);
+&#x60;&#x60;&#x60;
+
+### Listener
+
+The &#x60;Listener&#x60; is the underneath server connector that binds the given IP/Port to the network and it&#x27;s behavior can 
+be changed using the &#x60;http:ListenerConfiguration&#x60;. In HTTP, the &#x60;http:Service&#x60;-typed services can be attached to 
+the &#x60;Listener&#x60;. The service type precisely describes the syntax for both the service and resource.
+
+A &#x60;Service&#x60; represents a collection of network-accessible entry points and can be exposed via a &#x60;Listener&#x60; endpoint. 
+A resource represents one such entry point and can have its own path, HTTP methods, body format, &#x60;consumes&#x60; and 
+&#x60;produces&#x60; content types, CORS headers, etc. In resources, the HTTP method and resource path are mandatory parameters and
+the String literal and path parameters can be stated as the path. The resource function accepts the &#x60;http:Caller&#x60;, &#x60;http:Request&#x60;, 
+&#x60;http:Headers&#x60;, query parameters, header parameters, and payload parameters as arguments. However, they are optional.
+
+When a &#x60;Service&#x60; receives a request, it is dispatched to the best-matched resource.
+
+A &#x60;Listener&#x60; endpoint can be defined as follows:
+
+&#x60;&#x60;&#x60;ballerina
+// Attributes associated with the &#x60;Listener&#x60; endpoint are defined here.
+listener http:Listener helloWorldEP &#x3D; new(9090);
+&#x60;&#x60;&#x60;
+
+Then a &#x60;Service&#x60; can be defined and attached to the above &#x60;Listener&#x60; endpoint as shown below:
+
+&#x60;&#x60;&#x60;ballerina
+// By default, Ballerina assumes that the service is to be exposed via HTTP/1.1.
+service /helloWorld on helloWorldEP {
+
+   resource function post [string name](@http:Payload string message) returns string {
+       // Sends the response back to the client along with a string payload.
+       return &quot;Hello, World! I’m &quot; + name + &quot;. &quot; + message;
+   }
+}
+&#x60;&#x60;&#x60;
+
+#### Security
+
+&#x60;Listener&#x60; endpoints can be exposed via SSL. They support Mutual SSL, Hostname Verification, and Application Layer 
+Protocol Negotiation (ALPN) for HTTP2. &#x60;Listener&#x60; endpoints also support Certificate Revocation List (CRL), Online 
+Certificate Status Protocol (OCSP), and OCSP Stapling.
+Also, The &#x60;listener&#x60; can be configured to authenticate and authorize the inbound requests. Ballerina has 
+built-in support for basic authentication, JWT authentication, and OAuth2 authentication.
+
+In addition to that, supports both the HTTP/1.1 and HTTP2 protocols and connection keep-alive, content 
+chunking, HTTP caching, data compression/decompression, payload binding, and authorization can be highlighted as the features of a &#x60;Service&#x60;.
+</description>
+    </component>
+    <icon>icon/icon-small.gif</icon>
+    <displayName>http</displayName>
+</connector>

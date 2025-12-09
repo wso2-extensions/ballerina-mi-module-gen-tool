@@ -89,7 +89,11 @@ public class ConnectorZipValidationTest {
     @DataProvider(name = "balaProjectDataProvider")
     public Object[][] balaProjectDataProvider() {
         return new Object[][]{
-                {"project4"},
+                {"project4", null},  // project4 is a local bala project
+                // Note: project5 uses a connector from Ballerina Central
+                // Format: {"projectName", "org/package:version"} or {"projectName", null} for local
+                // Example: {"project5", "ballerina/http:2.15.3"} - uncomment when connector is available
+                {"project5", "ballerina/http:2.15.3"},  // project5 is from Central (example)
         };
     }
 
@@ -164,19 +168,28 @@ public class ConnectorZipValidationTest {
     }
 
     @Test(description = "Validate the generated connector artifacts for bala-based connectors", dataProvider = "balaProjectDataProvider")
-    public void testGeneratedConnectorArtifactsForBalaProject(String projectName) throws Exception {
+    public void testGeneratedConnectorArtifactsForBalaProject(String projectName, String centralPackage) throws Exception {
         Connector.reset();
-        Path projectPath = BALLERINA_PROJECTS_DIR.resolve(projectName);
         Path expectedPath = EXPECTED_DIR.resolve(projectName);
 
-        // First, pack the project to create a bala file
-        Path balaPath = ArtifactGenerationUtil.packBallerinaProject(projectPath);
-        Assert.assertTrue(Files.exists(balaPath), "Bala file was not created: " + balaPath);
+        Path tempBalaDir;
+        
+        if (centralPackage != null && !centralPackage.isBlank()) {
+            // Pull package from Ballerina Central
+            tempBalaDir = ArtifactGenerationUtil.pullPackageFromCentral(centralPackage);
+            Assert.assertTrue(Files.exists(tempBalaDir), "Bala directory not found in Central: " + tempBalaDir);
+        } else {
+            // Local project - pack and extract
+            Path projectPath = BALLERINA_PROJECTS_DIR.resolve(projectName);
+            
+            // First, pack the project to create a bala file
+            Path balaPath = ArtifactGenerationUtil.packBallerinaProject(projectPath);
+            Assert.assertTrue(Files.exists(balaPath), "Bala file was not created: " + balaPath);
 
-        // ProjectLoader.load() doesn't support .bala files directly
-        // Extract bala to a temporary directory that mimics repository structure
-        Path tempBalaDir = Files.createTempDirectory("bala-test-" + projectName);
-        try {
+            // ProjectLoader.load() doesn't support .bala files directly
+            // Extract bala to a temporary directory that mimics repository structure
+            tempBalaDir = Files.createTempDirectory("bala-test-" + projectName);
+            
             // Extract the bala file
             try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(balaPath))) {
                 ZipEntry entry = zis.getNextEntry();
@@ -192,6 +205,9 @@ public class ConnectorZipValidationTest {
                     entry = zis.getNextEntry();
                 }
             }
+        }
+        
+        try {
             
             // Use expected path's parent as target so generated folder will be at expectedPath level
             // Then we'll copy the generated contents to expectedPath

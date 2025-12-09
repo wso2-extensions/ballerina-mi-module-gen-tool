@@ -192,4 +192,96 @@ public class ArtifactGenerationUtil {
                     .orElseThrow(() -> new IllegalStateException("No .bala artifact found under " + projectPath));
         }
     }
+
+    /**
+     * Pulls a package from Ballerina Central and returns the path to the bala directory.
+     * The bala directory structure in Central is: ~/.ballerina/repositories/central.ballerina.io/bala/org/package/version/platform/
+     *
+     * @param packageName Package name in format "org/package" or "org/package:version"
+     * @return Path to the extracted bala directory in Central repository
+     * @throws Exception if pull fails or package not found
+     */
+    public static Path pullPackageFromCentral(String packageName) throws Exception {
+        String balCommand = System.getProperty("bal.command");
+        if (balCommand == null || balCommand.isBlank()) {
+            throw new IllegalStateException("System property 'bal.command' is not set. Cannot run 'bal pull'.");
+        }
+
+        System.out.println("Pulling package from Central: " + packageName);
+        ProcessBuilder processBuilder = new ProcessBuilder(balCommand, "pull", packageName);
+        processBuilder.redirectErrorStream(true);
+        Process process = processBuilder.start();
+
+        StringBuilder output = new StringBuilder();
+        try (InputStream inputStream = process.getInputStream();
+             InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             BufferedReader bufferedReader = new BufferedReader(reader)) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
+            }
+        }
+
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            String errorOutput = output.toString();
+            // "Package already exists" is not an error
+            if (!errorOutput.contains("Package already exists") && !errorOutput.contains("already exists")) {
+                throw new RuntimeException("'bal pull' failed for " + packageName + " with exit code " + exitCode +
+                        System.lineSeparator() + errorOutput);
+            }
+        }
+
+        // Parse package name to extract org and package name
+        String[] parts = packageName.split(":");
+        String orgPackage = parts[0];
+        String[] orgPackageParts = orgPackage.split("/");
+        if (orgPackageParts.length != 2) {
+            throw new IllegalArgumentException("Invalid package name format. Expected 'org/package' or 'org/package:version', got: " + packageName);
+        }
+        String org = orgPackageParts[0];
+        String packageNameOnly = orgPackageParts[1];
+
+        // Find the package in Central repository
+        String homeDir = System.getProperty("user.home");
+        Path centralRepoBase = Paths.get(homeDir, ".ballerina", "repositories", "central.ballerina.io", "bala", org, packageNameOnly);
+
+        if (!Files.exists(centralRepoBase)) {
+            throw new IllegalStateException("Package not found in Central repository: " + centralRepoBase);
+        }
+
+        // Find the latest version directory or specified version
+        Path versionDir;
+        if (parts.length > 1) {
+            // Specific version requested
+            versionDir = centralRepoBase.resolve(parts[1]);
+        } else {
+            // Find latest version (highest version number)
+            try (Stream<Path> versionDirs = Files.list(centralRepoBase)) {
+                versionDir = versionDirs
+                        .filter(Files::isDirectory)
+                        .max(Comparator.comparing(Path::getFileName, (v1, v2) -> {
+                            // Simple version comparison - find highest
+                            return v1.toString().compareTo(v2.toString());
+                        }))
+                        .orElseThrow(() -> new IllegalStateException("No version directory found for " + packageName));
+            }
+        }
+
+        // Find platform directory (java21, any, etc.)
+        Path platformDir;
+        try (Stream<Path> platformDirs = Files.list(versionDir)) {
+            platformDir = platformDirs
+                    .filter(Files::isDirectory)
+                    .filter(p -> {
+                        String name = p.getFileName().toString();
+                        return name.equals("java21") || name.equals("any") || name.equals("java17") || name.equals("java11");
+                    })
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No platform directory found in " + versionDir));
+        }
+
+        System.out.println("Found bala directory in Central: " + platformDir);
+        return platformDir;
+    }
 }

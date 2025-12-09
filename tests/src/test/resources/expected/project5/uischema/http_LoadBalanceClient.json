@@ -1,0 +1,37 @@
+{
+  "connectorName": "http",
+  "connectionName": "http_LoadBalanceClient",
+  "title": "Connection Config for http_LoadBalanceClient connection",
+  "help": "<h1>http_LoadBalanceClient Connection</h1> <b>LoadBalanceClient endpoint provides load balancing functionality over multiple HTTP clients.\n</b>",
+  "elements": [
+    {
+      "type": "attribute",
+      "value": {
+        "name": "connectionName",
+        "displayName": "Connection Name",
+        "inputType": "string",
+        "defaultValue": "http_LoadBalanceClient_connection_1",
+        "required": "true",
+        "helpTip": "The name for the http_LoadBalanceClient connection",
+        "validation": "nameWithoutSpecialCharactors"
+      }
+    },
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Basic",
+              "elements": [
+                
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

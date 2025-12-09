@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+  ~
+  ~ WSO2 LLC. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<component name="functions" type="synapse/template">
+    <subComponents>
+        <component name="getSecurityHeaders">
+            <displayName>getSecurityHeaders</displayName>
+            <file>getSecurityHeaders.xml</file>
+            <description>Returns the headers map with the relevant authentication requirements.
+</description>
+        </component>
+        <component name="enrichHeaders">
+            <displayName>enrichHeaders</displayName>
+            <file>enrichHeaders.xml</file>
+            <description>Enrich the headers map with the relevant authentication requirements.
+</description>
+        </component>
+        <component name="circuitBreakerForceClose">
+            <displayName>circuitBreakerForceClose</displayName>
+            <file>circuitBreakerForceClose.xml</file>
+            <description>Force the circuit breaker to allow all requests through, ignoring current error rates. Can be used to manually
+restore service after fixing issues.</description>
+        </component>
+        <component name="circuitBreakerForceOpen">
+            <displayName>circuitBreakerForceOpen</displayName>
+            <file>circuitBreakerForceOpen.xml</file>
+            <description>Force the circuit breaker to block all requests until the reset time expires. Can be used to manually stop
+requests during maintenance or known issues.</description>
+        </component>
+        <component name="getCookieStore">
+            <displayName>getCookieStore</displayName>
+            <file>getCookieStore.xml</file>
+            <description>Get the cookie storage associated with this HTTP client. Can be used to access stored cookies for session management.
+</description>
+        </component>
+        <component name="getCircuitBreakerCurrentState">
+            <displayName>getCircuitBreakerCurrentState</displayName>
+            <file>getCircuitBreakerCurrentState.xml</file>
+            <description>Check the current state of the circuit breaker. Can be used to monitor the health status of your HTTP connections.
+</description>
+        </component>
+        <component name="getRemoteHostName">
+            <displayName>getRemoteHostName</displayName>
+            <file>getRemoteHostName.xml</file>
+            <description>Gets the hostname from the remote address. This method may trigger a DNS reverse lookup if the address was created
+with a literal IP address.
+&#x60;&#x60;&#x60;ballerina
+string? remoteHost &#x3D; caller.getRemoteHostName();
+&#x60;&#x60;&#x60;
+</description>
+        </component>
+        <component name="&#x27;continue">
+            <displayName>&#x27;continue</displayName>
+            <file>&#x27;continue.xml</file>
+            <description>Sends a &#x60;100-continue&#x60; response to the caller.
+</description>
+        </component>
+        <component name="circuitBreakerForceClose">
+            <displayName>circuitBreakerForceClose</displayName>
+            <file>circuitBreakerForceClose.xml</file>
+            <description>The circuit breaker client related method to force the circuit into a closed state in which it will allow
+requests regardless of the error percentage until the failure threshold exceeds.</description>
+        </component>
+        <component name="circuitBreakerForceOpen">
+            <displayName>circuitBreakerForceOpen</displayName>
+            <file>circuitBreakerForceOpen.xml</file>
+            <description>The circuit breaker client related method to force the circuit into a open state in which it will suspend all
+requests until &#x60;resetTime&#x60; interval exceeds.</description>
+        </component>
+        <component name="getCookieStore">
+            <displayName>getCookieStore</displayName>
+            <file>getCookieStore.xml</file>
+            <description>Retrieves the cookie store of the client.
+</description>
+        </component>
+        <component name="getCircuitBreakerCurrentState">
+            <displayName>getCircuitBreakerCurrentState</displayName>
+            <file>getCircuitBreakerCurrentState.xml</file>
+            <description>The circuit breaker client related method to provides the &#x60;http:CircuitState&#x60; of the circuit breaker.
+</description>
+        </component>
+        <component name="getSucceededEndpointIndex">
+            <displayName>getSucceededEndpointIndex</displayName>
+            <file>getSucceededEndpointIndex.xml</file>
+            <description>Gets the index of the &#x60;TargetService[]&#x60; array which given a successful response.
+</description>
+        </component>
+        </subComponents>
+</component>

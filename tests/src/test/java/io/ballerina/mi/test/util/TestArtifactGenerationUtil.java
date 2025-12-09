@@ -169,4 +169,72 @@ public class TestArtifactGenerationUtil {
             }
         }
     }
+
+    @Test(description = "Generates expected artifacts for project5 from Central", enabled = false) // Set enabled to true to run manually
+    public void generateProject5ExpectedArtifacts() throws Exception {
+        String projectName = "project5";
+        // Pull package from Ballerina Central
+        String centralPackage = "ballerina/http:2.15.3"; 
+        Path balaDir = ArtifactGenerationUtil.pullPackageFromCentral(centralPackage);
+        
+        // Use expected path's parent as target so generated folder will be at expectedPath level
+        Path expectedPath = Paths.get("src/test/resources/expected", projectName);
+        Path tempTargetPath = expectedPath.getParent();
+        
+        ArtifactGenerationUtil.generateExpectedArtifacts(
+                balaDir.toAbsolutePath().toString(), 
+                tempTargetPath.toAbsolutePath().toString(), 
+                projectName);
+        
+        // Copy generated artifacts from tempTargetPath/generated to expectedPath
+        Path generatedPath = tempTargetPath.resolve("generated");
+        if (java.nio.file.Files.exists(generatedPath)) {
+            // Clean up existing expected path if it exists
+            if (java.nio.file.Files.exists(expectedPath)) {
+                try (var walk = java.nio.file.Files.walk(expectedPath)) {
+                    walk.sorted((a, b) -> b.compareTo(a))
+                        .forEach(path -> {
+                            try {
+                                java.nio.file.Files.delete(path);
+                            } catch (java.io.IOException e) {
+                                // Ignore cleanup errors
+                            }
+                        });
+                }
+            }
+            java.nio.file.Files.createDirectories(expectedPath);
+            
+            // Copy all contents from generated to expectedPath
+            try (var walk = java.nio.file.Files.walk(generatedPath)) {
+                walk.forEach(source -> {
+                    try {
+                        Path destination = expectedPath.resolve(generatedPath.relativize(source));
+                        if (java.nio.file.Files.isDirectory(source)) {
+                            java.nio.file.Files.createDirectories(destination);
+                        } else {
+                            java.nio.file.Files.createDirectories(destination.getParent());
+                            java.nio.file.Files.copy(source, destination, 
+                                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                        }
+                    } catch (java.io.IOException e) {
+                        throw new RuntimeException("Failed to copy artifact: " + source, e);
+                    }
+                });
+            }
+            
+            // Clean up the generated folder
+            try (var walk = java.nio.file.Files.walk(generatedPath)) {
+                walk.sorted((a, b) -> b.compareTo(a))
+                    .forEach(path -> {
+                        try {
+                            java.nio.file.Files.delete(path);
+                        } catch (java.io.IOException e) {
+                            // Ignore cleanup errors
+                        }
+                    });
+            }
+        }
+        
+        System.out.println("Expected artifacts for project5 generated successfully from Central package: " + centralPackage);
+    }
 }
