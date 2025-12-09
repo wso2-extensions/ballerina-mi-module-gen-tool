@@ -92,7 +92,7 @@ public class MiCmd implements BLauncherCmd {
 
         Path path = Path.of(sourcePath).normalize();
         BuildOptions buildOptions = BuildOptions.builder().setOffline(false).build();
-        ProjectLoadResult projectLoadResult = ProjectLoader.load(path, buildOptions);
+        ProjectLoadResult projectLoadResult = ProjectLoader.load(path.toAbsolutePath(), buildOptions);
         Project project = projectLoadResult.project();
         compilePkg = project.currentPackage();
         if (!(project instanceof BuildProject || project instanceof BalaProject)) {
