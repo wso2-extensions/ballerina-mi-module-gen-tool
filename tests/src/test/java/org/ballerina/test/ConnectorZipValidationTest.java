@@ -45,11 +45,20 @@ import java.util.zip.ZipInputStream;
  * {@link org.testng.annotations.DataProvider} mechanism. Each project to be tested should have
  * its own directory under {@code src/test/resources/ballerina/}.
  * <p>
+ * The test suite supports two types of projects:
+ * <ul>
+ *   <li><b>Build Projects</b> (project1, project2, project3): Regular Ballerina projects with
+ *       {@code @mi:Operation} annotated functions. Use {@code miProjectDataProvider()}.</li>
+ *   <li><b>Bala Projects</b> (project4): Ballerina connector projects that need to be packed
+ *       into .bala files first. Use {@code balaProjectDataProvider()}.</li>
+ * </ul>
+ * <p>
  * To add a new project to the test suite:
  * <ol>
  *   <li>Add the project's source files and expected output files to the appropriate directories under
  *       {@code src/test/resources/ballerina/} and {@code src/test/resources/expected/}.</li>
- *   <li>Update the {@code miProjectDataProvider()} method to include the new project name.</li>
+ *   <li>For build projects: Update the {@code miProjectDataProvider()} method to include the new project name.</li>
+ *   <li>For bala projects: Update the {@code balaProjectDataProvider()} method to include the new project name.</li>
  * </ol>
  */
 public class ConnectorZipValidationTest {
@@ -74,6 +83,13 @@ public class ConnectorZipValidationTest {
                 {"project1"},
                 {"project2"},
                 {"project3"},
+        };
+    }
+
+    @DataProvider(name = "balaProjectDataProvider")
+    public Object[][] balaProjectDataProvider() {
+        return new Object[][]{
+                {"project4"},
         };
     }
 
@@ -147,10 +163,9 @@ public class ConnectorZipValidationTest {
         compareFileContent(testUiSchema, expectedPath.resolve("uischema").resolve("test.json"));
     }
 
-    @Test(description = "Validate the generated connector artifacts for project4 (bala-based connector)")
-    public void testGeneratedConnectorArtifactsForProject4() throws Exception {
+    @Test(description = "Validate the generated connector artifacts for bala-based connectors", dataProvider = "balaProjectDataProvider")
+    public void testGeneratedConnectorArtifactsForBalaProject(String projectName) throws Exception {
         Connector.reset();
-        String projectName = "project4";
         Path projectPath = BALLERINA_PROJECTS_DIR.resolve(projectName);
         Path expectedPath = EXPECTED_DIR.resolve(projectName);
 
