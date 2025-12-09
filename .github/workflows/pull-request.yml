@@ -73,11 +73,6 @@ jobs:
         with:
           version: ${{ env.BAL_VERSION }}
 
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4
-        with:
-          maven-version: '3.9.6'
-
       - name: Check Docker availability (optional)
         shell: bash
         continue-on-error: true
