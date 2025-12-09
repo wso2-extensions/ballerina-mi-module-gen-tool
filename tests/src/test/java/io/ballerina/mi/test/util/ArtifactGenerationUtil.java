@@ -19,12 +19,16 @@ package io.ballerina.mi.test.util;
 import io.ballerina.mi.MiCmd;
 import org.testng.Assert;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.nio.file.StandardCopyOption;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -56,7 +60,8 @@ import java.util.zip.ZipInputStream;
  * </p>
  * <p>
  * <b>Usage:</b> Call {@link #generateExpectedArtifacts(String, String)} with the project path and name
- * to refresh the expected artifacts before running assertions in tests.
+ * to refresh the expected artifacts before running assertions in tests. For bala projects that require a custom
+ * output directory, use {@link #generateExpectedArtifacts(String, String, String)} and provide the target path.
  * </p>
  */
 public class ArtifactGenerationUtil {
@@ -64,10 +69,18 @@ public class ArtifactGenerationUtil {
     private static final Path EXPECTED_DIR = RESOURCES_DIR.resolve("expected");
 
     public static void generateExpectedArtifacts(String projectPathStr, String projectName) throws Exception {
+        generateExpectedArtifacts(projectPathStr, null, projectName);
+    }
+
+    public static void generateExpectedArtifacts(String projectPathStr, String targetPathStr, String projectName)
+            throws Exception {
         System.out.println("Starting generateExpectedArtifacts for project: " + projectName);
         System.out.println("ProjectPathStr: " + projectPathStr);
         Path projectPath = Paths.get(projectPathStr);
         Path expectedOutputPath = EXPECTED_DIR.resolve(projectName);
+        Path targetDir = targetPathStr == null || targetPathStr.isBlank()
+                ? projectPath.resolve("target")
+                : Paths.get(targetPathStr);
 
         // 1. Clean up existing expected artifacts
         if (Files.exists(expectedOutputPath)) {
@@ -86,6 +99,8 @@ public class ArtifactGenerationUtil {
         }
         Files.createDirectories(expectedOutputPath);
         System.out.println("Ensured expected output directory exists: " + expectedOutputPath);
+        Files.createDirectories(targetDir);
+        System.out.println("Ensured target directory exists: " + targetDir);
 
         // 2. Programmatically execute MiCmd
         System.out.println("Executing MiCmd for project: " + projectPathStr);
@@ -93,13 +108,17 @@ public class ArtifactGenerationUtil {
         Field sourcePathField = MiCmd.class.getDeclaredField("sourcePath");
         sourcePathField.setAccessible(true);
         sourcePathField.set(miCmd, projectPathStr);
+        if (targetPathStr != null && !targetPathStr.isBlank()) {
+            Field targetPathField = MiCmd.class.getDeclaredField("targetPath");
+            targetPathField.setAccessible(true);
+            targetPathField.set(miCmd, targetPathStr);
+        }
         miCmd.execute();
         System.out.println("MiCmd execution completed.");
 
         // 3. Find the generated zip file and unzip it to the expected directory
-        Path targetDir = projectPath.resolve("target");
         Optional<Path> generatedZipFile;
-        try (Stream<Path> files = Files.list(targetDir)) {
+        try (Stream<Path> files = Files.walk(targetDir, 2)) {
             generatedZipFile = files.filter(p -> p.toString().endsWith(".zip")).findFirst();
         }
 
@@ -137,6 +156,40 @@ public class ArtifactGenerationUtil {
         if (balCommand != null) {
             Path ballerinaHome = Paths.get(balCommand).getParent().getParent();
             System.setProperty("ballerina.home", ballerinaHome.toString());
+        }
+    }
+
+    public static Path packBallerinaProject(Path projectPath) throws Exception {
+        String balCommand = System.getProperty("bal.command");
+        if (balCommand == null || balCommand.isBlank()) {
+            throw new IllegalStateException("System property 'bal.command' is not set. Cannot run 'bal pack'.");
+        }
+
+        ProcessBuilder processBuilder = new ProcessBuilder(balCommand, "pack");
+        processBuilder.directory(projectPath.toFile());
+        processBuilder.redirectErrorStream(true);
+        Process process = processBuilder.start();
+
+        StringBuilder output = new StringBuilder();
+        try (InputStream inputStream = process.getInputStream();
+             InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             BufferedReader bufferedReader = new BufferedReader(reader)) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
+            }
+        }
+
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new RuntimeException("'bal pack' failed for " + projectPath + " with exit code " + exitCode +
+                    System.lineSeparator() + output);
+        }
+
+        try (Stream<Path> files = Files.walk(projectPath.resolve("target"))) {
+            return files.filter(path -> path.toString().endsWith(".bala"))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No .bala artifact found under " + projectPath));
         }
     }
 }

@@ -1,0 +1,37 @@
+{
+  "connectorName": "project4",
+  "connectionName": "project4_Client",
+  "title": "Connection Config for project4_Client connection",
+  "help": "<h1>project4_Client Connection</h1> <b>This is a generated connector from [Novel COVID-19 API version 3.0.0](https://disease.sh/docs/) OpenAPI Specification.\nBallerina connector for COVID-19 provides easy access to latest COVID-19 related data across the world. Please refer to [API documentation](https://disease.sh) for more detail.</b>",
+  "elements": [
+    {
+      "type": "attribute",
+      "value": {
+        "name": "connectionName",
+        "displayName": "Connection Name",
+        "inputType": "string",
+        "defaultValue": "project4_Client_connection_1",
+        "required": "true",
+        "helpTip": "The name for the project4_Client connection",
+        "validation": "nameWithoutSpecialCharactors"
+      }
+    },
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Basic",
+              "elements": [
+                
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

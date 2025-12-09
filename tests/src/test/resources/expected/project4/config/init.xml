@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2025, WSO2 LLC. (http://wso2.com).
+  ~ Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
   ~
   ~ WSO2 LLC. licenses this file to you under the Apache License,
   ~ Version 2.0 (the "License"); you may not use this file except
   ~ in compliance with the License.
   ~ You may obtain a copy of the License at
   ~
-  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~ http://www.apache.org/licenses/LICENSE-2.0
   ~
   ~ Unless required by applicable law or agreed to in writing,
   ~ software distributed under the License is distributed on an
@@ -16,12 +16,13 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
-
-<suite name="ballerina-mi-module-gen-tool-test-suite" time-out="120000">
-    <test name="ballerina-mi-module-gen-tool-test">
-        <packages>
-            <package name="org.ballerina.test.*"/>
-        </packages>
-    </test>
-</suite>
+<template name="init" onError="fault" xmlns="http://ws.apache.org/ns/synapse">
+    <parameter name="name" description="Unique name the connection is identified by"/>
+    <parameter name="connectionType" description="Connection type"/>
+    <!-- TODO: if union, the selected member type becomes a parameter-->
+    <sequence>
+        <property name="project4_Client_objectTypeName" value="Client"/>
+        
+        <class name="io.ballerina.stdlib.mi.BalConnectorConfig"/>
+    </sequence>
+</template>
