@@ -87,7 +87,11 @@ public class MiIntegrationTest {
         Path projectRootPath = Paths.get(projectRoot);
         
         // Get the CAR file path
-        Path carFile = projectRootPath.resolve("mi-intergration-test")
+        Path carFile = projectRootPath.resolve("tests")
+            .resolve("src")
+            .resolve("test")
+            .resolve("resources")
+            .resolve("mi")
             .resolve("mi-test-project")
             .resolve("target")
             .resolve("mi-test-project_1.0.0.car");
@@ -98,14 +102,22 @@ public class MiIntegrationTest {
         }
 
         // Get keystore files
-        Path keystoreFile = projectRootPath.resolve("mi-intergration-test")
+        Path keystoreFile = projectRootPath.resolve("tests")
+            .resolve("src")
+            .resolve("test")
+            .resolve("resources")
+            .resolve("mi")
             .resolve("mi-test-project")
             .resolve("deployment")
             .resolve("docker")
             .resolve("resources")
             .resolve("wso2carbon.jks");
         
-        Path truststoreFile = projectRootPath.resolve("mi-intergration-test")
+        Path truststoreFile = projectRootPath.resolve("tests")
+            .resolve("src")
+            .resolve("test")
+            .resolve("resources")
+            .resolve("mi")
             .resolve("mi-test-project")
             .resolve("deployment")
             .resolve("docker")

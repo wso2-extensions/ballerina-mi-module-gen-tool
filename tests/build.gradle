@@ -214,7 +214,7 @@ task copyConnectorArtifactsToMiProject {
     doLast {
         def projectRoot = project.rootDir
         def ballerinaProjectsDir = new File(projectRoot, "tests/src/test/resources/ballerina")
-        def miConnectorsDir = new File(projectRoot, "mi-intergration-test/mi-test-project/src/main/wso2mi/resources/connectors")
+        def miConnectorsDir = new File(projectRoot, "tests/src/test/resources/mi/mi-test-project/src/main/wso2mi/resources/connectors")
         
         // Ensure destination directory exists
         miConnectorsDir.mkdirs()
@@ -258,7 +258,7 @@ task copyConnectorArtifactsToMiProject {
 // Task to build MI project CAR file
 task buildMiProject(type: Exec) {
     dependsOn copyConnectorArtifactsToMiProject
-    def miProjectDir = new File(project.rootDir, "mi-intergration-test/mi-test-project")
+    def miProjectDir = new File(project.rootDir, "tests/src/test/resources/mi/mi-test-project")
     workingDir miProjectDir
     
     doFirst {

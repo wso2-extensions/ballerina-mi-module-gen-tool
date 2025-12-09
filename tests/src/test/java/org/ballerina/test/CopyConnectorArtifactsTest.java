@@ -40,7 +40,7 @@ public class CopyConnectorArtifactsTest {
         Paths.get(System.getProperty("user.dir"), "..").toAbsolutePath().normalize().toString());
     
     private static final String BALLERINA_PROJECTS_DIR = "tests/src/test/resources/ballerina";
-    private static final String MI_CONNECTORS_DIR = "mi-intergration-test/mi-test-project/src/main/wso2mi/resources/connectors";
+    private static final String MI_CONNECTORS_DIR = "tests/src/test/resources/mi/mi-test-project/src/main/wso2mi/resources/connectors";
 
     /**
      * Data provider for projects that need their artifacts copied to MI project.
