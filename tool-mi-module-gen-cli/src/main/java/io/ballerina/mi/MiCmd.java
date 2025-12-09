@@ -95,7 +95,7 @@ public class MiCmd implements BLauncherCmd {
         ProjectLoadResult projectLoadResult = ProjectLoader.load(path, buildOptions);
         Project project = projectLoadResult.project();
         compilePkg = project.currentPackage();
-        if (!(project instanceof BuildProject || project instanceof BalaProject)){
+        if (!(project instanceof BuildProject || project instanceof BalaProject)) {
             printStream.println("ERROR: Invalid project path provided");
             return;
         }

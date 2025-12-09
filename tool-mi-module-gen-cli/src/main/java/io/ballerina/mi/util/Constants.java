@@ -33,6 +33,7 @@ public class Constants {
     public static final String RECORD = "record";
     public static final String ARRAY = "array";
     public static final String ENUM = "enum";
+    public static final String MAP = "map";
     public static final String FUNCTION_TEMPLATE_PATH = "balConnector" + File.separator + "functions";
     public static final String JSON_TEMPLATE_PATH = "balConnector" + File.separator + "inputTemplates";
     public static final String ATTRIBUTE_GROUP_TEMPLATE_PATH = JSON_TEMPLATE_PATH + File.separator
@@ -45,8 +46,8 @@ public class Constants {
     public static final String INPUT_TYPE_BOOLEAN = "boolean";
     public static final String INPUT_TYPE_COMBO = "combo";
     public static final String VALIDATE_TYPE_REGEX = "regex";
-    public static final String INTEGER_REGEX = "^(-?\\d+|\\$\\{.+\\})$";
-    public static final String DECIMAL_REGEX = "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$";
+    public static final String INTEGER_REGEX = "^(-?\\\\d+|\\\\$\\\\{.+\\\\}\\\\)$";
+    public static final String DECIMAL_REGEX = "^(-?\\\\d+(\\\\.\\\\d+)?|\\\\$\\\\{.+\\\\}\\\\)$";
     public static final String ATTRIBUTE_SEPARATOR = ",";
     public static final String ATTRIBUTE_GROUP_END = "\n                    ]\n                  }\n                }";
     public static final String CONNECTOR_TARGET_PATH = "CONNECTOR_TARGET_PATH";

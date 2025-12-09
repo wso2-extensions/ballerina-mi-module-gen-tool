@@ -97,11 +97,30 @@ public class BalModuleAnalyzer implements Analyzer {
 
             for (int i = 0; i < noOfParams; i++) {
                 ParameterSymbol parameterSymbol = parameterSymbols.get(i);
-                String paramType = Utils.getParamTypeName(parameterSymbol.typeDescriptor().typeKind());
+                TypeSymbol typeSymbol = parameterSymbol.typeDescriptor();
+                TypeDescKind actualTypeKind = Utils.getActualTypeKind(typeSymbol);
+                String paramType = Utils.getParamTypeName(actualTypeKind);
+
                 if (paramType != null) {
                     Optional<String> optParamName = parameterSymbol.getName();
                     if (optParamName.isPresent()) {
-                        component.setFunctionParam(new FunctionParam(Integer.toString(i), optParamName.get(), parameterSymbol.typeDescriptor().typeKind().getName()));
+                        String paramName = optParamName.get();
+                        FunctionParam functionParam = new FunctionParam(Integer.toString(i), paramName, paramType);
+                        functionParam.setParamKind(parameterSymbol.paramKind());
+                        component.setFunctionParam(functionParam);
+                        if (actualTypeKind == TypeDescKind.RECORD) {
+                            TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(typeSymbol);
+                            if (actualTypeSymbol instanceof RecordTypeSymbol recordTypeSymbol) {
+                                Map<String, RecordFieldSymbol> recordFields = recordTypeSymbol.fieldDescriptors();
+                                for (Map.Entry<String, RecordFieldSymbol> field : recordFields.entrySet()) {
+                                    TypeSymbol fieldTypeSymbol = field.getValue().typeDescriptor();
+                                    TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldTypeSymbol);
+                                    FunctionParam fieldParam = new FunctionParam(Integer.toString(i), field.getKey(),
+                                            fieldTypeKind.getName());
+                                    component.setFunctionParam(fieldParam);
+                                }
+                            }
+                        }
                     }
                 }
             }

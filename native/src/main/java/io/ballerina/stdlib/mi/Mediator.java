@@ -30,11 +30,17 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BXml;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axis2.AxisFault;
 import org.apache.synapse.data.connector.ConnectorResponse;
 import org.apache.synapse.data.connector.DefaultConnectorResponse;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.apache.synapse.mediators.elementary.EnrichMediator;
+import org.apache.synapse.mediators.elementary.Source;
+import org.apache.synapse.mediators.elementary.Target;
 import org.apache.synapse.mediators.template.TemplateContext;
+import org.apache.synapse.util.MediatorEnrichUtil;
 
 import java.util.Objects;
 import java.util.Stack;
@@ -49,6 +55,8 @@ import static io.ballerina.stdlib.mi.Constants.STRING;
 import static io.ballerina.stdlib.mi.Constants.XML;
 
 public class Mediator extends AbstractMediator {
+
+    private static final String TEMP_RESPONSE_PROPERTY_NAME = "TEMP_BAL_RESPONSE_PROPERTY_";
     private static volatile Runtime rt = null;
     private static Module module = null;
     private String orgName;
@@ -68,6 +76,10 @@ public class Mediator extends AbstractMediator {
 
     private static String getResultProperty(MessageContext context) {
         return lookupTemplateParameter(context, Constants.RESPONSE_VARIABLE).toString();
+    }
+
+    private static boolean isOverwriteBody(MessageContext context) {
+        return Boolean.parseBoolean((String) lookupTemplateParameter(context, Constants.OVERWRITE_BODY));
     }
 
     public boolean mediate(MessageContext context) {
@@ -99,12 +111,37 @@ public class Mediator extends AbstractMediator {
                 result = result.toString();
             }
             ConnectorResponse connectorResponse = new DefaultConnectorResponse();
-            connectorResponse.setPayload(result);
+            if (isOverwriteBody(context)) {
+                context.setProperty(TEMP_RESPONSE_PROPERTY_NAME + getResultProperty(context), result);
+                overwriteBody(context, result);
+            } else {
+                connectorResponse.setPayload(result);
+            }
             context.setVariable(getResultProperty(context), connectorResponse);
         } catch (BError bError) {
             handleException(bError.getMessage(), context);
+        } catch (AxisFault e) {
+            handleException("Error while overwriting message body", e, context);
         }
         return true;
+    }
+
+    protected void overwriteBody(MessageContext messageContext, Object payload) throws AxisFault {
+        Source source = MediatorEnrichUtil.createSourceWithProperty(TEMP_RESPONSE_PROPERTY_NAME + getResultProperty(messageContext));
+        Target target = MediatorEnrichUtil.createTargetWithBody();
+        doEnrich(messageContext, source, target);
+    }
+
+    private void doEnrich(MessageContext synCtx, Source source, Target target) {
+        if (!Boolean.TRUE.equals(synCtx.getProperty("message.builder.invoked"))) {
+            MediatorEnrichUtil.buildMessage(synCtx);
+        }
+
+        EnrichMediator enrichMediator = new EnrichMediator();
+        enrichMediator.setSource(source);
+        enrichMediator.setTarget(target);
+        enrichMediator.setNativeJsonSupportEnabled(true);
+        enrichMediator.mediate(synCtx);
     }
 
     private boolean setParameters(Object[] args, MessageContext context) {
@@ -149,8 +186,16 @@ public class Mediator extends AbstractMediator {
 
     private OMElement getOMElement(MessageContext ctx, String value) {
         String param = ctx.getProperty(value).toString();
-        if (lookupTemplateParameter(ctx, param) != null) {
-            return (OMElement) lookupTemplateParameter(ctx, param);
+        Object paramValue = lookupTemplateParameter(ctx, param);
+        if (paramValue != null) {
+            if (paramValue instanceof OMElement) {
+                return (OMElement) paramValue;
+            } else {
+                try {
+                    return AXIOMUtil.stringToOM((String) lookupTemplateParameter(ctx, param));
+                } catch (Exception ignored) {
+                }
+            }
         }
         log.error("Error in getting the OMElement");
         return null;

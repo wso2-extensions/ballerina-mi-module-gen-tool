@@ -41,6 +41,9 @@ public class BalConnectorAnalyzer implements Analyzer {
 
     @Override
     public void analyze(Package compilePackage) {
+
+        PackageDescriptor descriptor = compilePackage.descriptor();
+        Connector.getConnector(descriptor);
         for (Module module : compilePackage.modules()) {
             analyzeModule(compilePackage, module);
         }
@@ -65,8 +68,7 @@ public class BalConnectorAnalyzer implements Analyzer {
         String moduleName = moduleSymbol.getName().orElseThrow(() -> new IllegalStateException("Module name not defined"));
         String connectionType = String.format("%s_%s", moduleName, clientClassName);
 
-        PackageDescriptor descriptor = compilePackage.descriptor();
-        Connector connector = Connector.getConnector(descriptor);
+        Connector connector = Connector.getConnector();
         Connection connection = new Connection(connector, connectionType, clientClassName, Integer.toString(connector.getConnections().size()));
 
         // Get the connector description
@@ -134,7 +136,8 @@ public class BalConnectorAnalyzer implements Analyzer {
                 List<ParameterSymbol> parameterSymbols = params.get();
 
                 for (ParameterSymbol parameterSymbol : parameterSymbols) {
-                    String paramType = Utils.getParamTypeName(parameterSymbol.typeDescriptor().typeKind());
+                    TypeDescKind actualTypeKind = Utils.getActualTypeKind(parameterSymbol.typeDescriptor());
+                    String paramType = Utils.getParamTypeName(actualTypeKind);
                     if (paramType == null) {
                         printStream.println("Invalid parameter type for method " + methodSymbol.getName().get());
                         printStream.println("Skipping method " + methodSymbol.getName().get());
@@ -142,7 +145,9 @@ public class BalConnectorAnalyzer implements Analyzer {
                     }
                     Optional<String> optParamName = parameterSymbol.getName();
                     if (optParamName.isPresent()) {
-                        component.setFunctionParam(new FunctionParam(Integer.toString(i), optParamName.get(), parameterSymbol.typeDescriptor().typeKind().getName()));
+                        FunctionParam functionParam = new FunctionParam(Integer.toString(i), optParamName.get(), actualTypeKind.getName());
+                        functionParam.setParamKind(parameterSymbol.paramKind());
+                        component.setFunctionParam(functionParam);
                     }
                 }
             }
