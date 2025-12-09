@@ -21,7 +21,8 @@
 <suite name="ballerina-mi-module-gen-tool-test-suite" time-out="120000">
     <test name="ballerina-mi-module-gen-tool-test">
         <packages>
-            <package name="org.ballerina.test.*"/>
+            <!-- <package name="org.ballerina.test.*"/> -->
+            <package name="io.ballerina.mi.test.util.*"/>
         </packages>
     </test>
 </suite>

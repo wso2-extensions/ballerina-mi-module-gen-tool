@@ -60,4 +60,12 @@ public class TestArtifactGenerationUtil {
         ArtifactGenerationUtil.generateExpectedArtifacts(projectPath, projectName);
         System.out.println("Expected artifacts for project3 generated successfully.");
     }
+
+    @Test(description = "Generates expected artifacts for project4", enabled = true) // Set enabled to true to run manually
+    public void generateProject4ExpectedArtifacts() throws Exception {
+        String projectPath = "/home/virul/.ballerina/repositories/local/bala/testOrg/project3/1.0.0";
+        String projectName = "project4";
+        ArtifactGenerationUtil.generateExpectedArtifacts(projectPath, projectName);
+        System.out.println("Expected artifacts for project4 generated successfully.");
+    }
 }
