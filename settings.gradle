@@ -14,7 +14,6 @@ plugins {
 rootProject.name = 'ballerina-mi-module-gen-tool'
 
 include(':checkstyle')
-//include(':tool-compiler-plugin')
 include(':tool-mi-module-gen')
 include(':tool-mi-module-gen-cli')
 include(':mi-tests')
@@ -22,7 +21,6 @@ include(':mi-native')
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
 project(':mi-native').projectDir = file('native')
-//project(':tool-compiler-plugin').projectDir = file('compiler-plugin')
 project(':tool-mi-module-gen').projectDir = file("tool-mi-module-gen")
 project(':tool-mi-module-gen-cli').projectDir = file("tool-mi-module-gen-cli")
 project(':mi-tests').projectDir = file('tests')
