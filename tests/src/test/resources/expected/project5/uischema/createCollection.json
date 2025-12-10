@@ -1,8 +1,8 @@
 {
-  "connectorName": "http",
-  "operationName": "getRemoteHostName",
-  "title": "getRemoteHostName",
-  "help": "Gets the hostname from the remote address. This method may trigger a DNS reverse lookup if the address was created\nwith a literal IP address.\n```ballerina\nstring? remoteHost = caller.getRemoteHostName();\n```\n",
+  "connectorName": "milvus",
+  "operationName": "createCollection",
+  "title": "createCollection",
+  "help": "Creates a new collection in the Milvus vector database.\n",
   "elements": [
     {
       "type": "attributeGroup",
@@ -10,11 +10,38 @@
         "groupName": "General",
         "elements": [
           {
+            "type": "attribute",
+            "value": {
+              "name": "configRef",
+              "displayName": "Connection",
+              "inputType": "connection",
+              "allowedConnectionTypes": [
+                "milvus_Client"
+              ],
+              "defaultType": "connection.milvus_Client",
+              "defaultValue": "",
+              "required": "true",
+              "helpTip": "Connection to be used"
+            }
+          },
+          {
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
               "elements": [
-                
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "request",
+                    "displayName": "request",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
               ]
             }
           },

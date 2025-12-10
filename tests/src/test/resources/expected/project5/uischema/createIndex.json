@@ -1,8 +1,8 @@
 {
-  "connectorName": "http",
-  "operationName": "getCircuitBreakerCurrentState",
-  "title": "getCircuitBreakerCurrentState",
-  "help": "The circuit breaker client related method to provides the `http:CircuitState` of the circuit breaker.\n",
+  "connectorName": "milvus",
+  "operationName": "createIndex",
+  "title": "createIndex",
+  "help": "Creates an index for a collection in the Milvus vector database.\n",
   "elements": [
     {
       "type": "attributeGroup",
@@ -16,9 +16,9 @@
               "displayName": "Connection",
               "inputType": "connection",
               "allowedConnectionTypes": [
-                "http_StatusCodeClient"
+                "milvus_Client"
               ],
-              "defaultType": "connection.http_StatusCodeClient",
+              "defaultType": "connection.milvus_Client",
               "defaultValue": "",
               "required": "true",
               "helpTip": "Connection to be used"
@@ -29,7 +29,19 @@
             "value": {
               "groupName": "Input Variables",
               "elements": [
-                
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "request",
+                    "displayName": "request",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
               ]
             }
           },

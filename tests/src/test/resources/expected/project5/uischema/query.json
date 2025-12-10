@@ -1,8 +1,8 @@
 {
-  "connectorName": "http",
-  "operationName": "&#x27;continue",
-  "title": "&#x27;continue",
-  "help": "Sends a `100-continue` response to the caller.\n",
+  "connectorName": "milvus",
+  "operationName": "query",
+  "title": "query",
+  "help": "Performs a scalar filtering for data in a collection in the Milvus vector database.\n",
   "elements": [
     {
       "type": "attributeGroup",
@@ -10,11 +10,38 @@
         "groupName": "General",
         "elements": [
           {
+            "type": "attribute",
+            "value": {
+              "name": "configRef",
+              "displayName": "Connection",
+              "inputType": "connection",
+              "allowedConnectionTypes": [
+                "milvus_Client"
+              ],
+              "defaultType": "connection.milvus_Client",
+              "defaultValue": "",
+              "required": "true",
+              "helpTip": "Connection to be used"
+            }
+          },
+          {
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
               "elements": [
-                
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "request",
+                    "displayName": "request",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
               ]
             }
           },

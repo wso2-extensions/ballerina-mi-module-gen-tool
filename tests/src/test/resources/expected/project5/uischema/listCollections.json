@@ -1,8 +1,8 @@
 {
-  "connectorName": "http",
-  "operationName": "circuitBreakerForceClose",
-  "title": "circuitBreakerForceClose",
-  "help": "The circuit breaker client related method to force the circuit into a closed state in which it will allow\nrequests regardless of the error percentage until the failure threshold exceeds.",
+  "connectorName": "milvus",
+  "operationName": "listCollections",
+  "title": "listCollections",
+  "help": "Lists all the collections in the Milvus vector database.\n",
   "elements": [
     {
       "type": "attributeGroup",
@@ -16,9 +16,9 @@
               "displayName": "Connection",
               "inputType": "connection",
               "allowedConnectionTypes": [
-                "http_StatusCodeClient"
+                "milvus_Client"
               ],
-              "defaultType": "connection.http_StatusCodeClient",
+              "defaultType": "connection.milvus_Client",
               "defaultValue": "",
               "required": "true",
               "helpTip": "Connection to be used"

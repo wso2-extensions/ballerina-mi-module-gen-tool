@@ -18,86 +18,52 @@
   -->
 <component name="functions" type="synapse/template">
     <subComponents>
-        <component name="getSecurityHeaders">
-            <displayName>getSecurityHeaders</displayName>
-            <file>getSecurityHeaders.xml</file>
-            <description>Returns the headers map with the relevant authentication requirements.
+        <component name="search">
+            <displayName>search</displayName>
+            <file>search.xml</file>
+            <description>Performs a vector similarity search for data in a collection in the Milvus vector database.
 </description>
         </component>
-        <component name="enrichHeaders">
-            <displayName>enrichHeaders</displayName>
-            <file>enrichHeaders.xml</file>
-            <description>Enrich the headers map with the relevant authentication requirements.
+        <component name="query">
+            <displayName>query</displayName>
+            <file>query.xml</file>
+            <description>Performs a scalar filtering for data in a collection in the Milvus vector database.
 </description>
         </component>
-        <component name="circuitBreakerForceClose">
-            <displayName>circuitBreakerForceClose</displayName>
-            <file>circuitBreakerForceClose.xml</file>
-            <description>Force the circuit breaker to allow all requests through, ignoring current error rates. Can be used to manually
-restore service after fixing issues.</description>
-        </component>
-        <component name="circuitBreakerForceOpen">
-            <displayName>circuitBreakerForceOpen</displayName>
-            <file>circuitBreakerForceOpen.xml</file>
-            <description>Force the circuit breaker to block all requests until the reset time expires. Can be used to manually stop
-requests during maintenance or known issues.</description>
-        </component>
-        <component name="getCookieStore">
-            <displayName>getCookieStore</displayName>
-            <file>getCookieStore.xml</file>
-            <description>Get the cookie storage associated with this HTTP client. Can be used to access stored cookies for session management.
+        <component name="upsert">
+            <displayName>upsert</displayName>
+            <file>upsert.xml</file>
+            <description>Upserts data into a collection in the Milvus vector database.
 </description>
         </component>
-        <component name="getCircuitBreakerCurrentState">
-            <displayName>getCircuitBreakerCurrentState</displayName>
-            <file>getCircuitBreakerCurrentState.xml</file>
-            <description>Check the current state of the circuit breaker. Can be used to monitor the health status of your HTTP connections.
+        <component name="loadCollection">
+            <displayName>loadCollection</displayName>
+            <file>loadCollection.xml</file>
+            <description>Loads a collection in the Milvus vector database.
 </description>
         </component>
-        <component name="getRemoteHostName">
-            <displayName>getRemoteHostName</displayName>
-            <file>getRemoteHostName.xml</file>
-            <description>Gets the hostname from the remote address. This method may trigger a DNS reverse lookup if the address was created
-with a literal IP address.
-&#x60;&#x60;&#x60;ballerina
-string? remoteHost &#x3D; caller.getRemoteHostName();
-&#x60;&#x60;&#x60;
+        <component name="listCollections">
+            <displayName>listCollections</displayName>
+            <file>listCollections.xml</file>
+            <description>Lists all the collections in the Milvus vector database.
 </description>
         </component>
-        <component name="&#x27;continue">
-            <displayName>&#x27;continue</displayName>
-            <file>&#x27;continue.xml</file>
-            <description>Sends a &#x60;100-continue&#x60; response to the caller.
+        <component name="createIndex">
+            <displayName>createIndex</displayName>
+            <file>createIndex.xml</file>
+            <description>Creates an index for a collection in the Milvus vector database.
 </description>
         </component>
-        <component name="circuitBreakerForceClose">
-            <displayName>circuitBreakerForceClose</displayName>
-            <file>circuitBreakerForceClose.xml</file>
-            <description>The circuit breaker client related method to force the circuit into a closed state in which it will allow
-requests regardless of the error percentage until the failure threshold exceeds.</description>
-        </component>
-        <component name="circuitBreakerForceOpen">
-            <displayName>circuitBreakerForceOpen</displayName>
-            <file>circuitBreakerForceOpen.xml</file>
-            <description>The circuit breaker client related method to force the circuit into a open state in which it will suspend all
-requests until &#x60;resetTime&#x60; interval exceeds.</description>
-        </component>
-        <component name="getCookieStore">
-            <displayName>getCookieStore</displayName>
-            <file>getCookieStore.xml</file>
-            <description>Retrieves the cookie store of the client.
+        <component name="delete">
+            <displayName>delete</displayName>
+            <file>delete.xml</file>
+            <description>Deletes data from a collection in the Milvus vector database.
 </description>
         </component>
-        <component name="getCircuitBreakerCurrentState">
-            <displayName>getCircuitBreakerCurrentState</displayName>
-            <file>getCircuitBreakerCurrentState.xml</file>
-            <description>The circuit breaker client related method to provides the &#x60;http:CircuitState&#x60; of the circuit breaker.
-</description>
-        </component>
-        <component name="getSucceededEndpointIndex">
-            <displayName>getSucceededEndpointIndex</displayName>
-            <file>getSucceededEndpointIndex.xml</file>
-            <description>Gets the index of the &#x60;TargetService[]&#x60; array which given a successful response.
+        <component name="createCollection">
+            <displayName>createCollection</displayName>
+            <file>createCollection.xml</file>
+            <description>Creates a new collection in the Milvus vector database.
 </description>
         </component>
         </subComponents>

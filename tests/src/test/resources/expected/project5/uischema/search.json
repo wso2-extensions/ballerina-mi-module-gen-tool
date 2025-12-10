@@ -1,8 +1,8 @@
 {
-  "connectorName": "http",
-  "operationName": "getSucceededEndpointIndex",
-  "title": "getSucceededEndpointIndex",
-  "help": "Gets the index of the `TargetService[]` array which given a successful response.\n",
+  "connectorName": "milvus",
+  "operationName": "search",
+  "title": "search",
+  "help": "Performs a vector similarity search for data in a collection in the Milvus vector database.\n",
   "elements": [
     {
       "type": "attributeGroup",
@@ -16,9 +16,9 @@
               "displayName": "Connection",
               "inputType": "connection",
               "allowedConnectionTypes": [
-                "http_FailoverClient"
+                "milvus_Client"
               ],
-              "defaultType": "connection.http_FailoverClient",
+              "defaultType": "connection.milvus_Client",
               "defaultValue": "",
               "required": "true",
               "helpTip": "Connection to be used"
@@ -29,7 +29,19 @@
             "value": {
               "groupName": "Input Variables",
               "elements": [
-                
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "request",
+                    "displayName": "request",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
               ]
             }
           },

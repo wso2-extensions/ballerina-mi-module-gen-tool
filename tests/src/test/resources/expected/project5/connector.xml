@@ -17,111 +17,114 @@
   ~ under the License.
   -->
 <connector>
-    <component name="http" package="io.ballerina.stdlib.mi">
+    <component name="milvus" package="io.ballerina.stdlib.mi">
         <dependency component="config"/>
         <dependency component="functions"/>
         <description>## Overview
 
-This module provides APIs for connecting and interacting with HTTP and HTTP2 endpoints. It
-facilitates two types of network entry points as the &#x60;Client&#x60; and &#x60;Listener&#x60;.
+[Milvus](https://milvus.io/) is an open-source vector database built for scalable similarity search and AI applications. It provides high-performance vector storage and retrieval capabilities, making it ideal for applications involving machine learning, deep learning, and similarity search scenarios.
 
-### Client
+The Ballerina Milvus connector provides seamless integration with Milvus vector database, enabling developers to perform operations such as creating collections, inserting vector data, building indexes, and conducting similarity searches within Ballerina applications. It supports [Milvus SDK Java v2.6.1](https://github.com/milvus-io/milvus-sdk-java).
 
-The &#x60;Client&#x60; is used to connect to and interact with HTTP endpoints. They support connection pooling and can be 
-configured to have a maximum number of active connections that can be made with the remote endpoint. The &#x60;Client&#x60; 
-activates connection eviction after a given idle period and also supports follow-redirects so that you do not 
-have to manually handle 3xx HTTP status codes.
+## Setup guide
 
-#### Resiliency
+To utilize the Milvus connector, you must have access to a running Milvus instance. You can use one of the following methods for that.
 
-The &#x60;Client&#x60; handles resilience in multiple ways such as load balancing, circuit breaking, endpoint timeouts, and via a 
-retry mechanism.
+### Option 1: Using Docker
 
-Load balancing is used in the round-robin or failover manner.
+1. Make sure Docker is installed on your system.
 
-When a failure occurs in the remote service, the client connections might wait for some time before a timeout occurs. 
-Awaiting requests consume resources in the system. Circuit Breakers are used to trip after a certain number of failed 
-requests to the remote service. Once a circuit breaker trips, it does not allow the client to send requests to the 
-remote service for a period of time.
+2. Use the following command to start a Milvus standalone instance in docker
 
-The Ballerina circuit breaker supports tripping on HTTP error status codes and I/O errors. Failure thresholds can be 
-configured based on a sliding window (e.g., 5 failures within 10 seconds). The &#x60;Client&#x60; also supports a retry 
-mechanism that allows it to resend failed requests periodically for a given number of times.
+&#x60;&#x60;&#x60;bash
+# Download the installation script
+$ curl -sfL https://raw.githubusercontent.com/milvus-io/milvus/master/scripts/standalone_embed.sh -o standalone_embed.sh
 
-#### Security
-
-The &#x60;Client&#x60; supports Server Name Indication (SNI), Certificate Revocation List (CRL), Online Certificate Status 
-Protocol (OCSP), and OCSP Stapling for SSL/TLS connections.
-Also, the &#x60;Client&#x60; can be configured to send authentication information to the endpoint being invoked. Ballerina has 
-built-in support for Basic authentication, JWT authentication, and OAuth2 authentication.
-
-In addition to that, it supports both HTTP/1.1 and HTTP2 protocols and connection keep-alive, content 
-chunking, HTTP caching, data compression/decompression, response payload binding, and authorization can be highlighted as the features of the &#x60;Clients&#x60;.
-
-A &#x60;Client&#x60; can be defined using the URL of the remote service that it needs to connect with as shown below:
-
-&#x60;&#x60;&#x60;ballerina
-http:Client clientEndpoint &#x3D; check new(&quot;https://my-simple-backend.com&quot;);
-&#x60;&#x60;&#x60;
-The defined &#x60;Client&#x60; endpoint can be used to call a remote service as follows:
-
-&#x60;&#x60;&#x60;ballerina
-// Send a GET request to the specified endpoint.
-http:Response response &#x3D; check clientEndpoint-&gt;get(&quot;/get?id&#x3D;123&quot;);
-&#x60;&#x60;&#x60;
-The payload can be retrieved as the return value from the remote function as follows:
-
-&#x60;&#x60;&#x60;ballerina
-// Retrieve payload as json.
-json payload &#x3D; check clientEndpoint-&gt;post(&quot;/backend/Json&quot;, &quot;foo&quot;);
+#Start the Docker container
+$ bash standalone_embed.sh start
 &#x60;&#x60;&#x60;
 
-### Listener
+For detailed installation instructions, refer to the official Milvus documentation.
 
-The &#x60;Listener&#x60; is the underneath server connector that binds the given IP/Port to the network and it&#x27;s behavior can 
-be changed using the &#x60;http:ListenerConfiguration&#x60;. In HTTP, the &#x60;http:Service&#x60;-typed services can be attached to 
-the &#x60;Listener&#x60;. The service type precisely describes the syntax for both the service and resource.
+- **Linux/macOS**: [Run Milvus in Docker](https://milvus.io/docs/install_standalone-docker.md)
+- **Windows**: [Run Milvus in Docker on Windows](https://milvus.io/docs/install_standalone-windows.md)
 
-A &#x60;Service&#x60; represents a collection of network-accessible entry points and can be exposed via a &#x60;Listener&#x60; endpoint. 
-A resource represents one such entry point and can have its own path, HTTP methods, body format, &#x60;consumes&#x60; and 
-&#x60;produces&#x60; content types, CORS headers, etc. In resources, the HTTP method and resource path are mandatory parameters and
-the String literal and path parameters can be stated as the path. The resource function accepts the &#x60;http:Caller&#x60;, &#x60;http:Request&#x60;, 
-&#x60;http:Headers&#x60;, query parameters, header parameters, and payload parameters as arguments. However, they are optional.
+### Option 2: Using Milvus Cloud by Zilliz
 
-When a &#x60;Service&#x60; receives a request, it is dispatched to the best-matched resource.
+[Zilliz Cloud](https://cloud.zilliz.com/) provides a fully managed Milvus service. Follow these steps to set up your cloud instance:
 
-A &#x60;Listener&#x60; endpoint can be defined as follows:
+1. **Sign up to Zilliz Cloud**: Visit [Zilliz Cloud](https://cloud.zilliz.com/) and create an account.
+
+   &lt;img src&#x3D;&quot;https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-milvus/main/ballerina/resources/sign_up.png&quot; alt&#x3D;&quot;Zilliz Cloud Sign Up&quot; width&#x3D;&quot;60%&quot;&gt;
+
+2. **Set up your account**: Complete the account setup process with your details.
+
+   &lt;img src&#x3D;&quot;https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-milvus/main/ballerina/resources/setup_account.png&quot; alt&#x3D;&quot;Account Setup&quot; width&#x3D;&quot;60%&quot;&gt;
+
+3. **Create a new cluster**: From the welcome page, select &quot;Create Cluster&quot; to start setting up your Milvus instance.
+
+   &lt;img src&#x3D;&quot;https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-milvus/main/ballerina/resources/welcome_page.png&quot; alt&#x3D;&quot;Welcome Page&quot; width&#x3D;&quot;60%&quot;&gt;
+
+4. **Configure cluster details**: Provide the necessary configuration details for your cluster, including cluster name, cloud provider, and region.
+
+   &lt;img src&#x3D;&quot;https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-milvus/main/ballerina/resources/create_cluster.png&quot; alt&#x3D;&quot;Create Cluster&quot; width&#x3D;&quot;60%&quot;&gt;
+
+5. **Download credentials**: Once your cluster is created, download the authentication credentials and connection details.
+
+   &lt;img src&#x3D;&quot;https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-milvus/main/ballerina/resources/cluster_creation.png&quot; alt&#x3D;&quot;Cluster Creation Complete&quot; width&#x3D;&quot;60%&quot;&gt;
+
+6. **Generate API Key**: Navigate to the API Keys section in your cluster dashboard and generate an API key for authentication.
+
+## Quickstart
+
+To use the Milvus connector in your Ballerina project, modify the &#x60;.bal&#x60; file as follows.
+
+### Step 1: Import the module
+
+Import the &#x60;ballerinax/milvus&#x60; module into your Ballerina project.
 
 &#x60;&#x60;&#x60;ballerina
-// Attributes associated with the &#x60;Listener&#x60; endpoint are defined here.
-listener http:Listener helloWorldEP &#x3D; new(9090);
+import ballerinax/milvus;
 &#x60;&#x60;&#x60;
 
-Then a &#x60;Service&#x60; can be defined and attached to the above &#x60;Listener&#x60; endpoint as shown below:
+### Step 2: Instantiate a new connector
+
+Create a &#x60;milvus:Client&#x60; with the Milvus server URL and optional configuration.
 
 &#x60;&#x60;&#x60;ballerina
-// By default, Ballerina assumes that the service is to be exposed via HTTP/1.1.
-service /helloWorld on helloWorldEP {
+configurable string milvusUrl &#x3D; ?;
 
-   resource function post [string name](@http:Payload string message) returns string {
-       // Sends the response back to the client along with a string payload.
-       return &quot;Hello, World! I’m &quot; + name + &quot;. &quot; + message;
-   }
+milvus:Client milvusClient &#x3D; check new(milvusUrl);
+&#x60;&#x60;&#x60;
+
+For authenticated connections, you can provide additional configuration.
+
+&#x60;&#x60;&#x60;ballerina
+milvus:Client milvusClient &#x3D; check new(milvusUrl);
+&#x60;&#x60;&#x60;
+
+### Step 3: Invoke the connector operations
+
+You can now utilize the operations available within the connector.
+
+&#x60;&#x60;&#x60;ballerina
+public function main() returns error? {
+    check milvusClient-&gt;createCollection({
+        collectionName: &quot;example_collection&quot;,
+        dimension: 2
+    });
 }
 &#x60;&#x60;&#x60;
 
-#### Security
+### Step 4: Run the Ballerina application
 
-&#x60;Listener&#x60; endpoints can be exposed via SSL. They support Mutual SSL, Hostname Verification, and Application Layer 
-Protocol Negotiation (ALPN) for HTTP2. &#x60;Listener&#x60; endpoints also support Certificate Revocation List (CRL), Online 
-Certificate Status Protocol (OCSP), and OCSP Stapling.
-Also, The &#x60;listener&#x60; can be configured to authenticate and authorize the inbound requests. Ballerina has 
-built-in support for basic authentication, JWT authentication, and OAuth2 authentication.
+Use the following command to compile and run the Ballerina program.
 
-In addition to that, supports both the HTTP/1.1 and HTTP2 protocols and connection keep-alive, content 
-chunking, HTTP caching, data compression/decompression, payload binding, and authorization can be highlighted as the features of a &#x60;Service&#x60;.
+&#x60;&#x60;&#x60;bash
+bal run
+&#x60;&#x60;&#x60;
 </description>
     </component>
     <icon>icon/icon-small.gif</icon>
-    <displayName>http</displayName>
+    <displayName>milvus</displayName>
 </connector>

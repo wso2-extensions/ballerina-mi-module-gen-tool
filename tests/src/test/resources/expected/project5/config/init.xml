@@ -21,21 +21,7 @@
     <parameter name="connectionType" description="Connection type"/>
     <!-- TODO: if union, the selected member type becomes a parameter-->
     <sequence>
-        <property name="http_ClientOAuth2Handler_objectTypeName" value="ClientOAuth2Handler"/>
-        
-        <property name="http_ListenerLdapUserStoreBasicAuthHandler_objectTypeName" value="ListenerLdapUserStoreBasicAuthHandler"/>
-        
-        <property name="http_ListenerOAuth2Handler_objectTypeName" value="ListenerOAuth2Handler"/>
-        
-        <property name="http_Client_objectTypeName" value="Client"/>
-        
-        <property name="http_Caller_objectTypeName" value="Caller"/>
-        
-        <property name="http_StatusCodeClient_objectTypeName" value="StatusCodeClient"/>
-        
-        <property name="http_FailoverClient_objectTypeName" value="FailoverClient"/>
-        
-        <property name="http_LoadBalanceClient_objectTypeName" value="LoadBalanceClient"/>
+        <property name="milvus_Client_objectTypeName" value="Client"/>
         
         <class name="io.ballerina.stdlib.mi.BalConnectorConfig"/>
     </sequence>

@@ -174,7 +174,7 @@ public class TestArtifactGenerationUtil {
     public void generateProject5ExpectedArtifacts() throws Exception {
         String projectName = "project5";
         // Pull package from Ballerina Central
-        String centralPackage = "ballerina/http:2.15.3"; 
+        String centralPackage = "ballerinax/milvus:1.1.0"; 
         Path balaDir = ArtifactGenerationUtil.pullPackageFromCentral(centralPackage);
         
         // Use expected path's parent as target so generated folder will be at expectedPath level

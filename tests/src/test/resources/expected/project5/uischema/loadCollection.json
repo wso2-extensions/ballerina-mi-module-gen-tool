@@ -1,14 +1,29 @@
 {
-  "connectorName": "http",
-  "operationName": "enrichHeaders",
-  "title": "enrichHeaders",
-  "help": "Enrich the headers map with the relevant authentication requirements.\n",
+  "connectorName": "milvus",
+  "operationName": "loadCollection",
+  "title": "loadCollection",
+  "help": "Loads a collection in the Milvus vector database.\n",
   "elements": [
     {
       "type": "attributeGroup",
       "value": {
         "groupName": "General",
         "elements": [
+          {
+            "type": "attribute",
+            "value": {
+              "name": "configRef",
+              "displayName": "Connection",
+              "inputType": "connection",
+              "allowedConnectionTypes": [
+                "milvus_Client"
+              ],
+              "defaultType": "connection.milvus_Client",
+              "defaultValue": "",
+              "required": "true",
+              "helpTip": "Connection to be used"
+            }
+          },
           {
             "type": "attributeGroup",
             "value": {
@@ -17,8 +32,8 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "headers",
-                    "displayName": "headers",
+                    "name": "collectionName",
+                    "displayName": "collectionName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
