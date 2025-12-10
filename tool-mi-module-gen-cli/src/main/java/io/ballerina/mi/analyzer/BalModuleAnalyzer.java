@@ -107,20 +107,22 @@ public class BalModuleAnalyzer implements Analyzer {
                         String paramName = optParamName.get();
                         FunctionParam functionParam = new FunctionParam(Integer.toString(i), paramName, paramType);
                         functionParam.setParamKind(parameterSymbol.paramKind());
+                        functionParam.setTypeSymbol(typeSymbol);
                         component.setFunctionParam(functionParam);
-                        if (actualTypeKind == TypeDescKind.RECORD) {
-                            TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(typeSymbol);
-                            if (actualTypeSymbol instanceof RecordTypeSymbol recordTypeSymbol) {
-                                Map<String, RecordFieldSymbol> recordFields = recordTypeSymbol.fieldDescriptors();
-                                for (Map.Entry<String, RecordFieldSymbol> field : recordFields.entrySet()) {
-                                    TypeSymbol fieldTypeSymbol = field.getValue().typeDescriptor();
-                                    TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldTypeSymbol);
-                                    FunctionParam fieldParam = new FunctionParam(Integer.toString(i), field.getKey(),
-                                            fieldTypeKind.getName());
-                                    component.setFunctionParam(fieldParam);
-                                }
-                            }
-                        }
+                        //TODO: Support individual fields of record types
+//                        if (actualTypeKind == TypeDescKind.RECORD) {
+//                            TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(typeSymbol);
+//                            if (actualTypeSymbol instanceof RecordTypeSymbol recordTypeSymbol) {
+//                                Map<String, RecordFieldSymbol> recordFields = recordTypeSymbol.fieldDescriptors();
+//                                for (Map.Entry<String, RecordFieldSymbol> field : recordFields.entrySet()) {
+//                                    TypeSymbol fieldTypeSymbol = field.getValue().typeDescriptor();
+//                                    TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldTypeSymbol);
+//                                    FunctionParam fieldParam = new FunctionParam(Integer.toString(i), field.getKey(),
+//                                            fieldTypeKind.getName());
+//                                    component.setFunctionParam(fieldParam);
+//                                }
+//                            }
+//                        }
                     }
                 }
             }

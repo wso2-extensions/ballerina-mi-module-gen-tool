@@ -21,7 +21,6 @@ package io.ballerina.mi;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import io.ballerina.mi.connectorModel.*;
-//import io.ballerina.mi.model.Component;
 import io.ballerina.mi.connectorModel.attributeModel.Attribute;
 import io.ballerina.mi.connectorModel.attributeModel.AttributeGroup;
 import io.ballerina.mi.connectorModel.attributeModel.Combo;
@@ -45,6 +44,7 @@ import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import static io.ballerina.mi.util.Constants.*;
@@ -164,8 +164,16 @@ public class ConnectorSerializer {
                                                  String extension) {
         try {
             Handlebars handlebar = new Handlebars();
-            handlebar.registerHelper("eq", (context, options) -> context != null &&
-                    context.equals(options.param(0)));
+            handlebar.registerHelper("eq", (first, options) -> {
+                Object second = options.param(0);
+                if (first == null && second == null) {
+                    return options.fn();
+                }
+                if (first != null && first.equals(second)) {
+                    return options.fn();
+                }
+                return options.inverse();
+            });
             handlebar.registerHelper("not", (context, options) -> {
                 if (context instanceof Boolean booleanContext) {
                     return !booleanContext;
@@ -220,6 +228,11 @@ public class ConnectorSerializer {
             handlebar.registerHelper("writeConfigJsonProperties", (context, options) -> {
                 Component component = (Component) context;
                 JsonTemplateBuilder builder = new JsonTemplateBuilder();
+                List<FunctionParam> functionParams = component.getFunctionParams();
+                for (FunctionParam param : functionParams) {
+                    writeJsonAttributeForFunctionParam(param.getParamType(), param.getValue(), functionParams.indexOf(param),
+                            functionParams.size(), builder, param.getValue(), param.getDescription(), false);
+                }
                 List<Type> queryParams = component.getQueryParams();
                 String helpTip = String.format("Input parameters required for %s connection",
                         component.getParent().getConnectionType());
@@ -258,6 +271,20 @@ public class ConnectorSerializer {
                 }
                 return new Handlebars.SafeString("");
             });
+            handlebar.registerHelper("uppercase", (context, options) -> {
+                if (context == null) {
+                    return "";
+                }
+                return context.toString().toUpperCase();
+            });
+            handlebar.registerHelper("unwrapOptional", ((context, options) -> {
+                if (context instanceof Optional<?> optional) {
+                    if (optional.isPresent()) {
+                        return optional.get();
+                    }
+                }
+                return "";
+            }));
             String templateFileName = String.format("%s/%s.%s", templatePath, templateName, extension);
             String content = Utils.readFile(templateFileName);
             Template template = handlebar.compileInline(content);

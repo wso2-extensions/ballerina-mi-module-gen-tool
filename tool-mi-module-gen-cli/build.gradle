@@ -70,6 +70,7 @@ dependencies {
     // MI runtime dependencies - these will be copied as separate JARs to lib directory
     miRuntimeLibs project(':mi-native')
     miRuntimeLibs "org.wso2.carbon.module:module-core:${carbonModuleCoreVersion}"
+    miRuntimeLibs "org.wso2.integration.connector.core:mi-connector-core:${miConnectorCoreVersion}"
 }
 
 task copyMiRuntimeLibs(type: Copy) {
