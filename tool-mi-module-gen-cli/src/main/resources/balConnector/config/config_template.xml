@@ -22,17 +22,31 @@
     <!-- TODO: if union, the selected member type becomes a parameter-->
     {{#each connections ~}}
     {{#each initComponent.queryParams ~}}
-    <parameter name="{{../connectionType}}_{{name}}" description="{{documentation}}"/>
+    <parameter name="{{uppercase ../connectionType}}_{{name}}" description="{{documentation}}"/>
+    {{/each ~}}
+    {{#each initComponent.pathParams ~}}
+    <parameter name="{{uppercase ../connectionType}}_{{name}}" description="{{documentation}}"/>
+    {{/each ~}}
+    {{#each initComponent.functionParams ~}}
+    <parameter name="{{value}}" description="{{description}}"/>
     {{/each ~}}
     {{/each ~}}
     <sequence>
         {{#each connections ~}}
-        <property name="{{connectionType}}_objectTypeName" value="{{objectTypeName}}"/>
+        <property name="{{uppercase connectionType}}_objectTypeName" value="{{objectTypeName}}"/>
         {{#each initComponent.params ~}}
-        <property name="{{../connectionType}}_param{{@index}}" value="{{name}}"/>
+        <property name="{{uppercase ../connectionType}}_{{key}}" value="{{value}}"/>
+        {{/each ~}}
+        {{#each initComponent.functionParams ~}}
+        <property name="{{uppercase ../connectionType}}_param{{@index}}" value="{{value}}"/>
+        <property name="{{uppercase ../connectionType}}_paramType{{@index}}" value="{{paramType}}"/>
         {{/each ~}}
         {{writeConfigXmlProperties this}}
         {{/each ~}}
-        <class name="io.ballerina.stdlib.mi.BalConnectorConfig"/>
+        <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
+            <property name="orgName" value="{{orgName}}"/>
+            <property name="moduleName" value="{{moduleName}}"/>
+            <property name="version" value="{{majorVersion}}"/>
+        </class>
     </sequence>
 </template>

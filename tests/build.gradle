@@ -41,7 +41,7 @@ dependencies {
     testImplementation project(path: ':tool-mi-module-gen-cli')
 }
 
-def projects = ['project2', 'project3', 'arrayProject']
+def projects = ['project2', 'project3', 'arrayProject', 'recordProject']
 def toolVersion = stripBallerinaExtensionVersion("${project.version}")
 // Define balCommand to use the test-specific distribution
 ext.balCommand = Os.isFamily(Os.FAMILY_WINDOWS)
@@ -305,6 +305,9 @@ test {
     systemProperty "project.root", project.rootDir.toString()
     systemProperty "miVersion", project.findProperty("miVersion") ?: "4.5.0"
 
+    if (System.getProperty('debug') == 'true') {
+        jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005'
+    }
     useTestNG() {
         suites 'src/test/resources/testng.xml'
     }
