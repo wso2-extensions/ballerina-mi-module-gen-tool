@@ -92,9 +92,9 @@ public class MiIntegrationTest {
             .resolve("test")
             .resolve("resources")
             .resolve("mi")
-            .resolve("mi-test-project")
+            .resolve("project1")
             .resolve("target")
-            .resolve("mi-test-project_1.0.0.car");
+            .resolve("project1_1.0.0.car");
         
         if (!Files.exists(carFile)) {
             throw new RuntimeException("CAR file not found at: " + carFile + 
@@ -107,7 +107,7 @@ public class MiIntegrationTest {
             .resolve("test")
             .resolve("resources")
             .resolve("mi")
-            .resolve("mi-test-project")
+            .resolve("project1")
             .resolve("deployment")
             .resolve("docker")
             .resolve("resources")
@@ -118,7 +118,7 @@ public class MiIntegrationTest {
             .resolve("test")
             .resolve("resources")
             .resolve("mi")
-            .resolve("mi-test-project")
+            .resolve("project1")
             .resolve("deployment")
             .resolve("docker")
             .resolve("resources")
@@ -130,7 +130,7 @@ public class MiIntegrationTest {
         Files.createDirectories(compositeAppsDir);
         
         // Copy CAR file to CompositeApps directory
-        Files.copy(carFile, compositeAppsDir.resolve("mi-test-project_1.0.0.car"), 
+        Files.copy(carFile, compositeAppsDir.resolve("project1.0.0.car"), 
             StandardCopyOption.REPLACE_EXISTING);
         
         // Create resources directory and copy keystores
@@ -158,7 +158,7 @@ public class MiIntegrationTest {
 
         try {
             // Build Docker image
-            ImageFromDockerfile dockerImage = new ImageFromDockerfile("mi-test-project:test", false)
+            ImageFromDockerfile dockerImage = new ImageFromDockerfile("project1:test", false)
                 .withFileFromPath(".", dockerContext)
                 .withBuildArg("BASE_IMAGE", BASE_IMAGE);
 

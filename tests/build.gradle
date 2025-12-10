@@ -258,7 +258,7 @@ task copyConnectorArtifactsToMiProject {
 // Task to build MI project CAR file
 task buildMiProject(type: Exec) {
     dependsOn copyConnectorArtifactsToMiProject
-    def miProjectDir = new File(project.rootDir, "tests/src/test/resources/mi/mi-test-project")
+    def miProjectDir = new File(project.rootDir, "tests/src/test/resources/mi/project1")
     workingDir miProjectDir
     
     doFirst {

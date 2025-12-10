@@ -3,11 +3,11 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microintegrator.projects</groupId>
-    <artifactId>mi-test-project</artifactId>
+    <artifactId>project1</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
-    <name>mi-test-project</name>
-    <description>mi-test-project</description>
+    <name>project1</name>
+    <description>project1</description>
     <repositories>
       <repository>
           <id>wso2-nexus</id>
