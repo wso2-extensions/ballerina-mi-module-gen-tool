@@ -93,7 +93,7 @@ public class ConnectorZipValidationTest {
                 // Note: project5 uses a connector from Ballerina Central
                 // Format: {"projectName", "org/package:version"} or {"projectName", null} for local
                 // Example: {"project5", "ballerina/http:2.15.3"} - uncomment when connector is available
-                {"project5", "ballerina/http:2.15.3"},  // project5 is from Central (example)
+                {"project5", "ballerinax/milvus:1.1.0"},  // project5 is from Central (example)
         };
     }
 
@@ -173,11 +173,25 @@ public class ConnectorZipValidationTest {
         Path expectedPath = EXPECTED_DIR.resolve(projectName);
 
         Path tempBalaDir;
+        Path centralPackagePath = null; // Track Central package path for cleanup
         
         if (centralPackage != null && !centralPackage.isBlank()) {
             // Pull package from Ballerina Central
             tempBalaDir = ArtifactGenerationUtil.pullPackageFromCentral(centralPackage);
             Assert.assertTrue(Files.exists(tempBalaDir), "Bala directory not found in Central: " + tempBalaDir);
+            
+            // Store the Central package path for cleanup
+            String[] parts = centralPackage.split(":");
+            String orgPackage = parts[0];
+            String[] orgPackageParts = orgPackage.split("/");
+            if (orgPackageParts.length == 2) {
+                String homeDir = System.getProperty("user.home");
+                Path centralRepoBase = Paths.get(homeDir, ".ballerina", "repositories", "central.ballerina.io", "bala", 
+                        orgPackageParts[0], orgPackageParts[1]);
+                if (Files.exists(centralRepoBase)) {
+                    centralPackagePath = centralRepoBase;
+                }
+            }
         } else {
             // Local project - pack and extract
             Path projectPath = BALLERINA_PROJECTS_DIR.resolve(projectName);
@@ -338,8 +352,11 @@ public class ConnectorZipValidationTest {
         long jsonCount = Files.list(uiSchemaDir).filter(p -> p.toString().endsWith(".json")).count();
         Assert.assertTrue(jsonCount > 0, "No JSON schema files found in 'uischema' for project: " + projectName);
         } finally {
-            // Clean up temporary directory
-            if (Files.exists(tempBalaDir)) {
+            // Clean up temporary directory (for local projects)
+            if (tempBalaDir != null && Files.exists(tempBalaDir) && 
+                (centralPackage == null || centralPackage.isBlank())) {
+                // Only delete tempBalaDir if it's a temporary directory (local projects)
+                // For Central packages, tempBalaDir points to the actual Central repo, don't delete it
                 try (var walk = Files.walk(tempBalaDir)) {
                     walk.sorted((a, b) -> b.compareTo(a))
                         .forEach(path -> {
@@ -347,6 +364,22 @@ public class ConnectorZipValidationTest {
                                 Files.delete(path);
                             } catch (IOException e) {
                                 // Ignore cleanup errors
+                            }
+                        });
+                } catch (IOException e) {
+                    // Ignore cleanup errors
+                }
+            }
+            
+            // Clean up pulled package from Central repository
+            if (centralPackagePath != null && Files.exists(centralPackagePath)) {
+                try (var walk = Files.walk(centralPackagePath)) {
+                    walk.sorted((a, b) -> b.compareTo(a))
+                        .forEach(path -> {
+                            try {
+                                Files.delete(path);
+                            } catch (IOException e) {
+                                // Ignore cleanup errors - package might be in use or protected
                             }
                         });
                 } catch (IOException e) {
