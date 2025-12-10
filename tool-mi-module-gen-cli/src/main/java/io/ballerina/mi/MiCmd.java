@@ -24,8 +24,14 @@ import io.ballerina.mi.analyzer.BalConnectorAnalyzer;
 import io.ballerina.mi.analyzer.BalModuleAnalyzer;
 import io.ballerina.mi.connectorModel.Connector;
 import io.ballerina.mi.util.Constants;
-import io.ballerina.projects.*;
+import io.ballerina.projects.BuildOptions;
+import io.ballerina.projects.EmitResult;
+import io.ballerina.projects.JBallerinaBackend;
+import io.ballerina.projects.JvmTarget;
 import io.ballerina.projects.Package;
+import io.ballerina.projects.PackageCompilation;
+import io.ballerina.projects.Project;
+import io.ballerina.projects.ProjectLoadResult;
 import io.ballerina.projects.directory.BalaProject;
 import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.directory.ProjectLoader;
@@ -85,7 +91,7 @@ public class MiCmd implements BLauncherCmd {
         }
 
         Path path = Path.of(sourcePath).normalize();
-        BuildOptions buildOptions = BuildOptions.builder().setSticky(false).setOffline(false).build();
+        BuildOptions buildOptions = BuildOptions.builder().setOffline(false).build();
         ProjectLoadResult projectLoadResult = ProjectLoader.load(path.toAbsolutePath(), buildOptions);
         Project project = projectLoadResult.project();
         compilePkg = project.currentPackage();
