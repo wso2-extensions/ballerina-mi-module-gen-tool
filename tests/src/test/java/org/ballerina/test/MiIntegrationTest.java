@@ -30,7 +30,6 @@ import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.nio.file.Files;
@@ -53,9 +52,6 @@ public class MiIntegrationTest {
     private static final int MI_HTTP_PORT = 8290;
     private static final int MI_HTTPS_PORT = 8253;
     private static final int MI_MANAGEMENT_PORT = 9164;
-    
-    private static boolean dockerAvailable = false;
-    private static boolean setupCompleted = false;
     private GenericContainer<?> miContainer;
     private String containerBaseUrl;
     private HttpClient httpClient;
@@ -63,6 +59,7 @@ public class MiIntegrationTest {
     @BeforeClass
     public void setUp() throws Exception {
         // Check if Docker is available
+        boolean dockerAvailable;
         try {
             Process dockerCheck = new ProcessBuilder("docker", "ps").start();
             int exitCode = dockerCheck.waitFor();
@@ -72,9 +69,7 @@ public class MiIntegrationTest {
         }
         
         if (!dockerAvailable) {
-            System.out.println("Docker is not available. Skipping integration tests.");
-            setupCompleted = false;
-            return; // Exit early, don't throw SkipException in @BeforeClass
+            throw new SkipException("Docker is not available. Skipping integration tests.");
         }
         
         // Get the project root directory from system property set by Gradle
@@ -175,22 +170,9 @@ public class MiIntegrationTest {
             System.out.println("Starting MI container...");
             miContainer.start();
         } catch (IllegalStateException e) {
-            // Testcontainers might fail even if Docker is available (e.g., on Windows)
-            // Don't throw SkipException here - just mark setup as incomplete
-            System.out.println("Testcontainers cannot access Docker: " + e.getMessage() + 
-                ". This may happen in CI environments where Docker is not fully accessible.");
-            setupCompleted = false;
-            dockerAvailable = false; // Mark Docker as unavailable
-            return; // Exit early without throwing exception
+            throw new SkipException("Testcontainers cannot access Docker: " + e.getMessage());
         } catch (Exception e) {
-            // Any other exception - mark setup as incomplete
-            System.out.println("Failed to initialize or start container: " + e.getMessage());
-            if (e.getCause() != null) {
-                System.out.println("  Caused by: " + e.getCause().getMessage());
-            }
-            setupCompleted = false;
-            dockerAvailable = false;
-            return;
+            throw new SkipException("Failed to initialize or start container: " + e.getMessage(), e);
         }
 
         // Get the container URL
@@ -237,18 +219,6 @@ public class MiIntegrationTest {
         
         if (!serverReady) {
             System.out.println("Warning: MI server may not be fully ready, but continuing with tests...");
-        }
-        
-        setupCompleted = true;
-    }
-    
-    @BeforeMethod
-    public void checkDockerAvailability() {
-        if (!dockerAvailable) {
-            throw new SkipException("Docker is not available. Skipping integration test.");
-        }
-        if (!setupCompleted) {
-            throw new SkipException("Test setup was not completed. Skipping integration test.");
         }
     }
 
