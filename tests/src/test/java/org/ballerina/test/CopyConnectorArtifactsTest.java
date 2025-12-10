@@ -18,6 +18,7 @@ package org.ballerina.test;
 
 import org.testng.Assert;
 import org.testng.SkipException;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -38,6 +39,7 @@ public class CopyConnectorArtifactsTest {
 
     private static final String PROJECT_ROOT = System.getProperty("project.root", 
         Paths.get(System.getProperty("user.dir"), "..").toAbsolutePath().normalize().toString());
+    private static final Path PROJECT_ROOT_PATH = Paths.get(PROJECT_ROOT);
     
     private static final String BALLERINA_PROJECTS_DIR = "tests/src/test/resources/ballerina";
     private static final String MI_CONNECTORS_DIR = "tests/src/test/resources/mi/project1/src/main/wso2mi/resources/connectors";
@@ -71,10 +73,8 @@ public class CopyConnectorArtifactsTest {
      */
     @Test(dataProvider = "connectorProjects")
     public void testCopyConnectorArtifact(String projectName, String artifactFileName) throws IOException {
-        Path projectRootPath = Paths.get(PROJECT_ROOT);
-        
         // Source: Ballerina project target directory
-        Path sourceArtifact = projectRootPath
+        Path sourceArtifact = PROJECT_ROOT_PATH
             .resolve(BALLERINA_PROJECTS_DIR)
             .resolve(projectName)
             .resolve("target")
@@ -82,7 +82,7 @@ public class CopyConnectorArtifactsTest {
         
         // Also check in the project root (some projects might have artifacts there)
         if (!Files.exists(sourceArtifact)) {
-            Path alternativeSource = projectRootPath
+            Path alternativeSource = PROJECT_ROOT_PATH
                 .resolve(BALLERINA_PROJECTS_DIR)
                 .resolve(projectName)
                 .resolve(artifactFileName);
@@ -99,7 +99,7 @@ public class CopyConnectorArtifactsTest {
         }
         
         // Destination: MI project connectors directory
-        Path destDir = projectRootPath.resolve(MI_CONNECTORS_DIR);
+        Path destDir = PROJECT_ROOT_PATH.resolve(MI_CONNECTORS_DIR);
         Path destArtifact = destDir.resolve(artifactFileName);
         
         // Create destination directory if it doesn't exist
@@ -118,6 +118,20 @@ public class CopyConnectorArtifactsTest {
         System.out.println("  From: " + sourceArtifact);
         System.out.println("  To:   " + destArtifact);
         System.out.println("  Size: " + Files.size(destArtifact) + " bytes");
+    }
+
+    @AfterClass
+    public void cleanUpCopiedArtifacts() throws IOException {
+        Path destDir = PROJECT_ROOT_PATH.resolve(MI_CONNECTORS_DIR);
+        if (!Files.exists(destDir)) {
+            return;
+        }
+
+        for (Object[] data : connectorProjectsDataProvider()) {
+            String artifactFileName = (String) data[1];
+            Path destArtifact = destDir.resolve(artifactFileName);
+            Files.deleteIfExists(destArtifact);
+        }
     }
 
     /**
