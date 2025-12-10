@@ -63,4 +63,13 @@ public isolated client class RecordClient {
         }
         return pr.id + ":" + email.toString() + ":" + tagCount.toString();
     }
+
+    // Test E: Return person with uppercased name
+    remote isolated function getUppercasedPerson(Person person) returns Person {
+        return {
+            first_name: person.first_name.toUpperAscii(),
+            last_name: person.last_name.toUpperAscii(),
+            age: person.age
+        };
+    }
 }

@@ -16,6 +16,7 @@
 
 package org.ballerina.test;
 
+import com.google.gson.JsonElement;
 import io.ballerina.stdlib.mi.BalConnectorConfig;
 import io.ballerina.stdlib.mi.BalConnectorFunction;
 import io.ballerina.stdlib.mi.ModuleInfo;
@@ -191,5 +192,34 @@ public class TestRecordType {
 
         String resAbsent = ((DefaultConnectorResponse) ctxAbsent.getVariable("result")).getPayload().toString();
         Assert.assertEquals(resAbsent, "u2:false:0", "Absent settings should produce default false and 0 tags");
+    }
+
+    @Test(description = "Test getting person with uppercased name")
+    public void testGetUppercasedPerson() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("getUppercasedPerson")
+                .returnType("record")
+                .addParameter("person", "record", "{\"first_name\":\"alice\",\"last_name\":\"smith\",\"age\":25}")
+                .build();
+
+        context.setProperty("param0", "person");
+        context.setProperty("paramType0", "record");
+        context.setProperty("param0_recordName", "Person");
+        context.setProperty("paramFunctionName", "getUppercasedPerson");
+        context.setProperty("paramSize", 1);
+        context.setProperty("returnType", "record");
+
+        connector.connect(context);
+
+        Object object = ((DefaultConnectorResponse) context.getVariable("result")).getPayload();
+        Assert.assertTrue(object instanceof JsonElement, "Expected result to be a JSON");
+
+        String result = object.toString();
+        Assert.assertTrue(result.contains("\"first_name\":\"ALICE\""), "First name should be uppercased");
+        Assert.assertTrue(result.contains("\"last_name\":\"SMITH\""), "Last name should be uppercased");
+        Assert.assertTrue(result.contains("\"age\":25"), "Age should remain unchanged");
     }
 }

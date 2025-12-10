@@ -18,6 +18,7 @@
 
 package io.ballerina.stdlib.mi;
 
+import com.google.gson.JsonParser;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.creators.ValueCreator;
@@ -31,6 +32,7 @@ import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BXml;
+import io.ballerina.runtime.internal.values.MapValueImpl;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
@@ -74,24 +76,12 @@ public class BalExecutor {
             } else {
                 throw new SynapseException("Unsupported callable type: " + callable.getClass().getName());
             }
-            if (Objects.equals(balFunctionReturnType, XML)) {
-                result = BXmlConverter.toOMElement((BXml) result);
-            } else if (Objects.equals(balFunctionReturnType, DECIMAL)) {
-                result = ((BDecimal) result).value().toString();
-            } else if (Objects.equals(balFunctionReturnType, STRING)) {
-                result = ((BString) result).getValue();
-            } else if (Objects.equals(balFunctionReturnType, ARRAY) || result instanceof BArray) {
-                // Convert BArray to JSON string format for MI consumption
-                result = TypeConverter.arrayToJsonString((BArray) result);
-            } else if (result instanceof BMap) {
-                result = result.toString();
-            }
+            Object processedResult = processResponse(balFunctionReturnType, result);
             ConnectorResponse connectorResponse = new DefaultConnectorResponse();
             if (isOverwriteBody(context)) {
-                context.setProperty(TEMP_RESPONSE_PROPERTY_NAME + getResultProperty(context), result);
-                overwriteBody(context, result);
+                overwriteBody(context, processedResult);
             } else {
-                connectorResponse.setPayload(result);
+                connectorResponse.setPayload(processedResult);
             }
             context.setVariable(getResultProperty(context), connectorResponse);
         } catch (BError bError) {
@@ -104,10 +94,28 @@ public class BalExecutor {
         return true;
     }
 
+    private Object processResponse(String balFunctionReturnType, Object result) {
+        if (Objects.equals(balFunctionReturnType, XML)) {
+            return BXmlConverter.toOMElement((BXml) result);
+        } else if (Objects.equals(balFunctionReturnType, DECIMAL)) {
+            return ((BDecimal) result).value().toString();
+        } else if (Objects.equals(balFunctionReturnType, STRING)) {
+            return ((BString) result).getValue();
+        } else if (Objects.equals(balFunctionReturnType, ARRAY) || result instanceof BArray) {
+            // Convert BArray to JSON format for MI consumption
+            return JsonParser.parseString(TypeConverter.arrayToJsonString((BArray) result));
+        } else if (result instanceof BMap) {
+            return JsonParser.parseString(((MapValueImpl<?, ?>) result).getJSONString());
+        }
+        return result;
+    }
+
     protected void overwriteBody(MessageContext messageContext, Object payload) throws AxisFault {
+        messageContext.setProperty(TEMP_RESPONSE_PROPERTY_NAME + getResultProperty(messageContext), payload);
         Source source = MediatorEnrichUtil.createSourceWithProperty(TEMP_RESPONSE_PROPERTY_NAME + getResultProperty(messageContext));
         Target target = MediatorEnrichUtil.createTargetWithBody();
         doEnrich(messageContext, source, target);
+        messageContext.setProperty(TEMP_RESPONSE_PROPERTY_NAME + getResultProperty(messageContext), null);
     }
 
     private void doEnrich(MessageContext synCtx, Source source, Target target) {
