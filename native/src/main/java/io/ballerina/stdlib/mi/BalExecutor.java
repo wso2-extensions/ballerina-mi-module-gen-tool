@@ -159,6 +159,7 @@ public class BalExecutor {
             case XML -> getBXmlParameter(context, value);
             case RECORD -> createRecordValue((String) param, context, index);
             case ARRAY -> getArrayParameter((String) param, context, value);
+            case MAP -> getMapParameter(param);
             default -> null;
         };
     }
@@ -213,6 +214,25 @@ public class BalExecutor {
             return JsonUtils.parse(strParam);
         } else {
             return JsonUtils.parse(param.toString());
+        }
+    }
+
+    private BMap getMapParameter(Object param) {
+        Object parsed;
+        if (param instanceof String strParam) {
+            if (strParam.startsWith("'") && strParam.endsWith("'")) {
+                strParam = strParam.substring(1, strParam.length() - 1);
+            }
+            parsed = JsonUtils.parse(strParam);
+        } else {
+            parsed = JsonUtils.parse(param.toString());
+        }
+        
+        // Validate that the parsed result is a BMap, not a BArray
+        if (parsed instanceof BMap) {
+            return (BMap) parsed;
+        } else {
+            throw new SynapseException("Map parameter must be a JSON object, not an array");
         }
     }
 
