@@ -217,14 +217,22 @@ public class BalExecutor {
         }
     }
 
-    private Object getMapParameter(Object param) {
+    private BMap getMapParameter(Object param) {
+        Object parsed;
         if (param instanceof String strParam) {
             if (strParam.startsWith("'") && strParam.endsWith("'")) {
                 strParam = strParam.substring(1, strParam.length() - 1);
             }
-            return JsonUtils.parse(strParam);
+            parsed = JsonUtils.parse(strParam);
         } else {
-            return JsonUtils.parse(param.toString());
+            parsed = JsonUtils.parse(param.toString());
+        }
+        
+        // Validate that the parsed result is a BMap, not a BArray
+        if (parsed instanceof BMap) {
+            return (BMap) parsed;
+        } else {
+            throw new SynapseException("Map parameter must be a JSON object, not an array");
         }
     }
 
