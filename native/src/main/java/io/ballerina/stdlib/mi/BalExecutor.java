@@ -159,6 +159,7 @@ public class BalExecutor {
             case XML -> getBXmlParameter(context, value);
             case RECORD -> createRecordValue((String) param, context, index);
             case ARRAY -> getArrayParameter((String) param, context, value);
+            case MAP -> getBMapParameter(param);
             default -> null;
         };
     }
