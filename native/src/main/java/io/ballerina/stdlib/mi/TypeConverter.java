@@ -203,35 +203,35 @@ public class TypeConverter {
         if (bArray == null) {
             return "[]";
         }
-
-        StringBuilder json = new StringBuilder("[");
-        for (int i = 0; i < bArray.size(); i++) {
-            if (i > 0) {
-                json.append(",");
-            }
-
-            Object element = bArray.get(i);
-            if (element instanceof BString) {
-                // String elements need quotes
-                json.append("\"").append(((BString) element).getValue()).append("\"");
-            } else if (element instanceof BDecimal) {
-                // Decimal to string
-                json.append(((BDecimal) element).value().toString());
-            } else if (element instanceof String) {
-                // String elements need quotes
-                json.append("\"").append(element).append("\"");
-            } else if (element instanceof Boolean || element instanceof Long ||
-                       element instanceof Integer || element instanceof Double ||
-                       element instanceof Float) {
-                // Primitives don't need quotes
-                json.append(element);
-            } else {
-                // For other types, use toString and quote
-                json.append("\"").append(element.toString()).append("\"");
-            }
-        }
-        json.append("]");
-
-        return json.toString();
+        return bArray.toString();
+//        StringBuilder json = new StringBuilder("[");
+//        for (int i = 0; i < bArray.size(); i++) {
+//            if (i > 0) {
+//                json.append(",");
+//            }
+//
+//            Object element = bArray.get(i);
+//            if (element instanceof BString) {
+//                // String elements need quotes
+//                json.append("\"").append(((BString) element).getValue()).append("\"");
+//            } else if (element instanceof BDecimal) {
+//                // Decimal to string
+//                json.append(((BDecimal) element).value().toString());
+//            } else if (element instanceof String) {
+//                // String elements need quotes
+//                json.append("\"").append(element).append("\"");
+//            } else if (element instanceof Boolean || element instanceof Long ||
+//                       element instanceof Integer || element instanceof Double ||
+//                       element instanceof Float) {
+//                // Primitives don't need quotes
+//                json.append(element);
+//            } else {
+//                // For other types, use toString and quote
+//                json.append("\"").append(element.toString()).append("\"");
+//            }
+//        }
+//        json.append("]");
+//
+//        return json.toString();
     }
 }
