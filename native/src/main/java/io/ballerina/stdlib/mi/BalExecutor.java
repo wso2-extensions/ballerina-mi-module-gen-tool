@@ -159,7 +159,7 @@ public class BalExecutor {
             case XML -> getBXmlParameter(context, value);
             case RECORD -> createRecordValue((String) param, context, index);
             case ARRAY -> getArrayParameter((String) param, context, value);
-            case MAP -> getBMapParameter(param);
+            case MAP -> getMapParameter(param);
             default -> null;
         };
     }
@@ -207,6 +207,17 @@ public class BalExecutor {
     }
 
     private Object getJsonParameter(Object param) {
+        if (param instanceof String strParam) {
+            if (strParam.startsWith("'") && strParam.endsWith("'")) {
+                strParam = strParam.substring(1, strParam.length() - 1);
+            }
+            return JsonUtils.parse(strParam);
+        } else {
+            return JsonUtils.parse(param.toString());
+        }
+    }
+
+    private Object getMapParameter(Object param) {
         if (param instanceof String strParam) {
             if (strParam.startsWith("'") && strParam.endsWith("'")) {
                 strParam = strParam.substring(1, strParam.length() - 1);
