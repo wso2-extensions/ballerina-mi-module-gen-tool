@@ -90,10 +90,9 @@ public class ConnectorZipValidationTest {
     public Object[][] balaProjectDataProvider() {
         return new Object[][]{
                 {"project4", null},  // project4 is a local bala project
-                // Note: project5 uses a connector from Ballerina Central
                 // Format: {"projectName", "org/package:version"} or {"projectName", null} for local
-                // Example: {"project5", "ballerina/http:2.15.3"} - uncomment when connector is available
-                {"project5", "ballerinax/milvus:1.1.0"},  // project5 is from Central (example)
+                // Example: {"ballerinax-milvus", "ballerina/http:2.15.3"} - uncomment when connector is available
+                {"ballerinax-milvus", "ballerinax/milvus:1.1.0"},  // project5 is from Central (example)
         };
     }
 
@@ -170,21 +169,25 @@ public class ConnectorZipValidationTest {
     @Test(description = "Validate the generated connector artifacts for bala-based connectors", dataProvider = "balaProjectDataProvider")
     public void testGeneratedConnectorArtifactsForBalaProject(String projectName, String centralPackage) throws Exception {
         Connector.reset();
-        Path expectedPath = EXPECTED_DIR.resolve(projectName);
-
+        
         Path tempBalaDir;
         Path centralPackagePath = null; // Track Central package path for cleanup
+        String connectorFolderName = projectName; // Default to projectName for local projects
         
         if (centralPackage != null && !centralPackage.isBlank()) {
             // Pull package from Ballerina Central
             tempBalaDir = ArtifactGenerationUtil.pullPackageFromCentral(centralPackage);
             Assert.assertTrue(Files.exists(tempBalaDir), "Bala directory not found in Central: " + tempBalaDir);
             
-            // Store the Central package path for cleanup
+            // Derive connector folder name from Central package (org-package format)
             String[] parts = centralPackage.split(":");
             String orgPackage = parts[0];
             String[] orgPackageParts = orgPackage.split("/");
             if (orgPackageParts.length == 2) {
+                // Use org-package as folder name (e.g., ballerinax/milvus -> ballerinax-milvus)
+                connectorFolderName = orgPackageParts[0] + "-" + orgPackageParts[1];
+                
+                // Store the Central package path for cleanup
                 String homeDir = System.getProperty("user.home");
                 Path centralRepoBase = Paths.get(homeDir, ".ballerina", "repositories", "central.ballerina.io", "bala", 
                         orgPackageParts[0], orgPackageParts[1]);
@@ -220,6 +223,9 @@ public class ConnectorZipValidationTest {
                 }
             }
         }
+        
+        // Set expected path using connector folder name
+        Path expectedPath = EXPECTED_DIR.resolve(connectorFolderName);
         
         try {
             

@@ -170,21 +170,28 @@ public class TestArtifactGenerationUtil {
         }
     }
 
-    @Test(description = "Generates expected artifacts for project5 from Central", enabled = false) // Set enabled to true to run manually
+    @Test(description = "Generates expected artifacts from Central", enabled = true) // Set enabled to true to run manually
     public void generateProject5ExpectedArtifacts() throws Exception {
-        String projectName = "project5";
         // Pull package from Ballerina Central
         String centralPackage = "ballerinax/milvus:1.1.0"; 
         Path balaDir = ArtifactGenerationUtil.pullPackageFromCentral(centralPackage);
         
+        // Derive connector folder name from Central package (org-package format)
+        String[] parts = centralPackage.split(":");
+        String orgPackage = parts[0];
+        String[] orgPackageParts = orgPackage.split("/");
+        String connectorFolderName = orgPackageParts.length == 2 
+                ? orgPackageParts[0] + "-" + orgPackageParts[1]  // e.g., ballerinax-milvus
+                : "project5";  // Fallback to project5 if parsing fails
+        
         // Use expected path's parent as target so generated folder will be at expectedPath level
-        Path expectedPath = Paths.get("src/test/resources/expected", projectName);
+        Path expectedPath = Paths.get("src/test/resources/expected", connectorFolderName);
         Path tempTargetPath = expectedPath.getParent();
         
         ArtifactGenerationUtil.generateExpectedArtifacts(
                 balaDir.toAbsolutePath().toString(), 
                 tempTargetPath.toAbsolutePath().toString(), 
-                projectName);
+                connectorFolderName);
         
         // Copy generated artifacts from tempTargetPath/generated to expectedPath
         Path generatedPath = tempTargetPath.resolve("generated");
@@ -235,6 +242,6 @@ public class TestArtifactGenerationUtil {
             }
         }
         
-        System.out.println("Expected artifacts for project5 generated successfully from Central package: " + centralPackage);
+        System.out.println("Expected artifacts for " + connectorFolderName + " generated successfully from Central package: " + centralPackage);
     }
 }
