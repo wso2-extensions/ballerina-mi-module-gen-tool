@@ -36,6 +36,7 @@ import java.util.Stack;
 public class TestPrimitiveTypeConnector {
 
     private static final String CONNECTION_NAME = "primitiveTypeConnection";
+    private static final String CONNECTION_TYPE = "PRIMITIVETYPEPROJECT_PRIMITIVEDATATYPECLIENT";
 
     @BeforeClass
     public void setupRuntime() throws Exception {
@@ -43,13 +44,18 @@ public class TestPrimitiveTypeConnector {
         BalConnectorConfig config = new BalConnectorConfig(moduleInfo);
 
         TestMessageContext initContext = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
                 .objectTypeName("PrimitiveDataTypeClient")
+                .addParameter("connectionType", "string", CONNECTION_TYPE)
                 .addParameter("apiUrl", "string", "http://test.api.com")
                 .build();
 
-        initContext.setProperty("connectionName", CONNECTION_NAME);
-        initContext.setProperty("objectTypeName", "PrimitiveDataTypeClient");
-        initContext.setProperty("paramSize", 1);
+        // Connection-type specific properties for the init invocation
+        initContext.setProperty(CONNECTION_TYPE + "_objectTypeName", "PrimitiveDataTypeClient");
+        initContext.setProperty(CONNECTION_TYPE + "_paramSize", 1);
+        initContext.setProperty(CONNECTION_TYPE + "_paramFunctionName", "init");
+        initContext.setProperty(CONNECTION_TYPE + "_param0", "apiUrl");
+        initContext.setProperty(CONNECTION_TYPE + "_paramType0", "string");
 
         config.connect(initContext);
     }
@@ -182,6 +188,9 @@ public class TestPrimitiveTypeConnector {
             properties.put("param" + paramCount, name);
             properties.put("paramType" + paramCount, type);
             templateParams.put(name, value);
+            if ("connectionType".equals(name)) {
+                properties.put("connectionType", value);
+            }
             paramCount++;
             return this;
         }
@@ -198,8 +207,11 @@ public class TestPrimitiveTypeConnector {
             if (connectionName != null) {
                 properties.put("connectionName", connectionName);
             }
+            if (properties.containsKey("connectionType")) {
+                templateParams.put("connectionType", properties.get("connectionType"));
+            }
             if (methodName != null) {
-                properties.put("paramMethodName", methodName);
+                properties.put("paramFunctionName", methodName);
             }
             if (returnType != null) {
                 properties.put("returnType", returnType);
@@ -214,6 +226,10 @@ public class TestPrimitiveTypeConnector {
             TemplateContext templateContext = new TemplateContext("testConnectorFunc", new ArrayList<>());
             templateParams.put("responseVariable", "result");
             templateParams.put("name", connectionName != null ? connectionName : CONNECTION_NAME);
+            templateParams.put("connectionName", connectionName != null ? connectionName : CONNECTION_NAME);
+            if (properties.containsKey("connectionType")) {
+                templateParams.put("connectionType", properties.get("connectionType"));
+            }
             templateContext.setMappedValues(templateParams);
             stack.push(templateContext);
             context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);
