@@ -369,7 +369,7 @@ public class TestArrayConnector {
             Stack<TemplateContext> stack = new Stack<>();
             TemplateContext templateContext = new TemplateContext("testConnectorFunc", new ArrayList<>());
             templateParams.put("responseVariable", "result");
-            templateParams.put("name", connectionName != null ? connectionName : CONNECTION_NAME);
+            templateParams.put("connectionName", connectionName != null ? connectionName : CONNECTION_NAME);
             templateContext.setMappedValues(templateParams);
             stack.push(templateContext);
             context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);

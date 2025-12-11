@@ -68,7 +68,7 @@ public class BalConnectorConfig extends AbstractConnector {
             }
         }
         String connectorName = module.getName();
-        String connectionName = lookupTemplateParamater(messageContext, "name");
+        String connectionName = lookupTemplateParamater(messageContext, "connectionName");
         String connectionType = lookupTemplateParamater(messageContext, "connectionType");
         //TODO: read parameter args and default values
         //TODO: Use the NodeParser API to generate the argument values

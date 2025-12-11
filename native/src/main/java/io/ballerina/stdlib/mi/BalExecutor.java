@@ -155,7 +155,7 @@ public class BalExecutor {
             case STRING -> StringUtils.fromString((String) param);
             case FLOAT -> Double.parseDouble((String) param);
             case DECIMAL -> ValueCreator.createDecimalValue((String) param);
-            case JSON -> getBMapParameter(param);
+            case JSON -> getJsonParameter(param);
             case XML -> getBXmlParameter(context, value);
             case RECORD -> createRecordValue((String) param, context, index);
             case ARRAY -> getArrayParameter((String) param, context, value);
@@ -205,11 +205,14 @@ public class BalExecutor {
         return currentFuncHolder.getParameterValue(paramName);
     }
 
-    private BMap getBMapParameter(Object param) {
-        if (param instanceof String) {
-            return (BMap) JsonUtils.parse((String) param);
+    private Object getJsonParameter(Object param) {
+        if (param instanceof String strParam) {
+            if (strParam.startsWith("'") && strParam.endsWith("'")) {
+                strParam = strParam.substring(1, strParam.length() - 1);
+            }
+            return JsonUtils.parse(strParam);
         } else {
-            return (BMap) JsonUtils.parse(param.toString());
+            return JsonUtils.parse(param.toString());
         }
     }
 
