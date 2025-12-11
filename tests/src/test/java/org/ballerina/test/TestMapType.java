@@ -106,7 +106,7 @@ public class TestMapType {
                 .connectionName(CONNECTION_NAME)
                 .methodName("summarizeOrder")
                 .returnType("string")
-                .addParameter("orderMap", "map", "{\"orderId\":\"ORD123\",\"items\":[{\"id\":\"i1\",\"description\":\"first\"},{\"id\":\"i2\"}]}")
+                .addParameter("orderMap", "map", "{\"orderId\":\"ORD123\",\"items\":[{\"itemId\":\"i1\",\"quantity\":1},{\"itemId\":\"i2\",\"quantity\":1}],\"note\":null}")
                 .build();
 
         context.setProperty("param0", "orderMap");
@@ -129,7 +129,7 @@ public class TestMapType {
                 .connectionName(CONNECTION_NAME)
                 .methodName("computeCatalogTotal")
                 .returnType("float")
-                .addParameter("catalogMap", "map", "{\"name\":\"Store\",\"categories\":[{\"name\":\"C1\",\"products\":[{\"id\":\"p1\",\"price\":10.5},{\"id\":\"p2\",\"price\":20.0}]},{\"name\":\"C2\",\"products\":[{\"id\":\"p3\",\"price\":5.5}]}]}")
+                .addParameter("catalogMap", "map", "{\"categories\":[{\"categoryName\":\"C1\",\"products\":[{\"productId\":\"p1\",\"price\":10.5},{\"productId\":\"p2\",\"price\":20.0}]},{\"categoryName\":\"C2\",\"products\":[{\"productId\":\"p3\",\"price\":5.5}]}]}")
                 .build();
 
         context.setProperty("param0", "catalogMap");
@@ -173,7 +173,7 @@ public class TestMapType {
                 .connectionName(CONNECTION_NAME)
                 .methodName("formatProfile")
                 .returnType("string")
-                .addParameter("profileMap", "map", "{\"id\":\"u2\"}")
+                .addParameter("profileMap", "map", "{\"id\":\"u2\",\"settings\":null}")
                 .build();
 
         ctxAbsent.setProperty("param0", "profileMap");
