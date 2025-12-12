@@ -111,10 +111,13 @@ public class ConnectorZipValidationTest {
 
         Path projectJar = libDir.resolve(projectName + ".jar");
         Assert.assertTrue(Files.exists(projectJar), "project JAR does not exist in 'lib' for project: " + projectName);
-        
-        Path miNativeJar = libDir.resolve("mi-native-0.4.1-SNAPSHOT.jar");
-        Assert.assertTrue(Files.exists(miNativeJar), "mi-native JAR does not exist in 'lib' for project: " + projectName);
-        
+
+        try (var libFiles = Files.list(libDir)) {
+            boolean miNativeJarExists = libFiles
+                    .anyMatch(path -> path.getFileName().toString().matches("mi-native-.*\\.jar"));
+            Assert.assertTrue(miNativeJarExists, "mi-native JAR does not exist in 'lib' for project: " + projectName);
+        }
+
         Path moduleCoreJar = libDir.resolve("module-core-1.0.2.jar");
         Assert.assertTrue(Files.exists(moduleCoreJar), "module-core JAR does not exist in 'lib' for project: " + projectName);
 
