@@ -117,10 +117,14 @@ public class BalConnectorConfig extends AbstractConnector {
         return module;
     }
 
-    public static String lookupTemplateParamater (MessageContext ctxt, String paramName){
+    public static String lookupTemplateParamater(MessageContext ctxt, String paramName) throws ConnectException {
         Stack<TemplateContext> funcStack = (Stack) ctxt.getProperty(Constants.SYNAPSE_FUNCTION_STACK);
         TemplateContext currentFuncHolder = funcStack.peek();
-        return currentFuncHolder.getParameterValue(paramName).toString();
+        Object value = currentFuncHolder.getParameterValue(paramName);
+        if (value == null) {
+            throw new ConnectException("Required template parameter '" + paramName + "' is missing");
+        }
+        return value.toString();
     }
 
     private void setParameters(Object[] args, MessageContext context, String connectionType) {
