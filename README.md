@@ -80,5 +80,3 @@ For more information, go to the [contribution guidelines](https://github.com/bal
 ## Code of conduct
 
 All the contributors are encouraged to read the [Ballerina Code of Conduct](https://ballerina.io/code-of-conduct).
-
- People who are joining from along the way, could you please add the pickup locations to the sheet:
