@@ -19,12 +19,16 @@ package io.ballerina.mi.test.util;
 import io.ballerina.mi.MiCmd;
 import org.testng.Assert;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.nio.file.StandardCopyOption;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -56,7 +60,8 @@ import java.util.zip.ZipInputStream;
  * </p>
  * <p>
  * <b>Usage:</b> Call {@link #generateExpectedArtifacts(String, String)} with the project path and name
- * to refresh the expected artifacts before running assertions in tests.
+ * to refresh the expected artifacts before running assertions in tests. For bala projects that require a custom
+ * output directory, use {@link #generateExpectedArtifacts(String, String, String)} and provide the target path.
  * </p>
  */
 public class ArtifactGenerationUtil {
@@ -64,10 +69,18 @@ public class ArtifactGenerationUtil {
     private static final Path EXPECTED_DIR = RESOURCES_DIR.resolve("expected");
 
     public static void generateExpectedArtifacts(String projectPathStr, String projectName) throws Exception {
+        generateExpectedArtifacts(projectPathStr, null, projectName);
+    }
+
+    public static void generateExpectedArtifacts(String projectPathStr, String targetPathStr, String projectName)
+            throws Exception {
         System.out.println("Starting generateExpectedArtifacts for project: " + projectName);
         System.out.println("ProjectPathStr: " + projectPathStr);
         Path projectPath = Paths.get(projectPathStr);
         Path expectedOutputPath = EXPECTED_DIR.resolve(projectName);
+        Path targetDir = targetPathStr == null || targetPathStr.isBlank()
+                ? projectPath.resolve("target")
+                : Paths.get(targetPathStr);
 
         // 1. Clean up existing expected artifacts
         if (Files.exists(expectedOutputPath)) {
@@ -86,6 +99,8 @@ public class ArtifactGenerationUtil {
         }
         Files.createDirectories(expectedOutputPath);
         System.out.println("Ensured expected output directory exists: " + expectedOutputPath);
+        Files.createDirectories(targetDir);
+        System.out.println("Ensured target directory exists: " + targetDir);
 
         // 2. Programmatically execute MiCmd
         System.out.println("Executing MiCmd for project: " + projectPathStr);
@@ -93,13 +108,17 @@ public class ArtifactGenerationUtil {
         Field sourcePathField = MiCmd.class.getDeclaredField("sourcePath");
         sourcePathField.setAccessible(true);
         sourcePathField.set(miCmd, projectPathStr);
+        if (targetPathStr != null && !targetPathStr.isBlank()) {
+            Field targetPathField = MiCmd.class.getDeclaredField("targetPath");
+            targetPathField.setAccessible(true);
+            targetPathField.set(miCmd, targetPathStr);
+        }
         miCmd.execute();
         System.out.println("MiCmd execution completed.");
 
         // 3. Find the generated zip file and unzip it to the expected directory
-        Path targetDir = projectPath.resolve("target");
         Optional<Path> generatedZipFile;
-        try (Stream<Path> files = Files.list(targetDir)) {
+        try (Stream<Path> files = Files.walk(targetDir, 2)) {
             generatedZipFile = files.filter(p -> p.toString().endsWith(".zip")).findFirst();
         }
 
@@ -138,5 +157,131 @@ public class ArtifactGenerationUtil {
             Path ballerinaHome = Paths.get(balCommand).getParent().getParent();
             System.setProperty("ballerina.home", ballerinaHome.toString());
         }
+    }
+
+    public static Path packBallerinaProject(Path projectPath) throws Exception {
+        String balCommand = System.getProperty("bal.command");
+        if (balCommand == null || balCommand.isBlank()) {
+            throw new IllegalStateException("System property 'bal.command' is not set. Cannot run 'bal pack'.");
+        }
+
+        ProcessBuilder processBuilder = new ProcessBuilder(balCommand, "pack");
+        processBuilder.directory(projectPath.toFile());
+        processBuilder.redirectErrorStream(true);
+        Process process = processBuilder.start();
+
+        StringBuilder output = new StringBuilder();
+        try (InputStream inputStream = process.getInputStream();
+             InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             BufferedReader bufferedReader = new BufferedReader(reader)) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
+            }
+        }
+
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new RuntimeException("'bal pack' failed for " + projectPath + " with exit code " + exitCode +
+                    System.lineSeparator() + output);
+        }
+
+        try (Stream<Path> files = Files.walk(projectPath.resolve("target"))) {
+            return files.filter(path -> path.toString().endsWith(".bala"))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No .bala artifact found under " + projectPath));
+        }
+    }
+
+    /**
+     * Pulls a package from Ballerina Central and returns the path to the bala directory.
+     * The bala directory structure in Central is: ~/.ballerina/repositories/central.ballerina.io/bala/org/package/version/platform/
+     *
+     * @param packageName Package name in format "org/package" or "org/package:version"
+     * @return Path to the extracted bala directory in Central repository
+     * @throws Exception if pull fails or package not found
+     */
+    public static Path pullPackageFromCentral(String packageName) throws Exception {
+        String balCommand = System.getProperty("bal.command");
+        if (balCommand == null || balCommand.isBlank()) {
+            throw new IllegalStateException("System property 'bal.command' is not set. Cannot run 'bal pull'.");
+        }
+
+        System.out.println("Pulling package from Central: " + packageName);
+        ProcessBuilder processBuilder = new ProcessBuilder(balCommand, "pull", packageName);
+        processBuilder.redirectErrorStream(true);
+        Process process = processBuilder.start();
+
+        StringBuilder output = new StringBuilder();
+        try (InputStream inputStream = process.getInputStream();
+             InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             BufferedReader bufferedReader = new BufferedReader(reader)) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
+            }
+        }
+
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            String errorOutput = output.toString();
+            // "Package already exists" is not an error
+            if (!errorOutput.contains("Package already exists") && !errorOutput.contains("already exists")) {
+                throw new RuntimeException("'bal pull' failed for " + packageName + " with exit code " + exitCode +
+                        System.lineSeparator() + errorOutput);
+            }
+        }
+
+        // Parse package name to extract org and package name
+        String[] parts = packageName.split(":");
+        String orgPackage = parts[0];
+        String[] orgPackageParts = orgPackage.split("/");
+        if (orgPackageParts.length != 2) {
+            throw new IllegalArgumentException("Invalid package name format. Expected 'org/package' or 'org/package:version', got: " + packageName);
+        }
+        String org = orgPackageParts[0];
+        String packageNameOnly = orgPackageParts[1];
+
+        // Find the package in Central repository
+        String homeDir = System.getProperty("user.home");
+        Path centralRepoBase = Paths.get(homeDir, ".ballerina", "repositories", "central.ballerina.io", "bala", org, packageNameOnly);
+
+        if (!Files.exists(centralRepoBase)) {
+            throw new IllegalStateException("Package not found in Central repository: " + centralRepoBase);
+        }
+
+        // Find the latest version directory or specified version
+        Path versionDir;
+        if (parts.length > 1) {
+            // Specific version requested
+            versionDir = centralRepoBase.resolve(parts[1]);
+        } else {
+            // Find latest version (highest version number)
+            try (Stream<Path> versionDirs = Files.list(centralRepoBase)) {
+                versionDir = versionDirs
+                        .filter(Files::isDirectory)
+                        .max(Comparator.comparing(Path::getFileName, (v1, v2) -> {
+                            // Simple version comparison - find highest
+                            return v1.toString().compareTo(v2.toString());
+                        }))
+                        .orElseThrow(() -> new IllegalStateException("No version directory found for " + packageName));
+            }
+        }
+
+        // Find platform directory (java21, any, etc.)
+        Path platformDir;
+        try (Stream<Path> platformDirs = Files.list(versionDir)) {
+            platformDir = platformDirs
+                    .filter(Files::isDirectory)
+                    .filter(p -> {
+                        String name = p.getFileName().toString();
+                        return name.equals("java21") || name.equals("any") || name.equals("java17") || name.equals("java11");
+                    })
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No platform directory found in " + versionDir));
+        }
+
+        System.out.println("Found bala directory in Central: " + platformDir);
+        return platformDir;
     }
 }

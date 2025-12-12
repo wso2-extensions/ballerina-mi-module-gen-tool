@@ -1,0 +1,106 @@
+{
+  "connectorName": "project4",
+  "operationName": "getVaccineCoverageByCountry",
+  "title": "getVaccineCoverageByCountry",
+  "help": "Get COVID-19 vaccine doses administered for a country that has reported vaccination rollout. Sourced from https://covid.ourworldindata.org/\n",
+  "elements": [
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attribute",
+            "value": {
+              "name": "configRef",
+              "displayName": "Connection",
+              "inputType": "connection",
+              "allowedConnectionTypes": [
+                "project4_Client"
+              ],
+              "defaultType": "connection.project4_Client",
+              "defaultValue": "",
+              "required": "true",
+              "helpTip": "Connection to be used"
+            }
+          },
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Input Variables",
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "country",
+                    "displayName": "country",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "lastdays",
+                    "displayName": "lastdays",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "fullData",
+                    "displayName": "fullData",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Output",
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "responseVariable",
+                    "displayName": "Output Variable Name",
+                    "inputType": "string",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The target variable in which the output of the operation will be stored"
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "overwriteBody",
+                    "displayName": "Overwrite Message Body",
+                    "inputType": "checkbox",
+                    "defaultValue": "false",
+                    "helpTip": "Replace the Message Body in Message Context with the output payload of the operation (This will remove the payload from the above variable. But other elements such as headers and attributes will remain).",
+                    "required": "false"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

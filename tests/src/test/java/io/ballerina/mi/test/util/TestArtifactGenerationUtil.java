@@ -19,6 +19,9 @@ package io.ballerina.mi.test.util;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * This test class is intended to be run manually by developers when expected artifacts need to be updated.
  * <p>
@@ -59,5 +62,186 @@ public class TestArtifactGenerationUtil {
         String projectName = "project3";
         ArtifactGenerationUtil.generateExpectedArtifacts(projectPath, projectName);
         System.out.println("Expected artifacts for project3 generated successfully.");
+    }
+
+    @Test(description = "Generates expected artifacts for project4", enabled = false) // Set enabled to true to run manually (disabled by default)
+    public void generateProject4ExpectedArtifacts() throws Exception {
+        String sourceProjectPath = "src/test/resources/ballerina/project4";
+        String projectName = "project4";
+        Path projectPath = Paths.get(sourceProjectPath);
+        Path balaPath = ArtifactGenerationUtil.packBallerinaProject(projectPath);
+        
+        // Extract bala to temporary directory since ProjectLoader doesn't support .bala files directly
+        Path tempBalaDir = java.nio.file.Files.createTempDirectory("bala-test-" + projectName);
+        try {
+            // Extract the bala file
+            try (java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(
+                    java.nio.file.Files.newInputStream(balaPath))) {
+                java.util.zip.ZipEntry entry = zis.getNextEntry();
+                while (entry != null) {
+                    Path filePath = tempBalaDir.resolve(entry.getName());
+                    if (entry.isDirectory()) {
+                        java.nio.file.Files.createDirectories(filePath);
+                    } else {
+                        java.nio.file.Files.createDirectories(filePath.getParent());
+                        java.nio.file.Files.copy(zis, filePath, 
+                                java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    zis.closeEntry();
+                    entry = zis.getNextEntry();
+                }
+            }
+            
+            // Use expected path's parent as target so generated folder will be at expectedPath level
+            Path expectedPath = Paths.get("src/test/resources/expected", projectName);
+            Path tempTargetPath = expectedPath.getParent();
+            
+            ArtifactGenerationUtil.generateExpectedArtifacts(
+                    tempBalaDir.toAbsolutePath().toString(), 
+                    tempTargetPath.toAbsolutePath().toString(), 
+                    projectName);
+            
+            // Copy generated artifacts from tempTargetPath/generated to expectedPath
+            Path generatedPath = tempTargetPath.resolve("generated");
+            if (java.nio.file.Files.exists(generatedPath)) {
+                // Clean up existing expected path if it exists
+                if (java.nio.file.Files.exists(expectedPath)) {
+                    try (var walk = java.nio.file.Files.walk(expectedPath)) {
+                        walk.sorted((a, b) -> b.compareTo(a))
+                            .forEach(path -> {
+                                try {
+                                    java.nio.file.Files.delete(path);
+                                } catch (java.io.IOException e) {
+                                    // Ignore cleanup errors
+                                }
+                            });
+                    }
+                }
+                java.nio.file.Files.createDirectories(expectedPath);
+                
+                // Copy all contents from generated to expectedPath
+                try (var walk = java.nio.file.Files.walk(generatedPath)) {
+                    walk.forEach(source -> {
+                        try {
+                            Path destination = expectedPath.resolve(generatedPath.relativize(source));
+                            if (java.nio.file.Files.isDirectory(source)) {
+                                java.nio.file.Files.createDirectories(destination);
+                            } else {
+                                java.nio.file.Files.createDirectories(destination.getParent());
+                                java.nio.file.Files.copy(source, destination, 
+                                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                            }
+                        } catch (java.io.IOException e) {
+                            throw new RuntimeException("Failed to copy artifact: " + source, e);
+                        }
+                    });
+                }
+                
+                // Clean up the generated folder
+                try (var walk = java.nio.file.Files.walk(generatedPath)) {
+                    walk.sorted((a, b) -> b.compareTo(a))
+                        .forEach(path -> {
+                            try {
+                                java.nio.file.Files.delete(path);
+                            } catch (java.io.IOException e) {
+                                // Ignore cleanup errors
+                            }
+                        });
+                }
+            }
+            
+            System.out.println("Expected artifacts for project4 generated successfully.");
+        } finally {
+            // Clean up temporary directory
+            if (java.nio.file.Files.exists(tempBalaDir)) {
+                try (var walk = java.nio.file.Files.walk(tempBalaDir)) {
+                    walk.sorted((a, b) -> b.compareTo(a))
+                        .forEach(path -> {
+                            try {
+                                java.nio.file.Files.delete(path);
+                            } catch (java.io.IOException e) {
+                                // Ignore cleanup errors
+                            }
+                        });
+                } catch (java.io.IOException e) {
+                    // Ignore cleanup errors
+                }
+            }
+        }
+    }
+
+    @Test(description = "Generates expected artifacts from Central", enabled = true) // Set enabled to true to run manually
+    public void generateProject5ExpectedArtifacts() throws Exception {
+        // Pull package from Ballerina Central
+        String centralPackage = "ballerinax/milvus:1.1.0"; 
+        Path balaDir = ArtifactGenerationUtil.pullPackageFromCentral(centralPackage);
+        
+        // Derive connector folder name from Central package (org-package format)
+        String[] parts = centralPackage.split(":");
+        String orgPackage = parts[0];
+        String[] orgPackageParts = orgPackage.split("/");
+        String connectorFolderName = orgPackageParts.length == 2 
+                ? orgPackageParts[0] + "-" + orgPackageParts[1]  // e.g., ballerinax-milvus
+                : "project5";  // Fallback to project5 if parsing fails
+        
+        // Use expected path's parent as target so generated folder will be at expectedPath level
+        Path expectedPath = Paths.get("src/test/resources/expected", connectorFolderName);
+        Path tempTargetPath = expectedPath.getParent();
+        
+        ArtifactGenerationUtil.generateExpectedArtifacts(
+                balaDir.toAbsolutePath().toString(), 
+                tempTargetPath.toAbsolutePath().toString(), 
+                connectorFolderName);
+        
+        // Copy generated artifacts from tempTargetPath/generated to expectedPath
+        Path generatedPath = tempTargetPath.resolve("generated");
+        if (java.nio.file.Files.exists(generatedPath)) {
+            // Clean up existing expected path if it exists
+            if (java.nio.file.Files.exists(expectedPath)) {
+                try (var walk = java.nio.file.Files.walk(expectedPath)) {
+                    walk.sorted((a, b) -> b.compareTo(a))
+                        .forEach(path -> {
+                            try {
+                                java.nio.file.Files.delete(path);
+                            } catch (java.io.IOException e) {
+                                // Ignore cleanup errors
+                            }
+                        });
+                }
+            }
+            java.nio.file.Files.createDirectories(expectedPath);
+            
+            // Copy all contents from generated to expectedPath
+            try (var walk = java.nio.file.Files.walk(generatedPath)) {
+                walk.forEach(source -> {
+                    try {
+                        Path destination = expectedPath.resolve(generatedPath.relativize(source));
+                        if (java.nio.file.Files.isDirectory(source)) {
+                            java.nio.file.Files.createDirectories(destination);
+                        } else {
+                            java.nio.file.Files.createDirectories(destination.getParent());
+                            java.nio.file.Files.copy(source, destination, 
+                                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                        }
+                    } catch (java.io.IOException e) {
+                        throw new RuntimeException("Failed to copy artifact: " + source, e);
+                    }
+                });
+            }
+            
+            // Clean up the generated folder
+            try (var walk = java.nio.file.Files.walk(generatedPath)) {
+                walk.sorted((a, b) -> b.compareTo(a))
+                    .forEach(path -> {
+                        try {
+                            java.nio.file.Files.delete(path);
+                        } catch (java.io.IOException e) {
+                            // Ignore cleanup errors
+                        }
+                    });
+            }
+        }
+        
+        System.out.println("Expected artifacts for " + connectorFolderName + " generated successfully from Central package: " + centralPackage);
     }
 }
