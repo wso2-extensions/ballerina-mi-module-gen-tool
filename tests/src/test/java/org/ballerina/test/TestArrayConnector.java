@@ -16,12 +16,7 @@
 
 package org.ballerina.test;
 
-import io.ballerina.runtime.api.Module;
-import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.mi.BalConnectorConfig;
-import io.ballerina.stdlib.mi.BalConnectorConnection;
 import io.ballerina.stdlib.mi.BalConnectorFunction;
 import io.ballerina.stdlib.mi.ModuleInfo;
 import org.apache.synapse.data.connector.DefaultConnectorResponse;
@@ -29,7 +24,6 @@ import org.apache.synapse.mediators.template.TemplateContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.integration.connector.core.connection.ConnectionHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +35,7 @@ import java.util.Stack;
  */
 public class TestArrayConnector {
 
-    private static final String CONNECTION_NAME = "testConnection";
+    private static final String CONNECTION_NAME = "testArrayConnection";
 
     @BeforeClass
     public void setupRuntime() throws Exception {
@@ -51,13 +45,16 @@ public class TestArrayConnector {
 
         // Create a context for connection initialization
         TestMessageContext initContext = ConnectorContextBuilder.connectorContext()
-                .objectTypeName("ArrayClient")
+                .connectionName(CONNECTION_NAME)
                 .addParameter("apiUrl", "string", "http://test.api.com")
+                .addParameter("connectionType", "string", "ARRAYPROJECT_ARRAYCLIENT")
                 .build();
 
-        initContext.setProperty("connectionName", CONNECTION_NAME);
-        initContext.setProperty("objectTypeName", "ArrayClient");
-        initContext.setProperty("paramSize", 1);
+        initContext.setProperty("ARRAYPROJECT_ARRAYCLIENT_objectTypeName", "ArrayClient");
+        initContext.setProperty("ARRAYPROJECT_ARRAYCLIENT_paramSize", 1);
+        initContext.setProperty("ARRAYPROJECT_ARRAYCLIENT_paramFunctionName", "init");
+        initContext.setProperty("ARRAYPROJECT_ARRAYCLIENT_param0", "apiUrl");
+        initContext.setProperty("ARRAYPROJECT_ARRAYCLIENT_paramType0", "string");
 
         // Use BalConnectorConfig to create the connection
         config.connect(initContext);
@@ -357,7 +354,7 @@ public class TestArrayConnector {
                 properties.put("connectionName", connectionName);
             }
             if (methodName != null) {
-                properties.put("paramMethodName", methodName);  // Use correct constant
+                properties.put("paramFunctionName", methodName);  // Use correct constant
             }
             if (returnType != null) {
                 properties.put("returnType", returnType);
@@ -372,7 +369,7 @@ public class TestArrayConnector {
             Stack<TemplateContext> stack = new Stack<>();
             TemplateContext templateContext = new TemplateContext("testConnectorFunc", new ArrayList<>());
             templateParams.put("responseVariable", "result");
-            templateParams.put("name", connectionName != null ? connectionName : CONNECTION_NAME);
+            templateParams.put("connectionName", connectionName != null ? connectionName : CONNECTION_NAME);
             templateContext.setMappedValues(templateParams);
             stack.push(templateContext);
             context.setProperty("_SYNAPSE_FUNCTION_STACK", stack);

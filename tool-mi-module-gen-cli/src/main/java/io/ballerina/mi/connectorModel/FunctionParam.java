@@ -15,15 +15,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
 package io.ballerina.mi.connectorModel;
 
 import io.ballerina.compiler.api.symbols.ParameterKind;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 
 public class FunctionParam extends Param {
 
     private final String paramType;
     private ParameterKind paramKind;
+    private TypeSymbol typeSymbol;
 
     public FunctionParam(String index, String name, String paramType) {
         super(index, name);
@@ -40,5 +42,13 @@ public class FunctionParam extends Param {
 
     public ParameterKind getParamKind() {
         return paramKind;
+    }
+
+    public TypeSymbol getTypeSymbol() {
+        return typeSymbol;
+    }
+
+    public void setTypeSymbol(TypeSymbol typeSymbol) {
+        this.typeSymbol = typeSymbol;
     }
 }
