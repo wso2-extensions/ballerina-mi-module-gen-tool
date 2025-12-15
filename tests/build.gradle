@@ -313,6 +313,8 @@ tasks.register("generateExpectedArtifacts", JavaExec) {
         if (project.hasProperty("centralPackage")) {
             systemProperty "centralPackage", project.property("centralPackage")
         }
+        systemProperty "bal.command", balCommand.toString()
+        systemProperty "project.root", project.rootDir.toString()
     }
 }
 
