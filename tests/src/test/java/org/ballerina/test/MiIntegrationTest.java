@@ -188,7 +188,7 @@ public class MiIntegrationTest {
         
         // Wait for the server to fully start and deploy the CAR file
         // Check if management API is accessible
-        int maxRetries = 30;
+        int maxRetries = 5;
         int retryCount = 0;
         boolean serverReady = false;
         while (retryCount < maxRetries && !serverReady) {
