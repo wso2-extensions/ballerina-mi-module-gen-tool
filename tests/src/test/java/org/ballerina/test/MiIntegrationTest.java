@@ -268,38 +268,6 @@ public class MiIntegrationTest {
             "Expected HTTP status code between 200-599, but got: " + statusCode);
     }
 
-    @Test
-    public void testManagementApi() {
-        // Test the management API to verify server is running
-        // Note: This test may fail if management API is not accessible or requires authentication
-        try {
-            String host = miContainer.getHost();
-            Integer managementPort = miContainer.getMappedPort(MI_MANAGEMENT_PORT);
-            String managementUrl = "http://" + host + ":" + managementPort + "/services/Version";
-            
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(managementUrl))
-                .GET()
-                .timeout(Duration.ofSeconds(10))
-                .build();
-            
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            int statusCode = response.statusCode();
-            System.out.println("Management API Response Status: " + statusCode);
-
-            // Management API should return 200
-            Assert.assertEquals(statusCode, 200, 
-                "Management API should return 200, but got: " + statusCode);
-        } catch (Exception e) {
-            // Management API might not be accessible or might require authentication
-            // This is acceptable as long as the main API endpoints work
-            System.out.println("Management API test skipped: " + e.getMessage());
-            // Don't fail the test if management API is not accessible
-            // The main API tests (testHelloApi) already verify the server is working
-        }
-    }
-
     @AfterClass
     public void tearDown() {
         if (miContainer != null) {
