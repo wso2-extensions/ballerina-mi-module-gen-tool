@@ -20,9 +20,21 @@
     <parameter name="name" description="Unique name the connection is identified by"/>
     <parameter name="connectionType" description="Connection type"/>
     <!-- TODO: if union, the selected member type becomes a parameter-->
+    <parameter name="config" description=""/>
+    <parameter name="serviceUrl" description=""/>
     <sequence>
-        <property name="project4_Client_objectTypeName" value="Client"/>
+        <property name="PROJECT4_CLIENT_objectTypeName" value="Client"/>
+        <property name="PROJECT4_CLIENT_paramSize" value="2"/>
+        <property name="PROJECT4_CLIENT_paramFunctionName" value="init"/>
+        <property name="PROJECT4_CLIENT_param0" value="config"/>
+        <property name="PROJECT4_CLIENT_paramType0" value="record"/>
+        <property name="PROJECT4_CLIENT_param1" value="serviceUrl"/>
+        <property name="PROJECT4_CLIENT_paramType1" value="string"/>
         
-        <class name="io.ballerina.stdlib.mi.BalConnectorConfig"/>
+        <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
+            <property name="orgName" value="testOrg"/>
+            <property name="moduleName" value="project4"/>
+            <property name="version" value="1"/>
+        </class>
     </sequence>
 </template>

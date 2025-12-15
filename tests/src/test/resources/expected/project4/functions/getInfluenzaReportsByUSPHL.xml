@@ -21,6 +21,8 @@
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
     <!-- TODO: if union, the selected member type becomes a parameter-->
     <sequence>
+        <property name="paramSize" value="0"/>
+        <property name="paramFunctionName" value="getInfluenzaReportsByUSPHL"/>
         <property name="returnType" value="null"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">

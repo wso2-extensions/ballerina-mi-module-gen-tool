@@ -334,10 +334,15 @@ public class ConnectorZipValidationTest {
         // Check for any jar file in the lib directory
         long jarCount = Files.list(libDir).filter(p -> p.toString().endsWith(".jar")).count();
         Assert.assertTrue(jarCount > 0, "No JAR files found in 'lib' for project: " + projectName);
-        
-        Path miNativeJar = libDir.resolve("mi-native-0.4.1-SNAPSHOT.jar");
-        Assert.assertTrue(Files.exists(miNativeJar), "mi-native JAR does not exist in 'lib' for project: " + projectName);
-        
+
+        // Validate presence of mi-native JAR without tying to a specific version
+        try (var libFiles = Files.list(libDir)) {
+            boolean miNativeJarExists = libFiles
+                    .anyMatch(path -> path.getFileName().toString().matches("mi-native-.*\\.jar"));
+            Assert.assertTrue(miNativeJarExists,
+                    "mi-native JAR does not exist in 'lib' for project: " + projectName);
+        }
+
         Path moduleCoreJar = libDir.resolve("module-core-1.0.2.jar");
         Assert.assertTrue(Files.exists(moduleCoreJar), "module-core JAR does not exist in 'lib' for project: " + projectName);
 

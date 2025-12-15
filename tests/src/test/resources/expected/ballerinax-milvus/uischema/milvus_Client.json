@@ -26,7 +26,31 @@
             "value": {
               "groupName": "Basic",
               "elements": [
-                
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "serviceUrl",
+                    "displayName": "serviceUrl",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config",
+                    "displayName": "config",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
               ]
             }
           }

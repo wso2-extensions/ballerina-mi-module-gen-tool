@@ -30,6 +30,8 @@
         <property name="paramType1" value="string"/>
         <property name="param2" value="lastdays"/>
         <property name="paramType2" value="string"/>
+        <property name="paramSize" value="3"/>
+        <property name="paramFunctionName" value="getTimeSeriesByProvince"/>
         <property name="returnType" value="null"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">

@@ -24,6 +24,9 @@
     <sequence>
         <property name="param0" value="request"/>
         <property name="paramType0" value="record"/>
+        <property name="param0_recordName" value="CreateCollectionRequest" />
+        <property name="paramSize" value="1"/>
+        <property name="paramFunctionName" value="createCollection"/>
         <property name="returnType" value="null"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">

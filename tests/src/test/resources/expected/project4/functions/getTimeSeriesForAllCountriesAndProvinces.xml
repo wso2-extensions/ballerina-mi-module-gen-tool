@@ -24,6 +24,8 @@
     <sequence>
         <property name="param0" value="lastdays"/>
         <property name="paramType0" value="string"/>
+        <property name="paramSize" value="1"/>
+        <property name="paramFunctionName" value="getTimeSeriesForAllCountriesAndProvinces"/>
         <property name="returnType" value="null"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">

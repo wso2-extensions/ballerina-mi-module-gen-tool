@@ -20,9 +20,21 @@
     <parameter name="name" description="Unique name the connection is identified by"/>
     <parameter name="connectionType" description="Connection type"/>
     <!-- TODO: if union, the selected member type becomes a parameter-->
+    <parameter name="serviceUrl" description=""/>
+    <parameter name="config" description=""/>
     <sequence>
-        <property name="milvus_Client_objectTypeName" value="Client"/>
+        <property name="MILVUS_CLIENT_objectTypeName" value="Client"/>
+        <property name="MILVUS_CLIENT_paramSize" value="2"/>
+        <property name="MILVUS_CLIENT_paramFunctionName" value="init"/>
+        <property name="MILVUS_CLIENT_param0" value="serviceUrl"/>
+        <property name="MILVUS_CLIENT_paramType0" value="string"/>
+        <property name="MILVUS_CLIENT_param1" value="config"/>
+        <property name="MILVUS_CLIENT_paramType1" value="record"/>
         
-        <class name="io.ballerina.stdlib.mi.BalConnectorConfig"/>
+        <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
+            <property name="orgName" value="ballerinax"/>
+            <property name="moduleName" value="milvus"/>
+            <property name="version" value="1"/>
+        </class>
     </sequence>
 </template>

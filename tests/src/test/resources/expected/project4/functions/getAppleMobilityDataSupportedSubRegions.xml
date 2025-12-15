@@ -24,6 +24,8 @@
     <sequence>
         <property name="param0" value="country"/>
         <property name="paramType0" value="string"/>
+        <property name="paramSize" value="1"/>
+        <property name="paramFunctionName" value="getAppleMobilityDataSupportedSubRegions"/>
         <property name="returnType" value="null"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">

@@ -27,6 +27,8 @@
         <property name="paramType0" value="string"/>
         <property name="param1" value="fullData"/>
         <property name="paramType1" value="string"/>
+        <property name="paramSize" value="2"/>
+        <property name="paramFunctionName" value="getVaccineCoverageOfAllUSAStates"/>
         <property name="returnType" value="null"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
