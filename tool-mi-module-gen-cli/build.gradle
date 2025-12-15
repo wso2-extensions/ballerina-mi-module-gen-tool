@@ -52,6 +52,8 @@ configurations {
     miRuntimeLibs {
         transitive = false
     }
+    // Configuration for dependencies to be included in the shadow JAR
+    shadowIncludes
 }
 
 dependencies {
@@ -71,6 +73,10 @@ dependencies {
     miRuntimeLibs project(':mi-native')
     miRuntimeLibs "org.wso2.carbon.module:module-core:${carbonModuleCoreVersion}"
     miRuntimeLibs "org.wso2.integration.connector.core:mi-connector-core:${miConnectorCoreVersion}"
+
+    // Dependencies to be included in shadow JAR
+    shadowIncludes "com.github.jknack:handlebars:${handlebarsVersion}"
+    shadowIncludes "org.antlr:antlr4-runtime:${antlrRuntimeVersion}"
 }
 
 task copyMiRuntimeLibs(type: Copy) {
@@ -82,26 +88,15 @@ processResources.dependsOn copyMiRuntimeLibs
 
 shadowJar {
     archiveClassifier.set('')
+    from sourceSets.main.output
+    configurations = [project.configurations.shadowIncludes]
     zip64 = true
-    // Exclude Ballerina dependencies as they're already in the runtime
-    dependencies {
-        exclude(dependency('org.ballerinalang:.*'))
-    }
+    mergeServiceFiles()
+
     // Exclude slf4j dependencies
     dependencies {
-        exclude(dependency('org.slf4j:slf4j-api'))
-        exclude(dependency('org.slf4j:slf4j-simple'))
-        exclude(dependency('org.slf4j:slf4j-nop'))
-        exclude(dependency('org.slf4j:slf4j-log4j12'))
         exclude(dependency('org.slf4j:.*'))
     }
-
-    // Exclude Java system classes
-    exclude 'java/**'
-    exclude 'javax/**'
-    exclude 'sun/**'
-    exclude 'com/sun/**'
-    mergeServiceFiles()
 
     // Shadow JAR treats .jar files as dependencies to merge, so we need to add them post-processing
     doLast {
