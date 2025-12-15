@@ -295,6 +295,27 @@ task buildMiProject(type: Exec) {
     }
 }
 
+tasks.register("generateExpectedArtifacts", JavaExec) {
+    group = "verification"
+    description = "Regenerates expected connector artifacts used by tests."
+    dependsOn copyStdlibs
+    dependsOn copyMiToolToCentral
+    dependsOn(":tool-mi-module-gen-cli:build")
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    main = "io.ballerina.mi.test.util.TestArtifactGenerationUtil"
+
+    doFirst {
+        if (!project.hasProperty("artifactTarget")) {
+            throw new GradleException("Provide -PartifactTarget=project1|project2|project3|project4|central")
+        }
+        args project.property("artifactTarget")
+        if (project.hasProperty("centralPackage")) {
+            systemProperty "centralPackage", project.property("centralPackage")
+        }
+    }
+}
+
 test {
     dependsOn copyMiToolToCentral  // This depends on pushMiToolToLocal
     dependsOn copyStdlibs
