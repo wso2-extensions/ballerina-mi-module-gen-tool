@@ -1,0 +1,61 @@
+{
+  "connectorName": "milvus",
+  "connectionName": "milvus_Client",
+  "title": "Connection Config for milvus_Client connection",
+  "help": "<h1>milvus_Client Connection</h1> <b>Milvus is a high-performance, cloud-native vector database built for scalable vector ANN search.\n</b>",
+  "elements": [
+    {
+      "type": "attribute",
+      "value": {
+        "name": "connectionName",
+        "displayName": "Connection Name",
+        "inputType": "string",
+        "defaultValue": "milvus_Client_connection_1",
+        "required": "true",
+        "helpTip": "The name for the milvus_Client connection",
+        "validation": "nameWithoutSpecialCharactors"
+      }
+    },
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Basic",
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "serviceUrl",
+                    "displayName": "serviceUrl",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config",
+                    "displayName": "config",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
