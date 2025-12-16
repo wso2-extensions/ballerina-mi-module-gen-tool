@@ -10,7 +10,7 @@ distribution-version = "2201.13.1"
 [[package]]
 org = "wso2"
 name = "mi_module_gen"
-version = "0.4.2"
+version = "0.4.3"
 modules = [
 	{org = "wso2", packageName = "mi_module_gen", moduleName = "mi_module_gen"}
 ]
