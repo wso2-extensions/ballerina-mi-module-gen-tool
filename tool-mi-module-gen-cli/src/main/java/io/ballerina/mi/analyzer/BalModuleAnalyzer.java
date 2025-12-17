@@ -96,35 +96,7 @@ public class BalModuleAnalyzer implements Analyzer {
             noOfParams = parameterSymbols.size();
 
             for (int i = 0; i < noOfParams; i++) {
-                ParameterSymbol parameterSymbol = parameterSymbols.get(i);
-                TypeSymbol typeSymbol = parameterSymbol.typeDescriptor();
-                TypeDescKind actualTypeKind = Utils.getActualTypeKind(typeSymbol);
-                String paramType = Utils.getParamTypeName(actualTypeKind);
-
-                if (paramType != null) {
-                    Optional<String> optParamName = parameterSymbol.getName();
-                    if (optParamName.isPresent()) {
-                        String paramName = optParamName.get();
-                        FunctionParam functionParam = new FunctionParam(Integer.toString(i), paramName, paramType);
-                        functionParam.setParamKind(parameterSymbol.paramKind());
-                        functionParam.setTypeSymbol(typeSymbol);
-                        component.setFunctionParam(functionParam);
-                        //TODO: Support individual fields of record types
-//                        if (actualTypeKind == TypeDescKind.RECORD) {
-//                            TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(typeSymbol);
-//                            if (actualTypeSymbol instanceof RecordTypeSymbol recordTypeSymbol) {
-//                                Map<String, RecordFieldSymbol> recordFields = recordTypeSymbol.fieldDescriptors();
-//                                for (Map.Entry<String, RecordFieldSymbol> field : recordFields.entrySet()) {
-//                                    TypeSymbol fieldTypeSymbol = field.getValue().typeDescriptor();
-//                                    TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldTypeSymbol);
-//                                    FunctionParam fieldParam = new FunctionParam(Integer.toString(i), field.getKey(),
-//                                            fieldTypeKind.getName());
-//                                    component.setFunctionParam(fieldParam);
-//                                }
-//                            }
-//                        }
-                    }
-                }
+                ParamFactory.createFunctionParam(parameterSymbols.get(i), i).ifPresent(component::setFunctionParam);
             }
         }
 

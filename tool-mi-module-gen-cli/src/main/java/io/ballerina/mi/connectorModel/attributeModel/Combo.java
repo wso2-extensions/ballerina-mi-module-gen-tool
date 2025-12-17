@@ -25,14 +25,18 @@ public class Combo extends Element {
     private final String comboValues;
     private final Boolean required;
     private final String helpTip;
+    private final String defaultValue;
+    private final String enableCondition;
 
-    public Combo (String name, String displayName, String inputType, String comboValues, Boolean required,
-                  String helpTip) {
+    public Combo (String name, String displayName, String inputType, String comboValues,String defaultValue, Boolean required,
+                  String enableCondition, String helpTip) {
         this.name = name;
         this.displayName = displayName;
         this.inputType = inputType;
         this.comboValues = comboValues;
+        this.defaultValue = defaultValue;
         this.required = required;
+        this.enableCondition = enableCondition;
         this.helpTip = helpTip;
     }
 
@@ -58,5 +62,9 @@ public class Combo extends Element {
 
     public String getHelpTip() {
         return helpTip;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
     }
 }

@@ -22,18 +22,14 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import io.ballerina.mi.connectorModel.*;
 import io.ballerina.mi.connectorModel.attributeModel.Attribute;
-import io.ballerina.mi.connectorModel.attributeModel.AttributeGroup;
 import io.ballerina.mi.connectorModel.attributeModel.Combo;
-import io.ballerina.mi.connectorModel.attributeModel.Table;
 import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.JsonTemplateBuilder;
 import io.ballerina.mi.util.Utils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.diagramutil.connector.models.connector.Type;
-import org.ballerinalang.diagramutil.connector.models.connector.types.EnumType;
 import org.ballerinalang.diagramutil.connector.models.connector.types.PathParamType;
-import org.ballerinalang.diagramutil.connector.models.connector.types.RecordType;
-import org.ballerinalang.diagramutil.connector.models.connector.types.UnionType;
 
 import java.io.File;
 import java.io.IOException;
@@ -229,34 +225,34 @@ public class ConnectorSerializer {
                 Component component = (Component) context;
                 JsonTemplateBuilder builder = new JsonTemplateBuilder();
                 List<FunctionParam> functionParams = component.getFunctionParams();
-                for (FunctionParam param : functionParams) {
-                    writeJsonAttributeForFunctionParam(param.getParamType(), param.getValue(), functionParams.indexOf(param),
-                            functionParams.size(), builder, param.getValue(), param.getDescription(), false);
+                for (FunctionParam functionParam : functionParams) {
+                    writeJsonAttributeForFunctionParam(functionParam, functionParams.indexOf(functionParam),
+                            functionParams.size(), builder, false);
                 }
-                List<Type> queryParams = component.getQueryParams();
-                String helpTip = String.format("Input parameters required for %s connection",
-                        component.getParent().getConnectionType());
-                for (Type configParam : queryParams) {
-                    String paramName = String.format("%s_%s", component.getParent().getConnectionType(),
-                            configParam.name);
-                    writeJsonAttributeForQueryParam(configParam.typeName, configParam, queryParams.indexOf(configParam),
-                            queryParams.size(), builder, paramName, helpTip, false);
-                }
+//                List<Type> queryParams = component.getQueryParams();
+//                String helpTip = String.format("Input parameters required for %s connection",
+//                        component.getParent().getConnectionType());
+//                for (Type configParam : queryParams) {
+//                    String paramName = String.format("%s_%s", component.getParent().getConnectionType(),
+//                            configParam.name);
+//                    writeJsonAttributeForQueryParam(configParam.typeName, configParam, queryParams.indexOf(configParam),
+//                            queryParams.size(), builder, paramName, helpTip, false);
+//                }
                 return new Handlebars.SafeString(builder.build());
             });
             handlebar.registerHelper("writeComponentJsonProperties", (context, options) -> {
                 Component component = (Component) context;
                 JsonTemplateBuilder builder = new JsonTemplateBuilder();
                 List<FunctionParam> functionParams = component.getFunctionParams();
-                for (FunctionParam param : functionParams) {
-                    writeJsonAttributeForFunctionParam(param.getParamType(), param.getValue(), functionParams.indexOf(param),
-                            functionParams.size(), builder, param.getValue(), param.getDescription(), false);
+                for (FunctionParam functionParam : functionParams) {
+                    writeJsonAttributeForFunctionParam(functionParam, functionParams.indexOf(functionParam),
+                            functionParams.size(), builder, false);
                 }
-                List<PathParamType> pathParams = component.getPathParams();
-                for (PathParamType pathParam : pathParams) {
-                    writeJsonAttributeForPathParam(pathParam.typeName, pathParam, pathParams.indexOf(pathParam),
-                            pathParams.size(), builder, pathParam.name, "", false);
-                }
+//                List<PathParamType> pathParams = component.getPathParams();
+//                for (PathParamType pathParam : pathParams) {
+//                    writeJsonAttributeForPathParam(pathParam.typeName, pathParam, pathParams.indexOf(pathParam),
+//                            pathParams.size(), builder, pathParam.name, "", false);
+//                }
 //                List<Type> queryParams = component.getQueryParams();
 //                for (Type queryParam: queryParams) {
 //                    writeJsonAttributeForQueryParam(queryParam.typeName, queryParam, queryParams.indexOf(queryParam),
@@ -282,6 +278,12 @@ public class ConnectorSerializer {
                     if (optional.isPresent()) {
                         return optional.get();
                     }
+                }
+                return "";
+            }));
+            handlebar.registerHelper("capitalize", ((context, options) -> {
+                if (context instanceof String) {
+                    return new Handlebars.SafeString(StringUtils.capitalize((String) context));
                 }
                 return "";
             }));
@@ -388,166 +390,188 @@ public class ConnectorSerializer {
         }
     }
 
-    private static void writeJsonAttributeForFunctionParam(String paramType, String displayName, int index, int paramLength,
-                                                           JsonTemplateBuilder builder, String paramName, String helpTip,
+    private static void writeJsonAttributeForFunctionParam(FunctionParam functionParam, int index, int paramLength,
+                                                           JsonTemplateBuilder builder,
                                                            boolean isCombo) throws IOException {
+        String paramType = functionParam.getParamType();
+        String displayName = functionParam.getValue();
         switch (paramType) {
-            case STRING, XML, JSON, MAP, RECORD:
-                Attribute stringAttr = new Attribute(paramName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        "", true, helpTip, "",
+            case STRING, XML, JSON, MAP, RECORD, ARRAY:
+                Attribute stringAttr = new Attribute(functionParam.getValue(), displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", functionParam.isRequired(), functionParam.getDescription(), "",
                         "", isCombo);
+                stringAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);
                 break;
             case INT:
-                Attribute intAttr = new Attribute(paramName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        "", true, helpTip, VALIDATE_TYPE_REGEX,
+                Attribute intAttr = new Attribute(functionParam.getValue(), displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", functionParam.isRequired(), functionParam.getDescription(), VALIDATE_TYPE_REGEX,
                         INTEGER_REGEX, isCombo);
+                intAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, intAttr);
                 break;
             case DECIMAL, FLOAT:
-                Attribute decAttr = new Attribute(paramName, displayName,
-                        INPUT_TYPE_STRING_OR_EXPRESSION, "", true,
-                        helpTip, VALIDATE_TYPE_REGEX, DECIMAL_REGEX, isCombo);
+                Attribute decAttr = new Attribute(functionParam.getValue(), displayName,
+                        INPUT_TYPE_STRING_OR_EXPRESSION, "", functionParam.isRequired(),
+                        functionParam.getDescription(), VALIDATE_TYPE_REGEX, DECIMAL_REGEX, isCombo);
+                decAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, decAttr);
                 break;
             case BOOLEAN:
-                Attribute boolAttr = new Attribute(paramName, displayName, INPUT_TYPE_BOOLEAN,
-                        "", true, helpTip, "",
+                Attribute boolAttr = new Attribute(functionParam.getValue(), displayName, INPUT_TYPE_BOOLEAN,
+                        "", functionParam.isRequired(), functionParam.getDescription(), "",
                         "", isCombo);
+                boolAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
-        }
-        builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
-    }
-
-    private static void writeJsonAttributeForPathParam(String paramType, PathParamType parameter, int index, int paramLength,
-                                                       JsonTemplateBuilder builder, String paramName, String helpTip,
-                                                       boolean isCombo) throws IOException {
-        switch (paramType) {
-            case STRING, XML, JSON, MAP, RECORD:
-                Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        "", true, helpTip, "",
-                        "", isCombo);
-                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);
-                break;
-            case INT:
-                Attribute intAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        "", true, helpTip, VALIDATE_TYPE_REGEX,
-                        INTEGER_REGEX, isCombo);
-                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, intAttr);
-                break;
-            case DECIMAL, FLOAT:
-                Attribute decAttr = new Attribute(paramName, parameter.name,
-                        INPUT_TYPE_STRING_OR_EXPRESSION, "", true,
-                        helpTip, VALIDATE_TYPE_REGEX, DECIMAL_REGEX, isCombo);
-                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, decAttr);
-                break;
-            case BOOLEAN:
-                Attribute boolAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_BOOLEAN,
-                        "", true, helpTip, "",
-                        "", isCombo);
-                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
-        }
-        builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
-    }
-
-    private static void writeJsonAttributeForQueryParam(String paramType, Type parameter, int index, int paramLength,
-                                                        JsonTemplateBuilder builder, String paramName, String helpTip,
-                                                        boolean isCombo)
-            throws IOException {
-        switch (paramType) {
-            case STRING, XML, JSON, MAP:
-                Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, "",
-                        "", isCombo);
-                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);
-                break;
-            case INT:
-                Attribute intAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, VALIDATE_TYPE_REGEX,
-                        INTEGER_REGEX, isCombo);
-                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, intAttr);
-                break;
-            case DECIMAL, FLOAT:
-                Attribute decAttr = new Attribute(paramName, parameter.name,
-                        INPUT_TYPE_STRING_OR_EXPRESSION, parameter.getDefaultValue(), !parameter.isOptional(),
-                        helpTip, VALIDATE_TYPE_REGEX, DECIMAL_REGEX, isCombo);
-                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, decAttr);
-                break;
-            case ARRAY:
-                Table arrayTable = new Table(paramName, parameter.name, parameter.name, helpTip);
-                builder.addFromTemplate(TABLE_TEMPLATE_PATH, arrayTable);
-                //TODO: Generate attribute according to the data type of the array fields
-//                writeJsonAttributeForQueryParam();
                 break;
             case UNION:
                 // Gather the data types in the union
-                Combo comboField = getComboField(parameter, paramName, helpTip);
-                builder.addFromTemplate(COMBO_TEMPLATE_PATH, comboField).addSeparator(ATTRIBUTE_SEPARATOR);
+                if (!((UnionFunctionParam) functionParam).getUnionMemberParams().isEmpty()) {
+                    Combo comboField = getComboField((UnionFunctionParam) functionParam, functionParam.getValue(),
+                            functionParam.getDescription());
+                    builder.addFromTemplate(COMBO_TEMPLATE_PATH, comboField).addSeparator(ATTRIBUTE_SEPARATOR);
+                }
 
                 // Add attribute fields for each type with enable conditions
-                List<Type> unionMembers = ((UnionType) parameter).members;
-                for (Type member : unionMembers) {
-                    writeJsonAttributeForQueryParam(member.typeName, parameter, index, paramLength, builder, paramName,
-                            helpTip, true);
-                }
-                break;
-            case ENUM:
-                List<Type> enumMembers = ((EnumType) parameter).members;
-                StringJoiner joiner = new StringJoiner(",", "[", "]");
-                for (Type member : enumMembers) {
-                    joiner.add("\"" + member.typeName + "\"");
-                }
-                String enumComboValues = joiner.toString();
-                Combo enumComboField = new Combo(paramName, parameter.name, INPUT_TYPE_COMBO, enumComboValues,
-                        !parameter.isOptional(), helpTip);
-                builder.addFromTemplate(COMBO_TEMPLATE_PATH, enumComboField);
-                break;
-            case BOOLEAN:
-                Attribute boolAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_BOOLEAN,
-                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, "",
-                        "", isCombo);
-                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
-                break;
-            case RECORD:
-                AttributeGroup recGroup = new AttributeGroup(paramName);
-                builder.addFromTemplate(ATTRIBUTE_GROUP_TEMPLATE_PATH, recGroup);
-                List<Type> recordFields = ((RecordType) parameter).fields;
-                for (Type field : recordFields) {
-                    String fieldName = String.format("%s_%s", paramName, field.name);
-                    writeJsonAttributeForQueryParam(field.typeName, field, recordFields.indexOf(field), paramLength,
-                            builder, fieldName, field.documentation, false);
-                    builder.addConditionalSeparator((recordFields.indexOf(field) < recordFields.size() - 1),
+                List<FunctionParam> unionMembers = ((UnionFunctionParam) functionParam).getUnionMemberParams();
+                for (FunctionParam member : unionMembers) {
+                    writeJsonAttributeForFunctionParam(member, index, paramLength, builder, false);
+                    builder.addConditionalSeparator((unionMembers.indexOf(member) < unionMembers.size() - 1),
                             ATTRIBUTE_SEPARATOR);
                 }
-                builder.addSeparator(ATTRIBUTE_GROUP_END);
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
+                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + functionParam.getValue());
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
     }
 
-    private static Combo getComboField(Type parameter, String paramName, String helpTip) {
-        List<Type> unionMembers = ((UnionType) parameter).members;
+//    private static void writeJsonAttributeForPathParam(String paramType, PathParamType parameter, int index, int paramLength,
+//                                                       JsonTemplateBuilder builder, String paramName, String helpTip,
+//                                                       boolean isCombo) throws IOException {
+//        switch (paramType) {
+//            case STRING, XML, JSON, MAP, RECORD:
+//                Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+//                        "", true, helpTip, "",
+//                        "", isCombo);
+//                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);
+//                break;
+//            case INT:
+//                Attribute intAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+//                        "", true, helpTip, VALIDATE_TYPE_REGEX,
+//                        INTEGER_REGEX, isCombo);
+//                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, intAttr);
+//                break;
+//            case DECIMAL, FLOAT:
+//                Attribute decAttr = new Attribute(paramName, parameter.name,
+//                        INPUT_TYPE_STRING_OR_EXPRESSION, "", true,
+//                        helpTip, VALIDATE_TYPE_REGEX, DECIMAL_REGEX, isCombo);
+//                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, decAttr);
+//                break;
+//            case BOOLEAN:
+//                Attribute boolAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_BOOLEAN,
+//                        "", true, helpTip, "",
+//                        "", isCombo);
+//                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
+//                break;
+//            default:
+//                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
+//        }
+//        builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
+//    }
+
+//    private static void writeJsonAttributeForQueryParam(String paramType, Type parameter, int index, int paramLength,
+//                                                        JsonTemplateBuilder builder, String paramName, String helpTip,
+//                                                        boolean isCombo)
+//            throws IOException {
+//        switch (paramType) {
+//            case STRING, XML, JSON, MAP:
+//                Attribute stringAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, "",
+//                        "", isCombo);
+//                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);
+//                break;
+//            case INT:
+//                Attribute intAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_STRING_OR_EXPRESSION,
+//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, VALIDATE_TYPE_REGEX,
+//                        INTEGER_REGEX, isCombo);
+//                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, intAttr);
+//                break;
+//            case DECIMAL, FLOAT:
+//                Attribute decAttr = new Attribute(paramName, parameter.name,
+//                        INPUT_TYPE_STRING_OR_EXPRESSION, parameter.getDefaultValue(), !parameter.isOptional(),
+//                        helpTip, VALIDATE_TYPE_REGEX, DECIMAL_REGEX, isCombo);
+//                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, decAttr);
+//                break;
+//            case ARRAY:
+//                Table arrayTable = new Table(paramName, parameter.name, parameter.name, helpTip);
+//                builder.addFromTemplate(TABLE_TEMPLATE_PATH, arrayTable);
+//                //TODO: Generate attribute according to the data type of the array fields
+
+    /// /                writeJsonAttributeForQueryParam();
+//                break;
+//            case UNION:
+//                // Gather the data types in the union
+//                Combo comboField = getComboField(parameter, paramName, helpTip);
+//                builder.addFromTemplate(COMBO_TEMPLATE_PATH, comboField).addSeparator(ATTRIBUTE_SEPARATOR);
+//
+//                // Add attribute fields for each type with enable conditions
+//                List<Type> unionMembers = ((UnionType) parameter).members;
+//                for (Type member : unionMembers) {
+//                    writeJsonAttributeForQueryParam(member.typeName, parameter, index, paramLength, builder, paramName,
+//                            helpTip, true);
+//                }
+//                break;
+//            case ENUM:
+//                List<Type> enumMembers = ((EnumType) parameter).members;
+//                StringJoiner joiner = new StringJoiner(",", "[", "]");
+//                for (Type member : enumMembers) {
+//                    joiner.add("\"" + member.typeName + "\"");
+//                }
+//                String enumComboValues = joiner.toString();
+//                Combo enumComboField = new Combo(paramName, parameter.name, INPUT_TYPE_COMBO, enumComboValues,
+//                        !parameter.isOptional(), helpTip);
+//                builder.addFromTemplate(COMBO_TEMPLATE_PATH, enumComboField);
+//                break;
+//            case BOOLEAN:
+//                Attribute boolAttr = new Attribute(paramName, parameter.name, INPUT_TYPE_BOOLEAN,
+//                        parameter.getDefaultValue(), !parameter.isOptional(), helpTip, "",
+//                        "", isCombo);
+//                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
+//                break;
+//            case RECORD:
+//                AttributeGroup recGroup = new AttributeGroup(paramName);
+//                builder.addFromTemplate(ATTRIBUTE_GROUP_TEMPLATE_PATH, recGroup);
+//                List<Type> recordFields = ((RecordType) parameter).fields;
+//                for (Type field : recordFields) {
+//                    String fieldName = String.format("%s_%s", paramName, field.name);
+//                    writeJsonAttributeForQueryParam(field.typeName, field, recordFields.indexOf(field), paramLength,
+//                            builder, fieldName, field.documentation, false);
+//                    builder.addConditionalSeparator((recordFields.indexOf(field) < recordFields.size() - 1),
+//                            ATTRIBUTE_SEPARATOR);
+//                }
+//                builder.addSeparator(ATTRIBUTE_GROUP_END);
+//                break;
+//            default:
+//                throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + paramName);
+//        }
+//        builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
+//    }
+    private static Combo getComboField(UnionFunctionParam unionFunctionParam, String paramName, String helpTip) {
+        List<FunctionParam> unionMembers = unionFunctionParam.getUnionMemberParams();
         StringJoiner unionJoiner = new StringJoiner(",", "[", "]");
-        for (Type member : unionMembers) {
-            String comboItem = member.typeName.equals(RECORD) ? String.format("%s_%s",
-                    member.typeName, member.name) : member.typeName;
+        for (FunctionParam member : unionMembers) {
+            String comboItem = member.getParamType().equals(RECORD) ?
+                    member.getTypeSymbol().getName().orElseThrow() : member.getParamType();
             unionJoiner.add("\"" + comboItem + "\"");
         }
         String unionComboValues = unionJoiner.toString();
-
+        String defaultValue = unionMembers.getFirst().getParamType().equals(RECORD) ?
+                unionMembers.getFirst().getTypeSymbol().getName().orElseThrow() : unionMembers.getFirst().getParamType();
         // Combo field for selecting the data type
-        String comboName = String.format("%s_%s", paramName, "dataType");
-        Combo comboField = new Combo(comboName, comboName, INPUT_TYPE_COMBO,
-                unionComboValues, !parameter.isOptional(), helpTip);
-        return comboField;
+        String comboName = String.format("%s%s", paramName, "DataType");
+        return new Combo(comboName, comboName, INPUT_TYPE_COMBO, unionComboValues, defaultValue,
+                unionFunctionParam.isRequired(), unionFunctionParam.getEnableCondition(), helpTip);
     }
 
     // Existing methods can now call the new generic method
