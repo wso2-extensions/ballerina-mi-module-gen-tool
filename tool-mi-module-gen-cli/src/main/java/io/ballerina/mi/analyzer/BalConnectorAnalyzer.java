@@ -21,6 +21,8 @@ package io.ballerina.mi.analyzer;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.impl.symbols.BallerinaClassSymbol;
 import io.ballerina.compiler.api.symbols.*;
+import io.ballerina.compiler.api.symbols.resourcepath.PathSegmentList;
+import io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment;
 import io.ballerina.mi.connectorModel.*;
 import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.Utils;
@@ -97,6 +99,9 @@ public class BalConnectorAnalyzer implements Analyzer {
         Map<String, MethodSymbol> allMethods = new HashMap<>(classSymbol.methods());
         classSymbol.initMethod().ifPresent(methodSymbol -> allMethods.put(Constants.INIT_FUNCTION_NAME, methodSymbol));
 
+        // Track generated synapse names to handle duplicates
+        Map<String, Integer> synapseNameCount = new HashMap<>();
+
         methodLoop:
         for (Map.Entry<String, MethodSymbol> methodEntry : allMethods.entrySet()) {
             MethodSymbol methodSymbol = methodEntry.getValue();
@@ -107,17 +112,53 @@ public class BalConnectorAnalyzer implements Analyzer {
                 continue;
             }
 
-            String functionName = methodSymbol.getName().get();
-//            FunctionSignatureNode functionSignature = methodSymbol.signature();
             FunctionType functionType = Utils.getFunctionType(methodSymbol);
-//            List<PathParamType> pathParams = new ArrayList<>(GeneratorUtils.getPathParameters(
-//                    functionDefinition.relativeResourcePath()));
-//            List<Type> queryParams = new ArrayList<>(GeneratorUtils.getFunctionParameters(
-//                    functionSignature.parameters(),
-//                    functionDefinition.metadata(), semanticModel));
+
+            // Optional resource-path-based hint for resource methods (only available for ResourceMethodSymbol)
+            String pathResourceHint = null;
+            if (functionType == FunctionType.RESOURCE && methodSymbol instanceof ResourceMethodSymbol resourceMethod) {
+                try {
+                    PathSegmentList resourcePath = (PathSegmentList) resourceMethod.resourcePath();
+                    java.util.List<PathSegment> pathSegments = resourcePath.list();
+                    StringBuilder sb = new StringBuilder();
+                    for (PathSegment segment : pathSegments) {
+                        String sig = segment.signature();
+                        // Skip path parameters like [id] or [string userId]
+                        if (sig != null && sig.startsWith("[") && sig.endsWith("]")) {
+                            continue;
+                        }
+                        if (sig != null && !sig.isEmpty()) {
+                            if (sb.length() > 0) {
+                                sb.append(" ");
+                            }
+                            sb.append(sig);
+                        }
+                    }
+                    if (sb.length() > 0) {
+                        pathResourceHint = sb.toString();
+                    }
+                } catch (Exception e) {
+                    // If anything goes wrong while reading the path, ignore and fall back to type-based heuristics
+                    printStream.println("WARN: Unable to extract resource path for method "
+                            + methodSymbol.getName().orElse("<unknown>") + ": " + e.getMessage());
+                }
+            }
+
+            // Generate synapse name using HTTP method and either path-based or type-based resource hint
+            String synapseName = Utils.generateSynapseName(methodSymbol, functionType, pathResourceHint);
+            
+            // Handle duplicate names by appending numeric suffix
+            String finalSynapseName = synapseName;
+            if (synapseNameCount.containsKey(synapseName)) {
+                int count = synapseNameCount.get(synapseName) + 1;
+                synapseNameCount.put(synapseName, count);
+                finalSynapseName = synapseName + count;
+            } else {
+                synapseNameCount.put(synapseName, 0);
+            }
 
             String returnType = Utils.getReturnTypeName(methodSymbol);
-            Component component = new Component(functionName, Utils.getDocString(methodSymbol.documentation().get()), functionType, Integer.toString(i), List.of(), List.of(), returnType);
+            Component component = new Component(finalSynapseName, Utils.getDocString(methodSymbol.documentation().get()), functionType, Integer.toString(i), List.of(), List.of(), returnType);
 //            String componentIndex = Integer.toString(connection.getComponents().size());
 //            Component component = new Component(functionName,
 //                    GeneratorUtils.getDocFromMetadata(functionDefinition.metadata()),

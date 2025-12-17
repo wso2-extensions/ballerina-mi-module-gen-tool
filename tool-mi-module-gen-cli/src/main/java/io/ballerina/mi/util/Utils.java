@@ -279,6 +279,303 @@ public class Utils {
         };
     }
 
+    /**
+     * Generate synapse name for resource functions when a path-based resource hint is available.
+     * Falls back to the default generation if no path hint is provided.
+     */
+    public static String generateSynapseName(FunctionSymbol functionSymbol, FunctionType functionType,
+                                             String pathResourceHint) {
+        if (functionType != FunctionType.RESOURCE || pathResourceHint == null || pathResourceHint.isBlank()) {
+            return generateSynapseName(functionSymbol, functionType);
+        }
+
+        String httpMethod = functionSymbol.getName().orElse("resource").toLowerCase();
+        String pascalHint = toPascalCase(pathResourceHint);
+        return sanitizeXmlName(httpMethod + pascalHint);
+    }
+
+    /**
+     * Generate synapse name for functions.
+     * <ul>
+     *   <li>Non-resource functions: use the function name directly.</li>
+     *   <li>Resource functions: derive a meaningful name using HTTP method + resource hint from parameters
+     *       (e.g., queries/requests types) and fall back to &lt;method&gt;Resource.</li>
+     * </ul>
+     *
+     * @param functionSymbol The function symbol (MethodSymbol or FunctionSymbol)
+     * @param functionType   The type of function (RESOURCE, REMOTE, FUNCTION, etc.)
+     * @return Generated synapse name
+     */
+    public static String generateSynapseName(FunctionSymbol functionSymbol, FunctionType functionType) {
+        if (functionType != FunctionType.RESOURCE) {
+            // For non-resource functions, use the function name directly
+            return functionSymbol.getName().orElse("unknown");
+        }
+
+        // For resource functions in client connectors, the symbol name is typically the HTTP method ("get", "post", ...)
+        String httpMethod = functionSymbol.getName().orElse("resource").toLowerCase(Locale.ROOT);
+
+        // Try to infer a resource name from parameter types (e.g., ListAssistantsQueries -> UsersThreadsTrash)
+        String resourceHint = inferResourceNameFromParams(functionSymbol);
+        // If params don't give a good hint, fall back to the return type
+        if (resourceHint == null || resourceHint.isEmpty()) {
+            resourceHint = inferResourceNameFromReturnType(functionSymbol);
+        }
+        if (resourceHint != null && !resourceHint.isEmpty()) {
+            String pascalHint = toPascalCase(resourceHint);
+            return sanitizeXmlName(httpMethod + pascalHint);
+        }
+
+        // Fallback: use HTTP method with "Resource" suffix
+        return sanitizeXmlName(httpMethod + "Resource");
+    }
+
+    /**
+     * Try to infer a meaningful resource name using parameter types of a resource function.
+     * <p>
+     * Heuristics (tuned for connector-style clients):
+     * <ul>
+     *   <li>Look for parameters whose type names end with common suffixes such as
+     *       "Queries", "Query", "Request", "Response", "Params", "Options".</li>
+     *   <li>Strip the suffix and derive a combined CamelCase resource name from the remaining tokens,
+     *       e.g., "GmailUsersThreadsTrashQueries" -> "UsersThreadsTrash", "ListAssistantsQueries" -> "Assistants".</li>
+     *   <li>If nothing meaningful is found, return an empty string.</li>
+     * </ul>
+     */
+    private static String inferResourceNameFromParams(FunctionSymbol functionSymbol) {
+        Optional<List<ParameterSymbol>> paramsOpt = functionSymbol.typeDescriptor().params();
+        if (paramsOpt.isEmpty()) {
+            return "";
+        }
+
+        List<ParameterSymbol> params = paramsOpt.get();
+        for (ParameterSymbol parameterSymbol : params) {
+            TypeSymbol typeSymbol = getActualTypeSymbol(parameterSymbol.typeDescriptor());
+            // Only consider named types; avoid using full signatures which can be extremely long
+            Optional<String> optTypeName = typeSymbol.getName();
+            if (optTypeName.isEmpty()) {
+                continue;
+            }
+            String typeName = optTypeName.get();
+
+            String base = stripCommonTypeSuffixes(typeName);
+            if (base.isEmpty()) {
+                continue;
+            }
+
+            String resourceName = buildResourceNameFromCamelTokens(base);
+            if (!resourceName.isEmpty()) {
+                return resourceName;
+            }
+        }
+
+        return "";
+    }
+
+    /**
+     * Infer a resource name from the return type of a resource function.
+     * <p>
+     * This is especially useful for DELETE-like operations where there may be only headers
+     * and no rich payload/query types to infer from. For example:
+     * <ul>
+     *   <li>return type "DeleteModelResponse" -> "Model"</li>
+     *   <li>return type "MailThread" -> "MailThread"</li>
+     * </ul>
+     */
+    private static String inferResourceNameFromReturnType(FunctionSymbol functionSymbol) {
+        Optional<TypeSymbol> retOpt = functionSymbol.typeDescriptor().returnTypeDescriptor();
+        if (retOpt.isEmpty()) {
+            return "";
+        }
+
+        TypeSymbol retSymbol = getActualTypeSymbol(retOpt.get());
+
+        // If union (e.g., T|error), pick the non-error member
+        if (retSymbol.typeKind() == TypeDescKind.UNION && retSymbol instanceof UnionTypeSymbol unionTypeSymbol) {
+            for (TypeSymbol member : unionTypeSymbol.memberTypeDescriptors()) {
+                if (member.typeKind() != TypeDescKind.ERROR) {
+                    retSymbol = getActualTypeSymbol(member);
+                    break;
+                }
+            }
+        }
+
+        Optional<String> optName = retSymbol.getName();
+        if (optName.isEmpty()) {
+            return "";
+        }
+        String typeName = optName.get();
+
+        String base = stripCommonTypeSuffixes(typeName);
+        if (base.isEmpty()) {
+            return "";
+        }
+
+        return buildResourceNameFromCamelTokens(base);
+    }
+
+    /**
+     * Strip well-known trailing suffixes from type names to get a more generic base.
+     * Example: "ListAssistantsQueries" -> "ListAssistants".
+     */
+    private static String stripCommonTypeSuffixes(String typeName) {
+        String[] suffixes = {"Queries", "Query", "Request", "Response", "Params", "Options", "Payload"};
+        for (String suffix : suffixes) {
+            if (typeName.endsWith(suffix) && typeName.length() > suffix.length()) {
+                return typeName.substring(0, typeName.length() - suffix.length());
+            }
+        }
+        return typeName;
+    }
+
+    /**
+     * Build a resource name from CamelCase tokens in a type name.
+     * <p>
+     * Examples:
+     * <ul>
+     *   <li>"ListAssistants" -> "Assistants"</li>
+     *   <li>"GmailUsersThreadsTrash" -> "UsersThreadsTrash"</li>
+     *   <li>"GmailUsersDraftsList" -> "UsersDrafts"</li>
+     * </ul>
+     */
+    private static String buildResourceNameFromCamelTokens(String str) {
+        if (str == null || str.isEmpty()) {
+            return "";
+        }
+
+        List<String> tokens = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        char[] chars = str.toCharArray();
+
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (i > 0 && Character.isUpperCase(c)
+                    && (Character.isLowerCase(chars[i - 1]) || Character.isDigit(chars[i - 1]))) {
+                tokens.add(current.toString());
+                current.setLength(0);
+            }
+            current.append(c);
+        }
+        if (current.length() > 0) {
+            tokens.add(current.toString());
+        }
+
+        if (tokens.isEmpty()) {
+            return "";
+        }
+
+        // Heuristic:
+        // - If 3+ tokens, drop the first one (often org/module prefix like "Gmail", "OpenAI", "List").
+        // - If 2 tokens and the first is a generic prefix (List, Get, Create, Update, Delete),
+        //   drop the first.
+        // - Drop a trailing generic token (List, Collection, Items) if present.
+        List<String> working = new ArrayList<>(tokens);
+
+        if (working.size() >= 3) {
+            working = working.subList(1, working.size());
+        } else if (working.size() == 2 && isGenericPrefix(working.get(0))) {
+            working = working.subList(1, working.size());
+        }
+
+        if (working.size() > 1 && isGenericSuffix(working.get(working.size() - 1))) {
+            working = working.subList(0, working.size() - 1);
+        }
+
+        if (working.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String t : working) {
+            if (t.isEmpty()) {
+                continue;
+            }
+            sb.append(t);
+        }
+        return sb.toString();
+    }
+
+    private static boolean isGenericPrefix(String token) {
+        String lower = token.toLowerCase(Locale.ROOT);
+        return lower.equals("list") || lower.equals("get") || lower.equals("create")
+                || lower.equals("update") || lower.equals("delete");
+    }
+
+    private static boolean isGenericSuffix(String token) {
+        String lower = token.toLowerCase(Locale.ROOT);
+        return lower.equals("list") || lower.equals("collection") || lower.equals("items");
+    }
+
+    /**
+     * Convert a string to PascalCase.
+     * Example: "user-profiles" -> "UserProfiles", "userId" -> "UserId"
+     */
+    private static String toPascalCase(String str) {
+        if (str == null || str.isEmpty()) {
+            return "";
+        }
+
+        // Handle hyphenated or underscore-separated words
+        String[] parts = str.split("[-_\\s]+");
+        StringBuilder result = new StringBuilder();
+        
+        for (String part : parts) {
+            if (part.isEmpty()) {
+                continue;
+            }
+            // Capitalize first letter, lowercase rest
+            result.append(Character.toUpperCase(part.charAt(0)));
+            if (part.length() > 1) {
+                result.append(part.substring(1).toLowerCase());
+            }
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * Sanitize a string to be a valid XML name.
+     * XML names must start with a letter or underscore, and contain only letters, digits, underscores, hyphens, and periods.
+     */
+    private static String sanitizeXmlName(String name) {
+        if (name == null || name.isEmpty()) {
+            return "resource";
+        }
+
+        StringBuilder sanitized = new StringBuilder();
+        boolean firstChar = true;
+
+        for (char c : name.toCharArray()) {
+            if (firstChar) {
+                // First character must be a letter or underscore
+                if (Character.isLetter(c) || c == '_') {
+                    sanitized.append(c);
+                    firstChar = false;
+                } else if (Character.isDigit(c)) {
+                    // If starts with digit, prefix with underscore
+                    sanitized.append('_').append(c);
+                    firstChar = false;
+                }
+                // Skip invalid first characters
+            } else {
+                // Subsequent characters can be letters, digits, underscores, hyphens, periods
+                if (Character.isLetterOrDigit(c) || c == '_' || c == '-' || c == '.') {
+                    sanitized.append(c);
+                } else {
+                    // Replace invalid characters with underscore
+                    sanitized.append('_');
+                }
+            }
+        }
+
+        // Ensure result is not empty
+        if (sanitized.length() == 0) {
+            return "resource";
+        }
+
+        return sanitized.toString();
+    }
+
     // Commented out: Syntax tree-dependent documentation extraction methods
     // These methods required classes from io.ballerina.compiler.syntax.tree which are not available
 //    /**
@@ -578,3 +875,4 @@ public class Utils {
 //        return type;
 //    }
 }
+

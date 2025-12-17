@@ -117,9 +117,33 @@ public class ArtifactGenerationUtil {
         System.out.println("MiCmd execution completed.");
 
         // 3. Find the generated zip file and unzip it to the expected directory
+        //    Prefer the zip that matches this projectName/module to avoid picking up
+        //    a previously generated connector (e.g., another Central package).
         Optional<Path> generatedZipFile;
+        // Derive a matcher key from projectName. For Central packages, projectName is typically
+        // "<org>-<module>", e.g., "ballerinax-googleapis.gmail", while the zip is
+        // "ballerina-connector-googleapis.gmail-<version>.zip". We therefore use the part
+        // after the first '-' ("googleapis.gmail") as a primary key.
+        final String matchKey;
+        int dashIndex = projectName.indexOf('-');
+        if (dashIndex >= 0 && dashIndex + 1 < projectName.length()) {
+            matchKey = projectName.substring(dashIndex + 1);
+        } else {
+            matchKey = projectName;
+        }
         try (Stream<Path> files = Files.walk(targetDir, 2)) {
-            generatedZipFile = files.filter(p -> p.toString().endsWith(".zip")).findFirst();
+            generatedZipFile = files
+                    .filter(p -> p.toString().endsWith(".zip"))
+                    .filter(p -> p.getFileName().toString().contains(matchKey))
+                    .findFirst();
+        }
+        // Fallback to first available zip (backward compatible with older layouts)
+        if (generatedZipFile.isEmpty()) {
+            try (Stream<Path> files = Files.walk(targetDir, 2)) {
+                generatedZipFile = files
+                        .filter(p -> p.toString().endsWith(".zip"))
+                        .findFirst();
+            }
         }
 
         Assert.assertTrue(generatedZipFile.isPresent(), "Generated zip file not found in " + targetDir);

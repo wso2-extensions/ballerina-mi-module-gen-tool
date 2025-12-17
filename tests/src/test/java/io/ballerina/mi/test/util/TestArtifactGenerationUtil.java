@@ -26,7 +26,7 @@ import java.nio.file.Paths;
  */
 public class TestArtifactGenerationUtil {
 
-    private static final String[] DEFAULT_CENTRAL_PACKAGES = {"ballerinax/milvus:1.1.0","ballerinax/azure.ai.search:1.0.0"};
+    private static final String[] DEFAULT_CENTRAL_PACKAGES = {"ballerinax/milvus:1.1.0"};
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0 || args[0].isBlank()) {
