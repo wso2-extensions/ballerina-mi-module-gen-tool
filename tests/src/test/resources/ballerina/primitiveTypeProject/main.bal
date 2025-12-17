@@ -248,4 +248,34 @@ public client class PrimitiveDataTypeClient {
     remote function convertFloatToDecimal(float value) returns decimal|error {
         return <decimal>value;
     }
+
+    // Signed and Unsigned integer subtypes
+    remote function processSigned8(int:Signed8 value) returns int:Signed8|error {
+        return value;
+    }
+
+    remote function processSigned16(int:Signed16 value) returns int:Signed16|error {
+        return value;
+    }
+
+    remote function processSigned32(int:Signed32 value) returns int:Signed32|error {
+        return value;
+    }
+
+    remote function processUnsigned8(int:Unsigned8 value) returns int:Unsigned8|error {
+        return value;
+    }
+
+    remote function processUnsigned16(int:Unsigned16 value) returns int:Unsigned16|error {
+        return value;
+    }
+
+    remote function processUnsigned32(int:Unsigned32 value) returns int:Unsigned32|error {
+        return value;
+    }
+
+    // String Char subtype
+    remote function processChar(string:Char value) returns string:Char|error {
+        return value;
+    }
 }

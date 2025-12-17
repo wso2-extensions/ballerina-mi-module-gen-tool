@@ -234,7 +234,10 @@ public class Utils {
 
     public static String getParamTypeName(TypeDescKind typeKind) {
         return switch (typeKind) {
-            case BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ARRAY, RECORD, MAP, UNION, NIL -> typeKind.getName();
+            case INT, INT_SIGNED8, INT_SIGNED16, INT_SIGNED32, INT_UNSIGNED8, INT_UNSIGNED16, INT_UNSIGNED32 ->
+                    Constants.INT;
+            case STRING, STRING_CHAR -> Constants.STRING;
+            case BOOLEAN, FLOAT, DECIMAL, XML, JSON, ARRAY, RECORD, MAP, UNION, NIL -> typeKind.getName();
             default -> null;
         };
     }

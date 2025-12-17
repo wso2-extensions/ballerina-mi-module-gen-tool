@@ -149,6 +149,125 @@ public class TestPrimitiveTypeConnector {
         Assert.assertEquals(result, "31.0", "10.5 + 20.5 should be 31.0");
     }
 
+    @Test(description = "Test Signed8 parameter")
+    public void testSigned8Parameter() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("processSigned8")
+                .returnType("int")
+                .addParameter("value", "int", "-128")
+                .build();
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result, "-128", "Signed8 value should be -128");
+    }
+
+    @Test(description = "Test Signed16 parameter")
+    public void testSigned16Parameter() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("processSigned16")
+                .returnType("int")
+                .addParameter("value", "int", "-32768")
+                .build();
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result, "-32768", "Signed16 value should be -32768");
+    }
+
+    @Test(description = "Test Signed32 parameter")
+    public void testSigned32Parameter() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("processSigned32")
+                .returnType("int")
+                .addParameter("value", "int", "-2147483648")
+                .build();
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result, "-2147483648", "Signed32 value should be -2147483648");
+    }
+
+    @Test(description = "Test Unsigned8 parameter")
+    public void testUnsigned8Parameter() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("processUnsigned8")
+                .returnType("int")
+                .addParameter("value", "int", "255")
+                .build();
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result, "255", "Unsigned8 value should be 255");
+    }
+
+    @Test(description = "Test Unsigned16 parameter")
+    public void testUnsigned16Parameter() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("processUnsigned16")
+                .returnType("int")
+                .addParameter("value", "int", "65535")
+                .build();
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result, "65535", "Unsigned16 value should be 65535");
+    }
+
+    @Test(description = "Test Unsigned32 parameter")
+    public void testUnsigned32Parameter() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("processUnsigned32")
+                .returnType("int")
+                .addParameter("value", "int", "4294967295")
+                .build();
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result, "4294967295", "Unsigned32 value should be 4294967295");
+    }
+
+    @Test(description = "Test Char parameter")
+    public void testCharParameter() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("processChar")
+                .returnType("string")
+                .addParameter("value", "string", "A")
+                .build();
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result, "A", "Char value should be A");
+    }
+
     /**
      * Helper class to build test MessageContext for connector tests.
      */
