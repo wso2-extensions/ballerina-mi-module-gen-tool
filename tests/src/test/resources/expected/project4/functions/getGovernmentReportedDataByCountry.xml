@@ -16,20 +16,25 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<template xmlns="http://ws.apache.org/ns/synapse" name="loadCollection">
+<template xmlns="http://ws.apache.org/ns/synapse" name="getGovernmentReportedDataByCountry">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="collectionName" description=""/>
+    <parameter name="country" description=""/>
+    <parameter name="allowNullDataType" description="Select the data type for 'allowNull' parameter"/>
+    <parameter name="allowNullString" description=""/>
     <sequence>
-        <property name="param0" value="collectionName"/>
+        <property name="param0" value="country"/>
         <property name="paramType0" value="string"/>
-        <property name="paramSize" value="1"/>
-        <property name="paramFunctionName" value="loadCollection"/>
+        <property name="param1" value="allowNull"/>
+        <property name="paramType1" value="union"/>
+        <property name="param1UnionString" value="allowNullString"/>
+        <property name="paramSize" value="2"/>
+        <property name="paramFunctionName" value="getGovernmentReportedDataByCountry"/>
         <property name="returnType" value="union"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
-            <property name="orgName" value="ballerinax"/>
-            <property name="moduleName" value="milvus"/>
+            <property name="orgName" value="testOrg"/>
+            <property name="moduleName" value="project4"/>
             <property name="version" value="1"/>
         </class>
     </sequence>

@@ -30,6 +30,12 @@
             <description>Get COVID-19 time series data for a state or set of states, with an entry for each day since the pandemic began
 </description>
         </component>
+        <component name="getAllContinentsStatus">
+            <displayName>getAllContinentsStatus</displayName>
+            <file>getAllContinentsStatus.xml</file>
+            <description>Get COVID-19 totals for all continents
+</description>
+        </component>
         <component name="getTimeSeriesByUSACountyNYT">
             <displayName>getTimeSeriesByUSACountyNYT</displayName>
             <file>getTimeSeriesByUSACountyNYT.xml</file>
@@ -46,6 +52,12 @@
             <displayName>getTimeSeriesOfMultipleCountries</displayName>
             <file>getTimeSeriesOfMultipleCountries.xml</file>
             <description>Get COVID-19 time series data for a specific set of countries
+</description>
+        </component>
+        <component name="getStatusByCountry">
+            <displayName>getStatusByCountry</displayName>
+            <file>getStatusByCountry.xml</file>
+            <description>Get COVID-19 totals for a specific country
 </description>
         </component>
         <component name="getAppleMobilityDataSupportedCountries">
@@ -84,6 +96,12 @@
             <description>Get a list of supported subregions for specific country in the Apple mobility data set
 </description>
         </component>
+        <component name="getMultipleCountriesStatus">
+            <displayName>getMultipleCountriesStatus</displayName>
+            <file>getMultipleCountriesStatus.xml</file>
+            <description>Get COVID-19 totals for a specific set of countries
+</description>
+        </component>
         <component name="getAllCountriesAndProvincesStatus">
             <displayName>getAllCountriesAndProvincesStatus</displayName>
             <file>getAllCountriesAndProvincesStatus.xml</file>
@@ -94,6 +112,18 @@
             <displayName>getGovenrmentDataSupportedCountries</displayName>
             <file>getGovenrmentDataSupportedCountries.xml</file>
             <description>Get a list of supported countries for government specific data
+</description>
+        </component>
+        <component name="getStatusByContinent">
+            <displayName>getStatusByContinent</displayName>
+            <file>getStatusByContinent.xml</file>
+            <description>Get COVID-19 totals for a specific continent
+</description>
+        </component>
+        <component name="getAllCountriesStatus">
+            <displayName>getAllCountriesStatus</displayName>
+            <file>getAllCountriesStatus.xml</file>
+            <description>Get COVID-19 totals for all countries
 </description>
         </component>
         <component name="getInfluenzaReportsByUSPHL">
@@ -144,10 +174,28 @@
             <description>Get COVID-19 time series data for all countries and their provinces
 </description>
         </component>
+        <component name="getGovernmentReportedDataByCountry">
+            <displayName>getGovernmentReportedDataByCountry</displayName>
+            <file>getGovernmentReportedDataByCountry.xml</file>
+            <description>Get COVID-19 government reported data for a specific country
+</description>
+        </component>
         <component name="getVaccineCoverageOfAllUSAStates">
             <displayName>getVaccineCoverageOfAllUSAStates</displayName>
             <file>getVaccineCoverageOfAllUSAStates.xml</file>
             <description>Get COVID-19 vaccine doses administered for all states that have reported rolling out vaccination. Sourced  from https://covid.ourworldindata.org/
+</description>
+        </component>
+        <component name="getAllUSAStatesStatus">
+            <displayName>getAllUSAStatesStatus</displayName>
+            <file>getAllUSAStatesStatus.xml</file>
+            <description>Get COVID-19 totals for all US States
+</description>
+        </component>
+        <component name="getUSAStatusByState">
+            <displayName>getUSAStatusByState</displayName>
+            <file>getUSAStatusByState.xml</file>
+            <description>Get COVID-19 totals for specific US State(s)
 </description>
         </component>
         <component name="getTimeSeriesForUSANYT">
@@ -184,6 +232,12 @@
             <displayName>getTimeSeriesByProvince</displayName>
             <file>getTimeSeriesByProvince.xml</file>
             <description>Get COVID-19 time series data for a specific province in a country
+</description>
+        </component>
+        <component name="getGlobalStatus">
+            <displayName>getGlobalStatus</displayName>
+            <file>getGlobalStatus.xml</file>
+            <description>Get global COVID-19 totals for today, yesterday and two days ago
 </description>
         </component>
         <component name="getTimeSeriesForAllUSAStatesNYT">

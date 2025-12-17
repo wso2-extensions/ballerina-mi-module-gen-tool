@@ -1,0 +1,169 @@
+{
+  "connectorName": "project4",
+  "operationName": "getStatusByContinent",
+  "title": "getStatusByContinent",
+  "help": "Get COVID-19 totals for a specific continent\n",
+  "elements": [
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attribute",
+            "value": {
+              "name": "configRef",
+              "displayName": "Connection",
+              "inputType": "connection",
+              "allowedConnectionTypes": [
+                "project4_Client"
+              ],
+              "defaultType": "connection.project4_Client",
+              "defaultValue": "",
+              "required": "true",
+              "helpTip": "Connection to be used"
+            }
+          },
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Input Variables",
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "continent",
+                    "displayName": "continent",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "yesterdayDataType",
+                    "displayName": "yesterdayDataType",
+                    "inputType": "combo",
+                    "comboValues": ["string"],
+                    "defaultValue": "string",
+                    "required": "false",
+                    "helpTip": ""
+                  }
+                }
+,{
+                  "type": "attribute",
+                  "value": {
+                    "name": "yesterdayString",
+                    "displayName": "yesterdayString",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [{"yesterdayDataType": "string"}]
+                  }
+                },,{
+                  "type": "attribute",
+                  "value": {
+                    "name": "twoDaysAgoDataType",
+                    "displayName": "twoDaysAgoDataType",
+                    "inputType": "combo",
+                    "comboValues": ["string"],
+                    "defaultValue": "string",
+                    "required": "false",
+                    "helpTip": ""
+                  }
+                }
+,{
+                  "type": "attribute",
+                  "value": {
+                    "name": "twoDaysAgoString",
+                    "displayName": "twoDaysAgoString",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [{"twoDaysAgoDataType": "string"}]
+                  }
+                },,{
+                  "type": "attribute",
+                  "value": {
+                    "name": "strict",
+                    "displayName": "strict",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "allowNullDataType",
+                    "displayName": "allowNullDataType",
+                    "inputType": "combo",
+                    "comboValues": ["string"],
+                    "defaultValue": "string",
+                    "required": "false",
+                    "helpTip": ""
+                  }
+                }
+,{
+                  "type": "attribute",
+                  "value": {
+                    "name": "allowNullString",
+                    "displayName": "allowNullString",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [{"allowNullDataType": "string"}]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Output",
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "responseVariable",
+                    "displayName": "Output Variable Name",
+                    "inputType": "string",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The target variable in which the output of the operation will be stored"
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "overwriteBody",
+                    "displayName": "Overwrite Message Body",
+                    "inputType": "checkbox",
+                    "defaultValue": "false",
+                    "helpTip": "Replace the Message Body in Message Context with the output payload of the operation (This will remove the payload from the above variable. But other elements such as headers and attributes will remain).",
+                    "required": "false"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -16,18 +16,30 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<template xmlns="http://ws.apache.org/ns/synapse" name="getTotalGlobalVaccineDosesAdministered">
+<template xmlns="http://ws.apache.org/ns/synapse" name="getMultipleCountriesStatus">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="lastdays" description=""/>
-    <parameter name="fullData" description=""/>
+    <parameter name="countries" description=""/>
+    <parameter name="yesterdayDataType" description="Select the data type for 'yesterday' parameter"/>
+    <parameter name="yesterdayString" description=""/>
+    <parameter name="twoDaysAgoDataType" description="Select the data type for 'twoDaysAgo' parameter"/>
+    <parameter name="twoDaysAgoString" description=""/>
+    <parameter name="allowNullDataType" description="Select the data type for 'allowNull' parameter"/>
+    <parameter name="allowNullString" description=""/>
     <sequence>
-        <property name="param0" value="lastdays"/>
+        <property name="param0" value="countries"/>
         <property name="paramType0" value="string"/>
-        <property name="param1" value="fullData"/>
-        <property name="paramType1" value="string"/>
-        <property name="paramSize" value="2"/>
-        <property name="paramFunctionName" value="getTotalGlobalVaccineDosesAdministered"/>
+        <property name="param1" value="yesterday"/>
+        <property name="paramType1" value="union"/>
+        <property name="param1UnionString" value="yesterdayString"/>
+        <property name="param2" value="twoDaysAgo"/>
+        <property name="paramType2" value="union"/>
+        <property name="param2UnionString" value="twoDaysAgoString"/>
+        <property name="param3" value="allowNull"/>
+        <property name="paramType3" value="union"/>
+        <property name="param3UnionString" value="allowNullString"/>
+        <property name="paramSize" value="4"/>
+        <property name="paramFunctionName" value="getMultipleCountriesStatus"/>
         <property name="returnType" value="union"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
