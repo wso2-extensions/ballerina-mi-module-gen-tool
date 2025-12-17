@@ -142,7 +142,9 @@ public class BalConnectorAnalyzer implements Analyzer {
                         component.setFunctionParam(functionParam.get());
                     } else {
                         // Skip the function if any parameter type is unsupported
-                        printStream.println("Skipping function '" + functionName + "' due to unsupported parameter type.");
+                        String paramType = parameterSymbol.typeDescriptor().typeKind().getName();
+                        printStream.println("Skipping function '" + functionName +
+                                "' due to unsupported parameter type: " + paramType);
                         continue methodLoop;
                     }
                     paramIndex++;

@@ -32,6 +32,7 @@ import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BXml;
+import io.ballerina.runtime.internal.values.ErrorValue;
 import io.ballerina.runtime.internal.values.MapValueImpl;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -59,8 +60,7 @@ public class BalExecutor {
     private static final String TEMP_RESPONSE_PROPERTY_NAME = "TEMP_BAL_RESPONSE_PROPERTY_";
     protected Log log = LogFactory.getLog(BalExecutor.class);
 
-    public boolean execute(Runtime rt, Object callable, MessageContext context) throws AxisFault {
-        String balFunctionReturnType = context.getProperty(Constants.RETURN_TYPE).toString();
+    public boolean execute(Runtime rt, Object callable, MessageContext context) throws AxisFault, BallerinaExecutionException {
         Object[] args = new Object[Integer.parseInt(context.getProperty(Constants.SIZE).toString())];
         setParameters(args, context);
         try {
@@ -72,6 +72,9 @@ public class BalExecutor {
             } else {
                 throw new SynapseException("Unsupported callable type: " + callable.getClass().getName());
             }
+            if (result instanceof ErrorValue bError) {
+                throw new BallerinaExecutionException(bError.getMessage(), bError.fillInStackTrace());
+            }
             Object processedResult = processResponse(result);
             ConnectorResponse connectorResponse = new DefaultConnectorResponse();
             if (isOverwriteBody(context)) {
@@ -81,11 +84,7 @@ public class BalExecutor {
             }
             context.setVariable(getResultProperty(context), connectorResponse);
         } catch (BError bError) {
-            log.error("Error while executing ballerina", bError);
-            throw bError;
-        } catch (AxisFault e) {
-            log.error("Error while overwriting message body", e);
-            throw e;
+            throw new BallerinaExecutionException(bError.getMessage(), bError.fillInStackTrace());
         }
         return true;
     }
