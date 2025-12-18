@@ -28,8 +28,8 @@ public class Combo extends Element {
     private final String defaultValue;
     private final String enableCondition;
 
-    public Combo (String name, String displayName, String inputType, String comboValues,String defaultValue, Boolean required,
-                  String enableCondition, String helpTip) {
+    public Combo(String name, String displayName, String inputType, String comboValues,
+                 String defaultValue, Boolean required, String enableCondition, String helpTip) {
         this.name = name;
         this.displayName = displayName;
         this.inputType = inputType;
