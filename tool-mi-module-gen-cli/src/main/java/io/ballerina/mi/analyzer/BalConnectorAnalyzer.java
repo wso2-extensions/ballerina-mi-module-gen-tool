@@ -114,38 +114,74 @@ public class BalConnectorAnalyzer implements Analyzer {
 
             FunctionType functionType = Utils.getFunctionType(methodSymbol);
 
-            // Optional resource-path-based hint for resource methods (only available for ResourceMethodSymbol)
-            String pathResourceHint = null;
+            // Generate synapse name.
+            // For resource functions:
+            //   httpMethod + PascalCase(literal path segments) + By<ParamName> for each path parameter.
+            // For all others, fall back to type-based heuristics in Utils.generateSynapseName(..).
+            String synapseName;
             if (functionType == FunctionType.RESOURCE && methodSymbol instanceof ResourceMethodSymbol resourceMethod) {
                 try {
+                    String httpMethod = methodSymbol.getName().orElse("resource").toLowerCase();
                     PathSegmentList resourcePath = (PathSegmentList) resourceMethod.resourcePath();
                     java.util.List<PathSegment> pathSegments = resourcePath.list();
-                    StringBuilder sb = new StringBuilder();
+
+                    java.util.List<String> literalSegments = new java.util.ArrayList<>();
+                    java.util.List<String> pathParamNames = new java.util.ArrayList<>();
+
                     for (PathSegment segment : pathSegments) {
                         String sig = segment.signature();
-                        // Skip path parameters like [id] or [string userId]
-                        if (sig != null && sig.startsWith("[") && sig.endsWith("]")) {
+                        if (sig == null || sig.isEmpty()) {
                             continue;
                         }
-                        if (sig != null && !sig.isEmpty()) {
-                            if (sb.length() > 0) {
-                                sb.append(" ");
+
+                        if (sig.startsWith("[") && sig.endsWith("]")) {
+                            // Path parameter segment. Extract the parameter name:
+                            // e.g. "[string userId]" -> "userId", "[userId]" -> "userId"
+                            String inside = sig.substring(1, sig.length() - 1).trim();
+                            String paramName = inside;
+                            int lastSpace = inside.lastIndexOf(' ');
+                            if (lastSpace >= 0 && lastSpace + 1 < inside.length()) {
+                                paramName = inside.substring(lastSpace + 1);
                             }
-                            sb.append(sig);
+                            if (!paramName.isEmpty()) {
+                                pathParamNames.add(paramName);
+                            }
+                        } else {
+                            // Literal path segment, e.g. "users", "threads", "trash"
+                            literalSegments.add(sig);
                         }
                     }
-                    if (sb.length() > 0) {
-                        pathResourceHint = sb.toString();
-                    }
-                } catch (Exception e) {
-                    // If anything goes wrong while reading the path, ignore and fall back to type-based heuristics
-                    printStream.println("WARN: Unable to extract resource path for method "
-                            + methodSymbol.getName().orElse("<unknown>") + ": " + e.getMessage());
-                }
-            }
 
-            // Generate synapse name using HTTP method and either path-based or type-based resource hint
-            String synapseName = Utils.generateSynapseName(methodSymbol, functionType, pathResourceHint);
+                    StringBuilder nameBuilder = new StringBuilder();
+                    nameBuilder.append(httpMethod);
+
+                    // Add PascalCase literal segments
+                    for (String lit : literalSegments) {
+                        nameBuilder.append(toPascalCaseSegment(lit));
+                    }
+
+                    // Add By<ParamName> for each path parameter
+                    for (String paramName : pathParamNames) {
+                        if (paramName.isEmpty()) {
+                            continue;
+                        }
+                        nameBuilder.append("By");
+                        nameBuilder.append(Character.toUpperCase(paramName.charAt(0)));
+                        if (paramName.length() > 1) {
+                            nameBuilder.append(paramName.substring(1));
+                        }
+                    }
+
+                    synapseName = nameBuilder.toString();
+                } catch (Throwable e) {
+                    // If anything goes wrong while reading the path, ignore and fall back to type-based heuristics
+                    printStream.println("WARN: Unable to derive name from resource path for method "
+                            + methodSymbol.getName().orElse("<unknown>") + ": " + e.getMessage());
+                    synapseName = Utils.generateSynapseName(methodSymbol, functionType);
+                }
+            } else {
+                synapseName = Utils.generateSynapseName(methodSymbol, functionType);
+            }
             
             // Handle duplicate names by appending numeric suffix
             String finalSynapseName = synapseName;
@@ -212,5 +248,26 @@ public class BalConnectorAnalyzer implements Analyzer {
     private boolean isClientClass(ClassSymbol classSymbol) {
 
         return classSymbol.qualifiers().contains(Qualifier.PUBLIC) && classSymbol.qualifiers().contains(Qualifier.CLIENT);
+    }
+
+    /**
+     * Convert a path segment (e.g. "users", "user-threads") to PascalCase ("Users", "UserThreads").
+     */
+    private static String toPascalCaseSegment(String segment) {
+        if (segment == null || segment.isEmpty()) {
+            return "";
+        }
+        String[] parts = segment.split("[-_\\s]+");
+        StringBuilder sb = new StringBuilder();
+        for (String part : parts) {
+            if (part.isEmpty()) {
+                continue;
+            }
+            sb.append(Character.toUpperCase(part.charAt(0)));
+            if (part.length() > 1) {
+                sb.append(part.substring(1).toLowerCase());
+            }
+        }
+        return sb.toString();
     }
 }
