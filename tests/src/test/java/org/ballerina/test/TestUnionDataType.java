@@ -35,8 +35,9 @@ public class TestUnionDataType {
         BalConnectorConfig config = new BalConnectorConfig(moduleInfo);
 
         // Create a context for connection initialization
-        TestMessageContext initContext = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext initContext = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
+                .isConnection(true)
                 .objectTypeName("UnionClient")
                 .addParameter("serviceUrl", "string", "http://test.api.com")
                 .addParameter("connectionType", "string", "UNIONPROJECT_UNIONCLIENT")
@@ -56,7 +57,7 @@ public class TestUnionDataType {
     public void testProcessStringOrIntWithString() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processStringOrInt")
                 .returnType("string")
@@ -82,7 +83,7 @@ public class TestUnionDataType {
     public void testProcessStringOrIntWithInt() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processStringOrInt")
                 .returnType("string")
@@ -108,7 +109,7 @@ public class TestUnionDataType {
     public void testProcessStringOrIntOrFloatWithFloat() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processStringOrIntOrFloat")
                 .returnType("string")
@@ -135,7 +136,7 @@ public class TestUnionDataType {
     public void testProcessNullableStringWithValue() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processNullableString")
                 .returnType("string")
@@ -161,7 +162,7 @@ public class TestUnionDataType {
     public void testProcessNullableStringWithNull() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processNullableString")
                 .returnType("string")
@@ -187,7 +188,7 @@ public class TestUnionDataType {
     public void testReturnStringOrIntReturnsString() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("returnStringOrInt")
                 .returnType("union")
@@ -210,7 +211,7 @@ public class TestUnionDataType {
     public void testReturnStringOrIntReturnsInt() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("returnStringOrInt")
                 .returnType("union")
@@ -233,7 +234,7 @@ public class TestUnionDataType {
     public void testProcessIntOrBooleanWithInt() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processIntOrBoolean")
                 .returnType("string")
@@ -259,7 +260,7 @@ public class TestUnionDataType {
     public void testProcessIntOrBooleanWithBoolean() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processIntOrBoolean")
                 .returnType("string")
@@ -285,7 +286,7 @@ public class TestUnionDataType {
     public void testProcessNumberTypeWithDecimal() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processNumberType")
                 .returnType("string")
@@ -312,7 +313,7 @@ public class TestUnionDataType {
     public void testGetResponseSuccess() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("getResponse")
                 .returnType("record")
@@ -336,7 +337,7 @@ public class TestUnionDataType {
     public void testGetResponseError() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("getResponse")
                 .returnType("record")
@@ -360,7 +361,7 @@ public class TestUnionDataType {
     public void testProcessEntityWithPerson() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processEntity")
                 .returnType("string")
@@ -384,7 +385,7 @@ public class TestUnionDataType {
     public void testProcessEntityWithCompany() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processEntity")
                 .returnType("string")
@@ -408,7 +409,7 @@ public class TestUnionDataType {
     public void testFindPersonFound() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("findPerson")
                 .returnType("record")
@@ -432,7 +433,7 @@ public class TestUnionDataType {
     public void testFindPersonNotFound() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("findPerson")
                 .returnType("record")
@@ -455,7 +456,7 @@ public class TestUnionDataType {
     public void testProcessWithNilValue() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processWithNil")
                 .returnType("string")

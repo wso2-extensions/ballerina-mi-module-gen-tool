@@ -27,6 +27,9 @@ import org.wso2.integration.connector.core.connection.ConnectionHandler;
 
 public class BalConnectorFunction extends AbstractConnector {
 
+    private String orgName;
+    private String moduleName;
+    private String version;
     private final BalExecutor balExecutor = new BalExecutor();
 
     @Override
@@ -44,5 +47,29 @@ public class BalConnectorFunction extends AbstractConnector {
         } catch (AxisFault | BallerinaExecutionException e) {
             handleException("Error while executing ballerina", e, messageContext);
         }
+    }
+
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }
