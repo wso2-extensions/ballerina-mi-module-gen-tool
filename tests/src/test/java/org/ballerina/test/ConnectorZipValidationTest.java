@@ -227,17 +227,15 @@ public class ConnectorZipValidationTest {
             }
         }
         
-        // Set expected path using connector folder name
+        // Set expected path using connector folder name (pre-existing expected files)
         Path expectedPath = EXPECTED_DIR.resolve(connectorFolderName);
         
+        // Create a temporary directory for generated artifacts
+        Path tempTargetDir = Files.createTempDirectory("bala-test-output-" + projectName);
+        Path tempGeneratedPath = null;
+        
         try {
-            
-            // Use expected path's parent as target so generated folder will be at expectedPath level
-            // Then we'll copy the generated contents to expectedPath
-            Path tempTargetPath = expectedPath.getParent();
-            Files.createDirectories(tempTargetPath);
-
-            // Programmatically execute MiCmd with extracted bala directory and target path
+            // Programmatically execute MiCmd with extracted bala directory and temporary target path
             MiCmd miCmd = new MiCmd();
             Field sourcePathField = MiCmd.class.getDeclaredField("sourcePath");
             sourcePathField.setAccessible(true);
@@ -246,62 +244,17 @@ public class ConnectorZipValidationTest {
 
             Field targetPathField = MiCmd.class.getDeclaredField("targetPath");
             targetPathField.setAccessible(true);
-            targetPathField.set(miCmd, tempTargetPath.toAbsolutePath().toString());
+            targetPathField.set(miCmd, tempTargetDir.toAbsolutePath().toString());
 
             miCmd.execute();
 
             // For bala projects, artifacts are generated in the target path's "generated" subdirectory
-            Path generatedPath = tempTargetPath.resolve("generated");
-            
-            // Copy generated artifacts to expectedPath
-            if (Files.exists(generatedPath)) {
-                // Clean up existing expected path if it exists
-                if (Files.exists(expectedPath)) {
-                    try (var walk = Files.walk(expectedPath)) {
-                        walk.sorted((a, b) -> b.compareTo(a))
-                            .forEach(path -> {
-                                try {
-                                    Files.delete(path);
-                                } catch (IOException e) {
-                                    // Ignore cleanup errors
-                                }
-                            });
-                    }
-                }
-                Files.createDirectories(expectedPath);
-                
-                // Copy all contents from generated to expectedPath
-                try (var walk = Files.walk(generatedPath)) {
-                    walk.forEach(source -> {
-                        try {
-                            Path destination = expectedPath.resolve(generatedPath.relativize(source));
-                            if (Files.isDirectory(source)) {
-                                Files.createDirectories(destination);
-                            } else {
-                                Files.createDirectories(destination.getParent());
-                                Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-                            }
-                        } catch (IOException e) {
-                            throw new RuntimeException("Failed to copy artifact: " + source, e);
-                        }
-                    });
-                }
-                
-                // Clean up the generated folder
-                try (var walk = Files.walk(generatedPath)) {
-                    walk.sorted((a, b) -> b.compareTo(a))
-                        .forEach(path -> {
-                            try {
-                                Files.delete(path);
-                            } catch (IOException e) {
-                                // Ignore cleanup errors
-                            }
-                        });
-                }
-            }
+            tempGeneratedPath = tempTargetDir.resolve("generated");
+            Assert.assertTrue(Files.exists(tempGeneratedPath), 
+                    "Generated artifacts directory does not exist for project: " + projectName);
 
-        // Validate the generated artifacts from expectedPath
-        Path connectorPath = expectedPath;
+        // Validate the generated artifacts against expected files
+        Path connectorPath = tempGeneratedPath;
 
         Assert.assertTrue(Files.exists(connectorPath), "Connector path does not exist for project: " + projectName);
         Assert.assertTrue(Files.isDirectory(connectorPath), "Connector path is not a directory for project: " + projectName);
@@ -309,9 +262,10 @@ public class ConnectorZipValidationTest {
         // Validate connector.xml
         Path connectorXml = connectorPath.resolve("connector.xml");
         Assert.assertTrue(Files.exists(connectorXml), "connector.xml does not exist for project: " + projectName);
-        if (Files.exists(expectedPath.resolve("connector.xml"))) {
-            compareFileContent(connectorXml, expectedPath.resolve("connector.xml"));
-        }
+        Path expectedConnectorXml = expectedPath.resolve("connector.xml");
+        Assert.assertTrue(Files.exists(expectedConnectorXml), 
+                "Expected connector.xml does not exist for project: " + projectName);
+        compareFileContent(connectorXml, expectedConnectorXml);
 
         // Validate component directory
         Path componentDir = connectorPath.resolve("functions");
@@ -321,9 +275,10 @@ public class ConnectorZipValidationTest {
         // Validate component xml
         Path testComponentXml = componentDir.resolve("component.xml");
         Assert.assertTrue(Files.exists(testComponentXml), "component.xml does not exist in 'functions' for project: " + projectName);
-        if (Files.exists(expectedPath.resolve("functions").resolve("component.xml"))) {
-            compareFileContent(testComponentXml, expectedPath.resolve("functions").resolve("component.xml"));
-        }
+        Path expectedComponentXml = expectedPath.resolve("functions").resolve("component.xml");
+        Assert.assertTrue(Files.exists(expectedComponentXml), 
+                "Expected component.xml does not exist in 'functions' for project: " + projectName);
+        compareFileContent(testComponentXml, expectedComponentXml);
 
         // Validate lib directory and jar
         Path libDir = connectorPath.resolve("lib");
@@ -365,7 +320,43 @@ public class ConnectorZipValidationTest {
         // Check if there are any JSON files in uischema (function names may vary)
         long jsonCount = Files.list(uiSchemaDir).filter(p -> p.toString().endsWith(".json")).count();
         Assert.assertTrue(jsonCount > 0, "No JSON schema files found in 'uischema' for project: " + projectName);
+        
+        // Validate uischema files against expected files
+        Path expectedUiSchemaDir = expectedPath.resolve("uischema");
+        if (Files.exists(expectedUiSchemaDir) && Files.isDirectory(expectedUiSchemaDir)) {
+            // Compare each JSON file in generated uischema against expected
+            try (var generatedFiles = Files.list(uiSchemaDir)) {
+                generatedFiles.filter(p -> p.toString().endsWith(".json"))
+                    .forEach(generatedFile -> {
+                        Path expectedFile = expectedUiSchemaDir.resolve(generatedFile.getFileName());
+                        if (Files.exists(expectedFile)) {
+                            try {
+                                compareFileContent(generatedFile, expectedFile);
+                            } catch (IOException e) {
+                                throw new RuntimeException("Failed to compare uischema file: " + generatedFile.getFileName(), e);
+                            }
+                        }
+                    });
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to list uischema files", e);
+            }
+        }
         } finally {
+            // Clean up temporary target directory
+            if (tempTargetDir != null && Files.exists(tempTargetDir)) {
+                try (var walk = Files.walk(tempTargetDir)) {
+                    walk.sorted((a, b) -> b.compareTo(a))
+                        .forEach(path -> {
+                            try {
+                                Files.delete(path);
+                            } catch (IOException e) {
+                                // Ignore cleanup errors
+                            }
+                        });
+                } catch (IOException e) {
+                    // Ignore cleanup errors
+                }
+            }
             // Clean up temporary directory (for local projects)
             if (tempBalaDir != null && Files.exists(tempBalaDir) && 
                 (centralPackage == null || centralPackage.isBlank())) {
