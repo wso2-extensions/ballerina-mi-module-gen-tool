@@ -57,11 +57,11 @@ public class BalConnectorAnalyzer implements Analyzer {
         List<Symbol> moduleSymbols = semanticModel.moduleSymbols();
         List<Symbol> classSymbols = moduleSymbols.stream().filter((s) -> s instanceof BallerinaClassSymbol).toList();
         for (Symbol classSymbol : classSymbols) {
-            analyzeClass(compilePackage, (ClassSymbol) classSymbol);
+            analyzeClass(compilePackage, module, (ClassSymbol) classSymbol);
         }
     }
 
-    private void analyzeClass(Package compilePackage, ClassSymbol classSymbol) {
+    private void analyzeClass(Package compilePackage, Module module, ClassSymbol classSymbol) {
 
         if (!isClientClass(classSymbol) || classSymbol.getName().isEmpty()) {
             return;
@@ -195,7 +195,35 @@ public class BalConnectorAnalyzer implements Analyzer {
             }
 
             String returnType = Utils.getReturnTypeName(methodSymbol);
+            
+            // Try to extract operationId from @openapi:ResourceInfo annotation if present
+            Optional<String> operationIdOpt = Optional.empty();
+            try {
+                // Get source content from module to extract operationId
+                // Try to access documents through module's document API
+                Collection<io.ballerina.projects.Document> documents = module.documentIds().stream()
+                        .map(module::document)
+                        .toList();
+                for (io.ballerina.projects.Document doc : documents) {
+                    String sourceContent = doc.textDocument().toString();
+                    operationIdOpt = Utils.getOpenApiOperationId(methodSymbol, sourceContent);
+                    if (operationIdOpt.isPresent()) {
+                        System.out.println("Found operationId: " + operationIdOpt.get() + " for method: " + methodSymbol.getName().orElse("<unknown>"));
+                        break; // Found operationId, no need to check other documents
+                    }
+                }
+            } catch (Exception e) {
+                // If source content access fails, continue without operationId
+                System.out.println("Error extracting operationId for method: " + methodSymbol.getName().orElse("<unknown>") + " - " + e.getMessage());
+            }
+            
             Component component = new Component(finalSynapseName, Utils.getDocString(methodSymbol.documentation().get()), functionType, Integer.toString(i), List.of(), List.of(), returnType);
+            
+            // Store operationId as a parameter if found
+            if (operationIdOpt.isPresent()) {
+                Param operationIdParam = new Param("operationId", operationIdOpt.get());
+                component.setParam(operationIdParam);
+            }
 //            String componentIndex = Integer.toString(connection.getComponents().size());
 //            Component component = new Component(functionName,
 //                    GeneratorUtils.getDocFromMetadata(functionDefinition.metadata()),
@@ -219,7 +247,7 @@ public class BalConnectorAnalyzer implements Analyzer {
                         component.setFunctionParam(functionParam.get());
                     } else {
                         // Skip the function if any parameter type is unsupported
-                        printStream.println("Skipping function '" + functionName + "' due to unsupported parameter type.");
+//                        printStream.println("Skipping function '" + functionName + "' due to unsupported parameter type.");
                         continue methodLoop;
                     }
                     paramIndex++;

@@ -18,7 +18,16 @@
 
 package io.ballerina.mi.util;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.*;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.mi.connectorModel.*;
 
 import java.io.*;
@@ -30,6 +39,8 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -277,6 +288,113 @@ public class Utils {
             case NIL, BOOLEAN, INT, STRING, FLOAT, DECIMAL, XML, JSON, ANY, ARRAY, MAP, RECORD, UNION -> typeKind.getName();
             default -> null;
         };
+    }
+
+    /**
+     * Extract operationId from @openapi:ResourceInfo annotation if present.
+     * 
+     * This method checks for the @openapi:ResourceInfo annotation and extracts the operationId field value
+     * by parsing the provided source content.
+     * 
+     * @param functionSymbol The function symbol (MethodSymbol or FunctionSymbol) to check for annotations
+     * @param sourceContent The source code content to search for the annotation (can be null)
+     * @return Optional containing the operationId value if found, empty otherwise
+     */
+    public static Optional<String> getOpenApiOperationId(FunctionSymbol functionSymbol, String sourceContent) {
+        // First check if the annotation exists
+        if (!hasOpenApiResourceInfoAnnotation(functionSymbol)) {
+            return Optional.empty();
+        }
+        
+        // If source content is not provided, we can't extract the value
+        if (sourceContent == null || sourceContent.isEmpty()) {
+            return Optional.empty();
+        }
+        
+        // Get function name to locate it in source files  
+        Optional<String> functionNameOpt = functionSymbol.getName();
+        if (functionNameOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        String functionName = functionNameOpt.get();
+        
+        // Extract operationId from source content
+        return extractOperationIdFromSource(sourceContent, functionName);
+    }
+    
+    /**
+     * Extract operationId from source code content by finding @openapi:ResourceInfo annotations.
+     * This uses regex to find annotations near resource functions with the given name.
+     */
+    private static Optional<String> extractOperationIdFromSource(String source, String functionName) {
+        // Pattern to match @openapi:ResourceInfo annotation with operationId
+        // Matches multiline patterns like:
+        // @openapi:ResourceInfo {
+        //     operationId: "value"
+        // }
+        Pattern pattern = Pattern.compile(
+            "@openapi:ResourceInfo\\s*\\{[^}]*?operationId\\s*:\\s*[\"']([^\"']+)[\"'][^}]*?\\}",
+            Pattern.DOTALL | Pattern.MULTILINE
+        );
+        
+        // First, try to find annotations that appear before resource functions with the matching HTTP method name
+        // Look for pattern: @openapi:ResourceInfo {...} followed by resource function <functionName>
+        String resourceFunctionPattern = "resource\\s+function\\s+" + Pattern.quote(functionName);
+        Pattern resourcePattern = Pattern.compile(resourceFunctionPattern);
+        
+        // Find all @openapi:ResourceInfo annotations in the source
+        Matcher annotationMatcher = pattern.matcher(source);
+        while (annotationMatcher.find()) {
+            int annotationEnd = annotationMatcher.end();
+            String remainingContent = source.substring(annotationEnd);
+            
+            // Check if there's a resource function with matching name nearby (within next 50 characters)
+            Matcher resourceMatcher = resourcePattern.matcher(remainingContent);
+            if (resourceMatcher.find() && resourceMatcher.start() < 200) {
+                // Found matching annotation near the function
+                return Optional.of(annotationMatcher.group(1));
+            }
+        }
+        
+        // If direct matching fails, just return the first operationId found (since we've already verified
+        // that this function has the annotation via hasOpenApiResourceInfoAnnotation)
+        Matcher firstMatcher = pattern.matcher(source);
+        if (firstMatcher.find()) {
+            return Optional.of(firstMatcher.group(1));
+        }
+        
+        return Optional.empty();
+    }
+    
+    /**
+     * Check if a function has @openapi:ResourceInfo annotation.
+     * 
+     * @param functionSymbol The function symbol to check
+     * @return true if the annotation is present, false otherwise
+     */
+    public static boolean hasOpenApiResourceInfoAnnotation(FunctionSymbol functionSymbol) {
+        List<AnnotationSymbol> annotations = functionSymbol.annotations();
+        for (AnnotationSymbol annotationSymbol : annotations) {
+            Optional<String> annotationName = annotationSymbol.getName();
+            if (annotationName.isEmpty()) {
+                continue;
+            }
+            
+            if (!annotationName.get().equals("ResourceInfo")) {
+                continue;
+            }
+            
+            Optional<ModuleSymbol> moduleOpt = annotationSymbol.getModule();
+            if (moduleOpt.isEmpty()) {
+                continue;
+            }
+            
+            Optional<String> moduleNameOpt = moduleOpt.get().getName();
+            if (moduleNameOpt.isPresent() && moduleNameOpt.get().equals("openapi")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
