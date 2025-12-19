@@ -62,6 +62,7 @@ public class BalConnectorAnalyzer implements Analyzer {
     }
 
     private void analyzeClass(Package compilePackage, Module module, ClassSymbol classSymbol) {
+        SemanticModel semanticModel = compilePackage.getCompilation().getSemanticModel(module.moduleId());
 
         if (!isClientClass(classSymbol) || classSymbol.getName().isEmpty()) {
             return;
@@ -115,74 +116,42 @@ public class BalConnectorAnalyzer implements Analyzer {
 
             FunctionType functionType = Utils.getFunctionType(methodSymbol);
 
-            // Generate synapse name.
-            // For resource functions:
-            //   httpMethod + PascalCase(literal path segments) + By<ParamName> for each path parameter.
-            // For all others, fall back to type-based heuristics in Utils.generateSynapseName(..).
-            String synapseName;
+            // Prepare context for synapse name generation
+            SynapseNameContext.Builder contextBuilder = SynapseNameContext.builder().module(module);
+            
+            // Extract operationId from @openapi:ResourceInfo annotation if present using syntax tree API
+            Optional<String> operationIdOpt = Optional.empty();
+            try {
+                operationIdOpt = Utils.getOpenApiOperationId(methodSymbol, module, semanticModel);
+                if (operationIdOpt.isPresent()) {
+                    System.out.println("Found operationId: " + operationIdOpt.get() + " for method: " + methodSymbol.getName().orElse("<unknown>"));
+                }
+            } catch (Exception e) {
+                // If syntax tree access fails, continue without operationId
+                System.out.println("Error extracting operationId for method: " + methodSymbol.getName().orElse("<unknown>") + " - " + e.getMessage());
+            }
+            
+            // Add operationId to context if found
+            operationIdOpt.ifPresent(contextBuilder::operationId);
+            
+            // Extract resource path segments if this is a resource function
             if (functionType == FunctionType.RESOURCE && methodSymbol instanceof ResourceMethodSymbol resourceMethod) {
                 try {
-                    String httpMethod = methodSymbol.getName().orElse("resource").toLowerCase();
                     PathSegmentList resourcePath = (PathSegmentList) resourceMethod.resourcePath();
-                    java.util.List<PathSegment> pathSegments = resourcePath.list();
-
-                    java.util.List<String> literalSegments = new java.util.ArrayList<>();
-                    java.util.List<String> pathParamNames = new java.util.ArrayList<>();
-
-                    for (PathSegment segment : pathSegments) {
-                        String sig = segment.signature();
-                        if (sig == null || sig.isEmpty()) {
-                            continue;
-                        }
-
-                        if (sig.startsWith("[") && sig.endsWith("]")) {
-                            // Path parameter segment. Extract the parameter name:
-                            // e.g. "[string userId]" -> "userId", "[userId]" -> "userId"
-                            String inside = sig.substring(1, sig.length() - 1).trim();
-                            String paramName = inside;
-                            int lastSpace = inside.lastIndexOf(' ');
-                            if (lastSpace >= 0 && lastSpace + 1 < inside.length()) {
-                                paramName = inside.substring(lastSpace + 1);
-                            }
-                            if (!paramName.isEmpty()) {
-                                pathParamNames.add(paramName);
-                            }
-                        } else {
-                            // Literal path segment, e.g. "users", "threads", "trash"
-                            literalSegments.add(sig);
-                        }
-                    }
-
-                    StringBuilder nameBuilder = new StringBuilder();
-                    nameBuilder.append(httpMethod);
-
-                    // Add PascalCase literal segments
-                    for (String lit : literalSegments) {
-                        nameBuilder.append(toPascalCaseSegment(lit));
-                    }
-
-                    // Add By<ParamName> for each path parameter
-                    for (String paramName : pathParamNames) {
-                        if (paramName.isEmpty()) {
-                            continue;
-                        }
-                        nameBuilder.append("By");
-                        nameBuilder.append(Character.toUpperCase(paramName.charAt(0)));
-                        if (paramName.length() > 1) {
-                            nameBuilder.append(paramName.substring(1));
-                        }
-                    }
-
-                    synapseName = nameBuilder.toString();
-                } catch (Throwable e) {
-                    // If anything goes wrong while reading the path, ignore and fall back to type-based heuristics
-                    printStream.println("WARN: Unable to derive name from resource path for method "
-                            + methodSymbol.getName().orElse("<unknown>") + ": " + e.getMessage());
-                    synapseName = Utils.generateSynapseName(methodSymbol, functionType);
+                    contextBuilder.resourcePathSegments(resourcePath.list());
+                } catch (Exception e) {
+                    // If path extraction fails, continue without path segments
                 }
-            } else {
-                synapseName = Utils.generateSynapseName(methodSymbol, functionType);
             }
+            
+            SynapseNameContext context = contextBuilder.build();
+            
+            // Use priority-based synapse name generation
+            SynapseNameGeneratorManager nameGenerator = new SynapseNameGeneratorManager();
+            Optional<String> synapseNameOpt = nameGenerator.generateSynapseName(methodSymbol, functionType, context);
+            
+            // Fallback to default if no generator succeeded
+            String synapseName = synapseNameOpt.orElseGet(() -> Utils.generateSynapseName(methodSymbol, functionType));
             
             // Handle duplicate names by appending numeric suffix
             String finalSynapseName = synapseName;
@@ -195,29 +164,8 @@ public class BalConnectorAnalyzer implements Analyzer {
             }
 
             String returnType = Utils.getReturnTypeName(methodSymbol);
-            
-            // Try to extract operationId from @openapi:ResourceInfo annotation if present
-            Optional<String> operationIdOpt = Optional.empty();
-            try {
-                // Get source content from module to extract operationId
-                // Try to access documents through module's document API
-                Collection<io.ballerina.projects.Document> documents = module.documentIds().stream()
-                        .map(module::document)
-                        .toList();
-                for (io.ballerina.projects.Document doc : documents) {
-                    String sourceContent = doc.textDocument().toString();
-                    operationIdOpt = Utils.getOpenApiOperationId(methodSymbol, sourceContent);
-                    if (operationIdOpt.isPresent()) {
-                        System.out.println("Found operationId: " + operationIdOpt.get() + " for method: " + methodSymbol.getName().orElse("<unknown>"));
-                        break; // Found operationId, no need to check other documents
-                    }
-                }
-            } catch (Exception e) {
-                // If source content access fails, continue without operationId
-                System.out.println("Error extracting operationId for method: " + methodSymbol.getName().orElse("<unknown>") + " - " + e.getMessage());
-            }
-            
-            Component component = new Component(finalSynapseName, Utils.getDocString(methodSymbol.documentation().get()), functionType, Integer.toString(i), List.of(), List.of(), returnType);
+            String docString = methodSymbol.documentation().map(Utils::getDocString).orElse("");
+            Component component = new Component(finalSynapseName, docString, functionType, Integer.toString(i), List.of(), List.of(), returnType);
             
             // Store operationId as a parameter if found
             if (operationIdOpt.isPresent()) {
@@ -271,26 +219,5 @@ public class BalConnectorAnalyzer implements Analyzer {
     private boolean isClientClass(ClassSymbol classSymbol) {
 
         return classSymbol.qualifiers().contains(Qualifier.PUBLIC) && classSymbol.qualifiers().contains(Qualifier.CLIENT);
-    }
-
-    /**
-     * Convert a path segment (e.g. "users", "user-threads") to PascalCase ("Users", "UserThreads").
-     */
-    private static String toPascalCaseSegment(String segment) {
-        if (segment == null || segment.isEmpty()) {
-            return "";
-        }
-        String[] parts = segment.split("[-_\\s]+");
-        StringBuilder sb = new StringBuilder();
-        for (String part : parts) {
-            if (part.isEmpty()) {
-                continue;
-            }
-            sb.append(Character.toUpperCase(part.charAt(0)));
-            if (part.length() > 1) {
-                sb.append(part.substring(1).toLowerCase());
-            }
-        }
-        return sb.toString();
     }
 }

@@ -20,14 +20,7 @@ package io.ballerina.mi.util;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.*;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.*;
 import io.ballerina.mi.connectorModel.*;
 
 import java.io.*;
@@ -294,76 +287,142 @@ public class Utils {
      * Extract operationId from @openapi:ResourceInfo annotation if present.
      * 
      * This method checks for the @openapi:ResourceInfo annotation and extracts the operationId field value
-     * by parsing the provided source content.
+     * using the syntax tree API to properly parse annotation values.
      * 
      * @param functionSymbol The function symbol (MethodSymbol or FunctionSymbol) to check for annotations
-     * @param sourceContent The source code content to search for the annotation (can be null)
+     * @param module The module containing the function (used to access syntax trees)
+     * @param semanticModel The semantic model to match function symbols to syntax tree nodes
      * @return Optional containing the operationId value if found, empty otherwise
      */
-    public static Optional<String> getOpenApiOperationId(FunctionSymbol functionSymbol, String sourceContent) {
+    public static Optional<String> getOpenApiOperationId(FunctionSymbol functionSymbol, io.ballerina.projects.Module module, 
+                                                         io.ballerina.compiler.api.SemanticModel semanticModel) {
         // First check if the annotation exists
         if (!hasOpenApiResourceInfoAnnotation(functionSymbol)) {
             return Optional.empty();
         }
         
-        // If source content is not provided, we can't extract the value
-        if (sourceContent == null || sourceContent.isEmpty()) {
-            return Optional.empty();
-        }
-        
-        // Get function name to locate it in source files  
-        Optional<String> functionNameOpt = functionSymbol.getName();
-        if (functionNameOpt.isEmpty()) {
-            return Optional.empty();
-        }
-        String functionName = functionNameOpt.get();
-        
-        // Extract operationId from source content
-        return extractOperationIdFromSource(sourceContent, functionName);
-    }
-    
-    /**
-     * Extract operationId from source code content by finding @openapi:ResourceInfo annotations.
-     * This uses regex to find annotations near resource functions with the given name.
-     */
-    private static Optional<String> extractOperationIdFromSource(String source, String functionName) {
-        // Pattern to match @openapi:ResourceInfo annotation with operationId
-        // Matches multiline patterns like:
-        // @openapi:ResourceInfo {
-        //     operationId: "value"
-        // }
-        Pattern pattern = Pattern.compile(
-            "@openapi:ResourceInfo\\s*\\{[^}]*?operationId\\s*:\\s*[\"']([^\"']+)[\"'][^}]*?\\}",
-            Pattern.DOTALL | Pattern.MULTILINE
-        );
-        
-        // First, try to find annotations that appear before resource functions with the matching HTTP method name
-        // Look for pattern: @openapi:ResourceInfo {...} followed by resource function <functionName>
-        String resourceFunctionPattern = "resource\\s+function\\s+" + Pattern.quote(functionName);
-        Pattern resourcePattern = Pattern.compile(resourceFunctionPattern);
-        
-        // Find all @openapi:ResourceInfo annotations in the source
-        Matcher annotationMatcher = pattern.matcher(source);
-        while (annotationMatcher.find()) {
-            int annotationEnd = annotationMatcher.end();
-            String remainingContent = source.substring(annotationEnd);
-            
-            // Check if there's a resource function with matching name nearby (within next 50 characters)
-            Matcher resourceMatcher = resourcePattern.matcher(remainingContent);
-            if (resourceMatcher.find() && resourceMatcher.start() < 200) {
-                // Found matching annotation near the function
-                return Optional.of(annotationMatcher.group(1));
+        // Extract operationId using syntax tree
+        try {
+            // Search through module documents for the function
+            for (io.ballerina.projects.DocumentId docId : module.documentIds()) {
+                io.ballerina.projects.Document document = module.document(docId);
+                SyntaxTree syntaxTree = document.syntaxTree();
+                
+                Optional<String> operationId = extractOperationIdFromSyntaxTree(syntaxTree, functionSymbol, semanticModel);
+                if (operationId.isPresent()) {
+                    return operationId;
+                }
             }
-        }
-        
-        // If direct matching fails, just return the first operationId found (since we've already verified
-        // that this function has the annotation via hasOpenApiResourceInfoAnnotation)
-        Matcher firstMatcher = pattern.matcher(source);
-        if (firstMatcher.find()) {
-            return Optional.of(firstMatcher.group(1));
+        } catch (Exception e) {
+            // If syntax tree access fails, return empty
         }
         
         return Optional.empty();
+    }
+    
+    /**
+     * Extract operationId from syntax tree by finding the function and its @openapi:ResourceInfo annotation.
+     * Uses the reference pattern from MetaInfoMapperImpl to properly extract annotation field values.
+     * Matches function nodes to the specific function symbol using SemanticModel.
+     */
+    private static Optional<String> extractOperationIdFromSyntaxTree(SyntaxTree syntaxTree, FunctionSymbol targetFunctionSymbol,
+                                                                     io.ballerina.compiler.api.SemanticModel semanticModel) {
+        Node rootNode = syntaxTree.rootNode();
+        
+        // Find all function definitions in the syntax tree and match to our target symbol
+        FunctionDefinitionNodeVisitor visitor = new FunctionDefinitionNodeVisitor(targetFunctionSymbol, semanticModel);
+        rootNode.accept(visitor);
+        
+        return visitor.getOperationId();
+    }
+    
+    /**
+     * Visitor class to find function definition nodes and extract operationId from annotations.
+     * Follows the pattern from MetaInfoMapperImpl for extracting annotation field values.
+     * Uses SemanticModel to match function definition nodes to the target function symbol.
+     */
+    private static class FunctionDefinitionNodeVisitor extends NodeVisitor {
+        private final FunctionSymbol targetFunctionSymbol;
+        private final io.ballerina.compiler.api.SemanticModel semanticModel;
+        private Optional<String> operationId = Optional.empty();
+        
+        public FunctionDefinitionNodeVisitor(FunctionSymbol targetFunctionSymbol, 
+                                              io.ballerina.compiler.api.SemanticModel semanticModel) {
+            this.targetFunctionSymbol = targetFunctionSymbol;
+            this.semanticModel = semanticModel;
+        }
+        
+        @Override
+        public void visit(FunctionDefinitionNode functionDefinitionNode) {
+            // Skip if we already found the operationId
+            if (operationId.isPresent()) {
+                return;
+            }
+            
+            // Use SemanticModel to get the symbol for this function definition node
+            // and check if it matches our target function symbol
+            Optional<io.ballerina.compiler.api.symbols.Symbol> nodeSymbolOpt = semanticModel.symbol(functionDefinitionNode);
+            if (nodeSymbolOpt.isEmpty() || !nodeSymbolOpt.get().equals(targetFunctionSymbol)) {
+                // Continue visiting child nodes
+                visitSyntaxNode(functionDefinitionNode);
+                return;
+            }
+            
+            // This is our target function - extract operationId from annotations
+            // Check metadata for annotations - following MetaInfoMapperImpl pattern
+            Optional<MetadataNode> optMetadata = functionDefinitionNode.metadata();
+            if (optMetadata.isPresent()) {
+                MetadataNode metadataNode = optMetadata.get();
+                NodeList<AnnotationNode> annotations = metadataNode.annotations();
+                
+                // Look for @openapi:ResourceInfo annotation
+                for (AnnotationNode annotation : annotations) {
+                    if (annotation.annotReference().kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
+                        QualifiedNameReferenceNode ref = (QualifiedNameReferenceNode) annotation.annotReference();
+                        String annotationName = ref.modulePrefix().text() + ":" + ref.identifier().text();
+                        
+                        if ("openapi:ResourceInfo".equals(annotationName)) {
+                            Optional<MappingConstructorExpressionNode> optExpressionNode = annotation.annotValue();
+                            if (optExpressionNode.isPresent()) {
+                                MappingConstructorExpressionNode mappingConstructorExpressionNode = optExpressionNode.get();
+                                SeparatedNodeList<MappingFieldNode> fields = mappingConstructorExpressionNode.fields();
+                                
+                                // Extract operationId field value - following MetaInfoMapperImpl pattern
+                                for (MappingFieldNode field : fields) {
+                                    if (field instanceof SpecificFieldNode specificField) {
+                                        String fieldName = specificField.fieldName().toSourceCode().trim().replaceAll("\"", "");
+                                        
+                                        if ("operationId".equals(fieldName)) {
+                                            Optional<ExpressionNode> valueExpr = specificField.valueExpr();
+                                            if (valueExpr.isPresent()) {
+                                                ExpressionNode expressionNode = valueExpr.get();
+                                                String expressionStr = expressionNode.toSourceCode().trim();
+                                                
+                                                // Extract string value - remove quotes
+                                                if (!expressionStr.isBlank()) {
+                                                    String fieldValue = expressionStr.replaceAll("\"", "").trim();
+                                                    if (!fieldValue.isEmpty()) {
+                                                        operationId = Optional.of(fieldValue);
+                                                        return; // Found operationId, stop searching
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Continue visiting child nodes
+            visitSyntaxNode(functionDefinitionNode);
+        }
+        
+        public Optional<String> getOperationId() {
+            return operationId;
+        }
     }
     
     /**
@@ -691,7 +750,7 @@ public class Utils {
      * Sanitize a string to be a valid XML name.
      * XML names must start with a letter or underscore, and contain only letters, digits, underscores, hyphens, and periods.
      */
-    private static String sanitizeXmlName(String name) {
+    public static String sanitizeXmlName(String name) {
         if (name == null || name.isEmpty()) {
             return "resource";
         }
