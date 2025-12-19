@@ -1,7 +1,7 @@
 {
   "connectorName": "{{parent.parent.moduleName}}",
-  "operationName": "{{name}}",
-  "title": "{{name}}",
+  "operationName": "{{displayName}}",
+  "title": "{{displayName}}",
   "help": "{{{escapeChars documentation}}}",
   "elements": [
     {

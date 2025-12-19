@@ -102,6 +102,20 @@ public class ArtifactGenerationUtil {
         Files.createDirectories(targetDir);
         System.out.println("Ensured target directory exists: " + targetDir);
 
+        // 1.5. Clean up old zip files from target directory to avoid picking up wrong artifacts
+        System.out.println("Cleaning up old zip files from target directory: " + targetDir);
+        try (Stream<Path> oldZips = Files.walk(targetDir, 2)) {
+            oldZips.filter(p -> p.toString().endsWith(".zip"))
+                    .forEach(zipPath -> {
+                        try {
+                            System.out.println("Deleting old zip: " + zipPath);
+                            Files.delete(zipPath);
+                        } catch (IOException e) {
+                            System.out.println("WARN: Failed to delete old zip " + zipPath + ": " + e.getMessage());
+                        }
+                    });
+        }
+
         // 2. Programmatically execute MiCmd
         System.out.println("Executing MiCmd for project: " + projectPathStr);
         MiCmd miCmd = new MiCmd();
@@ -117,13 +131,11 @@ public class ArtifactGenerationUtil {
         System.out.println("MiCmd execution completed.");
 
         // 3. Find the generated zip file and unzip it to the expected directory
-        //    Prefer the zip that matches this projectName/module to avoid picking up
-        //    a previously generated connector (e.g., another Central package).
+        //    The zip file name pattern for connectors is: "ballerina-connector-<moduleName>-<version>.zip"
+        //    For Central packages, projectName is typically "<org>-<module>", e.g., "ballerinax-googleapis.gmail"
+        //    We need to match the module name part (after the first '-') in the zip filename.
         Optional<Path> generatedZipFile;
-        // Derive a matcher key from projectName. For Central packages, projectName is typically
-        // "<org>-<module>", e.g., "ballerinax-googleapis.gmail", while the zip is
-        // "ballerina-connector-googleapis.gmail-<version>.zip". We therefore use the part
-        // after the first '-' ("googleapis.gmail") as a primary key.
+        // Derive a matcher key from projectName. Extract the module name part after the first '-'
         final String matchKey;
         int dashIndex = projectName.indexOf('-');
         if (dashIndex >= 0 && dashIndex + 1 < projectName.length()) {
@@ -131,22 +143,52 @@ public class ArtifactGenerationUtil {
         } else {
             matchKey = projectName;
         }
-        try (Stream<Path> files = Files.walk(targetDir, 2)) {
-            generatedZipFile = files
-                    .filter(p -> p.toString().endsWith(".zip"))
-                    .filter(p -> p.getFileName().toString().contains(matchKey))
-                    .findFirst();
-        }
-        // Fallback to first available zip (backward compatible with older layouts)
-        if (generatedZipFile.isEmpty()) {
-            try (Stream<Path> files = Files.walk(targetDir, 2)) {
-                generatedZipFile = files
+        
+        System.out.println("Looking for zip file matching module: " + matchKey);
+        // Search in targetDir and its parent (zip might be created in parent for bala projects)
+        Path[] searchPaths = {targetDir, targetDir.getParent() != null ? targetDir.getParent() : targetDir};
+        generatedZipFile = Optional.empty();
+        for (Path searchPath : searchPaths) {
+            if (!Files.exists(searchPath)) {
+                continue;
+            }
+            try (Stream<Path> files = Files.walk(searchPath, 2)) {
+                Optional<Path> found = files
                         .filter(p -> p.toString().endsWith(".zip"))
+                        .filter(p -> {
+                            String zipName = p.getFileName().toString();
+                            // Match zip files that contain the module name
+                            // Pattern: ballerina-connector-<moduleName>-<version>.zip
+                            boolean matches = zipName.contains(matchKey);
+                            if (matches) {
+                                System.out.println("Found matching zip: " + zipName + " in " + searchPath);
+                            }
+                            return matches;
+                        })
                         .findFirst();
+                if (found.isPresent()) {
+                    generatedZipFile = found;
+                    break;
+                }
             }
         }
 
-        Assert.assertTrue(generatedZipFile.isPresent(), "Generated zip file not found in " + targetDir);
+        if (generatedZipFile.isEmpty()) {
+            // List all available zip files for debugging
+            System.out.println("No matching zip file found. Available zip files:");
+            for (Path searchPath : searchPaths) {
+                if (Files.exists(searchPath)) {
+                    System.out.println("  In " + searchPath + ":");
+                    try (Stream<Path> files = Files.walk(searchPath, 2)) {
+                        files.filter(p -> p.toString().endsWith(".zip"))
+                                .forEach(p -> System.out.println("    - " + p.getFileName()));
+                    }
+                }
+            }
+            throw new AssertionError("Generated zip file not found for project '" + projectName + 
+                    "' (expected to contain '" + matchKey + "') in " + targetDir + 
+                    ". This usually means no components were generated (all methods were skipped).");
+        }
 
         Path generatedConnectorPath = generatedZipFile.get();
         Assert.assertTrue(Files.exists(generatedConnectorPath), "Generated connector zip does not exist: " + generatedConnectorPath);

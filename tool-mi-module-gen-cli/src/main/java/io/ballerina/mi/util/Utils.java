@@ -294,6 +294,42 @@ public class Utils {
         return sanitizeXmlName(httpMethod + pascalHint);
     }
 
+      /**
+     * Convert a technical name like "getAllCountriesAndProvincesStatus" or
+     * "postUsersThreadsTrashByUserIdById" into a human-friendly phrase:
+     * "get all countries and provinces status", "post users threads trash by user id by id".
+     */
+    public static String humanizeName(String name) {
+        if (name == null || name.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        char prev = 0;
+
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if (c == '_' || c == '-' || c == ' ') {
+                // Normalize any separators to a single space
+                if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
+                    sb.append(' ');
+                }
+            } else if (Character.isUpperCase(c)) {
+                // Insert a space before an upper-case letter when following a lower-case letter or digit
+                if (i > 0 && (Character.isLowerCase(prev) || Character.isDigit(prev)) && sb.charAt(sb.length() - 1) != ' ') {
+                    sb.append(' ');
+                }
+                sb.append(Character.toLowerCase(c));
+            } else {
+                sb.append(c);
+            }
+            prev = c;
+        }
+
+        // Collapse multiple spaces and trim
+        return sb.toString().trim().replaceAll("\\s+", " ");
+    }
+
     /**
      * Generate synapse name for functions.
      * <ul>
@@ -518,7 +554,7 @@ public class Utils {
         // Handle hyphenated or underscore-separated words
         String[] parts = str.split("[-_\\s]+");
         StringBuilder result = new StringBuilder();
-        
+
         for (String part : parts) {
             if (part.isEmpty()) {
                 continue;
