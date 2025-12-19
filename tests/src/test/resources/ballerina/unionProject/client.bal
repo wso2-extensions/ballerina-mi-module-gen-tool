@@ -114,5 +114,13 @@ public isolated client class UnionClient {
             return "int:" + value.toString();
         }
     }
+
+    // Test L: Return error or string (string|error)
+    remote isolated function processWithError(boolean shouldThrowError) returns string|error {
+        if shouldThrowError {
+            return error("Operation failed: Invalid input provided");
+        }
+        return "Success";
+    }
 }
 

@@ -18,6 +18,7 @@ package org.ballerina.test;
 
 import io.ballerina.stdlib.mi.BalConnectorConfig;
 import io.ballerina.stdlib.mi.BalConnectorFunction;
+import io.ballerina.stdlib.mi.BallerinaExecutionException;
 import io.ballerina.stdlib.mi.ModuleInfo;
 import org.apache.synapse.data.connector.DefaultConnectorResponse;
 import org.testng.Assert;
@@ -473,5 +474,58 @@ public class TestUnionDataType {
 
         String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
         Assert.assertEquals(result, "nil", "Should process nil value correctly");
+    }
+
+    @Test(description = "Test processing string|error union with error thrown")
+    public void testProcessWithErrorThrown() {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("processWithError")
+                .returnType("union")
+                .addParameter("shouldThrowError", "boolean", "true")
+                .build();
+
+        context.setProperty("param0", "shouldThrowError");
+        context.setProperty("paramType0", "boolean");
+        context.setProperty("paramFunctionName", "processWithError");
+        context.setProperty("paramSize", 1);
+        context.setProperty("returnType", "union");
+
+        try {
+            connector.connect(context);
+            Assert.fail("Expected an exception to be thrown");
+        } catch (Throwable t) {
+            String msg = t.getMessage() == null ? "" : t.getMessage();
+            Assert.assertEquals(msg, "Error while executing ballerina");
+            Assert.assertEquals(t.getCause().getClass(), BallerinaExecutionException.class,
+                    "Cause should be BallerinaExecutionException");
+            Assert.assertEquals(t.getCause().getMessage(), "Operation failed: Invalid input provided",
+                    "BallerinaExecutionException message should match");
+        }
+    }
+
+    @Test(description = "Test processing string|error union with success")
+    public void testProcessWithErrorSuccess() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("processWithError")
+                .returnType("union")
+                .addParameter("shouldThrowError", "boolean", "false")
+                .build();
+
+        context.setProperty("param0", "shouldThrowError");
+        context.setProperty("paramType0", "boolean");
+        context.setProperty("paramFunctionName", "processWithError");
+        context.setProperty("paramSize", 1);
+        context.setProperty("returnType", "union");
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result, "Success", "Should return success string when no error");
     }
 }
