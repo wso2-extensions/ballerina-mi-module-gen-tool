@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+  ~
+  ~ WSO2 LLC. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<component name="functions" type="synapse/template">
+    <subComponents>
+        <component name="returnStringOrInt">
+            <displayName>returnStringOrInt</displayName>
+            <file>returnStringOrInt.xml</file>
+            <description></description>
+        </component>
+        <component name="findPerson">
+            <displayName>findPerson</displayName>
+            <file>findPerson.xml</file>
+            <description></description>
+        </component>
+        <component name="processStringOrIntOrFloat">
+            <displayName>processStringOrIntOrFloat</displayName>
+            <file>processStringOrIntOrFloat.xml</file>
+            <description></description>
+        </component>
+        <component name="getResponse">
+            <displayName>getResponse</displayName>
+            <file>getResponse.xml</file>
+            <description></description>
+        </component>
+        <component name="processStringOrInt">
+            <displayName>processStringOrInt</displayName>
+            <file>processStringOrInt.xml</file>
+            <description></description>
+        </component>
+        <component name="processEntity">
+            <displayName>processEntity</displayName>
+            <file>processEntity.xml</file>
+            <description></description>
+        </component>
+        <component name="processIntOrBoolean">
+            <displayName>processIntOrBoolean</displayName>
+            <file>processIntOrBoolean.xml</file>
+            <description></description>
+        </component>
+        <component name="processNumberType">
+            <displayName>processNumberType</displayName>
+            <file>processNumberType.xml</file>
+            <description></description>
+        </component>
+        <component name="processWithNil">
+            <displayName>processWithNil</displayName>
+            <file>processWithNil.xml</file>
+            <description></description>
+        </component>
+        <component name="processNullableString">
+            <displayName>processNullableString</displayName>
+            <file>processNullableString.xml</file>
+            <description></description>
+        </component>
+        </subComponents>
+</component>

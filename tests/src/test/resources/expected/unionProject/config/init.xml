@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+  ~
+  ~ WSO2 LLC. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<template name="init" onError="fault" xmlns="http://ws.apache.org/ns/synapse">
+    <parameter name="name" description="Unique name the connection is identified by"/>
+    <parameter name="connectionType" description="Connection type"/>
+    <!-- TODO: if union, the selected member type becomes a parameter-->
+    <parameter name="serviceUrl" description=""/>
+    <sequence>
+        <property name="UNIONPROJECT_UNIONCLIENT_objectTypeName" value="UnionClient"/>
+        <property name="UNIONPROJECT_UNIONCLIENT_paramSize" value="1"/>
+        <property name="UNIONPROJECT_UNIONCLIENT_paramFunctionName" value="init"/>
+        <property name="UNIONPROJECT_UNIONCLIENT_param0" value="serviceUrl"/>
+        <property name="UNIONPROJECT_UNIONCLIENT_paramType0" value="string"/>
+        
+        <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
+            <property name="orgName" value="testOrg"/>
+            <property name="moduleName" value="unionProject"/>
+            <property name="version" value="1"/>
+        </class>
+    </sequence>
+</template>

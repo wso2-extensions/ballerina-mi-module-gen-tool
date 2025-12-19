@@ -26,10 +26,13 @@ public class FunctionParam extends Param {
     private final String paramType;
     private ParameterKind paramKind;
     private TypeSymbol typeSymbol;
+    private boolean required;
+    private String enableCondition;
 
     public FunctionParam(String index, String name, String paramType) {
         super(index, name);
         this.paramType = paramType;
+        this.required = true;
     }
 
     public String getParamType() {
@@ -50,5 +53,21 @@ public class FunctionParam extends Param {
 
     public void setTypeSymbol(TypeSymbol typeSymbol) {
         this.typeSymbol = typeSymbol;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
+    public String getEnableCondition() {
+        return enableCondition;
+    }
+
+    public void setEnableCondition(String enableCondition) {
+        this.enableCondition = enableCondition;
     }
 }

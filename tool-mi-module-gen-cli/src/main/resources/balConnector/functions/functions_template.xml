@@ -19,7 +19,6 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="{{name}}">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <!-- TODO: if union, the selected member type becomes a parameter-->
     {{#each queryParams ~}}
     <parameter name="{{name}}" description="{{documentation}}"/>
     {{/each ~}}
@@ -27,7 +26,14 @@
     <parameter name="{{name}}" description="{{documentation}}"/>
     {{/each ~}}
     {{#each functionParams ~}}
+    {{#eq paramType "union" ~}}
+    <parameter name="{{value}}DataType" description="Select the data type for '{{value}}' parameter"/>
+    {{#each unionMemberParams ~}}
     <parameter name="{{value}}" description="{{description}}"/>
+    {{/each ~}}
+    {{else ~}}
+    <parameter name="{{value}}" description="{{description}}"/>
+    {{/eq ~}}
     {{/each ~}}
     <sequence>
         {{#each functionParams ~}}
@@ -35,7 +41,12 @@
         <property name="paramType{{@index}}" value="{{paramType}}"/>
         {{#eq paramType "record" ~}}
         <property name="param{{@index}}_recordName" value="{{unwrapOptional typeSymbol.name}}" />
-        {{/eq~}}
+        {{/eq ~}}
+        {{#eq paramType "union" ~}}
+        {{#each unionMemberParams ~}}
+        <property name="param{{@../index}}Union{{capitalize paramType}}" value="{{value}}"/>
+        {{/each ~}}
+        {{/eq ~}}
         {{/each ~}}
         {{#each params ~}}
         <property name="{{key}}" value="{{value}}"/>

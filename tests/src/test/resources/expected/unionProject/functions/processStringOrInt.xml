@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+  ~
+  ~ WSO2 LLC. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<template xmlns="http://ws.apache.org/ns/synapse" name="processStringOrInt">
+    <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
+    <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
+    <parameter name="valueDataType" description="Select the data type for 'value' parameter"/>
+    <parameter name="valueString" description=""/>
+    <parameter name="valueInt" description=""/>
+    <sequence>
+        <property name="param0" value="value"/>
+        <property name="paramType0" value="union"/>
+        <property name="param0UnionString" value="valueString"/>
+        <property name="param0UnionInt" value="valueInt"/>
+        <property name="paramSize" value="1"/>
+        <property name="paramFunctionName" value="processStringOrInt"/>
+        <property name="returnType" value="string"/>
+
+        <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
+            <property name="orgName" value="testOrg"/>
+            <property name="moduleName" value="unionProject"/>
+            <property name="version" value="1"/>
+        </class>
+    </sequence>
+</template>

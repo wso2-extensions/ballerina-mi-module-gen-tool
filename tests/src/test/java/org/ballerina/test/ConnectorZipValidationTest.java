@@ -90,6 +90,7 @@ public class ConnectorZipValidationTest {
     public Object[][] balaProjectDataProvider() {
         return new Object[][]{
                 {"project4", null},  // project4 is a local bala project
+                {"unionProject", null},
                 // Format: {"projectName", "org/package:version"} or {"projectName", null} for local
                 // Example: {"ballerinax-milvus", "ballerina/http:2.15.3"} - uncomment when connector is available
                 {"ballerinax-milvus", "ballerinax/milvus:1.1.0"},  // project5 is from Central (example)

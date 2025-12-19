@@ -4,8 +4,10 @@
                     "name": "{{name}}",
                     "displayName": "{{displayName}}",
                     "inputType": "{{inputType}}",
-                    "comboValues": {{comboValues}},
+                    "comboValues": {{{comboValues}}},
+                    "defaultValue": "{{defaultValue}}",
                     "required": "{{required}}",
-                    "helpTip": "{{helpTip}}"
+                    "helpTip": "{{helpTip}}"{{#if enableCondition}},
+                    "enableCondition": {{{enableCondition}}}{{/if}}
                   }
                 }

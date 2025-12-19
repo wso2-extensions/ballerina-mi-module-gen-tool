@@ -20,6 +20,7 @@ package io.ballerina.mi.analyzer;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.impl.symbols.BallerinaClassSymbol;
+import io.ballerina.compiler.api.impl.symbols.BallerinaUnionTypeSymbol;
 import io.ballerina.compiler.api.symbols.*;
 import io.ballerina.mi.connectorModel.*;
 import io.ballerina.mi.util.Constants;
@@ -134,25 +135,19 @@ public class BalConnectorAnalyzer implements Analyzer {
             Optional<List<ParameterSymbol>> params = methodSymbol.typeDescriptor().params();
             if (params.isPresent()) {
                 List<ParameterSymbol> parameterSymbols = params.get();
-                int noOfParams = 0;
+                int paramIndex = 0;
                 for (ParameterSymbol parameterSymbol : parameterSymbols) {
-                    TypeDescKind actualTypeKind = Utils.getActualTypeKind(parameterSymbol.typeDescriptor());
-                    String paramType = Utils.getParamTypeName(actualTypeKind);
-                    if (paramType == null) {
-                        printStream.println("Invalid parameter type for method " + methodSymbol.getName().get());
-                        printStream.println("Skipping method " + methodSymbol.getName().get());
+                    Optional<FunctionParam> functionParam = ParamFactory.createFunctionParam(parameterSymbol, paramIndex);
+                    if (functionParam.isPresent()) {
+                        component.setFunctionParam(functionParam.get());
+                    } else {
+                        // Skip the function if any parameter type is unsupported
+                        printStream.println("Skipping function '" + functionName + "' due to unsupported parameter type.");
                         continue methodLoop;
                     }
-                    noOfParams++;
-                    Optional<String> optParamName = parameterSymbol.getName();
-                    if (optParamName.isPresent()) {
-                        FunctionParam functionParam = new FunctionParam(Integer.toString(i), optParamName.get(), actualTypeKind.getName());
-                        functionParam.setParamKind(parameterSymbol.paramKind());
-                        functionParam.setTypeSymbol(parameterSymbol.typeDescriptor());
-                        component.setFunctionParam(functionParam);
-                    }
+                    paramIndex++;
                 }
-                Param sizeParam = new Param("paramSize", Integer.toString(noOfParams));
+                Param sizeParam = new Param("paramSize", Integer.toString(paramIndex));
                 Param functionNameParam = new Param("paramFunctionName", component.getName());
                 component.setParam(sizeParam);
                 component.setParam(functionNameParam);

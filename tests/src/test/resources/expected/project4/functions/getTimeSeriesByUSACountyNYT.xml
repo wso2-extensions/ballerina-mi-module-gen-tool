@@ -19,7 +19,6 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="getTimeSeriesByUSACountyNYT">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <!-- TODO: if union, the selected member type becomes a parameter-->
     <parameter name="county" description=""/>
     <parameter name="lastdays" description=""/>
     <sequence>
@@ -29,7 +28,7 @@
         <property name="paramType1" value="string"/>
         <property name="paramSize" value="2"/>
         <property name="paramFunctionName" value="getTimeSeriesByUSACountyNYT"/>
-        <property name="returnType" value="null"/>
+        <property name="returnType" value="union"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
