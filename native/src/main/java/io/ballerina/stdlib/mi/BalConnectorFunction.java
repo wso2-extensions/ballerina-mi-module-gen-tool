@@ -41,7 +41,7 @@ public class BalConnectorFunction extends AbstractConnector {
         }
         try {
             balExecutor.execute(BalConnectorConfig.getRuntime(), clientObj, messageContext);
-        } catch (AxisFault e) {
+        } catch (AxisFault | BallerinaExecutionException e) {
             handleException("Error while executing ballerina", e, messageContext);
         }
     }

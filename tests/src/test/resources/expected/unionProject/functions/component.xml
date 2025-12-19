@@ -28,6 +28,11 @@
             <file>findPerson.xml</file>
             <description></description>
         </component>
+        <component name="processWithError">
+            <displayName>processWithError</displayName>
+            <file>processWithError.xml</file>
+            <description></description>
+        </component>
         <component name="processStringOrIntOrFloat">
             <displayName>processStringOrIntOrFloat</displayName>
             <file>processStringOrIntOrFloat.xml</file>

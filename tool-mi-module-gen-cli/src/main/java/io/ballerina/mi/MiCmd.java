@@ -169,6 +169,8 @@ public class MiCmd implements BLauncherCmd {
         // Generate MI connector artifacts (XML/JSON files and zip package)
         // Both BuildProject and BalaProject need MI artifacts
         generateMIArtifacts(executablePath, compilePkg, miArtifactsPath, project instanceof BuildProject);
+        printStream.println("MI " + (project instanceof BuildProject ? "module" : "connector") +
+                " generation completed successfully.");
     }
 
     private void generateMIArtifacts(Path sourcePath, Package compilePkg, Path targetPath, boolean isBuildProject) {

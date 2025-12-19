@@ -55,7 +55,7 @@ public class Mediator extends AbstractMediator {
         }
         try {
             return balExecutor.execute(rt, module, context);
-        } catch (AxisFault e) {
+        } catch (AxisFault | BallerinaExecutionException e) {
             handleException("Error while executing ballerina", e, context);
         }
         return false;
