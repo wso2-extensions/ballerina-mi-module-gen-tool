@@ -80,13 +80,16 @@ public class BalModuleAnalyzer implements Analyzer {
         FunctionType functionType = Utils.getFunctionType(functionSymbol);
         String returnTypeName = Utils.getReturnTypeName(functionSymbol);
 
+        // Generate synapse name based on function type (handles resource functions)
+        String synapseName = Utils.generateSynapseName(functionSymbol, functionType);
+
 //        List<PathParamType> pathParams = new ArrayList<>(GeneratorUtils.getPathParameters(
 //                functionSymbol. .relativeResourcePath()));
 //        List<Type> queryParams = new ArrayList<>(GeneratorUtils.getFunctionParameters(
 //                functionSignature.parameters(),
 //                functionDefinition.metadata(), semanticModel));
 
-        Component component = new Component(functionName.get(), documentationString, functionType, "0", Collections.emptyList(), Collections.emptyList(), returnTypeName);
+        Component component = new Component(synapseName, documentationString, functionType, "0", Collections.emptyList(), Collections.emptyList(), returnTypeName);
 
         // Extract parameters
         int noOfParams = 0;

@@ -22,6 +22,8 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.impl.symbols.BallerinaClassSymbol;
 import io.ballerina.compiler.api.impl.symbols.BallerinaUnionTypeSymbol;
 import io.ballerina.compiler.api.symbols.*;
+import io.ballerina.compiler.api.symbols.resourcepath.PathSegmentList;
+import io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment;
 import io.ballerina.mi.connectorModel.*;
 import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.Utils;
@@ -55,11 +57,12 @@ public class BalConnectorAnalyzer implements Analyzer {
         List<Symbol> moduleSymbols = semanticModel.moduleSymbols();
         List<Symbol> classSymbols = moduleSymbols.stream().filter((s) -> s instanceof BallerinaClassSymbol).toList();
         for (Symbol classSymbol : classSymbols) {
-            analyzeClass(compilePackage, (ClassSymbol) classSymbol);
+            analyzeClass(compilePackage, module, (ClassSymbol) classSymbol);
         }
     }
 
-    private void analyzeClass(Package compilePackage, ClassSymbol classSymbol) {
+    private void analyzeClass(Package compilePackage, Module module, ClassSymbol classSymbol) {
+        SemanticModel semanticModel = compilePackage.getCompilation().getSemanticModel(module.moduleId());
 
         if (!isClientClass(classSymbol) || classSymbol.getName().isEmpty()) {
             return;
@@ -98,6 +101,9 @@ public class BalConnectorAnalyzer implements Analyzer {
         Map<String, MethodSymbol> allMethods = new HashMap<>(classSymbol.methods());
         classSymbol.initMethod().ifPresent(methodSymbol -> allMethods.put(Constants.INIT_FUNCTION_NAME, methodSymbol));
 
+        // Track generated synapse names to handle duplicates
+        Map<String, Integer> synapseNameCount = new HashMap<>();
+
         methodLoop:
         for (Map.Entry<String, MethodSymbol> methodEntry : allMethods.entrySet()) {
             MethodSymbol methodSymbol = methodEntry.getValue();
@@ -108,17 +114,64 @@ public class BalConnectorAnalyzer implements Analyzer {
                 continue;
             }
 
-            String functionName = methodSymbol.getName().get();
-//            FunctionSignatureNode functionSignature = methodSymbol.signature();
             FunctionType functionType = Utils.getFunctionType(methodSymbol);
-//            List<PathParamType> pathParams = new ArrayList<>(GeneratorUtils.getPathParameters(
-//                    functionDefinition.relativeResourcePath()));
-//            List<Type> queryParams = new ArrayList<>(GeneratorUtils.getFunctionParameters(
-//                    functionSignature.parameters(),
-//                    functionDefinition.metadata(), semanticModel));
+
+            // Prepare context for synapse name generation
+            SynapseNameContext.Builder contextBuilder = SynapseNameContext.builder().module(module);
+            
+            // Extract operationId from @openapi:ResourceInfo annotation if present using syntax tree API
+            Optional<String> operationIdOpt = Optional.empty();
+            try {
+                operationIdOpt = Utils.getOpenApiOperationId(methodSymbol, module, semanticModel);
+                if (operationIdOpt.isPresent()) {
+                    System.out.println("Found operationId: " + operationIdOpt.get() + " for method: " + methodSymbol.getName().orElse("<unknown>"));
+                }
+            } catch (Exception e) {
+                // If syntax tree access fails, continue without operationId
+                System.out.println("Error extracting operationId for method: " + methodSymbol.getName().orElse("<unknown>") + " - " + e.getMessage());
+            }
+            
+            // Add operationId to context if found
+            operationIdOpt.ifPresent(contextBuilder::operationId);
+            
+            // Extract resource path segments if this is a resource function
+            if (functionType == FunctionType.RESOURCE && methodSymbol instanceof ResourceMethodSymbol resourceMethod) {
+                try {
+                    PathSegmentList resourcePath = (PathSegmentList) resourceMethod.resourcePath();
+                    contextBuilder.resourcePathSegments(resourcePath.list());
+                } catch (Exception e) {
+                    // If path extraction fails, continue without path segments
+                }
+            }
+            
+            SynapseNameContext context = contextBuilder.build();
+            
+            // Use priority-based synapse name generation
+            SynapseNameGeneratorManager nameGenerator = new SynapseNameGeneratorManager();
+            Optional<String> synapseNameOpt = nameGenerator.generateSynapseName(methodSymbol, functionType, context);
+            
+            // Fallback to default if no generator succeeded
+            String synapseName = synapseNameOpt.orElseGet(() -> Utils.generateSynapseName(methodSymbol, functionType));
+            
+            // Handle duplicate names by appending numeric suffix
+            String finalSynapseName = synapseName;
+            if (synapseNameCount.containsKey(synapseName)) {
+                int count = synapseNameCount.get(synapseName) + 1;
+                synapseNameCount.put(synapseName, count);
+                finalSynapseName = synapseName + count;
+            } else {
+                synapseNameCount.put(synapseName, 0);
+            }
 
             String returnType = Utils.getReturnTypeName(methodSymbol);
-            Component component = new Component(functionName, Utils.getDocString(methodSymbol.documentation().get()), functionType, Integer.toString(i), List.of(), List.of(), returnType);
+            String docString = methodSymbol.documentation().map(Utils::getDocString).orElse("");
+            Component component = new Component(finalSynapseName, docString, functionType, Integer.toString(i), List.of(), List.of(), returnType);
+            
+            // Store operationId as a parameter if found
+            if (operationIdOpt.isPresent()) {
+                Param operationIdParam = new Param("operationId", operationIdOpt.get());
+                component.setParam(operationIdParam);
+            }
 //            String componentIndex = Integer.toString(connection.getComponents().size());
 //            Component component = new Component(functionName,
 //                    GeneratorUtils.getDocFromMetadata(functionDefinition.metadata()),

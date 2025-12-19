@@ -21,7 +21,7 @@
         {{#each connections ~}}
         {{#each components ~}}
         <component name="{{name}}">
-            <displayName>{{name}}</displayName>
+            <displayName>{{displayName}}</displayName>
             <file>{{name}}.xml</file>
             <description>{{documentation}}</description>
         </component>
