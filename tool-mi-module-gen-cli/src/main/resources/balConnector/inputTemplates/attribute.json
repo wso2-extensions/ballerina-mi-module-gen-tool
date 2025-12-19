@@ -8,11 +8,7 @@
                     "required": "{{required}}",
                     "helpTip": "{{helpTip}}",
                     "validateType": "{{validateType}}",
-                    "matchPattern": "{{matchPattern}}"{{#if isCombo}},
-                    "enableCondition": [
-                      {
-                      "forwardExistingHeaders": "{{enableCondition}}"
-                      }
-                    ]{{/if}}
+                    "matchPattern": "{{matchPattern}}"{{#if enableCondition}},
+                    "enableCondition": {{{enableCondition}}}{{/if}}
                   }
                 }

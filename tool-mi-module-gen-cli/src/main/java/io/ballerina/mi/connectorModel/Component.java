@@ -19,7 +19,6 @@
 package io.ballerina.mi.connectorModel;
 
 import io.ballerina.mi.ConnectorSerializer;
-import io.ballerina.mi.util.Utils;
 
 import org.ballerinalang.diagramutil.connector.models.connector.Type;
 import org.ballerinalang.diagramutil.connector.models.connector.types.PathParamType;

@@ -19,11 +19,10 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="getInfluenzaReportsByUSPHL">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <!-- TODO: if union, the selected member type becomes a parameter-->
     <sequence>
         <property name="paramSize" value="0"/>
         <property name="paramFunctionName" value="getInfluenzaReportsByUSPHL"/>
-        <property name="returnType" value="null"/>
+        <property name="returnType" value="union"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>

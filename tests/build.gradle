@@ -42,7 +42,7 @@ dependencies {
 }
 
 
-def projects = ['project2', 'project3', 'arrayProject', 'recordProject', 'jsonProject', 'mapProject', 'primitiveTypeProject']
+def projects = ['project2', 'project3', 'arrayProject', 'recordProject', 'jsonProject', 'mapProject', 'primitiveTypeProject', 'unionProject']
 def toolVersion = stripBallerinaExtensionVersion("${project.version}")
 // Define balCommand to use the test-specific distribution
 ext.balCommand = Os.isFamily(Os.FAMILY_WINDOWS)
