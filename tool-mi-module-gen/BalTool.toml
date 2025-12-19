@@ -2,4 +2,4 @@
 id = "mi-module-gen"
 
 [[dependency]]
-path = "../tool-mi-module-gen-cli/build/libs/tool-mi-module-gen-cli-0.4.3-SNAPSHOT.jar"
+path = "../tool-mi-module-gen-cli/build/libs/tool-mi-module-gen-cli-0.4.3.jar"
