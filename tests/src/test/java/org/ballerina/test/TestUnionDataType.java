@@ -481,7 +481,7 @@ public class TestUnionDataType {
     public void testProcessWithErrorThrown() {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processWithError")
                 .returnType("union")
@@ -511,7 +511,7 @@ public class TestUnionDataType {
     public void testProcessWithErrorSuccess() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("processWithError")
                 .returnType("union")
