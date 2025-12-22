@@ -35,8 +35,9 @@ public class TestMapType {
         BalConnectorConfig config = new BalConnectorConfig(moduleInfo);
 
         // Create a context for connection initialization
-        TestMessageContext initContext = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext initContext = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
+                .isConnection(true)
                 .objectTypeName("MapClient")
                 .addParameter("serviceUrl", "string", "http://test.api.com")
                 .addParameter("connectionType", "string", "MAPPROJECT_MAPCLIENT")
@@ -56,7 +57,7 @@ public class TestMapType {
     public void testSimpleMap() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("simpleRecordFunction")
                 .returnType("string")
@@ -79,7 +80,7 @@ public class TestMapType {
     public void testNestedMap() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("getUserSummary")
                 .returnType("string")
@@ -102,7 +103,7 @@ public class TestMapType {
     public void testOptionalFieldsAndArrays() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("summarizeOrder")
                 .returnType("string")
@@ -125,7 +126,7 @@ public class TestMapType {
     public void testNestedArraysSum() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("computeCatalogTotal")
                 .returnType("float")
@@ -150,7 +151,7 @@ public class TestMapType {
         BalConnectorFunction connector = new BalConnectorFunction();
 
         // Present
-        TestMessageContext ctxPresent = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext ctxPresent = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("formatProfile")
                 .returnType("string")
@@ -169,7 +170,7 @@ public class TestMapType {
         Assert.assertEquals(resPresent, "u1:true:2", "Profile present should reflect emailOptIn and tag count");
 
         // Absent
-        TestMessageContext ctxAbsent = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext ctxAbsent = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("formatProfile")
                 .returnType("string")
@@ -192,7 +193,7 @@ public class TestMapType {
     public void testGetUppercasedPerson() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
-        TestMessageContext context = TestArrayConnector.ConnectorContextBuilder.connectorContext()
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("getUppercasedPerson")
                 .returnType("record")
