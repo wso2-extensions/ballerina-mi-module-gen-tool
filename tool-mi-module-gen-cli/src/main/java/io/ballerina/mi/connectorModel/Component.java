@@ -150,8 +150,15 @@ public class Component extends ModelElement {
     /**
      * Human-friendly display name derived from the component's technical name.
      * Used in UI schemas for operation title/label.
+     * If an operationId is present, returns the name as-is without humanization.
      */
     public String getDisplayName() {
+        // If operationId is present, use the name as-is (operationId should not be modified)
+        for (Param param : this.params) {
+            if ("operationId".equals(param.getKey())) {
+                return this.name;
+            }
+        }
         return Utils.humanizeName(this.name);
     }
 }

@@ -43,7 +43,7 @@ public client class SimpleClient {
 
     // Resource function to get a specific user by ID
     @openapi:ResourceInfo {
-        operationId: "getUserByIdTest"
+        operationId: "Testing123"
     }
     resource function get users/[int userId]() returns User|error {
         User user = check self.httpClient->get(string `/users/${userId}`);

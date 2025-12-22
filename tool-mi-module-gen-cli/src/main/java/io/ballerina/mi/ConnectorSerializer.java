@@ -406,15 +406,19 @@ public class ConnectorSerializer {
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
                 break;
             case UNION:
+                // Ensure the functionParam is actually a UnionFunctionParam instance
+                if (!(functionParam instanceof UnionFunctionParam unionFunctionParam)) {
+                    throw new IllegalArgumentException("FunctionParam with paramType 'union' must be an instance of UnionFunctionParam for parameter: " + functionParam.getValue());
+                }
                 // Gather the data types in the union
-                if (!((UnionFunctionParam) functionParam).getUnionMemberParams().isEmpty()) {
-                    Combo comboField = getComboField((UnionFunctionParam) functionParam, functionParam.getValue(),
+                if (!unionFunctionParam.getUnionMemberParams().isEmpty()) {
+                    Combo comboField = getComboField(unionFunctionParam, functionParam.getValue(),
                             functionParam.getDescription());
                     builder.addFromTemplate(COMBO_TEMPLATE_PATH, comboField).addSeparator(ATTRIBUTE_SEPARATOR);
                 }
 
                 // Add attribute fields for each type with enable conditions
-                List<FunctionParam> unionMembers = ((UnionFunctionParam) functionParam).getUnionMemberParams();
+                List<FunctionParam> unionMembers = unionFunctionParam.getUnionMemberParams();
                 for (FunctionParam member : unionMembers) {
                     writeJsonAttributeForFunctionParam(member, index, paramLength, builder, false);
                     builder.addConditionalSeparator((unionMembers.indexOf(member) < unionMembers.size() - 1),

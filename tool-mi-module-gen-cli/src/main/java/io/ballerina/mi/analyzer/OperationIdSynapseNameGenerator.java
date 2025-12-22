@@ -42,7 +42,8 @@ public class OperationIdSynapseNameGenerator implements SynapseNameGenerator {
         }
         
         String operationId = operationIdOpt.get();
-        // Sanitize the operationId to ensure it's a valid XML name
-        return Optional.of(Utils.sanitizeXmlName(operationId));
+        // Use operationId as-is without any modifications or splitting
+        // OperationIds from OpenAPI specs are typically valid and should be preserved exactly
+        return Optional.of(operationId);
     }
 }
