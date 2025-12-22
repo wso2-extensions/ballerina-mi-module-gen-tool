@@ -207,16 +207,18 @@ public class ConnectorSerializer {
             handlebar.registerHelper("writeComponentXmlProperties", (context, options) -> {
                 Component component = (Component) context;
                 StringBuilder result = new StringBuilder();
+                // Write path parameters first (pathParam0, pathParam1, etc.)
+                List<PathParamType> pathParams = component.getPathParams();
+                for (int i = 0; i < pathParams.size(); i++) {
+                    writeComponentXmlPathProperty(pathParams.get(i), i, result, i == 0);
+                }
+                // Then write query parameters (queryParam0, queryParam1, etc.)
                 List<Type> queryParams = component.getQueryParams();
                 for (int i = 0; i < queryParams.size(); i++) {
                     writeComponentXmlQueryProperty(queryParams.get(i), i, result);
                 }
-                List<PathParamType> pathParams = component.getPathParams();
-                for (int i = 0; i < pathParams.size(); i++) {
-                    writeComponentXmlPathProperty(pathParams.get(i), i, result);
-                }
                 if (templatePath.equals(FUNCTION_TEMPLATE_PATH)) {
-                    result.append(String.format("<property name=\"returnType\" value=\"%s\"/>\n",
+                    result.append(String.format("        <property name=\"returnType\" value=\"%s\"/>\n",
                             component.getReturnType()));
                 }
                 return new Handlebars.SafeString(result.toString());
@@ -234,10 +236,29 @@ public class ConnectorSerializer {
             handlebar.registerHelper("writeComponentJsonProperties", (context, options) -> {
                 Component component = (Component) context;
                 JsonTemplateBuilder builder = new JsonTemplateBuilder();
+                
+                // First, add path parameters as input elements
+                List<PathParamType> pathParams = component.getPathParams();
+                int totalPathParams = pathParams.size();
+                for (int i = 0; i < totalPathParams; i++) {
+                    PathParamType pathParam = pathParams.get(i);
+                    writeJsonAttributeForPathParam(pathParam, i, totalPathParams, builder);
+                    // Add separator if not the last path param or if there are function params
+                    if (i < totalPathParams - 1 || !component.getFunctionParams().isEmpty()) {
+                        builder.addSeparator(ATTRIBUTE_SEPARATOR);
+                    }
+                }
+                
+                // Then, add regular function parameters
                 List<FunctionParam> functionParams = component.getFunctionParams();
-                for (FunctionParam functionParam : functionParams) {
-                    writeJsonAttributeForFunctionParam(functionParam, functionParams.indexOf(functionParam),
-                            functionParams.size(), builder, false);
+                int totalFunctionParams = functionParams.size();
+                for (int i = 0; i < totalFunctionParams; i++) {
+                    FunctionParam functionParam = functionParams.get(i);
+                    writeJsonAttributeForFunctionParam(functionParam, i, totalFunctionParams, builder, false);
+                    // Add separator if not the last function param
+                    if (i < totalFunctionParams - 1) {
+                        builder.addSeparator(ATTRIBUTE_SEPARATOR);
+                    }
                 }
                 return new Handlebars.SafeString(builder.build());
             });
@@ -279,9 +300,16 @@ public class ConnectorSerializer {
         }
     }
 
-    private static void writeComponentXmlPathProperty(PathParamType parameter, int index, StringBuilder result) {
-        result.append(String.format("<property name=\"pathParam%d\" value=\"%s\"/>\n", index, parameter.name));
-        result.append(String.format("<property name=\"pathParamType%d\" value=\"%s\"/>\n", index, parameter.typeName));
+    private static void writeComponentXmlPathProperty(PathParamType parameter, int index, StringBuilder result, boolean isFirstPathParam) {
+        // Handlebars adds 8 spaces indentation only to the first line of helper output
+        // So the first pathParam line doesn't need indentation, but all subsequent lines do
+        if (isFirstPathParam) {
+            result.append(String.format("<property name=\"pathParam%d\" value=\"%s\"/>\n", index, parameter.name));
+        } else {
+            result.append(String.format("        <property name=\"pathParam%d\" value=\"%s\"/>\n", index, parameter.name));
+        }
+        // All pathParamType lines need indentation (they're not the first line)
+        result.append(String.format("        <property name=\"pathParamType%d\" value=\"%s\"/>\n", index, parameter.typeName));
     }
 
     private static void writeComponentXmlQueryProperty(Type parameter, int index, StringBuilder result) {
@@ -429,6 +457,47 @@ public class ConnectorSerializer {
                 throw new IllegalArgumentException("Unsupported parameter type '" + paramType + "' for parameter: " + functionParam.getValue());
         }
         builder.addConditionalSeparator((index < paramLength - 1), ATTRIBUTE_SEPARATOR);
+    }
+
+    /**
+     * Write JSON attribute for a path parameter.
+     * Path parameters are converted to input elements in the UI schema.
+     */
+    private static void writeJsonAttributeForPathParam(PathParamType pathParam, int index, int paramLength,
+                                                      JsonTemplateBuilder builder) throws IOException {
+        String paramType = pathParam.typeName;
+        String displayName = pathParam.name;
+        String description = ""; // PathParamType doesn't have documentation field
+        
+        switch (paramType) {
+            case STRING, XML, JSON, MAP, RECORD, ARRAY:
+                Attribute stringAttr = new Attribute(pathParam.name, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, description, "", "", false);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);
+                break;
+            case INT:
+                Attribute intAttr = new Attribute(pathParam.name, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, description, VALIDATE_TYPE_REGEX, INTEGER_REGEX, false);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, intAttr);
+                break;
+            case DECIMAL, FLOAT:
+                Attribute decAttr = new Attribute(pathParam.name, displayName,
+                        INPUT_TYPE_STRING_OR_EXPRESSION, "", true, description, 
+                        VALIDATE_TYPE_REGEX, DECIMAL_REGEX, false);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, decAttr);
+                break;
+            case BOOLEAN:
+                Attribute boolAttr = new Attribute(pathParam.name, displayName, INPUT_TYPE_BOOLEAN,
+                        "", true, description, "", "", false);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, boolAttr);
+                break;
+            default:
+                // Default to string for unknown types
+                Attribute defaultAttr = new Attribute(pathParam.name, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        "", true, description, "", "", false);
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, defaultAttr);
+                break;
+        }
     }
 
     private static Combo getComboField(UnionFunctionParam unionFunctionParam, String paramName, String helpTip) {

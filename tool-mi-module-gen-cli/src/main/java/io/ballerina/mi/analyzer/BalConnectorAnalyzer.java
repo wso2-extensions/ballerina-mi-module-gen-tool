@@ -31,6 +31,7 @@ import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.PackageDescriptor;
 import io.ballerina.projects.PackageReadmeMd;
+import org.ballerinalang.diagramutil.connector.models.connector.types.PathParamType;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -165,44 +166,107 @@ public class BalConnectorAnalyzer implements Analyzer {
 
             String returnType = Utils.getReturnTypeName(methodSymbol);
             String docString = methodSymbol.documentation().map(Utils::getDocString).orElse("");
-            Component component = new Component(finalSynapseName, docString, functionType, Integer.toString(i), List.of(), List.of(), returnType);
+            
+            // Extract path parameters from resource path segments (for resource functions)
+            List<PathParamType> pathParams = new ArrayList<>();
+            Set<String> pathParamNames = new HashSet<>();
+            
+            if (functionType == FunctionType.RESOURCE && methodSymbol instanceof ResourceMethodSymbol resourceMethod) {
+                try {
+                    PathSegmentList resourcePath = (PathSegmentList) resourceMethod.resourcePath();
+                    List<PathSegment> segments = resourcePath.list();
+                    
+                    for (PathSegment segment : segments) {
+                        String sig = segment.signature();
+                        if (sig != null && sig.startsWith("[") && sig.endsWith("]")) {
+                            // This is a path parameter segment
+                            String inside = sig.substring(1, sig.length() - 1).trim();
+                            String paramName = inside;
+                            int lastSpace = inside.lastIndexOf(' ');
+                            if (lastSpace >= 0 && lastSpace + 1 < inside.length()) {
+                                paramName = inside.substring(lastSpace + 1);
+                            }
+                            if (!paramName.isEmpty()) {
+                                pathParamNames.add(paramName);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    // If path extraction fails, continue without path parameters
+                }
+            }
+            
+            // Now match path parameter names with actual function parameters to get types
+            Optional<List<ParameterSymbol>> params = methodSymbol.typeDescriptor().params();
+            Map<String, ParameterSymbol> paramMap = new HashMap<>();
+            if (params.isPresent()) {
+                for (ParameterSymbol paramSymbol : params.get()) {
+                    paramSymbol.getName().ifPresent(name -> paramMap.put(name, paramSymbol));
+                }
+            }
+
+            /*
+             * Create PathParamType objects for identified path parameters.
+             * In some generated connectors, the path parameter name used in the resource path segment
+             * does not have a matching function parameter (for example, when the path param is only
+             * used in the path and not re-declared as a separate argument).
+             *
+             * Previously, such path parameters were silently dropped which resulted in:
+             *   - No <property name="pathParam*".../> entries in the Synapse template
+             *   - Missing input fields for those path params in the JSON UI schema
+             *
+             * To avoid losing path parameters, we now:
+             *   - Use the actual parameter type when a matching function parameter exists
+             *   - Fall back to treating the path parameter as a string when there is no match
+             */
+            for (String pathParamName : pathParamNames) {
+                ParameterSymbol paramSymbol = paramMap.get(pathParamName);
+                String paramTypeName;
+                if (paramSymbol != null) {
+                    paramTypeName = Utils.getParamTypeName(Utils.getActualTypeKind(paramSymbol.typeDescriptor()));
+                    // If we cannot resolve a concrete MI type, also fall back to string
+                    if (paramTypeName == null) {
+                        paramTypeName = Constants.STRING;
+                    }
+                } else {
+                    // No matching parameter symbol - assume string path parameter
+                    paramTypeName = Constants.STRING;
+                }
+
+                PathParamType pathParam = new PathParamType();
+                pathParam.name = pathParamName;
+                pathParam.typeName = paramTypeName;
+                pathParams.add(pathParam);
+            }
+            
+            Component component = new Component(finalSynapseName, docString, functionType, Integer.toString(i), pathParams, List.of(), returnType);
             
             // Store operationId as a parameter if found
             if (operationIdOpt.isPresent()) {
                 Param operationIdParam = new Param("operationId", operationIdOpt.get());
                 component.setParam(operationIdParam);
             }
-//            String componentIndex = Integer.toString(connection.getComponents().size());
-//            Component component = new Component(functionName,
-//                    GeneratorUtils.getDocFromMetadata(functionDefinition.metadata()),
-//                    functionType, componentIndex, pathParams, queryParams, returnParam !=null ? returnParam.typeName : null);
-//            int noOfQueryParams = queryParams.size();
-//            int noOfPathParams = pathParams.size();
-//            Param querySizeParam = new Param(QUERY_PARAM_SIZE, Integer.toString(noOfQueryParams));
-//            Param pathSizeParam = new Param(PATH_PARAM_SIZE, Integer.toString(noOfPathParams));
-//            Param functionNameParam = new Param(METHOD_NAME, component.getName());
-//            component.setParam(querySizeParam);
-//            component.setParam(pathSizeParam);
-//            component.setParam(functionNameParam);
 
-            Optional<List<ParameterSymbol>> params = methodSymbol.typeDescriptor().params();
+            // Extract regular function parameters (non-path parameters)
+            int functionParamIndex = 0;
             if (params.isPresent()) {
                 List<ParameterSymbol> parameterSymbols = params.get();
-                int paramIndex = 0;
                 for (ParameterSymbol parameterSymbol : parameterSymbols) {
-                    Optional<FunctionParam> functionParam = ParamFactory.createFunctionParam(parameterSymbol, paramIndex);
-                    if (functionParam.isPresent()) {
-                        component.setFunctionParam(functionParam.get());
-                    } else {
-                        // Skip the function if any parameter type is unsupported
-                        String paramType = parameterSymbol.typeDescriptor().typeKind().getName();
-                       // printStream.println("Skipping function '" + functionName +
-                         //       "' due to unsupported parameter type: " + paramType);
-                        continue methodLoop;
+                    // Skip path parameters as they are handled separately
+                    Optional<String> paramNameOpt = parameterSymbol.getName();
+                    if (paramNameOpt.isPresent() && !pathParamNames.contains(paramNameOpt.get())) {
+                        Optional<FunctionParam> functionParam = ParamFactory.createFunctionParam(parameterSymbol, functionParamIndex);
+                        if (functionParam.isPresent()) {
+                            component.setFunctionParam(functionParam.get());
+                            functionParamIndex++;
+                        } else {
+                            // Skip the function if any parameter type is unsupported
+                            String paramType = parameterSymbol.typeDescriptor().typeKind().getName();
+                            continue methodLoop;
+                        }
                     }
-                    paramIndex++;
                 }
-                Param sizeParam = new Param("paramSize", Integer.toString(paramIndex));
+                Param sizeParam = new Param("paramSize", Integer.toString(functionParamIndex));
                 Param functionNameParam = new Param("paramFunctionName", component.getName());
                 component.setParam(sizeParam);
                 component.setParam(functionNameParam);
