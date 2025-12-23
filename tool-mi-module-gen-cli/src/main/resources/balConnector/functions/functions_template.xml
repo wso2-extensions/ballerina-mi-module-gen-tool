@@ -48,8 +48,6 @@
         {{#eq paramType "union" ~}}
         {{#each unionMemberParams ~}}
         <property name="param{{@../index}}Union{{capitalize paramType}}" value="{{value}}"/>
-        {{#eq paramType "array" ~}}
-        <property name="arrayElementType{{@../index}}" value="{{arrayElementType this}}"/>
         {{/eq ~}}
         {{/each ~}}
         {{/eq ~}}
