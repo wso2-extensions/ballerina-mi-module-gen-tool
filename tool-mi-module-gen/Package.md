@@ -1,8 +1,5 @@
 # Package Overview
 
-[![Build](https://github.com/wso2-extensions/ballerina-mi-module-gen-tool/actions/workflows/build.yml/badge.svg)](https://github.com/wso2-extensions/ballerina-mi-module-gen-tool/actions/workflows/build.yml)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
 The `mi-module-gen` package provides a Ballerina tool for generating WSO2 Micro Integrator modules from Ballerina code.
 
 ## Overview
@@ -79,25 +76,3 @@ $ bal mi-module-gen -i {user.home}/.ballerina/repositories/central.ballerina.io/
 |--------|-------------|
 | `-i, --input` | Path to the Ballerina project or pulled connector |
 | `-t, --target` | Output directory for the generated MI connector |
-
-## Building from Source
-
-```bash
-$ git clone https://github.com/wso2-extensions/ballerina-mi-module-gen-tool.git
-$ cd ballerina-mi-module-gen-tool
-$ ./gradlew clean :tool-mi-module-gen:localPublish
-```
-
-## Contributing
-
-Contributions are welcome! Please read the [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md) before submitting a pull request.
-
-## License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](https://github.com/wso2-extensions/ballerina-mi-module-gen-tool/blob/main/LICENSE) file for details.
-
-## Useful Links
-
-- [GitHub Repository](https://github.com/wso2-extensions/ballerina-mi-module-gen-tool)
-- [WSO2 Micro Integrator](https://wso2.com/micro-integrator/)
-- [Ballerina](https://ballerina.io/)
