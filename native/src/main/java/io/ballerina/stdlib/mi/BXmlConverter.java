@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BXml;
 import io.ballerina.runtime.api.values.BXmlItem;
 import io.ballerina.runtime.internal.values.XmlPi;
+import io.ballerina.runtime.internal.values.XmlSequence;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMComment;
@@ -52,6 +53,14 @@ public class BXmlConverter {
     }
 
     public static OMElement toOMElement(BXml bXml) {
+        if (bXml instanceof XmlSequence xmlSequence) {
+            if (!xmlSequence.isEmpty()) {
+                BXml firstItem = xmlSequence.getItem(0);
+                return toOMElement(firstItem);
+            }
+            return null;
+        }
+
         if (!(bXml instanceof BXmlItem xmlItem)) {
             return null;
         }

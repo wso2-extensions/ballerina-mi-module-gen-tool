@@ -18,6 +18,14 @@
 
 package org.ballerina.test;
 
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.synapse.config.SynapseConfiguration;
+import org.apache.synapse.core.SynapseEnvironment;
+import org.apache.synapse.core.axis2.Axis2SynapseEnvironment;
+import org.apache.synapse.core.axis2.MessageContextCreatorForAxis2;
 import org.apache.synapse.mediators.template.TemplateContext;
 
 import java.util.ArrayList;
@@ -78,8 +86,17 @@ public class ConnectorContextBuilder {
         return this;
     }
 
-    public TestMessageContext build() {
-        TestMessageContext context = new TestMessageContext();
+    public TestMessageContext build() throws AxisFault {
+        org.apache.axis2.context.MessageContext axis2MC = new org.apache.axis2.context.MessageContext();
+        AxisConfiguration axisConfiguration = new AxisConfiguration();
+        ConfigurationContext axis2ConfigurationContext = new ConfigurationContext(axisConfiguration);
+        axis2MC.setConfigurationContext(axis2ConfigurationContext);
+        SynapseConfiguration synapseConfiguration = new SynapseConfiguration();
+        SynapseEnvironment synapseEnvironment = new Axis2SynapseEnvironment(synapseConfiguration);
+        MessageContextCreatorForAxis2.setSynEnv(synapseEnvironment);
+        MessageContextCreatorForAxis2.setSynConfig(synapseConfiguration);
+        TestMessageContext context = new TestMessageContext(axis2MC, synapseConfiguration, synapseEnvironment);
+        context.setEnvelope(OMAbstractFactory.getSOAP11Factory().getDefaultEnvelope());
 
         // Set connector-specific properties
         if (connectionName != null) {

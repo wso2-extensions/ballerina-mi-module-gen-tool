@@ -75,7 +75,7 @@ public class ParamFactory {
         UnionFunctionParam functionParam = new UnionFunctionParam(Integer.toString(index), paramName, TypeDescKind.UNION.getName());
         functionParam.setParamKind(parameterSymbol.paramKind());
         functionParam.setTypeSymbol(parameterSymbol.typeDescriptor());
-        populateUnionMemberParams(paramName, (BallerinaUnionTypeSymbol) parameterSymbol.typeDescriptor(), functionParam);
+        populateUnionMemberParams(paramName, (BallerinaUnionTypeSymbol) Utils.getActualTypeSymbol(parameterSymbol.typeDescriptor()), functionParam);
         return Optional.of(functionParam);
     }
 
