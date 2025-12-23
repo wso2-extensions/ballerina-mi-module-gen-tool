@@ -427,13 +427,7 @@ public class ConnectorSerializer {
                 break;
             case UNION:
                 if (!(functionParam instanceof UnionFunctionParam unionParam)) {
-                    // Defensive: if the model was not created as UnionFunctionParam, fallback to a simple string input
-                    Attribute fallbackAttr = new Attribute(functionParam.getValue(), displayName,
-                            INPUT_TYPE_STRING_OR_EXPRESSION, "", functionParam.isRequired(),
-                            functionParam.getDescription(), "", "", isCombo);
-                    fallbackAttr.setEnableCondition(functionParam.getEnableCondition());
-                    builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, fallbackAttr);
-                    break;
+                    throw new IllegalStateException("Union parameter must be modelled as UnionFunctionParam");
                 }
 
                 // Gather the data types in the union
