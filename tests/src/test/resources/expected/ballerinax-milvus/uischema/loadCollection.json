@@ -1,7 +1,7 @@
 {
   "connectorName": "milvus",
-  "operationName": "loadCollection",
-  "title": "loadCollection",
+  "operationName": "load collection",
+  "title": "load collection",
   "help": "Loads a collection in the Milvus vector database.\n",
   "elements": [
     {

@@ -18,10 +18,10 @@
 
 package io.ballerina.mi.analyzer;
 
-import io.ballerina.compiler.api.impl.symbols.BallerinaUnionTypeSymbol;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.mi.connectorModel.FunctionParam;
 import io.ballerina.mi.connectorModel.UnionFunctionParam;
 import io.ballerina.mi.util.Utils;
@@ -75,13 +75,20 @@ public class ParamFactory {
         UnionFunctionParam functionParam = new UnionFunctionParam(Integer.toString(index), paramName, TypeDescKind.UNION.getName());
         functionParam.setParamKind(parameterSymbol.paramKind());
         functionParam.setTypeSymbol(parameterSymbol.typeDescriptor());
-        populateUnionMemberParams(paramName, (BallerinaUnionTypeSymbol) parameterSymbol.typeDescriptor(), functionParam);
+        // Resolve type references to get the actual union type symbol
+        TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(parameterSymbol.typeDescriptor());
+        // Check for UnionTypeSymbol interface instead of concrete class to handle all union type implementations
+        if (actualTypeSymbol instanceof UnionTypeSymbol unionTypeSymbol) {
+            populateUnionMemberParams(paramName, unionTypeSymbol, functionParam);
+        }
+        // Even if we can't extract union members, still return the UnionFunctionParam
+        // This handles edge cases where the union type structure is complex or not directly accessible
         return Optional.of(functionParam);
     }
 
-    private static void populateUnionMemberParams(String paramName, BallerinaUnionTypeSymbol ballerinaUnionTypeSymbol, UnionFunctionParam functionParam) {
+    private static void populateUnionMemberParams(String paramName, UnionTypeSymbol unionTypeSymbol, UnionFunctionParam functionParam) {
         int memberIndex = 0;
-        for (TypeSymbol memberTypeSymbol : ballerinaUnionTypeSymbol.memberTypeDescriptors()) {
+        for (TypeSymbol memberTypeSymbol : unionTypeSymbol.memberTypeDescriptors()) {
             TypeDescKind actualTypeKind = Utils.getActualTypeKind(memberTypeSymbol);
             String paramType = Utils.getParamTypeName(actualTypeKind);
             if (paramType != null) {
@@ -95,8 +102,19 @@ public class ParamFactory {
                         actualParamType = paramType;
                     }
                     String memberParamName = paramName + StringUtils.capitalize(actualParamType);
-                    FunctionParam memberParam = new FunctionParam(Integer.toString(memberIndex), memberParamName, paramType);
-                    memberParam.setTypeSymbol(memberTypeSymbol);
+                    
+                    // If the member type is itself a union, create a UnionFunctionParam recursively
+                    FunctionParam memberParam;
+                    TypeSymbol actualMemberTypeSymbol = Utils.getActualTypeSymbol(memberTypeSymbol);
+                    if (actualTypeKind == TypeDescKind.UNION && actualMemberTypeSymbol instanceof UnionTypeSymbol memberUnionSymbol) {
+                        UnionFunctionParam memberUnionParam = new UnionFunctionParam(Integer.toString(memberIndex), memberParamName, paramType);
+                        memberUnionParam.setTypeSymbol(memberTypeSymbol);
+                        populateUnionMemberParams(memberParamName, memberUnionSymbol, memberUnionParam);
+                        memberParam = memberUnionParam;
+                    } else {
+                        memberParam = new FunctionParam(Integer.toString(memberIndex), memberParamName, paramType);
+                        memberParam.setTypeSymbol(memberTypeSymbol);
+                    }
                     memberParam.setEnableCondition("[{\"" + paramName + "DataType\": \"" + actualParamType + "\"}]");
                     functionParam.addUnionMemberParam(memberParam);
                     memberIndex++;
