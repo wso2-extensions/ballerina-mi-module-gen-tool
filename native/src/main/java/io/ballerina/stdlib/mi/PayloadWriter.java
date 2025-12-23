@@ -51,7 +51,7 @@ public class PayloadWriter {
         switch (payload) {
             case OMElement omElement -> {
                 JsonUtil.removeJsonPayload(axis2MessageContext);
-                if (!checkAndReplaceEnvelope(omElement, messageContext)) { // check if the target of the PF 'format' is the entire SOAP envelop, not just the body.
+                if (!checkAndReplaceEnvelope(omElement, messageContext)) { // check if the target of the PF 'format' is the entire SOAP envelope, not just the body.
                     axis2MessageContext.getEnvelope().getBody().addChild(omElement);
                 }
                 setContentType(axis2MessageContext, XML_CONTENT_TYPE);
@@ -66,6 +66,7 @@ public class PayloadWriter {
                 setContentType(axis2MessageContext, TEXT_CONTENT_TYPE);
             }
             default -> {
+                throw new AxisFault("Unsupported payload type: " + payload.getClass().getName());
             }
         }
         axis2MessageContext.removeProperty("NO_ENTITY_BODY");
