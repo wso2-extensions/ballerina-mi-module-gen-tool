@@ -27,6 +27,7 @@ import org.apache.axiom.soap.SOAP12Constants;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.util.AXIOMUtils;
 
@@ -49,9 +50,9 @@ public class PayloadWriter {
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         switch (payload) {
             case OMElement omElement -> {
-                org.apache.synapse.commons.json.JsonUtil.removeJsonPayload(axis2MessageContext);
+                JsonUtil.removeJsonPayload(axis2MessageContext);
                 if (!checkAndReplaceEnvelope(omElement, messageContext)) { // check if the target of the PF 'format' is the entire SOAP envelop, not just the body.
-                    axis2MessageContext.getEnvelope().getBody().addChild(omElement.getFirstElement());
+                    axis2MessageContext.getEnvelope().getBody().addChild(omElement);
                 }
                 setContentType(axis2MessageContext, XML_CONTENT_TYPE);
             }
@@ -60,7 +61,7 @@ public class PayloadWriter {
                 setContentType(axis2MessageContext, JSON_CONTENT_TYPE);
             }
             case String s -> {
-                org.apache.synapse.commons.json.JsonUtil.removeJsonPayload(axis2MessageContext);
+                JsonUtil.removeJsonPayload(axis2MessageContext);
                 axis2MessageContext.getEnvelope().getBody().addChild(getTextElement(s));
                 setContentType(axis2MessageContext, TEXT_CONTENT_TYPE);
             }
