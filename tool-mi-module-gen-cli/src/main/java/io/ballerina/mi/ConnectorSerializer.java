@@ -236,7 +236,7 @@ public class ConnectorSerializer {
             handlebar.registerHelper("writeComponentJsonProperties", (context, options) -> {
                 Component component = (Component) context;
                 JsonTemplateBuilder builder = new JsonTemplateBuilder();
-                
+
                 // First, add path parameters as input elements
                 List<PathParamType> pathParams = component.getPathParams();
                 int totalPathParams = pathParams.size();
@@ -248,17 +248,13 @@ public class ConnectorSerializer {
                         builder.addSeparator(ATTRIBUTE_SEPARATOR);
                     }
                 }
-                
+
                 // Then, add regular function parameters
                 List<FunctionParam> functionParams = component.getFunctionParams();
                 int totalFunctionParams = functionParams.size();
                 for (int i = 0; i < totalFunctionParams; i++) {
                     FunctionParam functionParam = functionParams.get(i);
                     writeJsonAttributeForFunctionParam(functionParam, i, totalFunctionParams, builder, false);
-                    // Add separator if not the last function param
-                    if (i < totalFunctionParams - 1) {
-                        builder.addSeparator(ATTRIBUTE_SEPARATOR);
-                    }
                 }
                 return new Handlebars.SafeString(builder.build());
             });
