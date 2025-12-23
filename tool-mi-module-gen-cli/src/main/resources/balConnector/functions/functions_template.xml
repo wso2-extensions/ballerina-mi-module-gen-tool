@@ -39,12 +39,18 @@
         {{#each functionParams ~}}
         <property name="param{{@index}}" value="{{value}}"/>
         <property name="paramType{{@index}}" value="{{paramType}}"/>
+        {{#eq paramType "array" ~}}
+        <property name="arrayElementType{{@index}}" value="{{arrayElementType this}}"/>
+        {{/eq ~}}
         {{#eq paramType "record" ~}}
         <property name="param{{@index}}_recordName" value="{{unwrapOptional typeSymbol.name}}" />
         {{/eq ~}}
         {{#eq paramType "union" ~}}
         {{#each unionMemberParams ~}}
         <property name="param{{@../index}}Union{{capitalize paramType}}" value="{{value}}"/>
+        {{#eq paramType "array" ~}}
+        <property name="arrayElementType{{@../index}}" value="{{arrayElementType this}}"/>
+        {{/eq ~}}
         {{/each ~}}
         {{/eq ~}}
         {{/each ~}}
