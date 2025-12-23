@@ -216,4 +216,131 @@ public class TestMapType {
         Assert.assertTrue(result.contains("\"last_name\":\"SMITH\""), "Last name should be uppercased");
         Assert.assertTrue(result.contains("\"age\":25"), "Age should remain unchanged");
     }
+
+    @Test(description = "Test processing headers with string and string[] values")
+    public void testProcessHeaders() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("processHeaders")
+                .returnType("string")
+                .addParameter("headers", "map",
+                        "{\"Host\":\"example.com\",\"Accept\":[\"application/json\",\"text/plain\"]}")
+                .build();
+
+        context.setProperty("param0", "headers");
+        context.setProperty("paramType0", "map");
+        context.setProperty("paramFunctionName", "processHeaders");
+        context.setProperty("paramSize", 1);
+        context.setProperty("returnType", "string");
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result,
+                "Host: example.com; Accept: [application/json, text/plain]; ",
+                "Headers should be processed correctly with string and string[] values");
+    }
+
+    @Test(description = "Test building query string with single and multiple values")
+    public void testBuildQueryString() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("buildQueryString")
+                .returnType("string")
+                .addParameter("queryParams", "map",
+                        "{\"q\":\"search\",\"tag\":[\"a\",\"b\"]}")
+                .build();
+
+        context.setProperty("param0", "queryParams");
+        context.setProperty("paramType0", "map");
+        context.setProperty("paramFunctionName", "buildQueryString");
+        context.setProperty("paramSize", 1);
+        context.setProperty("returnType", "string");
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result, "q=search&tag=a&tag=b",
+                "Query string should include both single and multiple values");
+    }
+
+    @Test(description = "Test validating form data with mixed single and multiple values")
+    public void testValidateFormData() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("validateFormData")
+                .returnType("string")
+                .addParameter("formData", "map",
+                        "{\"name\":\"Alice\",\"tags\":[\"a\",\"b\",\"c\"]}")
+                .build();
+
+        context.setProperty("param0", "formData");
+        context.setProperty("paramType0", "map");
+        context.setProperty("paramFunctionName", "validateFormData");
+        context.setProperty("paramSize", 1);
+        context.setProperty("returnType", "string");
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result, "Fields: 2, Total Values: 4",
+                "Form data summary should reflect field and value counts");
+    }
+
+    @Test(description = "Test applying filters with string and string[] values")
+    public void testApplyFilters() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("applyFilters")
+                .returnType("array")
+                .addParameter("filters", "map",
+                        "{\"status\":[\"ACTIVE\",\"PENDING\"],\"type\":\"basic\"}")
+                .build();
+
+        context.setProperty("param0", "filters");
+        context.setProperty("paramType0", "map");
+        context.setProperty("paramFunctionName", "applyFilters");
+        context.setProperty("paramSize", 1);
+        context.setProperty("returnType", "array");
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result,
+                "[\"status in ['ACTIVE', 'PENDING']\",\"type equals 'basic'\"]",
+                "Filters should be converted to descriptive array correctly");
+    }
+
+    @Test(description = "Test extracting metadata counts from string and string[] values")
+    public void testExtractMetadata() throws Exception {
+        BalConnectorFunction connector = new BalConnectorFunction();
+
+        TestMessageContext context = ConnectorContextBuilder.connectorContext()
+                .connectionName(CONNECTION_NAME)
+                .methodName("extractMetadata")
+                .returnType("map")
+                .addParameter("metadata", "map",
+                        "{\"tag\":\"one\",\"labels\":[\"a\",\"b\"]}")
+                .build();
+
+        context.setProperty("param0", "metadata");
+        context.setProperty("paramType0", "map");
+        context.setProperty("paramFunctionName", "extractMetadata");
+        context.setProperty("paramSize", 1);
+        context.setProperty("returnType", "map");
+
+        connector.connect(context);
+
+        String result = ((DefaultConnectorResponse) context.getVariable("result")).getPayload().toString();
+        Assert.assertEquals(result, "{\"tag\":1,\"labels\":2}",
+                "Metadata counts should reflect number of values per key");
+    }
 }

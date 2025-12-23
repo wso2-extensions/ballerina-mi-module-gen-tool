@@ -136,4 +136,83 @@ public isolated client class MapClient {
             age: person.age
         };
     }
+
+    // Test function: HTTP headers processing
+    // Processes headers where values can be single string or array of strings
+    remote isolated function processHeaders(map<string|string[]> headers) returns string {
+        string result = "";
+        foreach string headerName in headers.keys() {
+            string|string[] headerValue = headers.get(headerName);
+            if headerValue is string {
+                result += headerName + ": " + headerValue + "; ";
+            } else {
+                result += headerName + ": [" + string:'join(", ", ...headerValue) + "]; ";
+            }
+        }
+        return result;
+    }
+
+    // Test function: Query parameters handling
+    // Processes query parameters with single or multiple values
+    remote isolated function buildQueryString(map<string|string[]> queryParams) returns string {
+        string[] parts = [];
+        foreach string paramName in queryParams.keys() {
+            string|string[] paramValue = queryParams.get(paramName);
+            if paramValue is string {
+                parts.push(paramName + "=" + paramValue);
+            } else {
+                foreach string val in paramValue {
+                    parts.push(paramName + "=" + val);
+                }
+            }
+        }
+        return string:'join("&", ...parts);
+    }
+
+    // Test function: Form data validation
+    // Validates form data and returns count of fields and total values
+    remote isolated function validateFormData(map<string|string[]> formData) returns string {
+        int fieldCount = formData.length();
+        int totalValues = 0;
+        foreach string fieldName in formData.keys() {
+            string|string[] fieldValue = formData.get(fieldName);
+            if fieldValue is string {
+                totalValues += 1;
+            } else {
+                totalValues += fieldValue.length();
+            }
+        }
+        return "Fields: " + fieldCount.toString() + ", Total Values: " + totalValues.toString();
+    }
+
+    // Test function: Filter processing
+    // Processes filter criteria where each filter can have single or multiple values
+    remote isolated function applyFilters(map<string|string[]> filters) returns string[] {
+        string[] filterDescriptions = [];
+        foreach string filterKey in filters.keys() {
+            string|string[] filterValue = filters.get(filterKey);
+            if filterValue is string {
+                filterDescriptions.push(filterKey + " equals '" + filterValue + "'");
+            } else {
+                string valueList = string:'join("', '", ...filterValue);
+                filterDescriptions.push(filterKey + " in ['" + valueList + "']");
+            }
+        }
+        return filterDescriptions;
+    }
+
+    // Test function: Metadata extraction
+    // Extracts and formats metadata where tags can be single or multiple
+    remote isolated function extractMetadata(map<string|string[]> metadata) returns map<int> {
+        map<int> valueCounts = {};
+        foreach string metaKey in metadata.keys() {
+            string|string[] metaValue = metadata.get(metaKey);
+            if metaValue is string {
+                valueCounts[metaKey] = 1;
+            } else {
+                valueCounts[metaKey] = metaValue.length();
+            }
+        }
+        return valueCounts;
+    }
 }

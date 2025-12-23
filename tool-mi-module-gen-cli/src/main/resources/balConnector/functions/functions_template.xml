@@ -39,6 +39,9 @@
         {{#each functionParams ~}}
         <property name="param{{@index}}" value="{{value}}"/>
         <property name="paramType{{@index}}" value="{{paramType}}"/>
+        {{#eq paramType "array" ~}}
+        <property name="arrayElementType{{@index}}" value="{{arrayElementType this}}"/>
+        {{/eq ~}}
         {{#eq paramType "record" ~}}
         <property name="param{{@index}}_recordName" value="{{unwrapOptional typeSymbol.name}}" />
         {{/eq ~}}
