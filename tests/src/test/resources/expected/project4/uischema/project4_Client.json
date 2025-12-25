@@ -29,12 +29,664 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "config",
-                    "displayName": "config",
+                    "name": "host",
+                    "displayName": "host",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Host name of the proxy server",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "port",
+                    "displayName": "port",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Proxy server port",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "userName",
+                    "displayName": "userName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Proxy server username",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "password",
+                    "displayName": "password",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Proxy server password",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "http2PriorKnowledge",
+                    "displayName": "http2PriorKnowledge",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "http2InitialWindowSize",
+                    "displayName": "http2InitialWindowSize",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "timeout",
+                    "displayName": "timeout",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The maximum time to wait (in seconds) for a response before closing the connection",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "forwarded",
+                    "displayName": "forwarded",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The choice of setting &#x60;forwarded&#x60;/&#x60;x-forwarded&#x60; header",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "maxActiveConnections",
+                    "displayName": "maxActiveConnections",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "maxIdleConnections",
+                    "displayName": "maxIdleConnections",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "waitTime",
+                    "displayName": "waitTime",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "maxActiveStreamsPerConnection",
+                    "displayName": "maxActiveStreamsPerConnection",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "minEvictableIdleTime",
+                    "displayName": "minEvictableIdleTime",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "timeBetweenEvictionRuns",
+                    "displayName": "timeBetweenEvictionRuns",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "minIdleTimeInStaleState",
+                    "displayName": "minIdleTimeInStaleState",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "timeBetweenStaleEviction",
+                    "displayName": "timeBetweenStaleEviction",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "enabled",
+                    "displayName": "enabled",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "isShared",
+                    "displayName": "isShared",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "capacity",
+                    "displayName": "capacity",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "evictionFactor",
+                    "displayName": "evictionFactor",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "requestVolumeThreshold",
+                    "displayName": "requestVolumeThreshold",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Minimum number of requests in a &#x60;RollingWindow&#x60; that will trip the circuit.",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "timeWindow",
+                    "displayName": "timeWindow",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Time period in seconds for which the failure threshold is calculated",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "bucketSize",
+                    "displayName": "bucketSize",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The granularity at which the time window slides. This is measured in seconds.",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "failureThreshold",
+                    "displayName": "failureThreshold",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The threshold for request failures. When this threshold exceeds, the circuit trips. The threshold should be a\nvalue between 0 and 1",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "resetTime",
+                    "displayName": "resetTime",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The time period (in seconds) to wait before attempting to make another request to the upstream service",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "statusCodes",
+                    "displayName": "statusCodes",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Array of HTTP response status codes which are considered as failures",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "count",
+                    "displayName": "count",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "interval",
+                    "displayName": "interval",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "backOffFactor",
+                    "displayName": "backOffFactor",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "maxWaitInterval",
+                    "displayName": "maxWaitInterval",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "statusCodes",
+                    "displayName": "statusCodes",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "maxStatusLineLength",
+                    "displayName": "maxStatusLineLength",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "maxHeaderSize",
+                    "displayName": "maxHeaderSize",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "maxEntityBodySize",
+                    "displayName": "maxEntityBodySize",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable",
+                    "displayName": "enable",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "certDataType",
+                    "displayName": "certDataType",
+                    "inputType": "combo",
+                    "comboValues": ["TrustStore","string"],
+                    "defaultValue": "TrustStore",
+                    "required": "false",
+                    "helpTip": ""
+                  }
+                }
+,{
+                  "type": "attribute",
+                  "value": {
+                    "name": "certTrustStore",
+                    "displayName": "certTrustStore",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [{"certDataType": "TrustStore"}]
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "certString",
+                    "displayName": "certString",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [{"certDataType": "string"}]
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "keyDataType",
+                    "displayName": "keyDataType",
+                    "inputType": "combo",
+                    "comboValues": ["KeyStore","CertKey"],
+                    "defaultValue": "KeyStore",
+                    "required": "false",
+                    "helpTip": ""
+                  }
+                }
+,{
+                  "type": "attribute",
+                  "value": {
+                    "name": "keyKeyStore",
+                    "displayName": "keyKeyStore",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [{"keyDataType": "KeyStore"}]
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "keyCertKey",
+                    "displayName": "keyCertKey",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [{"keyDataType": "CertKey"}]
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "versions",
+                    "displayName": "versions",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "cacheSize",
+                    "displayName": "cacheSize",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
                     "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "cacheValidityPeriod",
+                    "displayName": "cacheValidityPeriod",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "ciphers",
+                    "displayName": "ciphers",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "verifyHostName",
+                    "displayName": "verifyHostName",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "shareSession",
+                    "displayName": "shareSession",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "handshakeTimeout",
+                    "displayName": "handshakeTimeout",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "sessionTimeout",
+                    "displayName": "sessionTimeout",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "serverName",
+                    "displayName": "serverName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "host",
+                    "displayName": "host",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "port",
+                    "displayName": "port",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "userName",
+                    "displayName": "userName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "password",
+                    "displayName": "password",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "validation",
+                    "displayName": "validation",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Enables the inbound payload validation functionality which provided by the constraint package. Enabled by default",
                     "validateType": "",
                     "matchPattern": ""
                   }
@@ -44,8 +696,8 @@
                     "name": "serviceUrl",
                     "displayName": "serviceUrl",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
+                    "defaultValue": "https://disease.sh",
+                    "required": "false",
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""

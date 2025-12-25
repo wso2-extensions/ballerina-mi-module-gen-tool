@@ -27,9 +27,7 @@
     {{#each initComponent.pathParams ~}}
     <parameter name="{{uppercase ../connectionType}}_{{name}}" description="{{documentation}}"/>
     {{/each ~}}
-    {{#each initComponent.functionParams ~}}
-    <parameter name="{{value}}" description="{{description}}"/>
-    {{/each ~}}
+    {{writeConfigXmlParameters initComponent.functionParams}}
     {{/each ~}}
     <sequence>
         {{#each connections ~}}
@@ -37,10 +35,7 @@
         {{#each initComponent.params ~}}
         <property name="{{uppercase ../connectionType}}_{{key}}" value="{{value}}"/>
         {{/each ~}}
-        {{#each initComponent.functionParams ~}}
-        <property name="{{uppercase ../connectionType}}_param{{@index}}" value="{{value}}"/>
-        <property name="{{uppercase ../connectionType}}_paramType{{@index}}" value="{{paramType}}"/>
-        {{/each ~}}
+        {{writeConfigXmlParamProperties this}}
         {{writeConfigXmlProperties this}}
         {{/each ~}}
         <class name="io.ballerina.stdlib.mi.BalConnectorConfig">

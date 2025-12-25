@@ -24,7 +24,7 @@
         <property name="param0" value="request"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="QueryRequest" />
-        <property name="paramSize" value="1"/>
+        <property name="paramSize" value="4"/>
         <property name="paramFunctionName" value="query"/>
         <property name="returnType" value="union"/>
 
