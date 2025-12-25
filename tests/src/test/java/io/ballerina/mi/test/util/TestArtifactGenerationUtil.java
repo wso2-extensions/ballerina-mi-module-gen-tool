@@ -40,6 +40,7 @@ public class TestArtifactGenerationUtil {
             case "project2" -> generateProject2ExpectedArtifacts();
             case "project3" -> generateProject3ExpectedArtifacts();
             case "project4" -> generateProject4ExpectedArtifacts();
+            case "unionProject" -> generateUnionProjectExpectedArtifacts();
             case "central" -> generateCentralExpectedArtifacts(resolveCentralPackages());
             default -> printUsageAndExit();
         }
@@ -71,8 +72,15 @@ public class TestArtifactGenerationUtil {
     }
 
     public static void generateProject4ExpectedArtifacts() throws Exception {
-        String sourceProjectPath = "src/test/resources/ballerina/project4";
-        String projectName = "project4";
+        generateBalaProjectExpectedArtifacts("project4");
+    }
+
+    public static void generateUnionProjectExpectedArtifacts() throws Exception {
+        generateBalaProjectExpectedArtifacts("unionProject");
+    }
+
+    private static void generateBalaProjectExpectedArtifacts(String projectName) throws Exception {
+        String sourceProjectPath = "src/test/resources/ballerina/" + projectName;
         Path projectPath = Paths.get(sourceProjectPath);
         Path balaPath = ArtifactGenerationUtil.packBallerinaProject(projectPath);
 
@@ -155,7 +163,7 @@ public class TestArtifactGenerationUtil {
                 }
             }
 
-            System.out.println("Expected artifacts for project4 generated successfully.");
+            System.out.println("Expected artifacts for " + projectName + " generated successfully.");
         } finally {
             // Clean up temporary directory
             if (java.nio.file.Files.exists(tempBalaDir)) {
@@ -266,7 +274,7 @@ public class TestArtifactGenerationUtil {
 
     private static void printUsageAndExit() {
         System.err.println("Usage: gradle :mi-tests:generateExpectedArtifacts "
-                + "-PartifactTarget=<project1|project2|project3|project4|central> "
+                + "-PartifactTarget=<project1|project2|project3|project4|unionProject|central> "
                 + "[-PcentralPackage=<org/name:version,org2/name2:version2,...>]");
         System.exit(1);
     }

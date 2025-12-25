@@ -66,7 +66,7 @@
                     "matchPattern": "",
                     "enableCondition": [{"yesterdayDataType": "string"}]
                   }
-                },,{
+                },{
                   "type": "attribute",
                   "value": {
                     "name": "twoDaysAgoDataType",
@@ -91,7 +91,7 @@
                     "matchPattern": "",
                     "enableCondition": [{"twoDaysAgoDataType": "string"}]
                   }
-                },,{
+                },{
                   "type": "attribute",
                   "value": {
                     "name": "allowNullDataType",

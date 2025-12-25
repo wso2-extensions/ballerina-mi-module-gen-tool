@@ -47,8 +47,8 @@
                     "name": "lastdays",
                     "displayName": "lastdays",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
+                    "defaultValue": "30",
+                    "required": "false",
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""
@@ -59,8 +59,8 @@
                     "name": "fullData",
                     "displayName": "fullData",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
+                    "defaultValue": "false",
+                    "required": "false",
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""
