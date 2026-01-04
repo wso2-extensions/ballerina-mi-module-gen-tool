@@ -478,7 +478,7 @@ public class TestUnionDataType {
     }
 
     @Test(description = "Test processing string|error union with error thrown")
-    public void testProcessWithErrorThrown() {
+    public void testProcessWithErrorThrown() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
         TestMessageContext context = ConnectorContextBuilder.connectorContext()
