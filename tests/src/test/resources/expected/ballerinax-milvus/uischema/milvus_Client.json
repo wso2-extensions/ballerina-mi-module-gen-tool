@@ -41,8 +41,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "token",
-                    "displayName": "token",
+                    "name": "config.authConfig.token",
+                    "displayName": "config.authConfig.token",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -53,8 +53,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "username",
-                    "displayName": "username",
+                    "name": "config.credentialsConfig.username",
+                    "displayName": "config.credentialsConfig.username",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -65,8 +65,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "password",
-                    "displayName": "password",
+                    "name": "config.credentialsConfig.password",
+                    "displayName": "config.credentialsConfig.password",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -77,8 +77,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "idleTimeout",
-                    "displayName": "idleTimeout",
+                    "name": "config.idleTimeout",
+                    "displayName": "config.idleTimeout",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -89,8 +89,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "keepAliveTime",
-                    "displayName": "keepAliveTime",
+                    "name": "config.keepAliveTime",
+                    "displayName": "config.keepAliveTime",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -101,8 +101,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "keepAliveTimeout",
-                    "displayName": "keepAliveTimeout",
+                    "name": "config.keepAliveTimeout",
+                    "displayName": "config.keepAliveTimeout",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -113,8 +113,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "keepAliveWithoutCalls",
-                    "displayName": "keepAliveWithoutCalls",
+                    "name": "config.keepAliveWithoutCalls",
+                    "displayName": "config.keepAliveWithoutCalls",
                     "inputType": "boolean",
                     "defaultValue": "",
                     "required": "false",
@@ -125,8 +125,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "rpcDeadline",
-                    "displayName": "rpcDeadline",
+                    "name": "config.rpcDeadline",
+                    "displayName": "config.rpcDeadline",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -137,8 +137,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "connectTimeout",
-                    "displayName": "connectTimeout",
+                    "name": "config.connectTimeout",
+                    "displayName": "config.connectTimeout",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -149,8 +149,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "databaseName",
-                    "displayName": "databaseName",
+                    "name": "config.databaseName",
+                    "displayName": "config.databaseName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -161,8 +161,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "serverName",
-                    "displayName": "serverName",
+                    "name": "config.serverName",
+                    "displayName": "config.serverName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -173,8 +173,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "proxyAddress",
-                    "displayName": "proxyAddress",
+                    "name": "config.proxyAddress",
+                    "displayName": "config.proxyAddress",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -185,8 +185,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "clientKeyPath",
-                    "displayName": "clientKeyPath",
+                    "name": "config.secureConfig.clientKeyPath",
+                    "displayName": "config.secureConfig.clientKeyPath",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -197,8 +197,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "clientPemPath",
-                    "displayName": "clientPemPath",
+                    "name": "config.secureConfig.clientPemPath",
+                    "displayName": "config.secureConfig.clientPemPath",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -209,8 +209,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "serverPemPath",
-                    "displayName": "serverPemPath",
+                    "name": "config.secureConfig.serverPemPath",
+                    "displayName": "config.secureConfig.serverPemPath",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -221,8 +221,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "caPemPath",
-                    "displayName": "caPemPath",
+                    "name": "config.secureConfig.caPemPath",
+                    "displayName": "config.secureConfig.caPemPath",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
