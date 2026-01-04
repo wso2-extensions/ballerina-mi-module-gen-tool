@@ -43,11 +43,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.data.connector.ConnectorResponse;
 import org.apache.synapse.data.connector.DefaultConnectorResponse;
-import org.apache.synapse.mediators.elementary.EnrichMediator;
-import org.apache.synapse.mediators.elementary.Source;
-import org.apache.synapse.mediators.elementary.Target;
 import org.apache.synapse.mediators.template.TemplateContext;
-import org.apache.synapse.util.MediatorEnrichUtil;
 import org.ballerinalang.langlib.value.FromJsonStringWithType;
 
 import java.util.Stack;
@@ -78,7 +74,7 @@ public class BalExecutor {
             Object processedResult = processResponse(result);
             ConnectorResponse connectorResponse = new DefaultConnectorResponse();
             if (isOverwriteBody(context)) {
-                overwriteBody(context, processedResult);
+                PayloadWriter.overwriteBody(context, processedResult);
             } else {
                 connectorResponse.setPayload(processedResult);
             }
@@ -103,29 +99,6 @@ public class BalExecutor {
             return JsonParser.parseString(((MapValueImpl<?, ?>) result).getJSONString());
         }
         return result;
-    }
-
-    protected void overwriteBody(MessageContext messageContext, Object payload) throws AxisFault {
-        if (payload == null) {
-            return;
-        }
-        messageContext.setProperty(TEMP_RESPONSE_PROPERTY_NAME + getResultProperty(messageContext), payload);
-        Source source = MediatorEnrichUtil.createSourceWithProperty(TEMP_RESPONSE_PROPERTY_NAME + getResultProperty(messageContext));
-        Target target = MediatorEnrichUtil.createTargetWithBody();
-        doEnrich(messageContext, source, target);
-        messageContext.setProperty(TEMP_RESPONSE_PROPERTY_NAME + getResultProperty(messageContext), null);
-    }
-
-    private void doEnrich(MessageContext synCtx, Source source, Target target) {
-        if (!Boolean.TRUE.equals(synCtx.getProperty("message.builder.invoked"))) {
-            MediatorEnrichUtil.buildMessage(synCtx);
-        }
-
-        EnrichMediator enrichMediator = new EnrichMediator();
-        enrichMediator.setSource(source);
-        enrichMediator.setTarget(target);
-        enrichMediator.setNativeJsonSupportEnabled(true);
-        enrichMediator.mediate(synCtx);
     }
 
     private void setParameters(Object[] args, MessageContext context) {
