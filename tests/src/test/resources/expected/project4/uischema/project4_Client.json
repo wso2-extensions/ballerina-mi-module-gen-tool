@@ -29,8 +29,8 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "host",
-                    "displayName": "host",
+                    "name": "config.http1Settings.proxy.host",
+                    "displayName": "config.http1Settings.proxy.host",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -41,8 +41,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "port",
-                    "displayName": "port",
+                    "name": "config.http1Settings.proxy.port",
+                    "displayName": "config.http1Settings.proxy.port",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -53,8 +53,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "userName",
-                    "displayName": "userName",
+                    "name": "config.http1Settings.proxy.userName",
+                    "displayName": "config.http1Settings.proxy.userName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -65,8 +65,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "password",
-                    "displayName": "password",
+                    "name": "config.http1Settings.proxy.password",
+                    "displayName": "config.http1Settings.proxy.password",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -77,8 +77,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "http2PriorKnowledge",
-                    "displayName": "http2PriorKnowledge",
+                    "name": "config.http2Settings.http2PriorKnowledge",
+                    "displayName": "config.http2Settings.http2PriorKnowledge",
                     "inputType": "boolean",
                     "defaultValue": "",
                     "required": "false",
@@ -89,8 +89,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "http2InitialWindowSize",
-                    "displayName": "http2InitialWindowSize",
+                    "name": "config.http2Settings.http2InitialWindowSize",
+                    "displayName": "config.http2Settings.http2InitialWindowSize",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -101,8 +101,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "timeout",
-                    "displayName": "timeout",
+                    "name": "config.timeout",
+                    "displayName": "config.timeout",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -113,8 +113,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "forwarded",
-                    "displayName": "forwarded",
+                    "name": "config.forwarded",
+                    "displayName": "config.forwarded",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -125,8 +125,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "maxActiveConnections",
-                    "displayName": "maxActiveConnections",
+                    "name": "config.poolConfig.maxActiveConnections",
+                    "displayName": "config.poolConfig.maxActiveConnections",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -137,8 +137,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "maxIdleConnections",
-                    "displayName": "maxIdleConnections",
+                    "name": "config.poolConfig.maxIdleConnections",
+                    "displayName": "config.poolConfig.maxIdleConnections",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -149,8 +149,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "waitTime",
-                    "displayName": "waitTime",
+                    "name": "config.poolConfig.waitTime",
+                    "displayName": "config.poolConfig.waitTime",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -161,8 +161,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "maxActiveStreamsPerConnection",
-                    "displayName": "maxActiveStreamsPerConnection",
+                    "name": "config.poolConfig.maxActiveStreamsPerConnection",
+                    "displayName": "config.poolConfig.maxActiveStreamsPerConnection",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -173,8 +173,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "minEvictableIdleTime",
-                    "displayName": "minEvictableIdleTime",
+                    "name": "config.poolConfig.minEvictableIdleTime",
+                    "displayName": "config.poolConfig.minEvictableIdleTime",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -185,8 +185,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "timeBetweenEvictionRuns",
-                    "displayName": "timeBetweenEvictionRuns",
+                    "name": "config.poolConfig.timeBetweenEvictionRuns",
+                    "displayName": "config.poolConfig.timeBetweenEvictionRuns",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -197,8 +197,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "minIdleTimeInStaleState",
-                    "displayName": "minIdleTimeInStaleState",
+                    "name": "config.poolConfig.minIdleTimeInStaleState",
+                    "displayName": "config.poolConfig.minIdleTimeInStaleState",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -209,8 +209,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "timeBetweenStaleEviction",
-                    "displayName": "timeBetweenStaleEviction",
+                    "name": "config.poolConfig.timeBetweenStaleEviction",
+                    "displayName": "config.poolConfig.timeBetweenStaleEviction",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -221,8 +221,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "enabled",
-                    "displayName": "enabled",
+                    "name": "config.cache.enabled",
+                    "displayName": "config.cache.enabled",
                     "inputType": "boolean",
                     "defaultValue": "",
                     "required": "false",
@@ -233,8 +233,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "isShared",
-                    "displayName": "isShared",
+                    "name": "config.cache.isShared",
+                    "displayName": "config.cache.isShared",
                     "inputType": "boolean",
                     "defaultValue": "",
                     "required": "false",
@@ -245,8 +245,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "capacity",
-                    "displayName": "capacity",
+                    "name": "config.cache.capacity",
+                    "displayName": "config.cache.capacity",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -257,8 +257,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "evictionFactor",
-                    "displayName": "evictionFactor",
+                    "name": "config.cache.evictionFactor",
+                    "displayName": "config.cache.evictionFactor",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -269,8 +269,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "requestVolumeThreshold",
-                    "displayName": "requestVolumeThreshold",
+                    "name": "config.circuitBreaker.rollingWindow.requestVolumeThreshold",
+                    "displayName": "config.circuitBreaker.rollingWindow.requestVolumeThreshold",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -281,8 +281,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "timeWindow",
-                    "displayName": "timeWindow",
+                    "name": "config.circuitBreaker.rollingWindow.timeWindow",
+                    "displayName": "config.circuitBreaker.rollingWindow.timeWindow",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -293,8 +293,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "bucketSize",
-                    "displayName": "bucketSize",
+                    "name": "config.circuitBreaker.rollingWindow.bucketSize",
+                    "displayName": "config.circuitBreaker.rollingWindow.bucketSize",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -305,8 +305,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "failureThreshold",
-                    "displayName": "failureThreshold",
+                    "name": "config.circuitBreaker.failureThreshold",
+                    "displayName": "config.circuitBreaker.failureThreshold",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -317,8 +317,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "resetTime",
-                    "displayName": "resetTime",
+                    "name": "config.circuitBreaker.resetTime",
+                    "displayName": "config.circuitBreaker.resetTime",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -329,8 +329,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "statusCodes",
-                    "displayName": "statusCodes",
+                    "name": "config.circuitBreaker.statusCodes",
+                    "displayName": "config.circuitBreaker.statusCodes",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -341,8 +341,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "count",
-                    "displayName": "count",
+                    "name": "config.retryConfig.count",
+                    "displayName": "config.retryConfig.count",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -353,8 +353,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "interval",
-                    "displayName": "interval",
+                    "name": "config.retryConfig.interval",
+                    "displayName": "config.retryConfig.interval",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -365,8 +365,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "backOffFactor",
-                    "displayName": "backOffFactor",
+                    "name": "config.retryConfig.backOffFactor",
+                    "displayName": "config.retryConfig.backOffFactor",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -377,8 +377,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "maxWaitInterval",
-                    "displayName": "maxWaitInterval",
+                    "name": "config.retryConfig.maxWaitInterval",
+                    "displayName": "config.retryConfig.maxWaitInterval",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -389,8 +389,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "statusCodes",
-                    "displayName": "statusCodes",
+                    "name": "config.retryConfig.statusCodes",
+                    "displayName": "config.retryConfig.statusCodes",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -401,8 +401,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "maxStatusLineLength",
-                    "displayName": "maxStatusLineLength",
+                    "name": "config.responseLimits.maxStatusLineLength",
+                    "displayName": "config.responseLimits.maxStatusLineLength",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -413,8 +413,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "maxHeaderSize",
-                    "displayName": "maxHeaderSize",
+                    "name": "config.responseLimits.maxHeaderSize",
+                    "displayName": "config.responseLimits.maxHeaderSize",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -425,8 +425,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "maxEntityBodySize",
-                    "displayName": "maxEntityBodySize",
+                    "name": "config.responseLimits.maxEntityBodySize",
+                    "displayName": "config.responseLimits.maxEntityBodySize",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -437,8 +437,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "enable",
-                    "displayName": "enable",
+                    "name": "config.secureSocket.enable",
+                    "displayName": "config.secureSocket.enable",
                     "inputType": "boolean",
                     "defaultValue": "",
                     "required": "false",
@@ -449,8 +449,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "certDataType",
-                    "displayName": "certDataType",
+                    "name": "config.secureSocket.certDataType",
+                    "displayName": "config.secureSocket.certDataType",
                     "inputType": "combo",
                     "comboValues": ["TrustStore","string"],
                     "defaultValue": "TrustStore",
@@ -487,8 +487,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "keyDataType",
-                    "displayName": "keyDataType",
+                    "name": "config.secureSocket.keyDataType",
+                    "displayName": "config.secureSocket.keyDataType",
                     "inputType": "combo",
                     "comboValues": ["KeyStore","CertKey"],
                     "defaultValue": "KeyStore",
@@ -525,8 +525,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "versions",
-                    "displayName": "versions",
+                    "name": "config.secureSocket.protocol.versions",
+                    "displayName": "config.secureSocket.protocol.versions",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -537,8 +537,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "cacheSize",
-                    "displayName": "cacheSize",
+                    "name": "config.secureSocket.certValidation.cacheSize",
+                    "displayName": "config.secureSocket.certValidation.cacheSize",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -549,8 +549,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "cacheValidityPeriod",
-                    "displayName": "cacheValidityPeriod",
+                    "name": "config.secureSocket.certValidation.cacheValidityPeriod",
+                    "displayName": "config.secureSocket.certValidation.cacheValidityPeriod",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -561,8 +561,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "ciphers",
-                    "displayName": "ciphers",
+                    "name": "config.secureSocket.ciphers",
+                    "displayName": "config.secureSocket.ciphers",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -573,8 +573,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "verifyHostName",
-                    "displayName": "verifyHostName",
+                    "name": "config.secureSocket.verifyHostName",
+                    "displayName": "config.secureSocket.verifyHostName",
                     "inputType": "boolean",
                     "defaultValue": "",
                     "required": "false",
@@ -585,8 +585,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "shareSession",
-                    "displayName": "shareSession",
+                    "name": "config.secureSocket.shareSession",
+                    "displayName": "config.secureSocket.shareSession",
                     "inputType": "boolean",
                     "defaultValue": "",
                     "required": "false",
@@ -597,8 +597,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "handshakeTimeout",
-                    "displayName": "handshakeTimeout",
+                    "name": "config.secureSocket.handshakeTimeout",
+                    "displayName": "config.secureSocket.handshakeTimeout",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -609,8 +609,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "sessionTimeout",
-                    "displayName": "sessionTimeout",
+                    "name": "config.secureSocket.sessionTimeout",
+                    "displayName": "config.secureSocket.sessionTimeout",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -621,8 +621,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "serverName",
-                    "displayName": "serverName",
+                    "name": "config.secureSocket.serverName",
+                    "displayName": "config.secureSocket.serverName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -633,8 +633,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "host",
-                    "displayName": "host",
+                    "name": "config.proxy.host",
+                    "displayName": "config.proxy.host",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -645,8 +645,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "port",
-                    "displayName": "port",
+                    "name": "config.proxy.port",
+                    "displayName": "config.proxy.port",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -657,8 +657,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "userName",
-                    "displayName": "userName",
+                    "name": "config.proxy.userName",
+                    "displayName": "config.proxy.userName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -669,8 +669,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "password",
-                    "displayName": "password",
+                    "name": "config.proxy.password",
+                    "displayName": "config.proxy.password",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
@@ -681,8 +681,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "validation",
-                    "displayName": "validation",
+                    "name": "config.validation",
+                    "displayName": "config.validation",
                     "inputType": "boolean",
                     "defaultValue": "",
                     "required": "false",

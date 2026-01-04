@@ -41,6 +41,7 @@ public class TestArtifactGenerationUtil {
             case "project3" -> generateProject3ExpectedArtifacts();
             case "project4" -> generateProject4ExpectedArtifacts();
             case "unionProject" -> generateUnionProjectExpectedArtifacts();
+            case "nestedRecordConflictProject" -> generateNestedRecordConflictProjectExpectedArtifacts();
             case "central" -> generateCentralExpectedArtifacts(resolveCentralPackages());
             default -> printUsageAndExit();
         }
@@ -77,6 +78,10 @@ public class TestArtifactGenerationUtil {
 
     public static void generateUnionProjectExpectedArtifacts() throws Exception {
         generateBalaProjectExpectedArtifacts("unionProject");
+    }
+
+    public static void generateNestedRecordConflictProjectExpectedArtifacts() throws Exception {
+        generateBalaProjectExpectedArtifacts("nestedRecordConflictProject");
     }
 
     private static void generateBalaProjectExpectedArtifacts(String projectName) throws Exception {
@@ -274,7 +279,7 @@ public class TestArtifactGenerationUtil {
 
     private static void printUsageAndExit() {
         System.err.println("Usage: gradle :mi-tests:generateExpectedArtifacts "
-                + "-PartifactTarget=<project1|project2|project3|project4|unionProject|central> "
+                + "-PartifactTarget=<project1|project2|project3|project4|unionProject|nestedRecordConflictProject|central> "
                 + "[-PcentralPackage=<org/name:version,org2/name2:version2,...>]");
         System.exit(1);
     }

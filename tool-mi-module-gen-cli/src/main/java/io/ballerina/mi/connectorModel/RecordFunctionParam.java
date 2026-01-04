@@ -32,6 +32,7 @@ public class RecordFunctionParam extends FunctionParam {
 
     private List<FunctionParam> recordFieldParams;
     private String recordName;
+    private String parentParamPath;
 
     public RecordFunctionParam(String index, String name, String paramType) {
         super(index, name, paramType);
@@ -56,5 +57,13 @@ public class RecordFunctionParam extends FunctionParam {
 
     public void setRecordName(String recordName) {
         this.recordName = recordName;
+    }
+
+    public String getParentParamPath() {
+        return parentParamPath;
+    }
+
+    public void setParentParamPath(String parentParamPath) {
+        this.parentParamPath = parentParamPath;
     }
 }

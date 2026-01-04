@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+  ~
+  ~ WSO2 LLC. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<template name="init" onError="fault" xmlns="http://ws.apache.org/ns/synapse">
+    <parameter name="name" description="Unique name the connection is identified by"/>
+    <parameter name="connectionType" description="Connection type"/>
+    <!-- TODO: if union, the selected member type becomes a parameter-->
+    <parameter name="config.server.host" description=""/>
+    <parameter name="config.server.port" description=""/>
+    <parameter name="config.server.protocol" description=""/>
+    <parameter name="config.database.host" description=""/>
+    <parameter name="config.database.port" description=""/>
+    <parameter name="config.database.database" description=""/>
+    <sequence>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_objectTypeName" value="TestClient"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramSize" value="6"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramFunctionName" value="init"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param0" value="config.server.host"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType0" value="string"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param1" value="config.server.port"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType1" value="int"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param2" value="config.server.protocol"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType2" value="string"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param3" value="config.database.host"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType3" value="string"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param4" value="config.database.port"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType4" value="int"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param5" value="config.database.database"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType5" value="string"/>
+        
+        <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
+            <property name="orgName" value="testOrg"/>
+            <property name="moduleName" value="nestedRecordConflictProject"/>
+            <property name="version" value="1"/>
+        </class>
+    </sequence>
+</template>

@@ -95,13 +95,15 @@ public class ParamFactory {
 
         // Extract record fields if the actual type is a RecordTypeSymbol
         if (actualTypeSymbol instanceof RecordTypeSymbol recordTypeSymbol) {
-            populateRecordFieldParams(recordParam, recordTypeSymbol);
+            String parentPath = paramName;  // Top-level record param name becomes parent path
+            recordParam.setParentParamPath("");  // Top-level has no parent
+            populateRecordFieldParams(recordParam, recordTypeSymbol, parentPath);
         }
 
         return Optional.of(recordParam);
     }
 
-    private static void populateRecordFieldParams(RecordFunctionParam recordParam, RecordTypeSymbol recordTypeSymbol) {
+    private static void populateRecordFieldParams(RecordFunctionParam recordParam, RecordTypeSymbol recordTypeSymbol, String parentPath) {
         Map<String, RecordFieldSymbol> fieldDescriptors = recordTypeSymbol.fieldDescriptors();
         int fieldIndex = 0;
 
@@ -115,10 +117,13 @@ public class ParamFactory {
             if (fieldType != null) {
                 FunctionParam fieldParam;
 
+                // Build qualified name for this field
+                String qualifiedFieldName = buildQualifiedName(parentPath, fieldName);
+
                 // Handle different field types appropriately
                 if (fieldTypeKind == TypeDescKind.UNION) {
                     // Create UnionFunctionParam for union type fields
-                    UnionFunctionParam unionFieldParam = new UnionFunctionParam(Integer.toString(fieldIndex), fieldName, fieldType);
+                    UnionFunctionParam unionFieldParam = new UnionFunctionParam(Integer.toString(fieldIndex), qualifiedFieldName, fieldType);
                     unionFieldParam.setTypeSymbol(fieldTypeSymbol);
                     TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(fieldTypeSymbol);
                     if (actualTypeSymbol instanceof BallerinaUnionTypeSymbol ballerinaUnionTypeSymbol) {
@@ -132,15 +137,18 @@ public class ParamFactory {
                 } else if (fieldTypeKind == TypeDescKind.RECORD) {
                     // Create RecordFunctionParam for nested record fields
                     TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(fieldTypeSymbol);
-                    RecordFunctionParam nestedRecordParam = new RecordFunctionParam(Integer.toString(fieldIndex), fieldName, fieldType);
+                    RecordFunctionParam nestedRecordParam = new RecordFunctionParam(Integer.toString(fieldIndex), qualifiedFieldName, fieldType);
                     nestedRecordParam.setTypeSymbol(fieldTypeSymbol);
                     nestedRecordParam.setRecordName(actualTypeSymbol.getName().orElse(fieldName));
+                    nestedRecordParam.setParentParamPath(parentPath);
                     if (actualTypeSymbol instanceof RecordTypeSymbol nestedRecordTypeSymbol) {
-                        populateRecordFieldParams(nestedRecordParam, nestedRecordTypeSymbol);
+                        // Recursive call with extended parent path
+                        String nestedParentPath = buildQualifiedName(parentPath, fieldName);
+                        populateRecordFieldParams(nestedRecordParam, nestedRecordTypeSymbol, nestedParentPath);
                     }
                     fieldParam = nestedRecordParam;
                 } else {
-                    fieldParam = new FunctionParam(Integer.toString(fieldIndex), fieldName, fieldType);
+                    fieldParam = new FunctionParam(Integer.toString(fieldIndex), qualifiedFieldName, fieldType);
                     fieldParam.setTypeSymbol(fieldTypeSymbol);
                 }
 
@@ -200,5 +208,19 @@ public class ParamFactory {
                 }
             }
         }
+    }
+
+    /**
+     * Builds qualified parameter name by combining parent path and field name.
+     *
+     * @param parentPath Parent path (may be empty for top-level)
+     * @param fieldName Current field name
+     * @return Qualified name using dot notation (e.g., "config.host")
+     */
+    private static String buildQualifiedName(String parentPath, String fieldName) {
+        if (parentPath == null || parentPath.isEmpty()) {
+            return fieldName;
+        }
+        return parentPath + "." + fieldName;
     }
 }

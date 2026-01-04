@@ -1,0 +1,109 @@
+{
+  "connectorName": "nestedRecordConflictProject",
+  "connectionName": "nestedRecordConflictProject_TestClient",
+  "title": "Connection Config for nestedRecordConflictProject_TestClient connection",
+  "help": "<h1>nestedRecordConflictProject_TestClient Connection</h1> <b></b>",
+  "elements": [
+    {
+      "type": "attribute",
+      "value": {
+        "name": "connectionName",
+        "displayName": "Connection Name",
+        "inputType": "string",
+        "defaultValue": "nestedRecordConflictProject_TestClient_connection_1",
+        "required": "true",
+        "helpTip": "The name for the nestedRecordConflictProject_TestClient connection",
+        "validation": "nameWithoutSpecialCharactors"
+      }
+    },
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Basic",
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.server.host",
+                    "displayName": "config.server.host",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.server.port",
+                    "displayName": "config.server.port",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.server.protocol",
+                    "displayName": "config.server.protocol",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.database.host",
+                    "displayName": "config.database.host",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.database.port",
+                    "displayName": "config.database.port",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.database.database",
+                    "displayName": "config.database.database",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
