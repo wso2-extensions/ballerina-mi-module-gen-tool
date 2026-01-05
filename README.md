@@ -1,5 +1,7 @@
 # Ballerina tool for WSO2 Micro Integrator module generator
 
+[![codecov](https://codecov.io/gh/wso2-extensions/ballerina-mi-module-gen-tool/branch/main/graph/badge.svg)](https://codecov.io/gh/wso2-extensions/ballerina-mi-module-gen-tool)
+
 ## Overview
 
 The `mi-module-gen` tools allows generation of modules for WSO2 Micro Integrator from Ballerina code.
