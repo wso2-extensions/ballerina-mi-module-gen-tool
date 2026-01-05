@@ -47,10 +47,11 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: wso2-extensions/ballerina-mi-module-gen-tool
           files: ./tests/build/reports/jacoco/test/jacocoTestReport.xml
           flags: unittests
           name: ubuntu-coverage
-          token: ${{ secrets.CODECOV_TOKEN }}
 
   windows-build:
 
