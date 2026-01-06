@@ -389,3 +389,26 @@ jacocoTestReport {
         html.required = true
     }
 }
+
+// Configure JaCoCo coverage after all projects are evaluated
+gradle.projectsEvaluated {
+    def coverageProjects = [
+        project(':mi-native'),
+        project(':tool-mi-module-gen-cli')
+    ]
+
+    jacocoTestReport {
+        // Set the class directories to include classes from dependent projects
+        classDirectories.setFrom(files(coverageProjects.collect {
+            it.sourceSets.main.output.classesDirs
+        }))
+
+        // Set the source directories to include source from dependent projects
+        sourceDirectories.setFrom(files(coverageProjects.collect {
+            it.sourceSets.main.allSource.srcDirs
+        }))
+
+        // Execution data comes from the test task
+        executionData.setFrom(files("${buildDir}/jacoco/test.exec"))
+    }
+}
