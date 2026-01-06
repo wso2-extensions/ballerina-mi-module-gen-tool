@@ -27,10 +27,15 @@
               "groupName": "Basic",
               "elements": [
                 {
+                  "type": "attributeGroup",
+                  "value": {
+                    "groupName": "Server",
+                    "elements": [
+                  {
                   "type": "attribute",
                   "value": {
-                    "name": "config.server.host",
-                    "displayName": "config.server.host",
+                    "name": "host",
+                    "displayName": "host",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -41,8 +46,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "config.server.port",
-                    "displayName": "config.server.port",
+                    "name": "port",
+                    "displayName": "port",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -53,8 +58,28 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "config.server.protocol",
-                    "displayName": "config.server.protocol",
+                    "name": "protocol",
+                    "displayName": "protocol",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
+                    ]
+                  }
+                },{
+                  "type": "attributeGroup",
+                  "value": {
+                    "groupName": "Database",
+                    "elements": [
+                  {
+                  "type": "attribute",
+                  "value": {
+                    "name": "host",
+                    "displayName": "host",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -65,20 +90,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "config.database.host",
-                    "displayName": "config.database.host",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "config.database.port",
-                    "displayName": "config.database.port",
+                    "name": "port",
+                    "displayName": "port",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -89,14 +102,17 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "config.database.database",
-                    "displayName": "config.database.database",
+                    "name": "database",
+                    "displayName": "database",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""
+                  }
+                }
+                    ]
                   }
                 }
               ]
