@@ -684,35 +684,36 @@ public class ConnectorSerializer {
     /**
      * Extracts the immediate parent segment from a qualified field name.
      * For example:
-     * - "config.authConfig.token" -> "authConfig"
-     * - "config.credentialsConfig.username" -> "credentialsConfig"
-     * - "config.secureConfig.clientKeyPath" -> "secureConfig"
-     * - "config.idleTimeout" -> null (top-level field, only one dot)
-     * 
-     * @param qualifiedName The qualified field name (e.g., "config.authConfig.token")
+     * - "authConfig.token" -> "authConfig"
+     * - "credentialsConfig.username" -> "credentialsConfig"
+     * - "secureConfig.clientKeyPath" -> "secureConfig"
+     * - "idleTimeout" -> null (top-level field, no dots)
+     * - "http1Settings.proxy.host" -> "proxy"
+     *
+     * @param qualifiedName The qualified field name (e.g., "authConfig.token")
      * @return The immediate parent segment, or null if it's a top-level field
      */
     private static String getImmediateParentSegment(String qualifiedName) {
         if (qualifiedName == null || qualifiedName.isEmpty()) {
             return null;
         }
-        
+
         int lastDotIndex = qualifiedName.lastIndexOf('.');
         if (lastDotIndex == -1) {
             // No dots - this is a top-level field
             return null;
         }
-        
+
         // Get the part before the last dot
         String beforeLastDot = qualifiedName.substring(0, lastDotIndex);
-        
+
         // Find the second-to-last dot to get the immediate parent
         int secondLastDotIndex = beforeLastDot.lastIndexOf('.');
         if (secondLastDotIndex == -1) {
-            // Only one dot - this is a direct child of the top-level param, so it's a top-level field
-            return null;
+            // Only one dot - the parent is the first segment (this is a direct nested field)
+            return beforeLastDot;
         }
-        
+
         // Extract the segment between the second-to-last and last dot
         return beforeLastDot.substring(secondLastDotIndex + 1);
     }
