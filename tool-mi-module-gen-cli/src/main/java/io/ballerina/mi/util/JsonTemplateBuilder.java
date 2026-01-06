@@ -52,7 +52,19 @@ public class JsonTemplateBuilder {
     }
 
     public JsonTemplateBuilder addConditionalSeparator(boolean condition, String separator) {
-        if (condition) result.append(separator);
+        if (condition) {
+            // If the last character is a newline, remove it, add the separator
+            // This ensures commas appear on the same line as the closing brace: },{
+            // The next template will start with {, so we get },{ on the same line
+            int length = result.length();
+            if (length > 0 && result.charAt(length - 1) == '\n') {
+                result.deleteCharAt(length - 1);
+                result.append(separator);
+                // Don't add newline back - let the next template provide it
+            } else {
+                result.append(separator);
+            }
+        }
         return this;
     }
 

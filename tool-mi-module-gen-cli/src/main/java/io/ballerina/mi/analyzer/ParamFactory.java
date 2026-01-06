@@ -95,7 +95,9 @@ public class ParamFactory {
 
         // Extract record fields if the actual type is a RecordTypeSymbol
         if (actualTypeSymbol instanceof RecordTypeSymbol recordTypeSymbol) {
-            String parentPath = paramName;  // Top-level record param name becomes parent path
+            // For top-level record params, use empty parent path so field names don't include the param name
+            // For example, fields will be "authConfig.token" instead of "config.authConfig.token"
+            String parentPath = "";  // Top-level record should not include param name in field paths
             recordParam.setParentParamPath("");  // Top-level has no parent
             populateRecordFieldParams(recordParam, recordTypeSymbol, parentPath);
         }
