@@ -539,16 +539,32 @@ public class ConnectorSerializer {
 
     /**
      * Writes XML property elements for function params, expanding record fields with proper indexing.
+     * For record parameters, writes the record parameter itself with type="record" and then
+     * writes the record fields with the record parameter name prefix.
      */
     private static void writeXmlParamProperties(FunctionParam functionParam, String connectionType,
                                                  StringBuilder result, int[] indexHolder, boolean[] isFirst) {
         if (functionParam instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
-            // Expand record fields as separate param properties
+            // First, write the record parameter itself with type="record"
+            if (!isFirst[0]) {
+                result.append("\n        ");
+            }
+            result.append(String.format("<property name=\"%s_param%d\" value=\"%s\"/>",
+                    connectionType, indexHolder[0], recordParam.getValue()));
+            result.append(String.format("\n        <property name=\"%s_paramType%d\" value=\"%s\"/>",
+                    connectionType, indexHolder[0], RECORD));
+            isFirst[0] = false;
+            int recordParamIndex = indexHolder[0];
+            indexHolder[0]++;
+            
+            // Then, write record fields with the record parameter name prefix
+            int[] fieldIndexHolder = {0};
+            String recordParamName = recordParam.getValue();
             for (FunctionParam fieldParam : recordParam.getRecordFieldParams()) {
-                writeXmlParamProperties(fieldParam, connectionType, result, indexHolder, isFirst);
+                writeRecordFieldParamProperties(fieldParam, connectionType, recordParamName, result, fieldIndexHolder);
             }
         } else {
-            // Generate param and paramType properties
+            // Generate param and paramType properties for non-record parameters
             if (!isFirst[0]) {
                 result.append("\n        ");
             }
@@ -558,6 +574,32 @@ public class ConnectorSerializer {
                     connectionType, indexHolder[0], functionParam.getParamType()));
             isFirst[0] = false;
             indexHolder[0]++;
+        }
+    }
+
+    /**
+     * Writes XML property elements for record field parameters with the record parameter name prefix.
+     * This allows the runtime to identify which fields belong to which record parameter.
+     * Recursively expands nested records to their leaf fields.
+     */
+    private static void writeRecordFieldParamProperties(FunctionParam fieldParam, String connectionType,
+                                                        String recordParamName, StringBuilder result,
+                                                        int[] fieldIndexHolder) {
+        // If this is a nested record, recursively expand its fields
+        if (fieldParam instanceof RecordFunctionParam nestedRecordParam && !nestedRecordParam.getRecordFieldParams().isEmpty()) {
+            // Recursively expand nested record fields
+            for (FunctionParam nestedFieldParam : nestedRecordParam.getRecordFieldParams()) {
+                writeRecordFieldParamProperties(nestedFieldParam, connectionType, recordParamName, result, fieldIndexHolder);
+            }
+        } else {
+            // Write the leaf field with the record parameter name prefix
+            result.append("\n        ");
+            // Use pattern: {connectionType}_{recordParamName}_param{fieldIndex}
+            result.append(String.format("<property name=\"%s_%s_param%d\" value=\"%s\"/>",
+                    connectionType, recordParamName, fieldIndexHolder[0], fieldParam.getValue()));
+            result.append(String.format("\n        <property name=\"%s_%s_paramType%d\" value=\"%s\"/>",
+                    connectionType, recordParamName, fieldIndexHolder[0], fieldParam.getParamType()));
+            fieldIndexHolder[0]++;
         }
     }
 
