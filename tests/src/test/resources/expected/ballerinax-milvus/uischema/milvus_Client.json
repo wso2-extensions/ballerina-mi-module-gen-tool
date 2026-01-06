@@ -39,6 +39,11 @@
                     "matchPattern": ""
                   }
                 },{
+                  "type": "attributeGroup",
+                  "value": {
+                    "groupName": "authConfig",
+                    "elements": [
+                  {
                   "type": "attribute",
                   "value": {
                     "name": "config.authConfig.token",
@@ -50,7 +55,15 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
+                }
+                    ]
+                  }
                 },{
+                  "type": "attributeGroup",
+                  "value": {
+                    "groupName": "credentialsConfig",
+                    "elements": [
+                  {
                   "type": "attribute",
                   "value": {
                     "name": "config.credentialsConfig.username",
@@ -73,6 +86,9 @@
                     "helpTip": "The password used to connect to the specified Milvus instance",
                     "validateType": "",
                     "matchPattern": ""
+                  }
+                }
+                    ]
                   }
                 },{
                   "type": "attribute",
@@ -183,6 +199,11 @@
                     "matchPattern": ""
                   }
                 },{
+                  "type": "attributeGroup",
+                  "value": {
+                    "groupName": "secureConfig",
+                    "elements": [
+                  {
                   "type": "attribute",
                   "value": {
                     "name": "config.secureConfig.clientKeyPath",
@@ -229,6 +250,9 @@
                     "helpTip": "The path to the CA PEM file for mutual authentication",
                     "validateType": "",
                     "matchPattern": ""
+                  }
+                }
+                    ]
                   }
                 }
               ]

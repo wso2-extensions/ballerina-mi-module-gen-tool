@@ -595,16 +595,81 @@ public class ConnectorSerializer {
      * Writes record fields as separate UI elements instead of a single opaque text field.
      * Only used for config (init) parameters where expandRecords is true.
      * If the param is a RecordFunctionParam with extracted fields, each field is rendered
-     * as its own input element. Otherwise, falls back to a single stringOrExpression field.
+     * as its own input element. Nested record types are grouped into attributeGroups.
+     * Otherwise, falls back to a single stringOrExpression field.
      */
     private static void writeRecordFields(FunctionParam functionParam, JsonTemplateBuilder builder,
                                           boolean expandRecords) throws IOException {
         if (functionParam instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
             List<FunctionParam> recordFields = recordParam.getRecordFieldParams();
-            for (int i = 0; i < recordFields.size(); i++) {
-                FunctionParam fieldParam = recordFields.get(i);
-                // writeJsonAttributeForFunctionParam already handles separators via index/paramLength
-                writeJsonAttributeForFunctionParam(fieldParam, i, recordFields.size(), builder, false, expandRecords);
+            
+            // Group fields by their immediate parent path segment for nested types
+            java.util.Map<String, java.util.List<FunctionParam>> groupedFields = new java.util.LinkedHashMap<>();
+            java.util.List<FunctionParam> topLevelFields = new java.util.ArrayList<>();
+            
+            for (FunctionParam fieldParam : recordFields) {
+                String fieldName = fieldParam.getValue();
+                String immediateParent = getImmediateParentSegment(fieldName);
+                
+                if (immediateParent != null && !immediateParent.isEmpty()) {
+                    // This is a nested field - group it
+                    groupedFields.computeIfAbsent(immediateParent, k -> new java.util.ArrayList<>()).add(fieldParam);
+                } else {
+                    // This is a top-level field (direct child of the record)
+                    topLevelFields.add(fieldParam);
+                }
+            }
+            
+            // Write top-level fields first (not grouped)
+            for (int i = 0; i < topLevelFields.size(); i++) {
+                FunctionParam fieldParam = topLevelFields.get(i);
+                writeJsonAttributeForFunctionParam(fieldParam, i, topLevelFields.size(), builder, false, expandRecords);
+            }
+            
+            // Write grouped nested fields
+            int groupIndex = 0;
+            int totalGroups = groupedFields.size();
+            for (java.util.Map.Entry<String, java.util.List<FunctionParam>> groupEntry : groupedFields.entrySet()) {
+                String groupName = groupEntry.getKey();
+                java.util.List<FunctionParam> groupFields = groupEntry.getValue();
+                
+                // Add separator before group if there were top-level fields or previous groups
+                if (!topLevelFields.isEmpty() || groupIndex > 0) {
+                    builder.addSeparator(ATTRIBUTE_SEPARATOR);
+                }
+                
+                // Create attributeGroup for this nested type
+                AttributeGroup attributeGroup = new AttributeGroup(groupName);
+                builder.addFromTemplate(ATTRIBUTE_GROUP_TEMPLATE_PATH, attributeGroup);
+                
+                // Write fields within this group
+                // The attributeGroup template ends with "elements": [ and a newline
+                // Add proper indentation (18 spaces) to align with the attribute template's content indentation
+                for (int i = 0; i < groupFields.size(); i++) {
+                    FunctionParam fieldParam = groupFields.get(i);
+                    // Add indentation before the first attribute in the group
+                    if (i == 0) {
+                        builder.addSeparator("                  ");  // 18 spaces to align with template content
+                    }
+                    writeJsonAttributeForFunctionParam(fieldParam, i, groupFields.size(), builder, false, expandRecords);
+                }
+                
+                // Close the attributeGroup - close elements array, value object, and attributeGroup object
+                // Match the indentation format from the expected output
+                builder.addSeparator("\n                    ]");
+                builder.addSeparator("\n                  }");
+                
+                // Close attributeGroup with comma if there are more groups, otherwise just close it
+                // The comma should be on the same line as the closing brace: },{
+                // The next attributeGroup template starts with {, so we get },{ on the same line
+                if (groupIndex < totalGroups - 1) {
+                    // Add closing brace and comma on same line, then newline
+                    builder.addSeparator("\n                },");
+                } else {
+                    builder.addSeparator("\n                }");
+                }
+                
+                groupIndex++;
             }
         } else {
             // Fallback: treat as single stringOrExpression field if no field info available
@@ -614,6 +679,42 @@ public class ConnectorSerializer {
             recordAttr.setEnableCondition(functionParam.getEnableCondition());
             builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, recordAttr);
         }
+    }
+    
+    /**
+     * Extracts the immediate parent segment from a qualified field name.
+     * For example:
+     * - "config.authConfig.token" -> "authConfig"
+     * - "config.credentialsConfig.username" -> "credentialsConfig"
+     * - "config.secureConfig.clientKeyPath" -> "secureConfig"
+     * - "config.idleTimeout" -> null (top-level field, only one dot)
+     * 
+     * @param qualifiedName The qualified field name (e.g., "config.authConfig.token")
+     * @return The immediate parent segment, or null if it's a top-level field
+     */
+    private static String getImmediateParentSegment(String qualifiedName) {
+        if (qualifiedName == null || qualifiedName.isEmpty()) {
+            return null;
+        }
+        
+        int lastDotIndex = qualifiedName.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            // No dots - this is a top-level field
+            return null;
+        }
+        
+        // Get the part before the last dot
+        String beforeLastDot = qualifiedName.substring(0, lastDotIndex);
+        
+        // Find the second-to-last dot to get the immediate parent
+        int secondLastDotIndex = beforeLastDot.lastIndexOf('.');
+        if (secondLastDotIndex == -1) {
+            // Only one dot - this is a direct child of the top-level param, so it's a top-level field
+            return null;
+        }
+        
+        // Extract the segment between the second-to-last and last dot
+        return beforeLastDot.substring(secondLastDotIndex + 1);
     }
 
     // Existing methods can now call the new generic method

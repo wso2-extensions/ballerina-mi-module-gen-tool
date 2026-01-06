@@ -223,7 +223,8 @@ public class BalConnectorAnalyzer implements Analyzer {
                 component.setParam(functionNameParam);
             }
             if (functionType == FunctionType.INIT) {
-                component.setObjectTypeName(classSymbol.getName().get());
+                // objectTypeName is only needed on Connection, not on Component
+                // to avoid duplication in generated XML
                 connection.setInitComponent(component);
             } else {
                 connection.setComponent(component);
