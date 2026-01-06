@@ -638,20 +638,33 @@ public class ConnectorSerializer {
                     builder.addSeparator(ATTRIBUTE_SEPARATOR);
                 }
                 
-                // Create attributeGroup for this nested type
-                AttributeGroup attributeGroup = new AttributeGroup(groupName);
+                // Create attributeGroup for this nested type with Title Case name
+                String displayGroupName = camelCaseToTitleCase(groupName);
+                AttributeGroup attributeGroup = new AttributeGroup(displayGroupName);
                 builder.addFromTemplate(ATTRIBUTE_GROUP_TEMPLATE_PATH, attributeGroup);
-                
+
                 // Write fields within this group
                 // The attributeGroup template ends with "elements": [ and a newline
                 // Add proper indentation (18 spaces) to align with the attribute template's content indentation
                 for (int i = 0; i < groupFields.size(); i++) {
                     FunctionParam fieldParam = groupFields.get(i);
+
+                    // Remove the group name prefix from the field name
+                    String originalFieldName = fieldParam.getValue();
+                    String shortFieldName = removeGroupPrefix(originalFieldName, groupName);
+
+                    // Temporarily modify the field name for display
+                    String savedFieldName = fieldParam.getValue();
+                    fieldParam.setValue(shortFieldName);
+
                     // Add indentation before the first attribute in the group
                     if (i == 0) {
                         builder.addSeparator("                  ");  // 18 spaces to align with template content
                     }
                     writeJsonAttributeForFunctionParam(fieldParam, i, groupFields.size(), builder, false, expandRecords);
+
+                    // Restore original field name
+                    fieldParam.setValue(savedFieldName);
                 }
                 
                 // Close the attributeGroup - close elements array, value object, and attributeGroup object
@@ -681,6 +694,47 @@ public class ConnectorSerializer {
         }
     }
     
+    /**
+     * Converts camelCase or PascalCase string to Title Case with spaces.
+     * For example:
+     * - "authConfig" -> "Auth Config"
+     * - "credentialsConfig" -> "Credentials Config"
+     * - "http1Settings" -> "Http1 Settings"
+     *
+     * @param camelCase The camelCase string to convert
+     * @return The Title Case string with spaces
+     */
+    private static String camelCaseToTitleCase(String camelCase) {
+        if (camelCase == null || camelCase.isEmpty()) {
+            return camelCase;
+        }
+        // Insert space before uppercase letters (except at the start) and capitalize first letter
+        String result = camelCase.replaceAll("([a-z])([A-Z])", "$1 $2")
+                                  .replaceAll("([A-Z])([A-Z][a-z])", "$1 $2");
+        return StringUtils.capitalize(result);
+    }
+
+    /**
+     * Removes the group name prefix from a field name.
+     * For example:
+     * - "authConfig.token" with group "authConfig" -> "token"
+     * - "credentialsConfig.username" with group "credentialsConfig" -> "username"
+     *
+     * @param fieldName The full field name
+     * @param groupName The group name prefix to remove
+     * @return The field name without the group prefix
+     */
+    private static String removeGroupPrefix(String fieldName, String groupName) {
+        if (fieldName == null || groupName == null) {
+            return fieldName;
+        }
+        String prefix = groupName + ".";
+        if (fieldName.startsWith(prefix)) {
+            return fieldName.substring(prefix.length());
+        }
+        return fieldName;
+    }
+
     /**
      * Extracts the immediate parent segment from a qualified field name.
      * For example:

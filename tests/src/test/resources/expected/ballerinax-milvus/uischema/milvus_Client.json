@@ -41,13 +41,13 @@
                 },{
                   "type": "attributeGroup",
                   "value": {
-                    "groupName": "authConfig",
+                    "groupName": "Auth Config",
                     "elements": [
                   {
                   "type": "attribute",
                   "value": {
-                    "name": "authConfig.token",
-                    "displayName": "authConfig.token",
+                    "name": "token",
+                    "displayName": "token",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -61,13 +61,13 @@
                 },{
                   "type": "attributeGroup",
                   "value": {
-                    "groupName": "credentialsConfig",
+                    "groupName": "Credentials Config",
                     "elements": [
                   {
                   "type": "attribute",
                   "value": {
-                    "name": "credentialsConfig.username",
-                    "displayName": "credentialsConfig.username",
+                    "name": "username",
+                    "displayName": "username",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -78,8 +78,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "credentialsConfig.password",
-                    "displayName": "credentialsConfig.password",
+                    "name": "password",
+                    "displayName": "password",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -201,13 +201,13 @@
                 },{
                   "type": "attributeGroup",
                   "value": {
-                    "groupName": "secureConfig",
+                    "groupName": "Secure Config",
                     "elements": [
                   {
                   "type": "attribute",
                   "value": {
-                    "name": "secureConfig.clientKeyPath",
-                    "displayName": "secureConfig.clientKeyPath",
+                    "name": "clientKeyPath",
+                    "displayName": "clientKeyPath",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -218,8 +218,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "secureConfig.clientPemPath",
-                    "displayName": "secureConfig.clientPemPath",
+                    "name": "clientPemPath",
+                    "displayName": "clientPemPath",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -230,8 +230,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "secureConfig.serverPemPath",
-                    "displayName": "secureConfig.serverPemPath",
+                    "name": "serverPemPath",
+                    "displayName": "serverPemPath",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
@@ -242,8 +242,8 @@
                 },{
                   "type": "attribute",
                   "value": {
-                    "name": "secureConfig.caPemPath",
-                    "displayName": "secureConfig.caPemPath",
+                    "name": "caPemPath",
+                    "displayName": "caPemPath",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
