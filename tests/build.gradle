@@ -2,6 +2,7 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
     id 'java'
+    id 'jacoco'
     id "de.undercouch.download" version "5.4.0"
 }
 
@@ -346,11 +347,11 @@ test {
     dependencies {
         implementation fileTree(dir: 'src/test/resources/libs', include: '*.jar')
     }
-    
+
     // On Windows, Docker/Testcontainers doesn't work, so ignore test failures
     // This is safe because integration tests that require Docker will be skipped
     ignoreFailures = Os.isFamily(Os.FAMILY_WINDOWS)
-    
+
     // Handle skipped tests gracefully
     afterSuite { desc, result ->
         if (!desc.parent) {
@@ -361,7 +362,7 @@ test {
             def startItem = '|  ', endItem = '  |'
             def repeatLength = startItem.length() + output.length() + endItem.length()
             println('\n' + ('=' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('=' * repeatLength))
-            
+
             // Log information about skipped tests on Windows
             if (Os.isFamily(Os.FAMILY_WINDOWS) && result.failedTestCount > 0) {
                 def xmlReport = file("${reporting.baseDir}/tests/test/TEST-org.ballerina.test.MiIntegrationTest.xml")
@@ -377,5 +378,38 @@ test {
                 }
             }
         }
+    }
+
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// Configure JaCoCo coverage after all projects are evaluated
+gradle.projectsEvaluated {
+    def coverageProjects = [
+        project(':mi-native'),
+        project(':tool-mi-module-gen-cli')
+    ]
+
+    jacocoTestReport {
+        // Set the class directories to include classes from dependent projects
+        classDirectories.setFrom(files(coverageProjects.collect {
+            it.sourceSets.main.output.classesDirs
+        }))
+
+        // Set the source directories to include source from dependent projects
+        sourceDirectories.setFrom(files(coverageProjects.collect {
+            it.sourceSets.main.allSource.srcDirs
+        }))
+
+        // Execution data comes from the test task
+        executionData.setFrom(files("${buildDir}/jacoco/test.exec"))
     }
 }

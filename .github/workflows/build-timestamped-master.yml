@@ -16,7 +16,27 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 21.0.3
-      
+          cache: maven
+
+      - name: Get Ballerina Version
+        run: |
+          BAL_VERSION=$(grep -w 'ballerinaLangVersion' gradle.properties | cut -d= -f2)
+          if [ -z "$BAL_VERSION" ]; then
+            BAL_VERSION="latest"
+          fi
+          echo "BAL_VERSION=$BAL_VERSION" >> $GITHUB_ENV
+          echo "Ballerina Version: $BAL_VERSION"
+
+      - name: Set Up Ballerina
+        uses: ballerina-platform/setup-ballerina@v1.1.3
+        with:
+          version: ${{ env.BAL_VERSION }}
+
+      - name: Verify Docker is available
+        run: |
+          docker info
+          echo "Docker is available for Testcontainers"
+
       - name: Change to Timestamped Version
         run: |
           startTime=$(TZ="Asia/Kolkata" date +'%Y%m%d-%H%M00')
@@ -36,4 +56,12 @@ jobs:
           nexusUser: ${{ secrets.NEXUS_USERNAME }}
           nexusPassword: ${{ secrets.NEXUS_PASSWORD }}
         run: |
-          ./gradlew clean build publish --stacktrace --scan --console=plain 
+          ./gradlew clean build publish --stacktrace --scan --console=plain
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./tests/build/reports/jacoco/test/jacocoTestReport.xml
+          flags: unittests
+          name: main-branch-coverage
+          token: ${{ secrets.CODECOV_TOKEN }} 
