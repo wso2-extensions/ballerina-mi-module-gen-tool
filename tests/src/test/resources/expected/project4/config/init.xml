@@ -20,16 +20,167 @@
     <parameter name="name" description="Unique name the connection is identified by"/>
     <parameter name="connectionType" description="Connection type"/>
     <!-- TODO: if union, the selected member type becomes a parameter-->
-    <parameter name="config" description=""/>
+    <parameter name="config.http1Settings.proxy.host" description="Host name of the proxy server"/>
+    <parameter name="config.http1Settings.proxy.port" description="Proxy server port"/>
+    <parameter name="config.http1Settings.proxy.userName" description="Proxy server username"/>
+    <parameter name="config.http1Settings.proxy.password" description="Proxy server password"/>
+    <parameter name="config.http2Settings.http2PriorKnowledge" description=""/>
+    <parameter name="config.http2Settings.http2InitialWindowSize" description=""/>
+    <parameter name="config.timeout" description="The maximum time to wait (in seconds) for a response before closing the connection"/>
+    <parameter name="config.forwarded" description="The choice of setting `forwarded`/`x-forwarded` header"/>
+    <parameter name="config.poolConfig.maxActiveConnections" description=""/>
+    <parameter name="config.poolConfig.maxIdleConnections" description=""/>
+    <parameter name="config.poolConfig.waitTime" description=""/>
+    <parameter name="config.poolConfig.maxActiveStreamsPerConnection" description=""/>
+    <parameter name="config.poolConfig.minEvictableIdleTime" description=""/>
+    <parameter name="config.poolConfig.timeBetweenEvictionRuns" description=""/>
+    <parameter name="config.poolConfig.minIdleTimeInStaleState" description=""/>
+    <parameter name="config.poolConfig.timeBetweenStaleEviction" description=""/>
+    <parameter name="config.cache.enabled" description=""/>
+    <parameter name="config.cache.isShared" description=""/>
+    <parameter name="config.cache.capacity" description=""/>
+    <parameter name="config.cache.evictionFactor" description=""/>
+    <parameter name="config.circuitBreaker.rollingWindow.requestVolumeThreshold" description="Minimum number of requests in a `RollingWindow` that will trip the circuit."/>
+    <parameter name="config.circuitBreaker.rollingWindow.timeWindow" description="Time period in seconds for which the failure threshold is calculated"/>
+    <parameter name="config.circuitBreaker.rollingWindow.bucketSize" description="The granularity at which the time window slides. This is measured in seconds."/>
+    <parameter name="config.circuitBreaker.failureThreshold" description="The threshold for request failures. When this threshold exceeds, the circuit trips. The threshold should be a
+value between 0 and 1"/>
+    <parameter name="config.circuitBreaker.resetTime" description="The time period (in seconds) to wait before attempting to make another request to the upstream service"/>
+    <parameter name="config.circuitBreaker.statusCodes" description="Array of HTTP response status codes which are considered as failures"/>
+    <parameter name="config.retryConfig.count" description=""/>
+    <parameter name="config.retryConfig.interval" description=""/>
+    <parameter name="config.retryConfig.backOffFactor" description=""/>
+    <parameter name="config.retryConfig.maxWaitInterval" description=""/>
+    <parameter name="config.retryConfig.statusCodes" description=""/>
+    <parameter name="config.responseLimits.maxStatusLineLength" description=""/>
+    <parameter name="config.responseLimits.maxHeaderSize" description=""/>
+    <parameter name="config.responseLimits.maxEntityBodySize" description=""/>
+    <parameter name="config.secureSocket.enable" description=""/>
+    <parameter name="config.secureSocket.cert" description=""/>
+    <parameter name="config.secureSocket.key" description=""/>
+    <parameter name="config.secureSocket.protocol.versions" description=""/>
+    <parameter name="config.secureSocket.certValidation.cacheSize" description=""/>
+    <parameter name="config.secureSocket.certValidation.cacheValidityPeriod" description=""/>
+    <parameter name="config.secureSocket.ciphers" description=""/>
+    <parameter name="config.secureSocket.verifyHostName" description=""/>
+    <parameter name="config.secureSocket.shareSession" description=""/>
+    <parameter name="config.secureSocket.handshakeTimeout" description=""/>
+    <parameter name="config.secureSocket.sessionTimeout" description=""/>
+    <parameter name="config.secureSocket.serverName" description=""/>
+    <parameter name="config.proxy.host" description=""/>
+    <parameter name="config.proxy.port" description=""/>
+    <parameter name="config.proxy.userName" description=""/>
+    <parameter name="config.proxy.password" description=""/>
+    <parameter name="config.validation" description="Enables the inbound payload validation functionality which provided by the constraint package. Enabled by default"/>
     <parameter name="serviceUrl" description=""/>
     <sequence>
         <property name="PROJECT4_CLIENT_objectTypeName" value="Client"/>
-        <property name="PROJECT4_CLIENT_paramSize" value="2"/>
+        <property name="PROJECT4_CLIENT_paramSize" value="52"/>
         <property name="PROJECT4_CLIENT_paramFunctionName" value="init"/>
-        <property name="PROJECT4_CLIENT_param0" value="config"/>
-        <property name="PROJECT4_CLIENT_paramType0" value="record"/>
-        <property name="PROJECT4_CLIENT_param1" value="serviceUrl"/>
-        <property name="PROJECT4_CLIENT_paramType1" value="string"/>
+        <property name="PROJECT4_CLIENT_param0" value="config.http1Settings.proxy.host"/>
+        <property name="PROJECT4_CLIENT_paramType0" value="string"/>
+        <property name="PROJECT4_CLIENT_param1" value="config.http1Settings.proxy.port"/>
+        <property name="PROJECT4_CLIENT_paramType1" value="int"/>
+        <property name="PROJECT4_CLIENT_param2" value="config.http1Settings.proxy.userName"/>
+        <property name="PROJECT4_CLIENT_paramType2" value="string"/>
+        <property name="PROJECT4_CLIENT_param3" value="config.http1Settings.proxy.password"/>
+        <property name="PROJECT4_CLIENT_paramType3" value="string"/>
+        <property name="PROJECT4_CLIENT_param4" value="config.http2Settings.http2PriorKnowledge"/>
+        <property name="PROJECT4_CLIENT_paramType4" value="boolean"/>
+        <property name="PROJECT4_CLIENT_param5" value="config.http2Settings.http2InitialWindowSize"/>
+        <property name="PROJECT4_CLIENT_paramType5" value="int"/>
+        <property name="PROJECT4_CLIENT_param6" value="config.timeout"/>
+        <property name="PROJECT4_CLIENT_paramType6" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param7" value="config.forwarded"/>
+        <property name="PROJECT4_CLIENT_paramType7" value="string"/>
+        <property name="PROJECT4_CLIENT_param8" value="config.poolConfig.maxActiveConnections"/>
+        <property name="PROJECT4_CLIENT_paramType8" value="int"/>
+        <property name="PROJECT4_CLIENT_param9" value="config.poolConfig.maxIdleConnections"/>
+        <property name="PROJECT4_CLIENT_paramType9" value="int"/>
+        <property name="PROJECT4_CLIENT_param10" value="config.poolConfig.waitTime"/>
+        <property name="PROJECT4_CLIENT_paramType10" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param11" value="config.poolConfig.maxActiveStreamsPerConnection"/>
+        <property name="PROJECT4_CLIENT_paramType11" value="int"/>
+        <property name="PROJECT4_CLIENT_param12" value="config.poolConfig.minEvictableIdleTime"/>
+        <property name="PROJECT4_CLIENT_paramType12" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param13" value="config.poolConfig.timeBetweenEvictionRuns"/>
+        <property name="PROJECT4_CLIENT_paramType13" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param14" value="config.poolConfig.minIdleTimeInStaleState"/>
+        <property name="PROJECT4_CLIENT_paramType14" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param15" value="config.poolConfig.timeBetweenStaleEviction"/>
+        <property name="PROJECT4_CLIENT_paramType15" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param16" value="config.cache.enabled"/>
+        <property name="PROJECT4_CLIENT_paramType16" value="boolean"/>
+        <property name="PROJECT4_CLIENT_param17" value="config.cache.isShared"/>
+        <property name="PROJECT4_CLIENT_paramType17" value="boolean"/>
+        <property name="PROJECT4_CLIENT_param18" value="config.cache.capacity"/>
+        <property name="PROJECT4_CLIENT_paramType18" value="int"/>
+        <property name="PROJECT4_CLIENT_param19" value="config.cache.evictionFactor"/>
+        <property name="PROJECT4_CLIENT_paramType19" value="float"/>
+        <property name="PROJECT4_CLIENT_param20" value="config.circuitBreaker.rollingWindow.requestVolumeThreshold"/>
+        <property name="PROJECT4_CLIENT_paramType20" value="int"/>
+        <property name="PROJECT4_CLIENT_param21" value="config.circuitBreaker.rollingWindow.timeWindow"/>
+        <property name="PROJECT4_CLIENT_paramType21" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param22" value="config.circuitBreaker.rollingWindow.bucketSize"/>
+        <property name="PROJECT4_CLIENT_paramType22" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param23" value="config.circuitBreaker.failureThreshold"/>
+        <property name="PROJECT4_CLIENT_paramType23" value="float"/>
+        <property name="PROJECT4_CLIENT_param24" value="config.circuitBreaker.resetTime"/>
+        <property name="PROJECT4_CLIENT_paramType24" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param25" value="config.circuitBreaker.statusCodes"/>
+        <property name="PROJECT4_CLIENT_paramType25" value="array"/>
+        <property name="PROJECT4_CLIENT_param26" value="config.retryConfig.count"/>
+        <property name="PROJECT4_CLIENT_paramType26" value="int"/>
+        <property name="PROJECT4_CLIENT_param27" value="config.retryConfig.interval"/>
+        <property name="PROJECT4_CLIENT_paramType27" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param28" value="config.retryConfig.backOffFactor"/>
+        <property name="PROJECT4_CLIENT_paramType28" value="float"/>
+        <property name="PROJECT4_CLIENT_param29" value="config.retryConfig.maxWaitInterval"/>
+        <property name="PROJECT4_CLIENT_paramType29" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param30" value="config.retryConfig.statusCodes"/>
+        <property name="PROJECT4_CLIENT_paramType30" value="array"/>
+        <property name="PROJECT4_CLIENT_param31" value="config.responseLimits.maxStatusLineLength"/>
+        <property name="PROJECT4_CLIENT_paramType31" value="int"/>
+        <property name="PROJECT4_CLIENT_param32" value="config.responseLimits.maxHeaderSize"/>
+        <property name="PROJECT4_CLIENT_paramType32" value="int"/>
+        <property name="PROJECT4_CLIENT_param33" value="config.responseLimits.maxEntityBodySize"/>
+        <property name="PROJECT4_CLIENT_paramType33" value="int"/>
+        <property name="PROJECT4_CLIENT_param34" value="config.secureSocket.enable"/>
+        <property name="PROJECT4_CLIENT_paramType34" value="boolean"/>
+        <property name="PROJECT4_CLIENT_param35" value="config.secureSocket.cert"/>
+        <property name="PROJECT4_CLIENT_paramType35" value="union"/>
+        <property name="PROJECT4_CLIENT_param36" value="config.secureSocket.key"/>
+        <property name="PROJECT4_CLIENT_paramType36" value="union"/>
+        <property name="PROJECT4_CLIENT_param37" value="config.secureSocket.protocol.versions"/>
+        <property name="PROJECT4_CLIENT_paramType37" value="array"/>
+        <property name="PROJECT4_CLIENT_param38" value="config.secureSocket.certValidation.cacheSize"/>
+        <property name="PROJECT4_CLIENT_paramType38" value="int"/>
+        <property name="PROJECT4_CLIENT_param39" value="config.secureSocket.certValidation.cacheValidityPeriod"/>
+        <property name="PROJECT4_CLIENT_paramType39" value="int"/>
+        <property name="PROJECT4_CLIENT_param40" value="config.secureSocket.ciphers"/>
+        <property name="PROJECT4_CLIENT_paramType40" value="array"/>
+        <property name="PROJECT4_CLIENT_param41" value="config.secureSocket.verifyHostName"/>
+        <property name="PROJECT4_CLIENT_paramType41" value="boolean"/>
+        <property name="PROJECT4_CLIENT_param42" value="config.secureSocket.shareSession"/>
+        <property name="PROJECT4_CLIENT_paramType42" value="boolean"/>
+        <property name="PROJECT4_CLIENT_param43" value="config.secureSocket.handshakeTimeout"/>
+        <property name="PROJECT4_CLIENT_paramType43" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param44" value="config.secureSocket.sessionTimeout"/>
+        <property name="PROJECT4_CLIENT_paramType44" value="decimal"/>
+        <property name="PROJECT4_CLIENT_param45" value="config.secureSocket.serverName"/>
+        <property name="PROJECT4_CLIENT_paramType45" value="string"/>
+        <property name="PROJECT4_CLIENT_param46" value="config.proxy.host"/>
+        <property name="PROJECT4_CLIENT_paramType46" value="string"/>
+        <property name="PROJECT4_CLIENT_param47" value="config.proxy.port"/>
+        <property name="PROJECT4_CLIENT_paramType47" value="int"/>
+        <property name="PROJECT4_CLIENT_param48" value="config.proxy.userName"/>
+        <property name="PROJECT4_CLIENT_paramType48" value="string"/>
+        <property name="PROJECT4_CLIENT_param49" value="config.proxy.password"/>
+        <property name="PROJECT4_CLIENT_paramType49" value="string"/>
+        <property name="PROJECT4_CLIENT_param50" value="config.validation"/>
+        <property name="PROJECT4_CLIENT_paramType50" value="boolean"/>
+        <property name="PROJECT4_CLIENT_param51" value="serviceUrl"/>
+        <property name="PROJECT4_CLIENT_paramType51" value="string"/>
         
         <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
             <property name="orgName" value="testOrg"/>

@@ -1,8 +1,8 @@
 {
-  "connectorName": "project4",
-  "operationName": "getTimeSeriesByProvince",
-  "title": "getTimeSeriesByProvince",
-  "help": "Get COVID-19 time series data for a specific province in a country\n",
+  "connectorName": "nestedRecordConflictProject",
+  "operationName": "testOperation",
+  "title": "testOperation",
+  "help": "",
   "elements": [
     {
       "type": "attributeGroup",
@@ -16,9 +16,9 @@
               "displayName": "Connection",
               "inputType": "connection",
               "allowedConnectionTypes": [
-                "project4_Client"
+                "nestedRecordConflictProject_TestClient"
               ],
-              "defaultType": "connection.project4_Client",
+              "defaultType": "connection.nestedRecordConflictProject_TestClient",
               "defaultValue": "",
               "required": "true",
               "helpTip": "Connection to be used"
@@ -29,43 +29,7 @@
             "value": {
               "groupName": "Input Variables",
               "elements": [
-                {
-                  "type": "attribute",
-                  "value": {
-                    "name": "country",
-                    "displayName": "country",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "province",
-                    "displayName": "province",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "lastdays",
-                    "displayName": "lastdays",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "30",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
+                
               ]
             }
           },

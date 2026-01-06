@@ -64,7 +64,14 @@ public class Attribute extends Element {
     }
 
     public String getHelpTip() {
-        return helpTip;
+        if (helpTip == null) return "";
+        // Escape special characters for JSON
+        return helpTip
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 
     public String getValidateType() {

@@ -22,9 +22,12 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.impl.symbols.BallerinaClassSymbol;
 import io.ballerina.compiler.api.impl.symbols.BallerinaUnionTypeSymbol;
 import io.ballerina.compiler.api.symbols.*;
+import io.ballerina.compiler.syntax.tree.*;
 import io.ballerina.mi.connectorModel.*;
 import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.Utils;
+import io.ballerina.projects.Document;
+import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.PackageDescriptor;
@@ -54,12 +57,77 @@ public class BalConnectorAnalyzer implements Analyzer {
         SemanticModel semanticModel = compilePackage.getCompilation().getSemanticModel(module.moduleId());
         List<Symbol> moduleSymbols = semanticModel.moduleSymbols();
         List<Symbol> classSymbols = moduleSymbols.stream().filter((s) -> s instanceof BallerinaClassSymbol).toList();
+
+        // Extract default values from syntax trees
+        Map<String, Map<String, Map<String, String>>> classMethodDefaultValues = extractDefaultValues(module);
+
         for (Symbol classSymbol : classSymbols) {
-            analyzeClass(compilePackage, (ClassSymbol) classSymbol);
+            String className = classSymbol.getName().orElse("");
+            Map<String, Map<String, String>> methodDefaultValues = classMethodDefaultValues.getOrDefault(className, Map.of());
+            analyzeClass(compilePackage, (ClassSymbol) classSymbol, methodDefaultValues);
         }
     }
 
-    private void analyzeClass(Package compilePackage, ClassSymbol classSymbol) {
+    /**
+     * Extracts default values for all method parameters from the module's syntax trees.
+     * Returns a map of className -> (functionName -> (paramName -> defaultValue))
+     */
+    private Map<String, Map<String, Map<String, String>>> extractDefaultValues(Module module) {
+        Map<String, Map<String, Map<String, String>>> result = new HashMap<>();
+
+        for (DocumentId docId : module.documentIds()) {
+            Document document = module.document(docId);
+            SyntaxTree syntaxTree = document.syntaxTree();
+            ModulePartNode modulePartNode = syntaxTree.rootNode();
+
+            for (ModuleMemberDeclarationNode member : modulePartNode.members()) {
+                if (member instanceof ClassDefinitionNode classNode) {
+                    String className = classNode.className().text();
+                    Map<String, Map<String, String>> functionDefaults = new HashMap<>();
+
+                    for (Node classMember : classNode.members()) {
+                        if (classMember instanceof FunctionDefinitionNode funcNode) {
+                            String functionName = funcNode.functionName().text();
+                            // Normalize init method name to match Constants.INIT_FUNCTION_NAME
+                            if (functionName.equals(Constants.INIT_FUNCTION_NAME)) {
+                                functionName = Constants.INIT_FUNCTION_NAME;
+                            }
+                            Map<String, String> paramDefaults = new HashMap<>();
+                            extractFunctionDefaultValues(funcNode, paramDefaults);
+                            if (!paramDefaults.isEmpty()) {
+                                functionDefaults.put(functionName, paramDefaults);
+                            }
+                        }
+                    }
+
+                    if (!functionDefaults.isEmpty()) {
+                        result.put(className, functionDefaults);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Extracts default values from a function's parameters.
+     */
+    private void extractFunctionDefaultValues(FunctionDefinitionNode funcNode, Map<String, String> paramDefaults) {
+        FunctionSignatureNode signature = funcNode.functionSignature();
+        SeparatedNodeList<ParameterNode> parameters = signature.parameters();
+
+        for (ParameterNode paramNode : parameters) {
+            if (paramNode instanceof DefaultableParameterNode defaultableParam) {
+                String paramName = defaultableParam.paramName().map(Token::text).orElse("");
+                String defaultValue = defaultableParam.expression().toSourceCode().trim();
+                // Clean up the default value (remove quotes for simple strings if needed)
+                paramDefaults.put(paramName, defaultValue);
+            }
+        }
+    }
+
+    private void analyzeClass(Package compilePackage, ClassSymbol classSymbol, Map<String, Map<String, String>> defaultValues) {
 
         if (!isClientClass(classSymbol) || classSymbol.getName().isEmpty()) {
             return;
@@ -109,28 +177,15 @@ public class BalConnectorAnalyzer implements Analyzer {
             }
 
             String functionName = methodSymbol.getName().get();
-//            FunctionSignatureNode functionSignature = methodSymbol.signature();
             FunctionType functionType = Utils.getFunctionType(methodSymbol);
-//            List<PathParamType> pathParams = new ArrayList<>(GeneratorUtils.getPathParameters(
-//                    functionDefinition.relativeResourcePath()));
-//            List<Type> queryParams = new ArrayList<>(GeneratorUtils.getFunctionParameters(
-//                    functionSignature.parameters(),
-//                    functionDefinition.metadata(), semanticModel));
+            // For init methods, use Constants.INIT_FUNCTION_NAME as key since we store it that way
+            String functionKey = (functionType == FunctionType.INIT) ? Constants.INIT_FUNCTION_NAME : functionName;
 
             String returnType = Utils.getReturnTypeName(methodSymbol);
             Component component = new Component(functionName, Utils.getDocString(methodSymbol.documentation().get()), functionType, Integer.toString(i), List.of(), List.of(), returnType);
-//            String componentIndex = Integer.toString(connection.getComponents().size());
-//            Component component = new Component(functionName,
-//                    GeneratorUtils.getDocFromMetadata(functionDefinition.metadata()),
-//                    functionType, componentIndex, pathParams, queryParams, returnParam !=null ? returnParam.typeName : null);
-//            int noOfQueryParams = queryParams.size();
-//            int noOfPathParams = pathParams.size();
-//            Param querySizeParam = new Param(QUERY_PARAM_SIZE, Integer.toString(noOfQueryParams));
-//            Param pathSizeParam = new Param(PATH_PARAM_SIZE, Integer.toString(noOfPathParams));
-//            Param functionNameParam = new Param(METHOD_NAME, component.getName());
-//            component.setParam(querySizeParam);
-//            component.setParam(pathSizeParam);
-//            component.setParam(functionNameParam);
+
+            // Get default values for this specific function
+            Map<String, String> functionParamDefaults = defaultValues.getOrDefault(functionKey, Map.of());
 
             Optional<List<ParameterSymbol>> params = methodSymbol.typeDescriptor().params();
             if (params.isPresent()) {
@@ -139,7 +194,21 @@ public class BalConnectorAnalyzer implements Analyzer {
                 for (ParameterSymbol parameterSymbol : parameterSymbols) {
                     Optional<FunctionParam> functionParam = ParamFactory.createFunctionParam(parameterSymbol, paramIndex);
                     if (functionParam.isPresent()) {
-                        component.setFunctionParam(functionParam.get());
+                        FunctionParam param = functionParam.get();
+                        // Set default value if available for this function parameter
+                        String paramName = parameterSymbol.getName().orElse("");
+                        if (functionParamDefaults.containsKey(paramName)) {
+                            String defaultValue = functionParamDefaults.get(paramName);
+                            // Clean up the default value - remove surrounding quotes for string literals
+                            if (defaultValue.startsWith("\"") && defaultValue.endsWith("\"")) {
+                                defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
+                            }
+                            param.setDefaultValue(defaultValue);
+                            param.setRequired(false);
+                        }
+                        component.setFunctionParam(param);
+                        // Count expanded params for records, otherwise count 1
+                        paramIndex += countExpandedParams(param);
                     } else {
                         // Skip the function if any parameter type is unsupported
                         String paramType = parameterSymbol.typeDescriptor().typeKind().getName();
@@ -147,7 +216,6 @@ public class BalConnectorAnalyzer implements Analyzer {
                                 "' due to unsupported parameter type: " + paramType);
                         continue methodLoop;
                     }
-                    paramIndex++;
                 }
                 Param sizeParam = new Param("paramSize", Integer.toString(paramIndex));
                 Param functionNameParam = new Param("paramFunctionName", component.getName());
@@ -166,7 +234,21 @@ public class BalConnectorAnalyzer implements Analyzer {
     }
 
     private boolean isClientClass(ClassSymbol classSymbol) {
-
         return classSymbol.qualifiers().contains(Qualifier.PUBLIC) && classSymbol.qualifiers().contains(Qualifier.CLIENT);
+    }
+
+    /**
+     * Counts the number of expanded parameters. For RecordFunctionParam, counts its fields recursively.
+     * For other params, returns 1.
+     */
+    private int countExpandedParams(FunctionParam param) {
+        if (param instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
+            int count = 0;
+            for (FunctionParam fieldParam : recordParam.getRecordFieldParams()) {
+                count += countExpandedParams(fieldParam);
+            }
+            return count;
+        }
+        return 1;
     }
 }

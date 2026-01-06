@@ -21,15 +21,60 @@
     <parameter name="connectionType" description="Connection type"/>
     <!-- TODO: if union, the selected member type becomes a parameter-->
     <parameter name="serviceUrl" description=""/>
-    <parameter name="config" description=""/>
+    <parameter name="config.authConfig.token" description="A valid access token to access the specified Milvus instance"/>
+    <parameter name="config.credentialsConfig.username" description="The username used to connect to the specified Milvus instance"/>
+    <parameter name="config.credentialsConfig.password" description="The password used to connect to the specified Milvus instance"/>
+    <parameter name="config.idleTimeout" description="The idle timeout for a connection"/>
+    <parameter name="config.keepAliveTime" description="The time between keep-alive probes sent by the client to the server. (Default: 55 seconds)"/>
+    <parameter name="config.keepAliveTimeout" description="The timeout duration for the server to respond to a keep-alive probe sent by the client. (Default: 20 seconds)"/>
+    <parameter name="config.keepAliveWithoutCalls" description="Whether to send keep-alive probes without making requests. (Default: false)"/>
+    <parameter name="config.rpcDeadline" description="The deadline for the rpc operation to be completed. The value defaults to 0, which indicates the deadline is disabled"/>
+    <parameter name="config.connectTimeout" description="The timeout duration for this operation. (Default: 10 seconds)"/>
+    <parameter name="config.databaseName" description="The name of the database to which the target Milvus instance belongs"/>
+    <parameter name="config.serverName" description="The expected name of the server"/>
+    <parameter name="config.proxyAddress" description="The proxy server’s address through which the connection is to be established"/>
+    <parameter name="config.secureConfig.clientKeyPath" description="The path to the client key file for mutual authentication"/>
+    <parameter name="config.secureConfig.clientPemPath" description="The path to the client PEM file for mutual authentication"/>
+    <parameter name="config.secureConfig.serverPemPath" description="The path to the server PEM file for mutual authentication"/>
+    <parameter name="config.secureConfig.caPemPath" description="The path to the CA PEM file for mutual authentication"/>
     <sequence>
         <property name="MILVUS_CLIENT_objectTypeName" value="Client"/>
-        <property name="MILVUS_CLIENT_paramSize" value="2"/>
+        <property name="MILVUS_CLIENT_paramSize" value="17"/>
         <property name="MILVUS_CLIENT_paramFunctionName" value="init"/>
         <property name="MILVUS_CLIENT_param0" value="serviceUrl"/>
         <property name="MILVUS_CLIENT_paramType0" value="string"/>
-        <property name="MILVUS_CLIENT_param1" value="config"/>
-        <property name="MILVUS_CLIENT_paramType1" value="record"/>
+        <property name="MILVUS_CLIENT_param1" value="config.authConfig.token"/>
+        <property name="MILVUS_CLIENT_paramType1" value="string"/>
+        <property name="MILVUS_CLIENT_param2" value="config.credentialsConfig.username"/>
+        <property name="MILVUS_CLIENT_paramType2" value="string"/>
+        <property name="MILVUS_CLIENT_param3" value="config.credentialsConfig.password"/>
+        <property name="MILVUS_CLIENT_paramType3" value="string"/>
+        <property name="MILVUS_CLIENT_param4" value="config.idleTimeout"/>
+        <property name="MILVUS_CLIENT_paramType4" value="int"/>
+        <property name="MILVUS_CLIENT_param5" value="config.keepAliveTime"/>
+        <property name="MILVUS_CLIENT_paramType5" value="int"/>
+        <property name="MILVUS_CLIENT_param6" value="config.keepAliveTimeout"/>
+        <property name="MILVUS_CLIENT_paramType6" value="int"/>
+        <property name="MILVUS_CLIENT_param7" value="config.keepAliveWithoutCalls"/>
+        <property name="MILVUS_CLIENT_paramType7" value="boolean"/>
+        <property name="MILVUS_CLIENT_param8" value="config.rpcDeadline"/>
+        <property name="MILVUS_CLIENT_paramType8" value="int"/>
+        <property name="MILVUS_CLIENT_param9" value="config.connectTimeout"/>
+        <property name="MILVUS_CLIENT_paramType9" value="int"/>
+        <property name="MILVUS_CLIENT_param10" value="config.databaseName"/>
+        <property name="MILVUS_CLIENT_paramType10" value="string"/>
+        <property name="MILVUS_CLIENT_param11" value="config.serverName"/>
+        <property name="MILVUS_CLIENT_paramType11" value="string"/>
+        <property name="MILVUS_CLIENT_param12" value="config.proxyAddress"/>
+        <property name="MILVUS_CLIENT_paramType12" value="string"/>
+        <property name="MILVUS_CLIENT_param13" value="config.secureConfig.clientKeyPath"/>
+        <property name="MILVUS_CLIENT_paramType13" value="string"/>
+        <property name="MILVUS_CLIENT_param14" value="config.secureConfig.clientPemPath"/>
+        <property name="MILVUS_CLIENT_paramType14" value="string"/>
+        <property name="MILVUS_CLIENT_param15" value="config.secureConfig.serverPemPath"/>
+        <property name="MILVUS_CLIENT_paramType15" value="string"/>
+        <property name="MILVUS_CLIENT_param16" value="config.secureConfig.caPemPath"/>
+        <property name="MILVUS_CLIENT_paramType16" value="string"/>
         
         <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
             <property name="orgName" value="ballerinax"/>

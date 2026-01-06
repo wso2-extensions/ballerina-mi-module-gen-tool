@@ -29,12 +29,664 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "config",
-                    "displayName": "config",
+                    "name": "config.http1Settings.proxy.host",
+                    "displayName": "config.http1Settings.proxy.host",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Host name of the proxy server",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.http1Settings.proxy.port",
+                    "displayName": "config.http1Settings.proxy.port",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Proxy server port",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.http1Settings.proxy.userName",
+                    "displayName": "config.http1Settings.proxy.userName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Proxy server username",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.http1Settings.proxy.password",
+                    "displayName": "config.http1Settings.proxy.password",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Proxy server password",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.http2Settings.http2PriorKnowledge",
+                    "displayName": "config.http2Settings.http2PriorKnowledge",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.http2Settings.http2InitialWindowSize",
+                    "displayName": "config.http2Settings.http2InitialWindowSize",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.timeout",
+                    "displayName": "config.timeout",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The maximum time to wait (in seconds) for a response before closing the connection",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.forwarded",
+                    "displayName": "config.forwarded",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The choice of setting &#x60;forwarded&#x60;/&#x60;x-forwarded&#x60; header",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.poolConfig.maxActiveConnections",
+                    "displayName": "config.poolConfig.maxActiveConnections",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.poolConfig.maxIdleConnections",
+                    "displayName": "config.poolConfig.maxIdleConnections",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.poolConfig.waitTime",
+                    "displayName": "config.poolConfig.waitTime",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.poolConfig.maxActiveStreamsPerConnection",
+                    "displayName": "config.poolConfig.maxActiveStreamsPerConnection",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.poolConfig.minEvictableIdleTime",
+                    "displayName": "config.poolConfig.minEvictableIdleTime",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.poolConfig.timeBetweenEvictionRuns",
+                    "displayName": "config.poolConfig.timeBetweenEvictionRuns",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.poolConfig.minIdleTimeInStaleState",
+                    "displayName": "config.poolConfig.minIdleTimeInStaleState",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.poolConfig.timeBetweenStaleEviction",
+                    "displayName": "config.poolConfig.timeBetweenStaleEviction",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.cache.enabled",
+                    "displayName": "config.cache.enabled",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.cache.isShared",
+                    "displayName": "config.cache.isShared",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.cache.capacity",
+                    "displayName": "config.cache.capacity",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.cache.evictionFactor",
+                    "displayName": "config.cache.evictionFactor",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.circuitBreaker.rollingWindow.requestVolumeThreshold",
+                    "displayName": "config.circuitBreaker.rollingWindow.requestVolumeThreshold",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Minimum number of requests in a &#x60;RollingWindow&#x60; that will trip the circuit.",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.circuitBreaker.rollingWindow.timeWindow",
+                    "displayName": "config.circuitBreaker.rollingWindow.timeWindow",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Time period in seconds for which the failure threshold is calculated",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.circuitBreaker.rollingWindow.bucketSize",
+                    "displayName": "config.circuitBreaker.rollingWindow.bucketSize",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The granularity at which the time window slides. This is measured in seconds.",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.circuitBreaker.failureThreshold",
+                    "displayName": "config.circuitBreaker.failureThreshold",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The threshold for request failures. When this threshold exceeds, the circuit trips. The threshold should be a\nvalue between 0 and 1",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.circuitBreaker.resetTime",
+                    "displayName": "config.circuitBreaker.resetTime",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The time period (in seconds) to wait before attempting to make another request to the upstream service",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.circuitBreaker.statusCodes",
+                    "displayName": "config.circuitBreaker.statusCodes",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Array of HTTP response status codes which are considered as failures",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.retryConfig.count",
+                    "displayName": "config.retryConfig.count",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.retryConfig.interval",
+                    "displayName": "config.retryConfig.interval",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.retryConfig.backOffFactor",
+                    "displayName": "config.retryConfig.backOffFactor",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.retryConfig.maxWaitInterval",
+                    "displayName": "config.retryConfig.maxWaitInterval",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.retryConfig.statusCodes",
+                    "displayName": "config.retryConfig.statusCodes",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.responseLimits.maxStatusLineLength",
+                    "displayName": "config.responseLimits.maxStatusLineLength",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.responseLimits.maxHeaderSize",
+                    "displayName": "config.responseLimits.maxHeaderSize",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.responseLimits.maxEntityBodySize",
+                    "displayName": "config.responseLimits.maxEntityBodySize",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.enable",
+                    "displayName": "config.secureSocket.enable",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.certDataType",
+                    "displayName": "config.secureSocket.certDataType",
+                    "inputType": "combo",
+                    "comboValues": ["TrustStore","string"],
+                    "defaultValue": "TrustStore",
+                    "required": "false",
+                    "helpTip": ""
+                  }
+                }
+,{
+                  "type": "attribute",
+                  "value": {
+                    "name": "certTrustStore",
+                    "displayName": "certTrustStore",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [{"certDataType": "TrustStore"}]
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "certString",
+                    "displayName": "certString",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [{"certDataType": "string"}]
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.keyDataType",
+                    "displayName": "config.secureSocket.keyDataType",
+                    "inputType": "combo",
+                    "comboValues": ["KeyStore","CertKey"],
+                    "defaultValue": "KeyStore",
+                    "required": "false",
+                    "helpTip": ""
+                  }
+                }
+,{
+                  "type": "attribute",
+                  "value": {
+                    "name": "keyKeyStore",
+                    "displayName": "keyKeyStore",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [{"keyDataType": "KeyStore"}]
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "keyCertKey",
+                    "displayName": "keyCertKey",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [{"keyDataType": "CertKey"}]
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.protocol.versions",
+                    "displayName": "config.secureSocket.protocol.versions",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.certValidation.cacheSize",
+                    "displayName": "config.secureSocket.certValidation.cacheSize",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
                     "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.certValidation.cacheValidityPeriod",
+                    "displayName": "config.secureSocket.certValidation.cacheValidityPeriod",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.ciphers",
+                    "displayName": "config.secureSocket.ciphers",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.verifyHostName",
+                    "displayName": "config.secureSocket.verifyHostName",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.shareSession",
+                    "displayName": "config.secureSocket.shareSession",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.handshakeTimeout",
+                    "displayName": "config.secureSocket.handshakeTimeout",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.sessionTimeout",
+                    "displayName": "config.secureSocket.sessionTimeout",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.secureSocket.serverName",
+                    "displayName": "config.secureSocket.serverName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.proxy.host",
+                    "displayName": "config.proxy.host",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.proxy.port",
+                    "displayName": "config.proxy.port",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.proxy.userName",
+                    "displayName": "config.proxy.userName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.proxy.password",
+                    "displayName": "config.proxy.password",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },{
+                  "type": "attribute",
+                  "value": {
+                    "name": "config.validation",
+                    "displayName": "config.validation",
+                    "inputType": "boolean",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Enables the inbound payload validation functionality which provided by the constraint package. Enabled by default",
                     "validateType": "",
                     "matchPattern": ""
                   }
@@ -44,8 +696,8 @@
                     "name": "serviceUrl",
                     "displayName": "serviceUrl",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
+                    "defaultValue": "https://disease.sh",
+                    "required": "false",
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""

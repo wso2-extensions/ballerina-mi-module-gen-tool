@@ -24,7 +24,7 @@
         <property name="param0" value="request"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="SearchRequest" />
-        <property name="paramSize" value="1"/>
+        <property name="paramSize" value="6"/>
         <property name="paramFunctionName" value="search"/>
         <property name="returnType" value="union"/>
 

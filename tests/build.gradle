@@ -308,7 +308,7 @@ tasks.register("generateExpectedArtifacts", JavaExec) {
 
     doFirst {
         if (!project.hasProperty("artifactTarget")) {
-            throw new GradleException("Provide -PartifactTarget=project1|project2|project3|project4|central")
+            throw new GradleException("Provide -PartifactTarget=project1|project2|project3|project4|unionProject|nestedRecordConflictProject|central")
         }
         args project.property("artifactTarget")
         if (project.hasProperty("centralPackage")) {

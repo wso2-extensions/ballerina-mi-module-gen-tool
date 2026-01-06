@@ -16,21 +16,17 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<template xmlns="http://ws.apache.org/ns/synapse" name="delete">
+<template xmlns="http://ws.apache.org/ns/synapse" name="testOperation">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="request" description=""/>
     <sequence>
-        <property name="param0" value="request"/>
-        <property name="paramType0" value="record"/>
-        <property name="param0_recordName" value="DeleteRequest" />
-        <property name="paramSize" value="4"/>
-        <property name="paramFunctionName" value="delete"/>
-        <property name="returnType" value="union"/>
+        <property name="paramSize" value="0"/>
+        <property name="paramFunctionName" value="testOperation"/>
+        <property name="returnType" value="string"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
-            <property name="orgName" value="ballerinax"/>
-            <property name="moduleName" value="milvus"/>
+            <property name="orgName" value="testOrg"/>
+            <property name="moduleName" value="nestedRecordConflictProject"/>
             <property name="version" value="1"/>
         </class>
     </sequence>

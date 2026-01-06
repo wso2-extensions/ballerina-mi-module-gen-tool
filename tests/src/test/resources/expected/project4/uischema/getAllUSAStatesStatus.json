@@ -54,7 +54,7 @@
                     "matchPattern": "",
                     "enableCondition": [{"sortDataType": "string"}]
                   }
-                },,{
+                },{
                   "type": "attribute",
                   "value": {
                     "name": "yesterdayDataType",
@@ -79,7 +79,7 @@
                     "matchPattern": "",
                     "enableCondition": [{"yesterdayDataType": "string"}]
                   }
-                },,{
+                },{
                   "type": "attribute",
                   "value": {
                     "name": "allowNullDataType",

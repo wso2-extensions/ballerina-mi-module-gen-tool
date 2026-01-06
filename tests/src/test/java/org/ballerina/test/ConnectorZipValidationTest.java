@@ -91,6 +91,7 @@ public class ConnectorZipValidationTest {
         return new Object[][]{
                 {"project4", null},  // project4 is a local bala project
                 {"unionProject", null},
+                {"nestedRecordConflictProject", null},  // Test for qualified naming with nested record conflicts
                 // Format: {"projectName", "org/package:version"} or {"projectName", null} for local
                 // Example: {"ballerinax-milvus", "ballerina/http:2.15.3"} - uncomment when connector is available
                 {"ballerinax-milvus", "ballerinax/milvus:1.1.0"},  // project5 is from Central (example)
