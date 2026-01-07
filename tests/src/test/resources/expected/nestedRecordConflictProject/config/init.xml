@@ -30,18 +30,20 @@
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_objectTypeName" value="TestClient"/>
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramSize" value="6"/>
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramFunctionName" value="init"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param0" value="server.host"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType0" value="string"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param1" value="server.port"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType1" value="int"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param2" value="server.protocol"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType2" value="string"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param3" value="database.host"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType3" value="string"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param4" value="database.port"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType4" value="int"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param5" value="database.database"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType5" value="string"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param0" value="config"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType0" value="record"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_param0" value="server.host"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_paramType0" value="string"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_param1" value="server.port"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_paramType1" value="int"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_param2" value="server.protocol"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_paramType2" value="string"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_param3" value="database.host"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_paramType3" value="string"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_param4" value="database.port"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_paramType4" value="int"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_param5" value="database.database"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_paramType5" value="string"/>
         
         <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
             <property name="orgName" value="testOrg"/>
