@@ -19,7 +19,7 @@ OPTIONS
 
 EXAMPLES
        Generate WSO2 micro integrator connector for Ballerina module.
-           $ bal mi-module-gen -i ballerina/project
+           $ bal mi-module-gen -i ballerina/project -t mi/connector/target
 
        Generate WSO2 Micro Integrator connector for a Ballerina connector.
            $ bal mi-module-gen -i ballerina/bala/project -t mi/connector/target

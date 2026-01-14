@@ -24,6 +24,7 @@ import io.ballerina.mi.analyzer.BalConnectorAnalyzer;
 import io.ballerina.mi.analyzer.BalModuleAnalyzer;
 import io.ballerina.mi.connectorModel.Connector;
 import io.ballerina.mi.util.Constants;
+import io.ballerina.mi.util.Utils;
 import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.EmitResult;
 import io.ballerina.projects.JBallerinaBackend;
@@ -48,14 +49,27 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.logging.LogManager;
 
 @CommandLine.Command(name = "mi-module-gen", description = "Generate WSO2 MI module")
 public class MiCmd implements BLauncherCmd {
     private static final String CMD_NAME = "mi-module-gen";
     private static final String CONNECTOR_NAME_SEPARATOR = "-";
     private final PrintStream printStream;
+
+    static {
+        // Suppress Axiom StAX dialect detection warning - must be done before any Axiom classes are loaded
+        try {
+            InputStream configStream = MiCmd.class.getResourceAsStream("/logging.properties");
+            if (configStream != null) {
+                LogManager.getLogManager().readConfiguration(configStream);
+                configStream.close();
+            }
+        } catch (IOException ignored) {
+        }
+    }
+
     @CommandLine.Option(names = {"--help", "-h"}, usageHelp = true)
     private boolean helpFlag;
     @CommandLine.Option(names = {"--input", "-i"}, description = "Ballerina project path")
@@ -63,8 +77,6 @@ public class MiCmd implements BLauncherCmd {
     @CommandLine.Option(names = {"--target", "-t"}, description = "Target path for the generated MI connector")
     private String targetPath;
     private Path executablePath;
-    private Path miArtifactsPath;
-    private Analyzer balAnalyzer;
 
     public MiCmd() {
         this.printStream = System.out;
@@ -81,18 +93,18 @@ public class MiCmd implements BLauncherCmd {
     }
 
     private void executeInternal() {
-        String miImportDocumentName;
         Package compilePkg;
-        if (sourcePath == null || helpFlag) {
+        if (sourcePath == null || targetPath == null || helpFlag) {
             StringBuilder stringBuilder = new StringBuilder();
             setHelpMessage(stringBuilder);
             printStream.println(stringBuilder);
             return;
         }
 
-        Path path = Path.of(sourcePath).normalize();
+        Path projectPath = Path.of(sourcePath).normalize();
+        Path miArtifactsPath = Path.of(targetPath);
         BuildOptions buildOptions = BuildOptions.builder().setOffline(false).build();
-        ProjectLoadResult projectLoadResult = ProjectLoader.load(path.toAbsolutePath(), buildOptions);
+        ProjectLoadResult projectLoadResult = ProjectLoader.load(projectPath.toAbsolutePath(), buildOptions);
         Project project = projectLoadResult.project();
         compilePkg = project.currentPackage();
         if (!(project instanceof BuildProject || project instanceof BalaProject)) {
@@ -100,14 +112,10 @@ public class MiCmd implements BLauncherCmd {
             return;
         }
 
+        Analyzer balAnalyzer;
         if (project instanceof BalaProject) {
             // Project is a Bala project
-            if (targetPath == null || targetPath.isEmpty()) {
-                printStream.println("ERROR: Target path for the MI connector not provided");
-                return;
-            }
             balAnalyzer = new BalConnectorAnalyzer();
-            miArtifactsPath = Paths.get(targetPath);
             Path miConnectorCache = miArtifactsPath.resolve("BalConnectors");
             executablePath = miConnectorCache.resolve(compilePkg.descriptor().org().value() +
                     CONNECTOR_NAME_SEPARATOR + compilePkg.descriptor().name().value() +
@@ -140,10 +148,6 @@ public class MiCmd implements BLauncherCmd {
 
         if (project instanceof BuildProject) {
             // Project is a build project
-            if (null != targetPath) {
-                printStream.println("WARNING: Arguments provided for -t will be ignored.\n");
-            }
-            miArtifactsPath = path.resolve("target");
             Path bin = miArtifactsPath.resolve("bin");
             try {
                 createBinFolder(bin);
@@ -168,12 +172,24 @@ public class MiCmd implements BLauncherCmd {
 
         // Generate MI connector artifacts (XML/JSON files and zip package)
         // Both BuildProject and BalaProject need MI artifacts
-        generateMIArtifacts(executablePath, compilePkg, miArtifactsPath, project instanceof BuildProject);
+        generateMIArtifacts(executablePath, miArtifactsPath, project instanceof BuildProject);
+        boolean isValid = ConnectorValidator.validateConnector(miArtifactsPath);
+        if (!isValid) {
+            printStream.println("ERROR: MI " + (project instanceof BuildProject ? "module" : "connector") +
+                    " generation failed due to validation errors.");
+            try {
+                Utils.deleteDirectory(miArtifactsPath);
+            } catch (IOException e) {
+                printStream.println("ERROR: Failed to delete invalid MI " + (project instanceof BuildProject ?
+                        "module" : "connector") + " artifacts at: " + miArtifactsPath);
+            }
+            return;
+        }
         printStream.println("MI " + (project instanceof BuildProject ? "module" : "connector") +
                 " generation completed successfully.");
     }
 
-    private void generateMIArtifacts(Path sourcePath, Package compilePkg, Path targetPath, boolean isBuildProject) {
+    private void generateMIArtifacts(Path sourcePath, Path targetPath, boolean isBuildProject) {
         printStream.println("Generating MI " + (isBuildProject ? "module" : "connector") + " artifacts...");
 
         Connector connector = Connector.getConnector();
@@ -198,7 +214,7 @@ public class MiCmd implements BLauncherCmd {
             }
         }
         Files.deleteIfExists(bin);
-        Files.createDirectory(bin);
+        Files.createDirectories(bin);
     }
 
     @Override

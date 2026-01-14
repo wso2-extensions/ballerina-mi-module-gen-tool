@@ -1,0 +1,534 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://wso2.com/mi/ui-schema.json",
+  "title": "MI Connector UI Schema",
+  "description": "JSON Schema for validating MI connector UI schemas used by FormGenerator. Supports both operation schemas and connection schemas.",
+  "type": "object",
+  "required": ["connectorName", "title", "elements"],
+  "anyOf": [
+    {
+      "required": ["operationName"],
+      "properties": {
+        "operationName": {
+          "type": "string",
+          "description": "The name of the operation (required for operation schemas)",
+          "minLength": 1
+        }
+      }
+    },
+    {
+      "required": ["connectionName"],
+      "properties": {
+        "connectionName": {
+          "type": "string",
+          "description": "The name of the connection type (required for connection schemas)",
+          "minLength": 1
+        }
+      }
+    }
+  ],
+  "properties": {
+    "connectorName": {
+      "type": "string",
+      "description": "The name of the connector",
+      "minLength": 1
+    },
+    "operationName": {
+      "type": "string",
+      "description": "The name of the operation (for operation schemas)",
+      "minLength": 1
+    },
+    "connectionName": {
+      "type": "string",
+      "description": "The name of the connection type (for connection schemas)",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "description": "The display title for the form",
+      "minLength": 1
+    },
+    "help": {
+      "type": "string",
+      "description": "Help text displayed at the top of the form"
+    },
+    "doc": {
+      "type": "string",
+      "description": "Documentation for the operation"
+    },
+    "banner": {
+      "type": "string",
+      "description": "Warning banner text to display"
+    },
+    "elements": {
+      "type": "array",
+      "description": "Array of form elements",
+      "items": {
+        "$ref": "#/definitions/element"
+      }
+    }
+  },
+  "definitions": {
+    "element": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["attribute", "attributeGroup", "table"],
+          "description": "The type of the element"
+        },
+        "value": {
+          "oneOf": [
+            { "$ref": "#/definitions/attributeValue" },
+            { "$ref": "#/definitions/attributeGroupValue" },
+            { "$ref": "#/definitions/tableValue" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "attribute" } }
+          },
+          "then": {
+            "properties": {
+              "value": { "$ref": "#/definitions/attributeValue" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "attributeGroup" } }
+          },
+          "then": {
+            "properties": {
+              "value": { "$ref": "#/definitions/attributeGroupValue" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "table" } }
+          },
+          "then": {
+            "properties": {
+              "value": { "$ref": "#/definitions/tableValue" }
+            }
+          }
+        }
+      ]
+    },
+    "attributeGroupValue": {
+      "type": "object",
+      "required": ["groupName", "elements"],
+      "properties": {
+        "groupName": {
+          "type": "string",
+          "description": "Display name for the attribute group",
+          "minLength": 1
+        },
+        "elements": {
+          "type": "array",
+          "description": "Nested elements within the group",
+          "items": {
+            "$ref": "#/definitions/element"
+          }
+        },
+        "isCollapsed": {
+          "type": ["boolean", "string"],
+          "description": "Whether the group should be collapsed by default (can be boolean or 'true'/'false' string)"
+        },
+        "conditions": {
+          "$ref": "#/definitions/conditions",
+          "description": "Conditions for showing/hiding the group"
+        },
+        "enableCondition": {
+          "$ref": "#/definitions/enableCondition",
+          "description": "Conditions for enabling/showing the group"
+        }
+      }
+    },
+    "attributeValue": {
+      "type": "object",
+      "required": ["name", "displayName", "inputType"],
+      "properties": {
+        "name": {
+          "type": ["string", "number"],
+          "description": "The field name/identifier"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The label displayed for this field"
+        },
+        "inputType": {
+          "type": "string",
+          "enum": [
+            "string",
+            "stringOrExpression",
+            "integerOrExpression",
+            "expression",
+            "keyOrExpression",
+            "resourceOrExpression",
+            "textOrExpression",
+            "textAreaOrExpression",
+            "stringOrExpresion",
+            "stringWithParamManager",
+            "expressionTextArea",
+            "connection",
+            "checkbox",
+            "combo",
+            "searchableCombo",
+            "table",
+            "keyValue",
+            "paramManager",
+            "textArea",
+            "integer",
+            "number",
+            "password",
+            "file",
+            "sequence",
+            "sequenceOrExpression",
+            "endpoint",
+            "endpointOrExpression",
+            "booleanOrExpression",
+            "boolean",
+            "enum",
+            "multiSelect",
+            "popUp"
+          ],
+          "description": "The type of input control to render"
+        },
+        "description": {
+          "type": "string",
+          "description": "Additional description for the field"
+        },
+        "required": {
+          "type": ["string", "boolean"],
+          "description": "Whether the field is required (can be 'true', 'false', or boolean)"
+        },
+        "helpTip": {
+          "type": "string",
+          "description": "Tooltip help text for the field"
+        },
+        "placeholder": {
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "object",
+              "properties": {
+                "conditionField": { "type": "string" },
+                "values": { "type": "object" }
+              }
+            }
+          ],
+          "description": "Placeholder text or conditional placeholder object"
+        },
+        "defaultValue": {
+          "description": "Default value for the field"
+        },
+        "currentValue": {
+          "description": "Current value of the field (when editing)"
+        },
+        "comboValues": {
+          "type": "array",
+          "description": "Array of values for combo/dropdown fields",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "properties": {
+                  "value": { "type": "string" },
+                  "label": { "type": "string" }
+                }
+              }
+            ]
+          }
+        },
+        "allowedConnectionTypes": {
+          "type": "array",
+          "description": "Allowed connection types for connection input type",
+          "items": { "type": "string" }
+        },
+        "defaultType": {
+          "type": "string",
+          "description": "Default connection type"
+        },
+        "keyType": {
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "object",
+              "properties": {
+                "conditionField": { "type": "string" },
+                "values": { "type": "object" }
+              }
+            }
+          ],
+          "description": "Key type for key-value inputs"
+        },
+        "canAddNew": {
+          "type": "boolean",
+          "description": "Whether new items can be added"
+        },
+        "elements": {
+          "type": "array",
+          "description": "Nested elements (for complex types)",
+          "items": {
+            "$ref": "#/definitions/element"
+          }
+        },
+        "tableKey": {
+          "type": "string",
+          "description": "Key column name for table input"
+        },
+        "tableValue": {
+          "type": "string",
+          "description": "Value column name for table input"
+        },
+        "configurableType": {
+          "type": "string",
+          "description": "Type of configurable"
+        },
+        "addParamText": {
+          "type": "string",
+          "description": "Text for add parameter button"
+        },
+        "deriveResponseVariable": {
+          "type": "boolean",
+          "description": "Whether to derive response variable name"
+        },
+        "separatorPattern": {
+          "type": "string",
+          "description": "Pattern for separating values"
+        },
+        "initialSeparator": {
+          "type": "string",
+          "description": "Initial separator character"
+        },
+        "secondarySeparator": {
+          "type": "string",
+          "description": "Secondary separator character"
+        },
+        "keyValueSeparator": {
+          "type": "string",
+          "description": "Separator between key and value"
+        },
+        "viewIdentifier": {
+          "type": "string",
+          "description": "Identifier for custom view"
+        },
+        "viewDisplayName": {
+          "type": "string",
+          "description": "Display name for custom view"
+        },
+        "expressionType": {
+          "type": "string",
+          "enum": ["xpath/jsonPath", "synapse"],
+          "description": "Type of expression editor to use"
+        },
+        "supportsAIValues": {
+          "type": "boolean",
+          "description": "Whether field supports AI-generated values"
+        },
+        "rowCount": {
+          "type": "number",
+          "description": "Number of rows for text area"
+        },
+        "artifactPath": {
+          "type": "string",
+          "description": "Path to artifact"
+        },
+        "artifactType": {
+          "type": "string",
+          "description": "Type of artifact"
+        },
+        "isUnitTest": {
+          "type": "boolean",
+          "description": "Whether this is for unit testing"
+        },
+        "skipSanitization": {
+          "type": "boolean",
+          "description": "Whether to skip input sanitization"
+        },
+        "validateType": {
+          "type": "string",
+          "description": "Validation type for the field"
+        },
+        "matchPattern": {
+          "type": "string",
+          "description": "Regex pattern for validation"
+        },
+        "validation": {
+          "type": "string",
+          "description": "Named validation rule (e.g., 'nameWithoutSpecialCharactors')"
+        },
+        "conditions": {
+          "$ref": "#/definitions/conditions",
+          "description": "Conditions for showing/hiding the field"
+        },
+        "enableCondition": {
+          "$ref": "#/definitions/enableCondition",
+          "description": "Conditions for enabling/showing the field based on other field values"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "inputType": { "enum": ["combo", "searchableCombo"] } }
+          },
+          "then": {
+            "required": ["comboValues"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "inputType": { "const": "connection" } }
+          },
+          "then": {
+            "required": ["allowedConnectionTypes"]
+          }
+        }
+      ]
+    },
+    "tableValue": {
+      "type": "object",
+      "required": ["name", "displayName"],
+      "properties": {
+        "name": {
+          "type": ["string", "number"],
+          "description": "The field name/identifier"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The label displayed for this table"
+        },
+        "description": {
+          "type": "string",
+          "description": "Additional description for the table"
+        },
+        "inputType": {
+          "type": "string",
+          "const": "table"
+        },
+        "required": {
+          "type": ["string", "boolean"],
+          "description": "Whether the field is required"
+        },
+        "helpTip": {
+          "type": "string",
+          "description": "Tooltip help text"
+        },
+        "elements": {
+          "type": "array",
+          "description": "Column definitions for the table",
+          "items": {
+            "$ref": "#/definitions/element"
+          }
+        },
+        "tableKey": {
+          "type": "string",
+          "description": "Key column identifier"
+        },
+        "tableValue": {
+          "type": "string",
+          "description": "Value column identifier"
+        },
+        "defaultValue": {
+          "type": "array",
+          "description": "Default rows for the table"
+        },
+        "conditions": {
+          "$ref": "#/definitions/conditions"
+        },
+        "enableCondition": {
+          "$ref": "#/definitions/enableCondition",
+          "description": "Conditions for enabling/showing the table"
+        }
+      }
+    },
+    "conditions": {
+      "oneOf": [
+        { "type": "boolean" },
+        {
+          "type": "object",
+          "properties": {
+            "field": { "type": "string" },
+            "value": {},
+            "operator": {
+              "type": "string",
+              "enum": ["equals", "notEquals", "contains", "notContains", "in", "notIn"]
+            }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field": { "type": "string" },
+              "value": {},
+              "operator": { "type": "string" },
+              "logic": {
+                "type": "string",
+                "enum": ["and", "or"]
+              }
+            }
+          }
+        }
+      ],
+      "description": "Conditions for conditional rendering"
+    },
+    "enableCondition": {
+      "description": "Conditions for enabling/showing elements based on other field values. Supports simple conditions, AND/OR logic.",
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "Simple condition: {fieldName: expectedValue}",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean"]
+          }
+        },
+        {
+          "type": "array",
+          "description": "Array of conditions with optional AND/OR logic",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": ["AND", "OR"],
+                "description": "Logical operator for combining conditions"
+              },
+              {
+                "type": "object",
+                "description": "Simple condition: {fieldName: expectedValue}",
+                "additionalProperties": {
+                  "type": ["string", "number", "boolean"]
+                }
+              },
+              {
+                "type": "array",
+                "description": "Nested conditions with AND/OR logic",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "enum": ["AND", "OR"]
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": ["string", "number", "boolean"]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

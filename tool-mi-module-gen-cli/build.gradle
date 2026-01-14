@@ -68,6 +68,8 @@ dependencies {
     implementation "org.apache.commons:commons-compress:${commonsCompressVersion}"
     implementation "org.ow2.asm:asm:${asmVersion}"
     implementation project(':mi-native')
+    implementation "org.apache.synapse:synapse-core:${synapseVersion}"
+    implementation "com.networknt:json-schema-validator:${jsonSchemaValidatorVersion}"
 
     // MI runtime dependencies - these will be copied as separate JARs to lib directory
     miRuntimeLibs project(':mi-native')
@@ -77,6 +79,8 @@ dependencies {
     // Dependencies to be included in shadow JAR
     shadowIncludes "com.github.jknack:handlebars:${handlebarsVersion}"
     shadowIncludes "org.antlr:antlr4-runtime:${antlrRuntimeVersion}"
+    shadowIncludes "org.apache.synapse:synapse-core:${synapseVersion}"
+    shadowIncludes "com.networknt:json-schema-validator:${jsonSchemaValidatorVersion}"
 }
 
 task copyMiRuntimeLibs(type: Copy) {
