@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,6 +44,7 @@ import java.util.stream.Stream;
  */
 public class ConnectorValidator {
 
+    private static final PrintStream ERROR_STREAM = System.err;
     private static final String UI_SCHEMA_PATH = "schema/ui-schema.json";
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static JsonSchema uiSchema;
@@ -70,8 +72,8 @@ public class ConnectorValidator {
                         if (path.toString().endsWith(".json")) {
                             ValidationResult validationResult = validateUISchema(path);
                             if (!validationResult.valid()) {
-                                System.out.println("UI Schema validation errors in " + path + ":");
-                                System.out.println(validationResult);
+                                ERROR_STREAM.println("UI Schema validation errors in " + path + ":");
+                                ERROR_STREAM.println(validationResult);
                                 return false;
                             }
                         }
