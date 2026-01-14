@@ -109,10 +109,13 @@ public class ConnectorZipValidationTest {
         Field sourcePathField = MiCmd.class.getDeclaredField("sourcePath");
         sourcePathField.setAccessible(true);
         sourcePathField.set(miCmd, projectPath.toString());
+        Path targetPath = projectPath.resolve("target");
+        Field targetPathField = MiCmd.class.getDeclaredField("targetPath");
+        targetPathField.setAccessible(true);
+        targetPathField.set(miCmd, targetPath.toString());
         miCmd.execute();
 
         // Validate the generated artifacts
-        Path targetPath = projectPath.resolve("target");
         Path connectorPath = targetPath.resolve("generated");
 
         Assert.assertTrue(Files.exists(connectorPath), "Connector path does not exist for project: " + projectName);
