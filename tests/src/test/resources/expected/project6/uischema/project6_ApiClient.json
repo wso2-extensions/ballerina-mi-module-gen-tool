@@ -1,0 +1,72 @@
+{
+  "connectorName": "project6",
+  "connectionName": "project6_ApiClient",
+  "title": "Connection Config for project6_ApiClient connection",
+  "help": "<h1>project6_ApiClient Connection</h1> <b></b>",
+  "elements": [
+    {
+      "type": "attribute",
+      "value": {
+        "name": "connectionName",
+        "displayName": "Connection Name",
+        "inputType": "string",
+        "defaultValue": "project6_ApiClient_connection_1",
+        "required": "true",
+        "helpTip": "The name for the project6_ApiClient connection",
+        "validation": "nameWithoutSpecialCharactors"
+      }
+    },
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Basic",
+              "collapsed": false,
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "baseUrl",
+                    "displayName": "baseUrl",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "true",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Advanced",
+              "collapsed": true,
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "apiKey",
+                    "displayName": "apiKey",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
