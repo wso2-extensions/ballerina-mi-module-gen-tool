@@ -49,7 +49,7 @@ import java.util.zip.ZipInputStream;
  * <ul>
  *   <li><b>Build Projects</b> (project1, project2, project3): Regular Ballerina projects with
  *       {@code @mi:Operation} annotated functions. Use {@code miProjectDataProvider()}.</li>
- *   <li><b>Bala Projects</b> (project4): Ballerina connector projects that need to be packed
+ *   <li><b>Bala Projects</b> (project4, project6, unionProject, nestedRecordConflictProject, etc.): Ballerina connector projects that need to be packed
  *       into .bala files first. Use {@code balaProjectDataProvider()}.</li>
  * </ul>
  * <p>
@@ -91,6 +91,7 @@ public class ConnectorZipValidationTest {
         return new Object[][]{
                 {"project4", null},  // project4 is a local bala project
                 {"unionProject", null},
+                {"project6", null},
                 {"nestedRecordConflictProject", null},  // Test for qualified naming with nested record conflicts
                 // Format: {"projectName", "org/package:version"} or {"projectName", null} for local
                 // Example: {"ballerinax-milvus", "ballerina/http:2.15.3"} - uncomment when connector is available

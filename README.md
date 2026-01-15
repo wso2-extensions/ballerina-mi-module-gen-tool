@@ -81,7 +81,7 @@ Use the dedicated Gradle task instead of enabling TestNG methods:
 $ ./gradlew :mi-tests:generateExpectedArtifacts -PartifactTarget=project1
 ```
 
-- `artifactTarget` can be one of `project1`, `project2`, `project3`, `project4`, or `central`.
+- `artifactTarget` can be one of `project1`, `project2`, `project3`, `project4`, `project6`, or `central`.
 - For `central`, optionally override Central packages with `-PcentralPackage=org/name:version,org2/name2:version2`
   (defaults to `ballerinax/milvus:1.1.0,ballerinax/azure.ai.search:1.0.0`). Multiple entries generate artifacts for each package, placing them in per-connector folders derived from `org-name`.
 

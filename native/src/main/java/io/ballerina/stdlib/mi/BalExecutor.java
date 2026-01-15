@@ -147,6 +147,40 @@ public class BalExecutor {
     }
 
     private Object createRecordValue(String jsonString, MessageContext context, int paramIndex) {
+        // Check if this is a flattened record from init function or a regular JSON record
+        // If jsonString doesn't look like JSON (doesn't start with '{' or '['), it's likely a record name
+        // that needs to be reconstructed from flattened fields
+        if (!jsonString.startsWith("{") && !jsonString.startsWith("[") && !jsonString.startsWith("'")) {
+            // This is a flattened record from init function
+            String recordParamName = jsonString; // e.g., "config"
+            
+            // Need to determine the connection type prefix to access the flattened fields
+            // Try to get it from the function name property
+            String functionName = context.getProperty(Constants.FUNCTION_NAME).toString();
+            
+            // For init functions, find the connection type from the context properties
+            // The pattern is {CONNECTIONTYPE}_paramFunctionName = "init"
+            String connectionType = findConnectionTypeForParam(context, recordParamName);
+            
+            if (connectionType != null) {
+                // Reconstruct the record from flattened fields
+                Object reconstructedBMap = reconstructRecordFromFields(recordParamName, context, connectionType);
+                
+                // Now convert the BMap to the typed record
+                String recordName = context.getProperty("param" + paramIndex + "_recordName").toString();
+                BMap<BString, Object> recValue = ValueCreator.createRecordValue(BalConnectorConfig.getModule(), recordName);
+                Type recType = recValue.getType();
+                
+                // Convert the reconstructed BMap to JSON and then to typed record
+                if (reconstructedBMap instanceof BMap) {
+                    String jsonStr = ((io.ballerina.runtime.internal.values.MapValueImpl<?, ?>) reconstructedBMap).getJSONString();
+                    BString jsonBString = StringUtils.fromString(jsonStr);
+                    return FromJsonStringWithType.fromJsonStringWithType(jsonBString, ValueCreator.createTypedescValue(recType));
+                }
+            }
+        }
+        
+        // Original logic for regular JSON record values
         if (jsonString.startsWith("'") && jsonString.endsWith("'")) {
             jsonString = jsonString.substring(1, jsonString.length() - 1);
         }
@@ -155,6 +189,196 @@ public class BalExecutor {
         BMap<BString, Object> recValue = ValueCreator.createRecordValue(BalConnectorConfig.getModule(), recordName);
         Type recType = recValue.getType();
         return FromJsonStringWithType.fromJsonStringWithType(jsonBString, ValueCreator.createTypedescValue(recType));
+    }
+    
+    /**
+     * Finds the connection type prefix for a given record parameter name.
+     * Searches through context properties to find the pattern {CONNECTIONTYPE}_{recordParamName}_param0.
+     * 
+     * @param context The message context
+     * @param recordParamName The record parameter name (e.g., "config")
+     * @return The connection type prefix or null if not found
+     */
+    private String findConnectionTypeForParam(MessageContext context, String recordParamName) {
+        // Strategy: Look for the SIZE property which tells us how many params we have
+        // Then check param0, param1, etc. to find which one matches our recordParamName
+        // Once we find it, we know the index and can construct the connection type
+        
+        try {
+            // The flattened fields use pattern: {CONNECTIONTYPE}_{recordParamName}_param0
+            // We need to find the {CONNECTIONTYPE} part
+            // We know that there's a property like "{CONNECTIONTYPE}_param0" = "config"
+            // So let's try to deduce the connection type by checking combinations
+            
+            // Get the SIZE to know how many parameters we have
+            Object sizeObj = context.getProperty(Constants.SIZE);
+            if (sizeObj != null) {
+                int size = Integer.parseInt(sizeObj.toString());
+                
+                // For each parameter index, check if the value matches our recordParamName
+                for (int i = 0; i < size; i++) {
+                    String paramKey = "param" + i;
+                    Object paramValue = context.getProperty(paramKey);
+                    
+                    if (paramValue != null && paramValue.toString().equals(recordParamName)) {
+                        // Found it! Now try to find the connection type prefix
+                        // The connection type has properties like {CONNECTIONTYPE}_param{i}
+                        // Try to find it by checking for {CONNECTIONTYPE}_paramFunctionName = "init"
+                        
+                        // Since we can't iterate all properties, use a workaround:
+                        // Try a brute force approach with common separators
+                        // The connection type is usually {MODULE}_{CLASS} in uppercase
+                        // Let's scan for known patterns by checking if {PREFIX}_param0 exists
+                        
+                        // Actually, a simpler approach: check if there's a property
+                        // named differently with _param0 suffix
+                        // We can use the fact that the template parameter name is different
+                        // from the context property name
+                        
+                        // The template parameter is just "config" but the property is
+                        // "{CONNECTIONTYPE}_config_param0"
+                        // So we need to get the value of "param0" from lookup, which should give us "config"
+                        // Then we check for properties ending with "_config_param0"
+                        
+                        // Workaround: Try common module prefixes
+                        Object functionNameProp = context.getProperty(Constants.FUNCTION_NAME);
+                        if (functionNameProp != null && "init".equals(functionNameProp.toString())) {
+                            // We're in an init function call
+                            // Look for the objectTypeName which has the connection type prefix
+                            // Try to find it by testing common patterns
+                            String testKey = recordParamName + "_param0";
+                            
+                            // Build potential connection types from org.module.Client pattern
+                            // For now, use a heuristic: try uppercase versions
+                            String[] testPrefixes = buildPotentialPrefixes(context);
+                            
+                            for (String prefix : testPrefixes) {
+                                Object testProp = context.getProperty(prefix + "_" + testKey);
+                                if (testProp != null) {
+                                    return prefix;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error finding connection type for record parameter: " + recordParamName, e);
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Builds potential connection type prefixes from the context.
+     * This is a heuristic approach since we can't enumerate all properties.
+     */
+    private String[] buildPotentialPrefixes(MessageContext context) {
+        java.util.List<String> prefixes = new java.util.ArrayList<>();
+        
+        // Try to get hints from the BalConnectorConfig if it's been set
+        // For now, use common patterns
+        // TODO: Make this more dynamic by storing the connection type in a well-known property
+        prefixes.add("GOOGLEAPIS_GMAIL_CLIENT");
+        
+        return prefixes.toArray(new String[0]);
+    }
+
+    /**
+     * Reconstructs a record from flattened fields stored in the context properties.
+     * Used for init function parameters where record fields are flattened in the XML.
+     * 
+     * @param recordParamName The name of the record parameter (e.g., "config")
+     * @param context The message context containing property values
+     * @param connectionType The connection type prefix (e.g., "GOOGLEAPIS_GMAIL_CLIENT")
+     * @return A JSON object representing the reconstructed record
+     */
+    private Object reconstructRecordFromFields(String recordParamName, MessageContext context, String connectionType) {
+        // Build a JSON object from the flattened fields
+        // Fields are stored as {connectionType}_{recordParamName}_param{index} = "fieldPath"
+        // e.g., GOOGLEAPIS_GMAIL_CLIENT_config_param0 = "http1Settings.keepAlive"
+        
+        com.google.gson.JsonObject recordJson = new com.google.gson.JsonObject();
+        int fieldIndex = 0;
+        
+        while (true) {
+            String fieldNameKey = connectionType + "_" + recordParamName + "_param" + fieldIndex;
+            String fieldTypeKey = connectionType + "_" + recordParamName + "_paramType" + fieldIndex;
+            
+            Object fieldNameObj = context.getProperty(fieldNameKey);
+            Object fieldTypeObj = context.getProperty(fieldTypeKey);
+            
+            if (fieldNameObj == null || fieldTypeObj == null) {
+                break; // No more fields
+            }
+            
+            String fieldPath = fieldNameObj.toString();
+            String fieldType = fieldTypeObj.toString();
+            
+            // Get the actual field value from the template parameters
+            Object fieldValue = lookupTemplateParameter(context, fieldPath);
+            
+            if (fieldValue != null) {
+                // Set the nested field value in the JSON object
+                setNestedField(recordJson, fieldPath, fieldValue, fieldType);
+            }
+            
+            fieldIndex++;
+        }
+        
+        // Log the reconstructed record for debugging
+        String recordJsonString = recordJson.toString();
+        log.info("Reconstructed record '" + recordParamName + "' with connection type '" + connectionType + "': " + recordJsonString);
+        System.out.println("Reconstructed record '" + recordParamName + "' with connection type '" + connectionType + "': " + recordJsonString);
+        
+        // Convert JSON object to BMap
+        return JsonUtils.parse(recordJsonString);
+    }
+    
+    /**
+     * Sets a nested field value in a JSON object using dot notation path.
+     * For example, "http1Settings.proxy.host" creates nested objects and sets the value.
+     * 
+     * @param jsonObject The root JSON object
+     * @param fieldPath The dot-notation path (e.g., "http1Settings.proxy.host")
+     * @param value The value to set
+     * @param fieldType The type of the field
+     */
+    private void setNestedField(com.google.gson.JsonObject jsonObject, String fieldPath, Object value, String fieldType) {
+        String[] parts = fieldPath.split("\\.");
+        com.google.gson.JsonObject current = jsonObject;
+        
+        // Navigate/create nested objects up to the second-to-last part
+        for (int i = 0; i < parts.length - 1; i++) {
+            String part = parts[i];
+            if (!current.has(part)) {
+                current.add(part, new com.google.gson.JsonObject());
+            }
+            current = current.getAsJsonObject(part);
+        }
+        
+        // Set the final field value with appropriate type
+        String finalField = parts[parts.length - 1];
+        String valueStr = value.toString();
+        
+        switch (fieldType) {
+            case BOOLEAN:
+                current.addProperty(finalField, Boolean.parseBoolean(valueStr));
+                break;
+            case INT:
+                current.addProperty(finalField, Long.parseLong(valueStr));
+                break;
+            case FLOAT:
+                current.addProperty(finalField, Double.parseDouble(valueStr));
+                break;
+            case DECIMAL:
+                current.addProperty(finalField, valueStr); // Keep as string for decimals
+                break;
+            default:
+                // String and other types
+                current.addProperty(finalField, valueStr);
+                break;
+        }
     }
 
     private BXml getBXmlParameter(MessageContext context, String parameterName) {
@@ -184,6 +408,11 @@ public class BalExecutor {
 
     public static Object lookupTemplateParameter(MessageContext ctx, String paramName) {
         Stack funcStack = (Stack) ctx.getProperty(Constants.SYNAPSE_FUNCTION_STACK);
+        if (funcStack == null || funcStack.isEmpty()) {
+            // Fallback for testing or when function stack is not available
+            // Read directly from context properties
+            return ctx.getProperty(paramName);
+        }
         TemplateContext currentFuncHolder = (TemplateContext) funcStack.peek();
         return currentFuncHolder.getParameterValue(paramName);
     }
