@@ -25,93 +25,101 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Basic",
+              "collapsed": false,
               "elements": [
                 {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Server",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "host",
-                    "displayName": "host",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "port",
-                    "displayName": "port",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "protocol",
-                    "displayName": "protocol",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "host",
+                          "displayName": "host",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "port",
+                          "displayName": "port",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "protocol",
+                          "displayName": "protocol",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
                     ]
                   }
-                },{
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Database",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "host",
-                    "displayName": "host",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "port",
-                    "displayName": "port",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "database",
-                    "displayName": "database",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "host",
+                          "displayName": "host",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "port",
+                          "displayName": "port",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "database",
+                          "displayName": "database",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
                     ]
                   }
                 }

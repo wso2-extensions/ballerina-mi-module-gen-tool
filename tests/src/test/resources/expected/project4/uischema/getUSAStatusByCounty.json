@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getUSAStatusByCounty",
-  "title": "getUSAStatusByCounty",
+  "title": "get usastatus by county",
   "help": "Get COVID-19 totals for a specific county\n",
   "elements": [
     {

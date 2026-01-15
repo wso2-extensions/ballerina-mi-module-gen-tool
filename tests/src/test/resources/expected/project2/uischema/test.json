@@ -26,7 +26,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "xmlB",
@@ -38,7 +39,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "xmlC",

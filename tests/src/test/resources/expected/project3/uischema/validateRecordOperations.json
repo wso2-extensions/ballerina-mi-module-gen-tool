@@ -1,7 +1,7 @@
 {
   "connectorName": "project3",
   "operationName": "validateRecordOperations",
-  "title": "validateRecordOperations",
+  "title": "validate record operations",
   "help": "",
   "elements": [
     {
@@ -26,96 +26,13 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "name",
-                    "displayName": "name",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "age",
-                    "displayName": "age",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "city",
-                    "displayName": "city",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "employeeInput",
                     "displayName": "employeeInput",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "employeeId",
-                    "displayName": "employeeId",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "department",
-                    "displayName": "department",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "salary",
-                    "displayName": "salary",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "isActive",
-                    "displayName": "isActive",
-                    "inputType": "boolean",
                     "defaultValue": "",
                     "required": "true",
                     "helpTip": "",

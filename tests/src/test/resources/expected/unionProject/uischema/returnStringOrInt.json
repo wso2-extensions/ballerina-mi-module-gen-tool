@@ -1,7 +1,7 @@
 {
   "connectorName": "unionProject",
   "operationName": "returnStringOrInt",
-  "title": "returnStringOrInt",
+  "title": "return string or int",
   "help": "",
   "elements": [
     {

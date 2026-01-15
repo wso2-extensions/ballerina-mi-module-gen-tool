@@ -19,7 +19,7 @@
 <component name="functions" type="synapse/template">
     <subComponents>
         <component name="testOperation">
-            <displayName>testOperation</displayName>
+            <displayName>test operation</displayName>
             <file>testOperation.xml</file>
             <description></description>
         </component>

@@ -1,7 +1,7 @@
 {
   "connectorName": "unionProject",
   "operationName": "processWithNil",
-  "title": "processWithNil",
+  "title": "process with nil",
   "help": "",
   "elements": [
     {
@@ -35,13 +35,16 @@
                     "name": "valueDataType",
                     "displayName": "valueDataType",
                     "inputType": "combo",
-                    "comboValues": ["string","int"],
+                    "comboValues": [
+                      "string",
+                      "int"
+                    ],
                     "defaultValue": "string",
                     "required": "false",
                     "helpTip": ""
                   }
-                }
-,{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "valueString",
@@ -52,9 +55,14 @@
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": "",
-                    "enableCondition": [{"valueDataType": "string"}]
+                    "enableCondition": [
+                      {
+                        "valueDataType": "string"
+                      }
+                    ]
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "valueInt",
@@ -65,7 +73,11 @@
                     "helpTip": "",
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$",
-                    "enableCondition": [{"valueDataType": "int"}]
+                    "enableCondition": [
+                      {
+                        "valueDataType": "int"
+                      }
+                    ]
                   }
                 }
               ]

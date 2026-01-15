@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getInfluenzaReportsByUCLA",
-  "title": "getInfluenzaReportsByUCLA",
+  "title": "get influenza reports by ucla",
   "help": "Get Influenza report data for the 2019 and 2020 outbreaks from the US Center for Disease Control, reported by US clinical labs\n",
   "elements": [
     {
@@ -28,9 +28,7 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
-              "elements": [
-                
-              ]
+              "elements": []
             }
           },
           {

@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getTimeSeriesByUSAStateNYT",
-  "title": "getTimeSeriesByUSAStateNYT",
+  "title": "get time series by usastate nyt",
   "help": "Get COVID-19 time series data for a state or set of states, with an entry for each day since the pandemic began\n",
   "elements": [
     {
@@ -41,13 +41,14 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "lastdays",
                     "displayName": "lastdays",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "30",
+                    "defaultValue": "",
                     "required": "false",
                     "helpTip": "",
                     "validateType": "",

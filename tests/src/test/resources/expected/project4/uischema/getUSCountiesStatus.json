@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getUSCountiesStatus",
-  "title": "getUSCountiesStatus",
+  "title": "get uscounties status",
   "help": "Get COVID-19 totals for all US counties\n",
   "elements": [
     {
@@ -28,9 +28,7 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
-              "elements": [
-                
-              ]
+              "elements": []
             }
           },
           {

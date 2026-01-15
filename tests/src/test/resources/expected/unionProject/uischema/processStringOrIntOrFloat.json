@@ -1,7 +1,7 @@
 {
   "connectorName": "unionProject",
   "operationName": "processStringOrIntOrFloat",
-  "title": "processStringOrIntOrFloat",
+  "title": "process string or int or float",
   "help": "",
   "elements": [
     {
@@ -35,13 +35,17 @@
                     "name": "valueDataType",
                     "displayName": "valueDataType",
                     "inputType": "combo",
-                    "comboValues": ["string","int","float"],
+                    "comboValues": [
+                      "string",
+                      "int",
+                      "float"
+                    ],
                     "defaultValue": "string",
                     "required": "true",
                     "helpTip": ""
                   }
-                }
-,{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "valueString",
@@ -52,9 +56,14 @@
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": "",
-                    "enableCondition": [{"valueDataType": "string"}]
+                    "enableCondition": [
+                      {
+                        "valueDataType": "string"
+                      }
+                    ]
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "valueInt",
@@ -65,9 +74,14 @@
                     "helpTip": "",
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$",
-                    "enableCondition": [{"valueDataType": "int"}]
+                    "enableCondition": [
+                      {
+                        "valueDataType": "int"
+                      }
+                    ]
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "valueFloat",
@@ -78,7 +92,11 @@
                     "helpTip": "",
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$",
-                    "enableCondition": [{"valueDataType": "float"}]
+                    "enableCondition": [
+                      {
+                        "valueDataType": "float"
+                      }
+                    ]
                   }
                 }
               ]

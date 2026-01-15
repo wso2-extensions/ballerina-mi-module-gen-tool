@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getTimeSeriesForUSACounties",
-  "title": "getTimeSeriesForUSACounties",
+  "title": "get time series for usacounties",
   "help": "Get all possible US States to query the /historical/usacounties/{state} endpoint with\n",
   "elements": [
     {
@@ -28,9 +28,7 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
-              "elements": [
-                
-              ]
+              "elements": []
             }
           },
           {

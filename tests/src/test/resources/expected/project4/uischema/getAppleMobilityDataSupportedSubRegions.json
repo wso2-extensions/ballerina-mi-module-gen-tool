@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getAppleMobilityDataSupportedSubRegions",
-  "title": "getAppleMobilityDataSupportedSubRegions",
+  "title": "get apple mobility data supported sub regions",
   "help": "Get a list of supported subregions for specific country in the Apple mobility data set\n",
   "elements": [
     {

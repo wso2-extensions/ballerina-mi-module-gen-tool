@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getTimeSeriesByProvince",
-  "title": "getTimeSeriesByProvince",
+  "title": "get time series by province",
   "help": "Get COVID-19 time series data for a specific province in a country\n",
   "elements": [
     {
@@ -41,7 +41,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "province",
@@ -53,13 +54,14 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "lastdays",
                     "displayName": "lastdays",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "30",
+                    "defaultValue": "",
                     "required": "false",
                     "helpTip": "",
                     "validateType": "",

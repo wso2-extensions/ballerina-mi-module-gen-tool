@@ -37,19 +37,19 @@
 </description>
         </component>
         <component name="loadCollection">
-            <displayName>loadCollection</displayName>
+            <displayName>load collection</displayName>
             <file>loadCollection.xml</file>
             <description>Loads a collection in the Milvus vector database.
 </description>
         </component>
         <component name="listCollections">
-            <displayName>listCollections</displayName>
+            <displayName>list collections</displayName>
             <file>listCollections.xml</file>
             <description>Lists all the collections in the Milvus vector database.
 </description>
         </component>
         <component name="createIndex">
-            <displayName>createIndex</displayName>
+            <displayName>create index</displayName>
             <file>createIndex.xml</file>
             <description>Creates an index for a collection in the Milvus vector database.
 </description>
@@ -61,7 +61,7 @@
 </description>
         </component>
         <component name="createCollection">
-            <displayName>createCollection</displayName>
+            <displayName>create collection</displayName>
             <file>createCollection.xml</file>
             <description>Creates a new collection in the Milvus vector database.
 </description>

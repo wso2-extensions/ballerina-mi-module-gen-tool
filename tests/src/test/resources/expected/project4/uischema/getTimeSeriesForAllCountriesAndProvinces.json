@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getTimeSeriesForAllCountriesAndProvinces",
-  "title": "getTimeSeriesForAllCountriesAndProvinces",
+  "title": "get time series for all countries and provinces",
   "help": "Get COVID-19 time series data for all countries and their provinces\n",
   "elements": [
     {
@@ -35,7 +35,7 @@
                     "name": "lastdays",
                     "displayName": "lastdays",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "30",
+                    "defaultValue": "",
                     "required": "false",
                     "helpTip": "",
                     "validateType": "",

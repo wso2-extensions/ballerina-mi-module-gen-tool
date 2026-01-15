@@ -1,7 +1,7 @@
 {
   "connectorName": "unionProject",
   "operationName": "getResponse",
-  "title": "getResponse",
+  "title": "get response",
   "help": "",
   "elements": [
     {

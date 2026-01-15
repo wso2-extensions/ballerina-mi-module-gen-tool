@@ -1,7 +1,7 @@
 {
   "connectorName": "milvus",
   "operationName": "listCollections",
-  "title": "listCollections",
+  "title": "list collections",
   "help": "Lists all the collections in the Milvus vector database.\n",
   "elements": [
     {
@@ -28,9 +28,7 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
-              "elements": [
-                
-              ]
+              "elements": []
             }
           },
           {

@@ -24,52 +24,52 @@
             <description></description>
         </component>
         <component name="testXmlReturn">
-            <displayName>testXmlReturn</displayName>
+            <displayName>test xml return</displayName>
             <file>testXmlReturn.xml</file>
             <description></description>
         </component>
         <component name="testAbsenceOfValues">
-            <displayName>testAbsenceOfValues</displayName>
+            <displayName>test absence of values</displayName>
             <file>testAbsenceOfValues.xml</file>
             <description></description>
         </component>
         <component name="validateBooleanOperations">
-            <displayName>validateBooleanOperations</displayName>
+            <displayName>validate boolean operations</displayName>
             <file>validateBooleanOperations.xml</file>
             <description></description>
         </component>
         <component name="validateIntegerOperations">
-            <displayName>validateIntegerOperations</displayName>
+            <displayName>validate integer operations</displayName>
             <file>validateIntegerOperations.xml</file>
             <description></description>
         </component>
         <component name="validateFloatOperations">
-            <displayName>validateFloatOperations</displayName>
+            <displayName>validate float operations</displayName>
             <file>validateFloatOperations.xml</file>
             <description></description>
         </component>
         <component name="validateDecimalOperations">
-            <displayName>validateDecimalOperations</displayName>
+            <displayName>validate decimal operations</displayName>
             <file>validateDecimalOperations.xml</file>
             <description></description>
         </component>
         <component name="validateStringOperations">
-            <displayName>validateStringOperations</displayName>
+            <displayName>validate string operations</displayName>
             <file>validateStringOperations.xml</file>
             <description></description>
         </component>
         <component name="validateRecordOperations">
-            <displayName>validateRecordOperations</displayName>
+            <displayName>validate record operations</displayName>
             <file>validateRecordOperations.xml</file>
             <description></description>
         </component>
         <component name="validateJsonOperations">
-            <displayName>validateJsonOperations</displayName>
+            <displayName>validate json operations</displayName>
             <file>validateJsonOperations.xml</file>
             <description></description>
         </component>
         <component name="validateMapOperations">
-            <displayName>validateMapOperations</displayName>
+            <displayName>validate map operations</displayName>
             <file>validateMapOperations.xml</file>
             <description></description>
         </component>

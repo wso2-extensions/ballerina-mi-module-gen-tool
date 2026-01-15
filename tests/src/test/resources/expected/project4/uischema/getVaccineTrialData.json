@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getVaccineTrialData",
-  "title": "getVaccineTrialData",
+  "title": "get vaccine trial data",
   "help": "Get vaccine trial data from RAPS (Regulatory Affairs Professional Society). Specifically published by Jeff Craven at https://www.raps.org/news-and-articles/news-articles/2020/3/covid-19-vaccine-tracker\n",
   "elements": [
     {
@@ -28,9 +28,7 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
-              "elements": [
-                
-              ]
+              "elements": []
             }
           },
           {

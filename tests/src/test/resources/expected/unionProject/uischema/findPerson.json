@@ -1,7 +1,7 @@
 {
   "connectorName": "unionProject",
   "operationName": "findPerson",
-  "title": "findPerson",
+  "title": "find person",
   "help": "",
   "elements": [
     {

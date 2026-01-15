@@ -1,7 +1,7 @@
 {
   "connectorName": "project3",
   "operationName": "validateStringOperations",
-  "title": "validateStringOperations",
+  "title": "validate string operations",
   "help": "",
   "elements": [
     {
@@ -26,7 +26,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "inputB",

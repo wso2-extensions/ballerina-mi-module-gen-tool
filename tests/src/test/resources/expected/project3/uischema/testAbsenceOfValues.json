@@ -1,7 +1,7 @@
 {
   "connectorName": "project3",
   "operationName": "testAbsenceOfValues",
-  "title": "testAbsenceOfValues",
+  "title": "test absence of values",
   "help": "",
   "elements": [
     {
@@ -13,9 +13,7 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
-              "elements": [
-                
-              ]
+              "elements": []
             }
           },
           {

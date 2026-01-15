@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getTotalGlobalVaccineDosesAdministered",
-  "title": "getTotalGlobalVaccineDosesAdministered",
+  "title": "get total global vaccine doses administered",
   "help": "Get total global COVID-19 vaccine doses administered. Sourced from https://covid.ourworldindata.org/\n",
   "elements": [
     {
@@ -35,19 +35,20 @@
                     "name": "lastdays",
                     "displayName": "lastdays",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "30",
+                    "defaultValue": "",
                     "required": "false",
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "fullData",
                     "displayName": "fullData",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "false",
+                    "defaultValue": "",
                     "required": "false",
                     "helpTip": "",
                     "validateType": "",
