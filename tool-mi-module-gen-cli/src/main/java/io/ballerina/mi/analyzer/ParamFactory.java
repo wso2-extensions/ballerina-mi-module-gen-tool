@@ -25,6 +25,7 @@ import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.mi.connectorModel.FunctionParam;
 import io.ballerina.mi.connectorModel.RecordFunctionParam;
 import io.ballerina.mi.connectorModel.UnionFunctionParam;
@@ -99,14 +100,22 @@ public class ParamFactory {
             // For example, fields will be "authConfig.token" instead of "config.authConfig.token"
             String parentPath = "";  // Top-level record should not include param name in field paths
             recordParam.setParentParamPath("");  // Top-level has no parent
-            populateRecordFieldParams(recordParam, recordTypeSymbol, parentPath);
+            populateRecordFieldParams(recordParam, recordTypeSymbol, parentPath, new java.util.HashSet<>());
         }
 
         return Optional.of(recordParam);
     }
 
-    private static void populateRecordFieldParams(RecordFunctionParam recordParam, RecordTypeSymbol recordTypeSymbol, String parentPath) {
-        Map<String, RecordFieldSymbol> fieldDescriptors = recordTypeSymbol.fieldDescriptors();
+    private static void populateRecordFieldParams(RecordFunctionParam recordParam, RecordTypeSymbol recordTypeSymbol, String parentPath, java.util.Set<String> visitStack) {
+        // recursion check
+        String typeSignature = recordTypeSymbol.signature();
+        if (visitStack.contains(typeSignature)) {
+            return;
+        }
+        visitStack.add(typeSignature);
+        
+        try {
+            Map<String, RecordFieldSymbol> fieldDescriptors = recordTypeSymbol.fieldDescriptors();
         int fieldIndex = 0;
 
         for (Map.Entry<String, RecordFieldSymbol> entry : fieldDescriptors.entrySet()) {
@@ -129,13 +138,26 @@ public class ParamFactory {
                     unionFieldParam.setTypeSymbol(fieldTypeSymbol);
                     TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(fieldTypeSymbol);
                     if (actualTypeSymbol instanceof BallerinaUnionTypeSymbol ballerinaUnionTypeSymbol) {
-                        populateUnionMemberParams(fieldName, ballerinaUnionTypeSymbol, unionFieldParam);
+                        // Use qualifiedFieldName to ensure enable conditions are properly scoped for nested fields
+                        populateUnionMemberParams(qualifiedFieldName, ballerinaUnionTypeSymbol, unionFieldParam, visitStack);
                     }
                     // Skip empty unions (all members are nil or unsupported types)
                     if (unionFieldParam.getUnionMemberParams().isEmpty()) {
                         continue;
                     }
-                    fieldParam = unionFieldParam;
+                    // If there's only one non-nil member, convert to a regular FunctionParam instead of UnionFunctionParam
+                    // This avoids generating a pointless combobox with a single selectable value (e.g., for optional fields like string?)
+                    // However, if the single member is itself a UnionFunctionParam, we must NOT simplify it to a generic FunctionParam,
+                    // as that would lose the Union structure and cause runtime errors when the serializer expects a UnionFunctionParam.
+                    if (unionFieldParam.getUnionMemberParams().size() == 1 && !(unionFieldParam.getUnionMemberParams().getFirst() instanceof UnionFunctionParam)) {
+                        FunctionParam singleMember = unionFieldParam.getUnionMemberParams().getFirst();
+                        fieldParam = new FunctionParam(Integer.toString(fieldIndex), qualifiedFieldName, singleMember.getParamType());
+                        fieldParam.setTypeSymbol(singleMember.getTypeSymbol());
+                        // If the union was optional (nil was one of the members), the result should also be optional
+                        fieldParam.setRequired(unionFieldParam.isRequired());
+                    } else {
+                        fieldParam = unionFieldParam;
+                    }
                 } else if (fieldTypeKind == TypeDescKind.RECORD) {
                     // Create RecordFunctionParam for nested record fields
                     TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(fieldTypeSymbol);
@@ -146,7 +168,9 @@ public class ParamFactory {
                     if (actualTypeSymbol instanceof RecordTypeSymbol nestedRecordTypeSymbol) {
                         // Recursive call with extended parent path
                         String nestedParentPath = buildQualifiedName(parentPath, fieldName);
-                        populateRecordFieldParams(nestedRecordParam, nestedRecordTypeSymbol, nestedParentPath);
+                        // Pass a copy of the stack or remove after return? 
+                        // Since we want to detect cycles in *this* path, passing the same stack instance (and removing on exit) is correct.
+                        populateRecordFieldParams(nestedRecordParam, nestedRecordTypeSymbol, nestedParentPath, visitStack);
                     }
                     fieldParam = nestedRecordParam;
                 } else {
@@ -166,6 +190,9 @@ public class ParamFactory {
                 fieldIndex++;
             }
         }
+        } finally {
+            visitStack.remove(typeSignature);
+        }
     }
 
     private static Optional<FunctionParam> createUnionFunctionParam(ParameterSymbol parameterSymbol, int index) {
@@ -176,18 +203,44 @@ public class ParamFactory {
         functionParam.setTypeSymbol(typeSymbol);
         TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(typeSymbol);
         if (actualTypeSymbol instanceof BallerinaUnionTypeSymbol ballerinaUnionTypeSymbol) {
-            populateUnionMemberParams(paramName, ballerinaUnionTypeSymbol, functionParam);
+            populateUnionMemberParams(paramName, ballerinaUnionTypeSymbol, functionParam, new java.util.HashSet<>());
+        }
+        functionParam.setTypeSymbol(parameterSymbol.typeDescriptor());
+        // Only try the second approach if the first one didn't find any members
+        if (functionParam.getUnionMemberParams().isEmpty()) {
+            // Resolve type references to get the actual union type symbol
+            actualTypeSymbol = Utils.getActualTypeSymbol(parameterSymbol.typeDescriptor());
+            // Check for UnionTypeSymbol interface instead of concrete class to handle all union type implementations
+            if (actualTypeSymbol instanceof UnionTypeSymbol unionTypeSymbol) {
+                populateUnionMemberParams(paramName, unionTypeSymbol, functionParam, new java.util.HashSet<>());
+            }
         }
         // Skip empty unions (all members are nil or unsupported types)
+        // Note: Check AFTER both population attempts to ensure we try all possible ways to extract union members
         if (functionParam.getUnionMemberParams().isEmpty()) {
             return Optional.empty();
+        }
+        // If there's only one non-nil member, return it as a regular FunctionParam instead of a UnionFunctionParam
+        // This avoids generating a pointless combobox with a single selectable value (e.g., for optional types like string?)
+        // However, if the single member is itself a UnionFunctionParam, we must NOT simplify it to a generic FunctionParam.
+        if (functionParam.getUnionMemberParams().size() == 1 && !(functionParam.getUnionMemberParams().getFirst() instanceof UnionFunctionParam)) {
+            FunctionParam singleMember = functionParam.getUnionMemberParams().getFirst();
+            // Create a new function param with the original parameter's properties
+            FunctionParam simplifiedParam = new FunctionParam(Integer.toString(index), paramName, singleMember.getParamType());
+            simplifiedParam.setParamKind(parameterSymbol.paramKind());
+            simplifiedParam.setTypeSymbol(singleMember.getTypeSymbol());
+            // If the union was optional (nil was one of the members), the result should also be optional
+            simplifiedParam.setRequired(functionParam.isRequired());
+            return Optional.of(simplifiedParam);
         }
         return Optional.of(functionParam);
     }
 
-    private static void populateUnionMemberParams(String paramName, BallerinaUnionTypeSymbol ballerinaUnionTypeSymbol, UnionFunctionParam functionParam) {
+    private static void populateUnionMemberParams(String paramName, UnionTypeSymbol unionTypeSymbol, UnionFunctionParam functionParam, java.util.Set<String> visitStack) {
         int memberIndex = 0;
-        for (TypeSymbol memberTypeSymbol : ballerinaUnionTypeSymbol.memberTypeDescriptors()) {
+        java.util.Set<String> seenTypes = new java.util.HashSet<>();  // Track seen actualParamType values to avoid duplicates
+
+        for (TypeSymbol memberTypeSymbol : unionTypeSymbol.memberTypeDescriptors()) {
             TypeDescKind actualTypeKind = Utils.getActualTypeKind(memberTypeSymbol);
             String paramType = Utils.getParamTypeName(actualTypeKind);
             if (paramType != null) {
@@ -198,13 +251,47 @@ public class ParamFactory {
                     if (TypeDescKind.RECORD.getName().equals(paramType)) {
                         // Use record name if available, otherwise use generic "Record" + index
                         actualParamType = memberTypeSymbol.getName().orElse("Record" + memberIndex);
+                    } else if (TypeDescKind.UNION.getName().equals(paramType)) {
+                        // For union types, try to get the type name (e.g., type alias name)
+                        // If no name is available, use generic "Union" + index
+                        actualParamType = memberTypeSymbol.getName().orElse("Union" + memberIndex);
                     } else {
                         actualParamType = paramType;
                     }
+
+                    // Skip if we've already added this type (e.g., multiple singleton strings "1", "2" both map to "string")
+                    if (seenTypes.contains(actualParamType)) {
+                        continue;
+                    }
+                    seenTypes.add(actualParamType);
+
                     String memberParamName = paramName + StringUtils.capitalize(actualParamType);
-                    FunctionParam memberParam = new FunctionParam(Integer.toString(memberIndex), memberParamName, paramType);
-                    memberParam.setTypeSymbol(memberTypeSymbol);
-                    memberParam.setEnableCondition("[{\"" + paramName + "DataType\": \"" + actualParamType + "\"}]");
+
+                    // If the member type is itself a union, create a UnionFunctionParam recursively
+                    FunctionParam memberParam;
+                    TypeSymbol actualMemberTypeSymbol = Utils.getActualTypeSymbol(memberTypeSymbol);
+                    if (actualTypeKind == TypeDescKind.UNION && actualMemberTypeSymbol instanceof UnionTypeSymbol memberUnionSymbol) {
+                        UnionFunctionParam memberUnionParam = new UnionFunctionParam(Integer.toString(memberIndex), memberParamName, paramType);
+                        memberUnionParam.setTypeSymbol(memberTypeSymbol);
+                        memberUnionParam.setDisplayTypeName(actualParamType);
+                        populateUnionMemberParams(memberParamName, memberUnionSymbol, memberUnionParam, visitStack);
+                        memberParam = memberUnionParam;
+                    } else if (actualTypeKind == TypeDescKind.RECORD && actualMemberTypeSymbol instanceof RecordTypeSymbol recordTypeSymbol) {
+                        RecordFunctionParam recordParam = new RecordFunctionParam(Integer.toString(memberIndex), memberParamName, paramType);
+                        recordParam.setTypeSymbol(memberTypeSymbol);
+                        recordParam.setDisplayTypeName(actualParamType);
+                        recordParam.setRecordName(actualParamType);
+                        // Use original paramName as parent path for fields so they are generated as "paramName.field"
+                        populateRecordFieldParams(recordParam, recordTypeSymbol, paramName, visitStack);
+                        memberParam = recordParam;
+                    } else {
+                        memberParam = new FunctionParam(Integer.toString(memberIndex), memberParamName, paramType);
+                        memberParam.setTypeSymbol(memberTypeSymbol);
+                        memberParam.setDisplayTypeName(actualParamType);
+                    }
+                    // Use sanitized parameter name in enable condition for consistency
+                    String sanitizedParamName = io.ballerina.mi.util.Utils.sanitizeParamName(paramName);
+                    memberParam.setEnableCondition("[{\"" + sanitizedParamName + "DataType\": \"" + actualParamType + "\"}]");
                     functionParam.addUnionMemberParam(memberParam);
                     memberIndex++;
                 }

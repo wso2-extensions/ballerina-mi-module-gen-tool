@@ -29,6 +29,7 @@ public class FunctionParam extends Param {
     private boolean required;
     private String enableCondition;
     private String defaultValue;
+    private String displayTypeName;  // For unions/records, stores the actual type name (e.g., "Xgafv" instead of "union")
 
     public FunctionParam(String index, String name, String paramType) {
         super(index, name);
@@ -79,5 +80,13 @@ public class FunctionParam extends Param {
 
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
+    }
+
+    public String getDisplayTypeName() {
+        return displayTypeName;
+    }
+
+    public void setDisplayTypeName(String displayTypeName) {
+        this.displayTypeName = displayTypeName;
     }
 }
