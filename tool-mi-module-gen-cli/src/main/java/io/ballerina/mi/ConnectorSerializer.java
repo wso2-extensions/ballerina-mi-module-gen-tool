@@ -81,17 +81,14 @@ public class ConnectorSerializer {
             copyResources(getClass().getClassLoader(), destinationPath, jarPath, connector.getOrgName(),
                     connector.getModuleName(), connector.getMajorVersion());
 
-            String zipFilePath;
             if (connector.isBalModule()) {
                 Files.copy(targetPath.resolve("bin").resolve(connector.getModuleName() + ".jar"), destinationPath.resolve(Connector.LIB_PATH).resolve(connector.getModuleName() + ".jar"));
-                zipFilePath = targetPath.toAbsolutePath().getParent().resolve(connector.getZipFileName()).toString();
             } else {
                 Path generatedArtifactPath = Paths.get(System.getProperty(Constants.CONNECTOR_TARGET_PATH));
                 Files.copy(generatedArtifactPath, destinationPath.resolve(Connector.LIB_PATH).resolve(generatedArtifactPath.getFileName()));
-                zipFilePath = generatedArtifactPath.getParent().getParent().resolve(connector.getZipFileName()).toString();
             }
+            String zipFilePath = targetPath.resolve(connector.getZipFileName()).toString();
             Utils.zipFolder(destinationPath, zipFilePath);
-//            Utils.deleteDirectory(destinationPath);
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }

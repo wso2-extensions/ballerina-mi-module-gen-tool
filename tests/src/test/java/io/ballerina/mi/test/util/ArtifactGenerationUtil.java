@@ -19,10 +19,7 @@ package io.ballerina.mi.test.util;
 import io.ballerina.mi.MiCmd;
 import org.testng.Assert;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -108,11 +105,13 @@ public class ArtifactGenerationUtil {
         Field sourcePathField = MiCmd.class.getDeclaredField("sourcePath");
         sourcePathField.setAccessible(true);
         sourcePathField.set(miCmd, projectPathStr);
-        if (targetPathStr != null && !targetPathStr.isBlank()) {
-            Field targetPathField = MiCmd.class.getDeclaredField("targetPath");
-            targetPathField.setAccessible(true);
-            targetPathField.set(miCmd, targetPathStr);
+        if (targetPathStr == null || targetPathStr.isBlank()) {
+            targetPathStr = projectPathStr + File.separator + "target";
         }
+        Field targetPathField = MiCmd.class.getDeclaredField("targetPath");
+        targetPathField.setAccessible(true);
+        targetPathField.set(miCmd, targetPathStr);
+
         miCmd.execute();
         System.out.println("MiCmd execution completed.");
 
