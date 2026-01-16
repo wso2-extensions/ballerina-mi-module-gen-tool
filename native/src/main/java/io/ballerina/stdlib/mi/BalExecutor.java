@@ -117,7 +117,7 @@ public class BalExecutor {
         } else {
             paramType = context.getProperty(type).toString();
         }
-        if (param == null && !UNION.equals(paramType)) {
+        if (param == null && !UNION.equals(paramType) && !RECORD.equals(paramType)) {
             log.error("Error in getting the ballerina function parameter: " + paramName);
             throw new SynapseException("Parameter '" + paramName + "' is missing");
         }
@@ -129,7 +129,7 @@ public class BalExecutor {
             case DECIMAL -> ValueCreator.createDecimalValue((String) param);
             case JSON -> getJsonParameter(param);
             case XML -> getBXmlParameter(context, value);
-            case RECORD -> createRecordValue((String) param, context, index);
+            case RECORD -> createRecordValue((String) param, paramName, context, index);
             case ARRAY -> getArrayParameter((String) param, context, value);
             case MAP -> getMapParameter(param);
             case UNION -> getUnionParameter(paramName, context, index);
@@ -146,13 +146,13 @@ public class BalExecutor {
         return null;
     }
 
-    private Object createRecordValue(String jsonString, MessageContext context, int paramIndex) {
+    private Object createRecordValue(String jsonString, String paramName, MessageContext context, int paramIndex) {
         // Check if this is a flattened record from init function or a regular JSON record
         // If jsonString doesn't look like JSON (doesn't start with '{' or '['), it's likely a record name
         // that needs to be reconstructed from flattened fields
-        if (!jsonString.startsWith("{") && !jsonString.startsWith("[") && !jsonString.startsWith("'")) {
+        if (jsonString == null || (!jsonString.startsWith("{") && !jsonString.startsWith("[") && !jsonString.startsWith("'"))) {
             // This is a flattened record from init function
-            String recordParamName = jsonString; // e.g., "config"
+            String recordParamName = (jsonString != null) ? jsonString : paramName; // e.g., "config"
             
             // Need to determine the connection type prefix to access the flattened fields
             // Try to get it from the function name property
