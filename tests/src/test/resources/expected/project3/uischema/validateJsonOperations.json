@@ -1,7 +1,7 @@
 {
   "connectorName": "project3",
   "operationName": "validateJsonOperations",
-  "title": "validateJsonOperations",
+  "title": "validate json operations",
   "help": "",
   "elements": [
     {
@@ -26,7 +26,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "inputJsonB",

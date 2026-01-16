@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getVaccineCoverageOfAllUSAStates",
-  "title": "getVaccineCoverageOfAllUSAStates",
+  "title": "get vaccine coverage of all usastates",
   "help": "Get COVID-19 vaccine doses administered for all states that have reported rolling out vaccination. Sourced  from https://covid.ourworldindata.org/\n",
   "elements": [
     {
@@ -41,7 +41,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "fullData",

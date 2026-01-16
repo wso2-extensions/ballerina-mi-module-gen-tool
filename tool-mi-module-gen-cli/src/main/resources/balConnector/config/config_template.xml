@@ -21,12 +21,6 @@
     <parameter name="connectionType" description="Connection type"/>
     <!-- TODO: if union, the selected member type becomes a parameter-->
     {{#each connections ~}}
-    {{#each initComponent.queryParams ~}}
-    <parameter name="{{uppercase ../connectionType}}_{{name}}" description="{{documentation}}"/>
-    {{/each ~}}
-    {{#each initComponent.pathParams ~}}
-    <parameter name="{{uppercase ../connectionType}}_{{name}}" description="{{documentation}}"/>
-    {{/each ~}}
     {{writeConfigXmlParameters initComponent.functionParams}}
     {{/each ~}}
     <sequence>
@@ -36,8 +30,8 @@
         <property name="{{uppercase ../connectionType}}_{{key}}" value="{{value}}"/>
         {{/each ~}}
         {{writeConfigXmlParamProperties this}}
-        {{writeConfigXmlProperties this}}
         {{/each ~}}
+        
         <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
             <property name="orgName" value="{{orgName}}"/>
             <property name="moduleName" value="{{moduleName}}"/>

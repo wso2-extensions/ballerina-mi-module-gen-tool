@@ -77,7 +77,7 @@
         <property name="MILVUS_CLIENT_config_paramType14" value="string"/>
         <property name="MILVUS_CLIENT_config_param15" value="secureConfig.caPemPath"/>
         <property name="MILVUS_CLIENT_config_paramType15" value="string"/>
-        
+
         <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
             <property name="orgName" value="ballerinax"/>
             <property name="moduleName" value="milvus"/>

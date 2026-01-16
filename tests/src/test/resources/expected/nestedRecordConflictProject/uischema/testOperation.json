@@ -1,7 +1,7 @@
 {
   "connectorName": "nestedRecordConflictProject",
   "operationName": "testOperation",
-  "title": "testOperation",
+  "title": "test operation",
   "help": "",
   "elements": [
     {
@@ -28,9 +28,7 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
-              "elements": [
-                
-              ]
+              "elements": []
             }
           },
           {

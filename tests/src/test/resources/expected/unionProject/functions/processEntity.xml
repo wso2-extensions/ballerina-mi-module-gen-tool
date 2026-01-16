@@ -25,8 +25,8 @@
     <sequence>
         <property name="param0" value="entity"/>
         <property name="paramType0" value="union"/>
-        <property name="param0UnionRecord" value="entityPerson"/>
-        <property name="param0UnionRecord" value="entityCompany"/>
+        <property name="param0UnionPerson" value="entityPerson"/>
+        <property name="param0UnionCompany" value="entityCompany"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="processEntity"/>
         <property name="returnType" value="string"/>

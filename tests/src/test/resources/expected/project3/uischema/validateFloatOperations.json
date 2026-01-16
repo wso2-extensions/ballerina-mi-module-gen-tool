@@ -1,7 +1,7 @@
 {
   "connectorName": "project3",
   "operationName": "validateFloatOperations",
-  "title": "validateFloatOperations",
+  "title": "validate float operations",
   "help": "",
   "elements": [
     {
@@ -26,7 +26,8 @@
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "inputB",

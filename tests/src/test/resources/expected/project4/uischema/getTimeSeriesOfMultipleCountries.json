@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getTimeSeriesOfMultipleCountries",
-  "title": "getTimeSeriesOfMultipleCountries",
+  "title": "get time series of multiple countries",
   "help": "Get COVID-19 time series data for a specific set of countries\n",
   "elements": [
     {
@@ -41,7 +41,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "lastdays",

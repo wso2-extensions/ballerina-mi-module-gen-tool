@@ -27,7 +27,7 @@
         <property name="UNIONPROJECT_UNIONCLIENT_paramFunctionName" value="init"/>
         <property name="UNIONPROJECT_UNIONCLIENT_param0" value="serviceUrl"/>
         <property name="UNIONPROJECT_UNIONCLIENT_paramType0" value="string"/>
-        
+
         <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="unionProject"/>

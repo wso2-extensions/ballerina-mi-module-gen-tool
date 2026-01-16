@@ -1,7 +1,7 @@
 {
   "connectorName": "unionProject",
   "operationName": "processNumberType",
-  "title": "processNumberType",
+  "title": "process number type",
   "help": "",
   "elements": [
     {
@@ -35,13 +35,17 @@
                     "name": "valueDataType",
                     "displayName": "valueDataType",
                     "inputType": "combo",
-                    "comboValues": ["int","float","decimal"],
+                    "comboValues": [
+                      "int",
+                      "float",
+                      "decimal"
+                    ],
                     "defaultValue": "int",
                     "required": "true",
                     "helpTip": ""
                   }
-                }
-,{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "valueInt",
@@ -52,9 +56,14 @@
                     "helpTip": "",
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$",
-                    "enableCondition": [{"valueDataType": "int"}]
+                    "enableCondition": [
+                      {
+                        "valueDataType": "int"
+                      }
+                    ]
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "valueFloat",
@@ -65,9 +74,14 @@
                     "helpTip": "",
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$",
-                    "enableCondition": [{"valueDataType": "float"}]
+                    "enableCondition": [
+                      {
+                        "valueDataType": "float"
+                      }
+                    ]
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "valueDecimal",
@@ -78,7 +92,11 @@
                     "helpTip": "",
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$",
-                    "enableCondition": [{"valueDataType": "decimal"}]
+                    "enableCondition": [
+                      {
+                        "valueDataType": "decimal"
+                      }
+                    ]
                   }
                 }
               ]

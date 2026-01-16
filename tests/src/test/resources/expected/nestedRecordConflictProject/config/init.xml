@@ -44,7 +44,7 @@
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_paramType4" value="int"/>
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_param5" value="database.database"/>
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_paramType5" value="string"/>
-        
+
         <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="nestedRecordConflictProject"/>

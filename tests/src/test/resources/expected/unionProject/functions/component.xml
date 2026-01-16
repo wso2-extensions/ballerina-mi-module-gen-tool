@@ -19,57 +19,57 @@
 <component name="functions" type="synapse/template">
     <subComponents>
         <component name="returnStringOrInt">
-            <displayName>returnStringOrInt</displayName>
+            <displayName>return string or int</displayName>
             <file>returnStringOrInt.xml</file>
             <description></description>
         </component>
         <component name="findPerson">
-            <displayName>findPerson</displayName>
+            <displayName>find person</displayName>
             <file>findPerson.xml</file>
             <description></description>
         </component>
         <component name="processWithError">
-            <displayName>processWithError</displayName>
+            <displayName>process with error</displayName>
             <file>processWithError.xml</file>
             <description></description>
         </component>
         <component name="processStringOrIntOrFloat">
-            <displayName>processStringOrIntOrFloat</displayName>
+            <displayName>process string or int or float</displayName>
             <file>processStringOrIntOrFloat.xml</file>
             <description></description>
         </component>
         <component name="getResponse">
-            <displayName>getResponse</displayName>
+            <displayName>get response</displayName>
             <file>getResponse.xml</file>
             <description></description>
         </component>
         <component name="processStringOrInt">
-            <displayName>processStringOrInt</displayName>
+            <displayName>process string or int</displayName>
             <file>processStringOrInt.xml</file>
             <description></description>
         </component>
         <component name="processEntity">
-            <displayName>processEntity</displayName>
+            <displayName>process entity</displayName>
             <file>processEntity.xml</file>
             <description></description>
         </component>
         <component name="processIntOrBoolean">
-            <displayName>processIntOrBoolean</displayName>
+            <displayName>process int or boolean</displayName>
             <file>processIntOrBoolean.xml</file>
             <description></description>
         </component>
         <component name="processNumberType">
-            <displayName>processNumberType</displayName>
+            <displayName>process number type</displayName>
             <file>processNumberType.xml</file>
             <description></description>
         </component>
         <component name="processWithNil">
-            <displayName>processWithNil</displayName>
+            <displayName>process with nil</displayName>
             <file>processWithNil.xml</file>
             <description></description>
         </component>
         <component name="processNullableString">
-            <displayName>processNullableString</displayName>
+            <displayName>process nullable string</displayName>
             <file>processNullableString.xml</file>
             <description></description>
         </component>

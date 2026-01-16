@@ -24,105 +24,154 @@
           {
             "type": "attributeGroup",
             "value": {
-              "groupName": "Basic",
+              "groupName": "Advanced",
+              "collapsed": true,
               "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "httpVersion",
+                    "displayName": "httpVersion",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The HTTP version understood by the client",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
                 {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Http1Settings",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attributeGroup",
-                  "value": {
-                    "groupName": "Proxy",
-                    "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "http1Settings.proxy.host",
-                    "displayName": "http1Settings.proxy.host",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "Host name of the proxy server",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "http1Settings.proxy.port",
-                    "displayName": "http1Settings.proxy.port",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "Proxy server port",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "http1Settings.proxy.userName",
-                    "displayName": "http1Settings.proxy.userName",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "Proxy server username",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "http1Settings.proxy.password",
-                    "displayName": "http1Settings.proxy.password",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "Proxy server password",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "http1Settings.keepAlive",
+                          "displayName": "keepAlive",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "Specifies whether to reuse a connection for multiple requests",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "http1Settings.chunking",
+                          "displayName": "chunking",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "The chunking behaviour of the request",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attributeGroup",
+                        "value": {
+                          "groupName": "Proxy",
+                          "collapsed": false,
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "http1Settings.proxy.host",
+                                "displayName": "host",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "false",
+                                "helpTip": "Host name of the proxy server",
+                                "validateType": "",
+                                "matchPattern": ""
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "http1Settings.proxy.port",
+                                "displayName": "port",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "false",
+                                "helpTip": "Proxy server port",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "http1Settings.proxy.userName",
+                                "displayName": "userName",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "false",
+                                "helpTip": "Proxy server username",
+                                "validateType": "",
+                                "matchPattern": ""
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "http1Settings.proxy.password",
+                                "displayName": "password",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "false",
+                                "helpTip": "Proxy server password",
+                                "validateType": "",
+                                "matchPattern": ""
+                              }
+                            }
+                          ]
+                        }
+                      }
                     ]
                   }
-                }
-                    ]
-                  }
-                },{
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Http2Settings",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "http2PriorKnowledge",
-                    "displayName": "http2PriorKnowledge",
-                    "inputType": "boolean",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "http2InitialWindowSize",
-                    "displayName": "http2InitialWindowSize",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "http2Settings.http2PriorKnowledge",
+                          "displayName": "http2PriorKnowledge",
+                          "inputType": "boolean",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "http2Settings.http2InitialWindowSize",
+                          "displayName": "http2InitialWindowSize",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      }
                     ]
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "timeout",
@@ -134,7 +183,8 @@
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "forwarded",
@@ -146,643 +196,862 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Pool Config",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "maxActiveConnections",
-                    "displayName": "maxActiveConnections",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "maxIdleConnections",
-                    "displayName": "maxIdleConnections",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "waitTime",
-                    "displayName": "waitTime",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "maxActiveStreamsPerConnection",
-                    "displayName": "maxActiveStreamsPerConnection",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "minEvictableIdleTime",
-                    "displayName": "minEvictableIdleTime",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "timeBetweenEvictionRuns",
-                    "displayName": "timeBetweenEvictionRuns",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "minIdleTimeInStaleState",
-                    "displayName": "minIdleTimeInStaleState",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "timeBetweenStaleEviction",
-                    "displayName": "timeBetweenStaleEviction",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "poolConfig.maxActiveConnections",
+                          "displayName": "maxActiveConnections",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "poolConfig.maxIdleConnections",
+                          "displayName": "maxIdleConnections",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "poolConfig.waitTime",
+                          "displayName": "waitTime",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "poolConfig.maxActiveStreamsPerConnection",
+                          "displayName": "maxActiveStreamsPerConnection",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "poolConfig.minEvictableIdleTime",
+                          "displayName": "minEvictableIdleTime",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "poolConfig.timeBetweenEvictionRuns",
+                          "displayName": "timeBetweenEvictionRuns",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "poolConfig.minIdleTimeInStaleState",
+                          "displayName": "minIdleTimeInStaleState",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "poolConfig.timeBetweenStaleEviction",
+                          "displayName": "timeBetweenStaleEviction",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      }
                     ]
                   }
-                },{
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Cache",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "enabled",
-                    "displayName": "enabled",
-                    "inputType": "boolean",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "isShared",
-                    "displayName": "isShared",
-                    "inputType": "boolean",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "capacity",
-                    "displayName": "capacity",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "evictionFactor",
-                    "displayName": "evictionFactor",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "cache.enabled",
+                          "displayName": "enabled",
+                          "inputType": "boolean",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "cache.isShared",
+                          "displayName": "isShared",
+                          "inputType": "boolean",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "cache.capacity",
+                          "displayName": "capacity",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "cache.evictionFactor",
+                          "displayName": "evictionFactor",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "cache.policy",
+                          "displayName": "policy",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
                     ]
                   }
-                },{
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "compression",
+                    "displayName": "compression",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "Specifies the way of handling compression (&#x60;accept-encoding&#x60;) header",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Circuit Breaker",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attributeGroup",
-                  "value": {
-                    "groupName": "Rolling Window",
-                    "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "circuitBreaker.rollingWindow.requestVolumeThreshold",
-                    "displayName": "circuitBreaker.rollingWindow.requestVolumeThreshold",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "Minimum number of requests in a &#x60;RollingWindow&#x60; that will trip the circuit.",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "circuitBreaker.rollingWindow.timeWindow",
-                    "displayName": "circuitBreaker.rollingWindow.timeWindow",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "Time period in seconds for which the failure threshold is calculated",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "circuitBreaker.rollingWindow.bucketSize",
-                    "displayName": "circuitBreaker.rollingWindow.bucketSize",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "The granularity at which the time window slides. This is measured in seconds.",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                }
+                      {
+                        "type": "attributeGroup",
+                        "value": {
+                          "groupName": "Rolling Window",
+                          "collapsed": false,
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "circuitBreaker.rollingWindow.requestVolumeThreshold",
+                                "displayName": "requestVolumeThreshold",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "false",
+                                "helpTip": "Minimum number of requests in a &#x60;RollingWindow&#x60; that will trip the circuit.",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "circuitBreaker.rollingWindow.timeWindow",
+                                "displayName": "timeWindow",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "false",
+                                "helpTip": "Time period in seconds for which the failure threshold is calculated",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "circuitBreaker.rollingWindow.bucketSize",
+                                "displayName": "bucketSize",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "false",
+                                "helpTip": "The granularity at which the time window slides. This is measured in seconds.",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "circuitBreaker.failureThreshold",
+                          "displayName": "failureThreshold",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "The threshold for request failures. When this threshold exceeds, the circuit trips. The threshold should be a\nvalue between 0 and 1",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "circuitBreaker.resetTime",
+                          "displayName": "resetTime",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "The time period (in seconds) to wait before attempting to make another request to the upstream service",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "circuitBreaker.statusCodes",
+                          "displayName": "statusCodes",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "Array of HTTP response status codes which are considered as failures",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
                     ]
                   }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "failureThreshold",
-                    "displayName": "failureThreshold",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "The threshold for request failures. When this threshold exceeds, the circuit trips. The threshold should be a\nvalue between 0 and 1",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "resetTime",
-                    "displayName": "resetTime",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "The time period (in seconds) to wait before attempting to make another request to the upstream service",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "statusCodes",
-                    "displayName": "statusCodes",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "Array of HTTP response status codes which are considered as failures",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
-                    ]
-                  }
-                },{
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Retry Config",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "count",
-                    "displayName": "count",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "interval",
-                    "displayName": "interval",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "backOffFactor",
-                    "displayName": "backOffFactor",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "maxWaitInterval",
-                    "displayName": "maxWaitInterval",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "statusCodes",
-                    "displayName": "statusCodes",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "retryConfig.count",
+                          "displayName": "count",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "retryConfig.interval",
+                          "displayName": "interval",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "retryConfig.backOffFactor",
+                          "displayName": "backOffFactor",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "retryConfig.maxWaitInterval",
+                          "displayName": "maxWaitInterval",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "retryConfig.statusCodes",
+                          "displayName": "statusCodes",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
                     ]
                   }
-                },{
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Response Limits",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "maxStatusLineLength",
-                    "displayName": "maxStatusLineLength",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "maxHeaderSize",
-                    "displayName": "maxHeaderSize",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "maxEntityBodySize",
-                    "displayName": "maxEntityBodySize",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "responseLimits.maxStatusLineLength",
+                          "displayName": "maxStatusLineLength",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "responseLimits.maxHeaderSize",
+                          "displayName": "maxHeaderSize",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "responseLimits.maxEntityBodySize",
+                          "displayName": "maxEntityBodySize",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      }
                     ]
                   }
-                },{
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Secure Socket",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "enable",
-                    "displayName": "enable",
-                    "inputType": "boolean",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "certDataType",
-                    "displayName": "certDataType",
-                    "inputType": "combo",
-                    "comboValues": ["TrustStore","string"],
-                    "defaultValue": "TrustStore",
-                    "required": "false",
-                    "helpTip": ""
-                  }
-                }
-,{
-                  "type": "attribute",
-                  "value": {
-                    "name": "certTrustStore",
-                    "displayName": "certTrustStore",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": "",
-                    "enableCondition": [{"certDataType": "TrustStore"}]
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "certString",
-                    "displayName": "certString",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": "",
-                    "enableCondition": [{"certDataType": "string"}]
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "keyDataType",
-                    "displayName": "keyDataType",
-                    "inputType": "combo",
-                    "comboValues": ["KeyStore","CertKey"],
-                    "defaultValue": "KeyStore",
-                    "required": "false",
-                    "helpTip": ""
-                  }
-                }
-,{
-                  "type": "attribute",
-                  "value": {
-                    "name": "keyKeyStore",
-                    "displayName": "keyKeyStore",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": "",
-                    "enableCondition": [{"keyDataType": "KeyStore"}]
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "keyCertKey",
-                    "displayName": "keyCertKey",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": "",
-                    "enableCondition": [{"keyDataType": "CertKey"}]
-                  }
-                },{
-                  "type": "attributeGroup",
-                  "value": {
-                    "groupName": "Protocol",
-                    "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "secureSocket.protocol.versions",
-                    "displayName": "secureSocket.protocol.versions",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureSocket.enable",
+                          "displayName": "enable",
+                          "inputType": "boolean",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureSocket.certDataType",
+                          "displayName": "certDataType",
+                          "inputType": "combo",
+                          "comboValues": [
+                            "TrustStore",
+                            "string"
+                          ],
+                          "defaultValue": "TrustStore",
+                          "required": "false",
+                          "helpTip": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureSocket.certString",
+                          "displayName": "certString",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": "",
+                          "enableCondition": [
+                            {
+                              "secureSocket.certDataType": "string"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attributeGroup",
+                        "value": {
+                          "groupName": "Cert",
+                          "collapsed": false,
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.cert.path",
+                                "displayName": "path",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "true",
+                                "helpTip": "",
+                                "validateType": "",
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  {
+                                    "secureSocket.certDataType": "TrustStore"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.cert.password",
+                                "displayName": "password",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "true",
+                                "helpTip": "",
+                                "validateType": "",
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  {
+                                    "secureSocket.certDataType": "TrustStore"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureSocket.keyDataType",
+                          "displayName": "keyDataType",
+                          "inputType": "combo",
+                          "comboValues": [
+                            "KeyStore",
+                            "CertKey"
+                          ],
+                          "defaultValue": "KeyStore",
+                          "required": "false",
+                          "helpTip": ""
+                        }
+                      },
+                      {
+                        "type": "attributeGroup",
+                        "value": {
+                          "groupName": "Key",
+                          "collapsed": false,
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.key.path",
+                                "displayName": "path",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "true",
+                                "helpTip": "",
+                                "validateType": "",
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  {
+                                    "secureSocket.keyDataType": "KeyStore"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.key.password",
+                                "displayName": "password",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "true",
+                                "helpTip": "",
+                                "validateType": "",
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  {
+                                    "secureSocket.keyDataType": "KeyStore"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.key.certFile",
+                                "displayName": "certFile",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "true",
+                                "helpTip": "",
+                                "validateType": "",
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  {
+                                    "secureSocket.keyDataType": "CertKey"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.key.keyFile",
+                                "displayName": "keyFile",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "true",
+                                "helpTip": "",
+                                "validateType": "",
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  {
+                                    "secureSocket.keyDataType": "CertKey"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.key.keyPassword",
+                                "displayName": "keyPassword",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "false",
+                                "helpTip": "",
+                                "validateType": "",
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  {
+                                    "secureSocket.keyDataType": "CertKey"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attributeGroup",
+                        "value": {
+                          "groupName": "Protocol",
+                          "collapsed": false,
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.protocol.name",
+                                "displayName": "name",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "true",
+                                "helpTip": "",
+                                "validateType": "",
+                                "matchPattern": ""
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.protocol.versions",
+                                "displayName": "versions",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "false",
+                                "helpTip": "",
+                                "validateType": "",
+                                "matchPattern": ""
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attributeGroup",
+                        "value": {
+                          "groupName": "Cert Validation",
+                          "collapsed": false,
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.certValidation.type",
+                                "displayName": "type",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "false",
+                                "helpTip": "",
+                                "validateType": "",
+                                "matchPattern": ""
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.certValidation.cacheSize",
+                                "displayName": "cacheSize",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "true",
+                                "helpTip": "",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "secureSocket.certValidation.cacheValidityPeriod",
+                                "displayName": "cacheValidityPeriod",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": "true",
+                                "helpTip": "",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureSocket.ciphers",
+                          "displayName": "ciphers",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureSocket.verifyHostName",
+                          "displayName": "verifyHostName",
+                          "inputType": "boolean",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureSocket.shareSession",
+                          "displayName": "shareSession",
+                          "inputType": "boolean",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureSocket.handshakeTimeout",
+                          "displayName": "handshakeTimeout",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureSocket.sessionTimeout",
+                          "displayName": "sessionTimeout",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureSocket.serverName",
+                          "displayName": "serverName",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
                     ]
                   }
-                },{
-                  "type": "attributeGroup",
-                  "value": {
-                    "groupName": "Cert Validation",
-                    "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "secureSocket.certValidation.cacheSize",
-                    "displayName": "secureSocket.certValidation.cacheSize",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "secureSocket.certValidation.cacheValidityPeriod",
-                    "displayName": "secureSocket.certValidation.cacheValidityPeriod",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                }
-                    ]
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "ciphers",
-                    "displayName": "ciphers",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "verifyHostName",
-                    "displayName": "verifyHostName",
-                    "inputType": "boolean",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "shareSession",
-                    "displayName": "shareSession",
-                    "inputType": "boolean",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "handshakeTimeout",
-                    "displayName": "handshakeTimeout",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "sessionTimeout",
-                    "displayName": "sessionTimeout",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "serverName",
-                    "displayName": "serverName",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
-                    ]
-                  }
-                },{
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Proxy",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "host",
-                    "displayName": "host",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "port",
-                    "displayName": "port",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "userName",
-                    "displayName": "userName",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "password",
-                    "displayName": "password",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "proxy.host",
+                          "displayName": "host",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "proxy.port",
+                          "displayName": "port",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "proxy.userName",
+                          "displayName": "userName",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "proxy.password",
+                          "displayName": "password",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "false",
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
                     ]
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "validation",
@@ -794,7 +1063,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "serviceUrl",

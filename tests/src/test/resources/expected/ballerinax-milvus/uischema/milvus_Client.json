@@ -25,6 +25,7 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Basic",
+              "collapsed": false,
               "elements": [
                 {
                   "type": "attribute",
@@ -38,59 +39,74 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                }
+              ]
+            }
+          },
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Advanced",
+              "collapsed": true,
+              "elements": [
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Auth Config",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "token",
-                    "displayName": "token",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "A valid access token to access the specified Milvus instance",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "authConfig.token",
+                          "displayName": "token",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "A valid access token to access the specified Milvus instance",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
                     ]
                   }
-                },{
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Credentials Config",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "username",
-                    "displayName": "username",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "The username used to connect to the specified Milvus instance",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "password",
-                    "displayName": "password",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "The password used to connect to the specified Milvus instance",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "credentialsConfig.username",
+                          "displayName": "username",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "The username used to connect to the specified Milvus instance",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "credentialsConfig.password",
+                          "displayName": "password",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "The password used to connect to the specified Milvus instance",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
                     ]
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "idleTimeout",
@@ -102,7 +118,8 @@
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "keepAliveTime",
@@ -114,7 +131,8 @@
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "keepAliveTimeout",
@@ -126,7 +144,8 @@
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "keepAliveWithoutCalls",
@@ -138,7 +157,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "rpcDeadline",
@@ -150,7 +170,8 @@
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "connectTimeout",
@@ -162,7 +183,8 @@
                     "validateType": "regex",
                     "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "databaseName",
@@ -174,7 +196,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "serverName",
@@ -186,7 +209,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "proxyAddress",
@@ -198,60 +222,65 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Secure Config",
+                    "collapsed": false,
                     "elements": [
-                  {
-                  "type": "attribute",
-                  "value": {
-                    "name": "clientKeyPath",
-                    "displayName": "clientKeyPath",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "The path to the client key file for mutual authentication",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "clientPemPath",
-                    "displayName": "clientPemPath",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "The path to the client PEM file for mutual authentication",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "serverPemPath",
-                    "displayName": "serverPemPath",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "The path to the server PEM file for mutual authentication",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                },{
-                  "type": "attribute",
-                  "value": {
-                    "name": "caPemPath",
-                    "displayName": "caPemPath",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "The path to the CA PEM file for mutual authentication",
-                    "validateType": "",
-                    "matchPattern": ""
-                  }
-                }
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureConfig.clientKeyPath",
+                          "displayName": "clientKeyPath",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "The path to the client key file for mutual authentication",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureConfig.clientPemPath",
+                          "displayName": "clientPemPath",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "The path to the client PEM file for mutual authentication",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureConfig.serverPemPath",
+                          "displayName": "serverPemPath",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "The path to the server PEM file for mutual authentication",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "secureConfig.caPemPath",
+                          "displayName": "caPemPath",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": "true",
+                          "helpTip": "The path to the CA PEM file for mutual authentication",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
                     ]
                   }
                 }

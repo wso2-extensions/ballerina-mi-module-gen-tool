@@ -1,7 +1,7 @@
 {
-  "connectorName": "{{parent.parent.moduleName}}",
+  "connectorName": "{{sanitizeModuleName parent.parent.moduleName}}",
   "operationName": "{{name}}",
-  "title": "{{name}}",
+  "title": "{{displayName}}",
   "help": "{{{escapeChars documentation}}}",
   "elements": [
     {

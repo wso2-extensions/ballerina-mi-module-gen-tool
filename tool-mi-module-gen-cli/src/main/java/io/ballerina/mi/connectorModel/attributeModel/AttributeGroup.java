@@ -21,11 +21,23 @@ package io.ballerina.mi.connectorModel.attributeModel;
 public class AttributeGroup extends Element {
     private final String name;
 
+    private final boolean collapsed;
+
     public AttributeGroup (String name) {
         this.name = name;
+        this.collapsed = false;
+    }
+
+    public AttributeGroup (String name, boolean collapsed) {
+        this.name = name;
+        this.collapsed = collapsed;
     }
 
     public String getName() {
         return name;
+    }
+
+    public boolean isCollapsed() {
+        return collapsed;
     }
 }

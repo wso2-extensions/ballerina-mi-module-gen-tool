@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getAllCountriesAndProvincesStatus",
-  "title": "getAllCountriesAndProvincesStatus",
+  "title": "get all countries and provinces status",
   "help": "Get COVID-19 totals for all countries and their provinces\n",
   "elements": [
     {
@@ -28,9 +28,7 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
-              "elements": [
-                
-              ]
+              "elements": []
             }
           },
           {

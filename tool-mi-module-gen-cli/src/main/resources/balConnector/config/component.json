@@ -1,5 +1,5 @@
 {
-  "connectorName": "{{parent.parent.moduleName}}",
+  "connectorName": "{{sanitizeModuleName parent.parent.moduleName}}",
   "connectionName": "{{parent.connectionType}}",
   "title": "Connection Config for {{parent.connectionType}} connection",
   "help": "<h1>{{parent.connectionType}} Connection</h1> <b>{{{escapeChars parent.description}}}</b>",
@@ -21,15 +21,7 @@
       "value": {
         "groupName": "General",
         "elements": [
-          {
-            "type": "attributeGroup",
-            "value": {
-              "groupName": "Basic",
-              "elements": [
-                {{writeConfigJsonProperties this}}
-              ]
-            }
-          }
+          {{writeConfigJsonProperties this}}
         ]
       }
     }

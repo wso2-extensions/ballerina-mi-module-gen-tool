@@ -1,7 +1,7 @@
 {
   "connectorName": "unionProject",
   "operationName": "processNullableString",
-  "title": "processNullableString",
+  "title": "process nullable string",
   "help": "",
   "elements": [
     {
@@ -32,27 +32,14 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "valueDataType",
-                    "displayName": "valueDataType",
-                    "inputType": "combo",
-                    "comboValues": ["string"],
-                    "defaultValue": "string",
-                    "required": "false",
-                    "helpTip": ""
-                  }
-                }
-,{
-                  "type": "attribute",
-                  "value": {
-                    "name": "valueString",
-                    "displayName": "valueString",
+                    "name": "value",
+                    "displayName": "value",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "false",
                     "helpTip": "",
                     "validateType": "",
-                    "matchPattern": "",
-                    "enableCondition": [{"valueDataType": "string"}]
+                    "matchPattern": ""
                   }
                 }
               ]

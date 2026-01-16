@@ -27,17 +27,17 @@
     {{/each ~}}
     {{#each functionParams ~}}
     {{#eq paramType "union" ~}}
-    <parameter name="{{value}}DataType" description="Select the data type for '{{value}}' parameter"/>
+    <parameter name="{{sanitizeParamName value}}DataType" description="Select the data type for '{{value}}' parameter"/>
     {{#each unionMemberParams ~}}
-    <parameter name="{{value}}" description="{{description}}"/>
+    <parameter name="{{sanitizeParamName value}}" description="{{description}}"/>
     {{/each ~}}
     {{else ~}}
-    <parameter name="{{value}}" description="{{description}}"/>
+    <parameter name="{{sanitizeParamName value}}" description="{{description}}"/>
     {{/eq ~}}
     {{/each ~}}
     <sequence>
         {{#each functionParams ~}}
-        <property name="param{{@index}}" value="{{value}}"/>
+        <property name="param{{@index}}" value="{{sanitizeParamName value}}"/>
         <property name="paramType{{@index}}" value="{{paramType}}"/>
         {{#eq paramType "array" ~}}
         <property name="arrayElementType{{@index}}" value="{{arrayElementType this}}"/>
@@ -47,7 +47,7 @@
         {{/eq ~}}
         {{#eq paramType "union" ~}}
         {{#each unionMemberParams ~}}
-        <property name="param{{@../index}}Union{{capitalize paramType}}" value="{{value}}"/>
+        <property name="param{{@../index}}Union{{capitalize displayTypeName}}" value="{{sanitizeParamName value}}"/>
         {{/each ~}}
         {{/eq ~}}
         {{/each ~}}

@@ -19,12 +19,10 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="processNullableString">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="valueDataType" description="Select the data type for 'value' parameter"/>
-    <parameter name="valueString" description=""/>
+    <parameter name="value" description=""/>
     <sequence>
         <property name="param0" value="value"/>
-        <property name="paramType0" value="union"/>
-        <property name="param0UnionString" value="valueString"/>
+        <property name="paramType0" value="string"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="processNullableString"/>
         <property name="returnType" value="string"/>

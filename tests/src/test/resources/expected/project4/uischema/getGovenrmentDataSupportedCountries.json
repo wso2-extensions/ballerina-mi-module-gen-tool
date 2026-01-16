@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getGovenrmentDataSupportedCountries",
-  "title": "getGovenrmentDataSupportedCountries",
+  "title": "get govenrment data supported countries",
   "help": "Get a list of supported countries for government specific data\n",
   "elements": [
     {
@@ -28,9 +28,7 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
-              "elements": [
-                
-              ]
+              "elements": []
             }
           },
           {

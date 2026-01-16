@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getStatusBySubRegionUsingAppleMobilotyData",
-  "title": "getStatusBySubRegionUsingAppleMobilotyData",
+  "title": "get status by sub region using apple mobiloty data",
   "help": "Get COVID-19 Apple mobility data for subregions of a country\n",
   "elements": [
     {
@@ -41,7 +41,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "subregions",

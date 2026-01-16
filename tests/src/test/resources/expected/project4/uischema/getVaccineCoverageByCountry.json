@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getVaccineCoverageByCountry",
-  "title": "getVaccineCoverageByCountry",
+  "title": "get vaccine coverage by country",
   "help": "Get COVID-19 vaccine doses administered for a country that has reported vaccination rollout. Sourced from https://covid.ourworldindata.org/\n",
   "elements": [
     {
@@ -41,7 +41,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "lastdays",
@@ -53,7 +54,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "fullData",

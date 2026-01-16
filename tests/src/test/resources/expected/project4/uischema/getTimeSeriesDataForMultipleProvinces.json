@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getTimeSeriesDataForMultipleProvinces",
-  "title": "getTimeSeriesDataForMultipleProvinces",
+  "title": "get time series data for multiple provinces",
   "help": "Get COVID-19 time series data for a set of provinces in a country\n",
   "elements": [
     {
@@ -41,7 +41,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "provinces",
@@ -53,7 +54,8 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                },{
+                },
+                {
                   "type": "attribute",
                   "value": {
                     "name": "lastdays",

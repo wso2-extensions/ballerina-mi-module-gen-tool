@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getGlobalStatusInTimeSeries",
-  "title": "getGlobalStatusInTimeSeries",
+  "title": "get global status in time series",
   "help": "Get global accumulated COVID-19 time series data\n",
   "elements": [
     {

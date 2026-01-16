@@ -19,229 +19,229 @@
 <component name="functions" type="synapse/template">
     <subComponents>
         <component name="getVaccineCoverageByUSAState">
-            <displayName>getVaccineCoverageByUSAState</displayName>
+            <displayName>get vaccine coverage by usastate</displayName>
             <file>getVaccineCoverageByUSAState.xml</file>
             <description>Get COVID-19 vaccine doses administered for a state that has reported vaccination rollout. Sourced from https://covid.ourworldindata.org/
 </description>
         </component>
         <component name="getTimeSeriesByUSAStateNYT">
-            <displayName>getTimeSeriesByUSAStateNYT</displayName>
+            <displayName>get time series by usastate nyt</displayName>
             <file>getTimeSeriesByUSAStateNYT.xml</file>
             <description>Get COVID-19 time series data for a state or set of states, with an entry for each day since the pandemic began
 </description>
         </component>
         <component name="getAllContinentsStatus">
-            <displayName>getAllContinentsStatus</displayName>
+            <displayName>get all continents status</displayName>
             <file>getAllContinentsStatus.xml</file>
             <description>Get COVID-19 totals for all continents
 </description>
         </component>
         <component name="getTimeSeriesByUSACountyNYT">
-            <displayName>getTimeSeriesByUSACountyNYT</displayName>
+            <displayName>get time series by usacounty nyt</displayName>
             <file>getTimeSeriesByUSACountyNYT.xml</file>
             <description>Get COVID-19 time series data for a county or set of counties, with an entry for each day since the pandemic began
 </description>
         </component>
         <component name="getUSCountiesStatus">
-            <displayName>getUSCountiesStatus</displayName>
+            <displayName>get uscounties status</displayName>
             <file>getUSCountiesStatus.xml</file>
             <description>Get COVID-19 totals for all US counties
 </description>
         </component>
         <component name="getTimeSeriesOfMultipleCountries">
-            <displayName>getTimeSeriesOfMultipleCountries</displayName>
+            <displayName>get time series of multiple countries</displayName>
             <file>getTimeSeriesOfMultipleCountries.xml</file>
             <description>Get COVID-19 time series data for a specific set of countries
 </description>
         </component>
         <component name="getStatusByCountry">
-            <displayName>getStatusByCountry</displayName>
+            <displayName>get status by country</displayName>
             <file>getStatusByCountry.xml</file>
             <description>Get COVID-19 totals for a specific country
 </description>
         </component>
         <component name="getAppleMobilityDataSupportedCountries">
-            <displayName>getAppleMobilityDataSupportedCountries</displayName>
+            <displayName>get apple mobility data supported countries</displayName>
             <file>getAppleMobilityDataSupportedCountries.xml</file>
             <description>Get a list of supported countries for Apple mobility data
 </description>
         </component>
         <component name="getVaccineCoverageByCountry">
-            <displayName>getVaccineCoverageByCountry</displayName>
+            <displayName>get vaccine coverage by country</displayName>
             <file>getVaccineCoverageByCountry.xml</file>
             <description>Get COVID-19 vaccine doses administered for a country that has reported vaccination rollout. Sourced from https://covid.ourworldindata.org/
 </description>
         </component>
         <component name="getTimeSeriesForUSACounties">
-            <displayName>getTimeSeriesForUSACounties</displayName>
+            <displayName>get time series for usacounties</displayName>
             <file>getTimeSeriesForUSACounties.xml</file>
             <description>Get all possible US States to query the /historical/usacounties/{state} endpoint with
 </description>
         </component>
         <component name="getVaccineCoverageOfAllCountries">
-            <displayName>getVaccineCoverageOfAllCountries</displayName>
+            <displayName>get vaccine coverage of all countries</displayName>
             <file>getVaccineCoverageOfAllCountries.xml</file>
             <description>Get COVID-19 vaccine doses administered for all countries that have reported rolling out vaccination. Sourced  from https://covid.ourworldindata.org/
 </description>
         </component>
         <component name="getGlobalStatusInTimeSeries">
-            <displayName>getGlobalStatusInTimeSeries</displayName>
+            <displayName>get global status in time series</displayName>
             <file>getGlobalStatusInTimeSeries.xml</file>
             <description>Get global accumulated COVID-19 time series data
 </description>
         </component>
         <component name="getAppleMobilityDataSupportedSubRegions">
-            <displayName>getAppleMobilityDataSupportedSubRegions</displayName>
+            <displayName>get apple mobility data supported sub regions</displayName>
             <file>getAppleMobilityDataSupportedSubRegions.xml</file>
             <description>Get a list of supported subregions for specific country in the Apple mobility data set
 </description>
         </component>
         <component name="getMultipleCountriesStatus">
-            <displayName>getMultipleCountriesStatus</displayName>
+            <displayName>get multiple countries status</displayName>
             <file>getMultipleCountriesStatus.xml</file>
             <description>Get COVID-19 totals for a specific set of countries
 </description>
         </component>
         <component name="getAllCountriesAndProvincesStatus">
-            <displayName>getAllCountriesAndProvincesStatus</displayName>
+            <displayName>get all countries and provinces status</displayName>
             <file>getAllCountriesAndProvincesStatus.xml</file>
             <description>Get COVID-19 totals for all countries and their provinces
 </description>
         </component>
         <component name="getGovenrmentDataSupportedCountries">
-            <displayName>getGovenrmentDataSupportedCountries</displayName>
+            <displayName>get govenrment data supported countries</displayName>
             <file>getGovenrmentDataSupportedCountries.xml</file>
             <description>Get a list of supported countries for government specific data
 </description>
         </component>
         <component name="getStatusByContinent">
-            <displayName>getStatusByContinent</displayName>
+            <displayName>get status by continent</displayName>
             <file>getStatusByContinent.xml</file>
             <description>Get COVID-19 totals for a specific continent
 </description>
         </component>
         <component name="getAllCountriesStatus">
-            <displayName>getAllCountriesStatus</displayName>
+            <displayName>get all countries status</displayName>
             <file>getAllCountriesStatus.xml</file>
             <description>Get COVID-19 totals for all countries
 </description>
         </component>
         <component name="getInfluenzaReportsByUSPHL">
-            <displayName>getInfluenzaReportsByUSPHL</displayName>
+            <displayName>get influenza reports by usphl</displayName>
             <file>getInfluenzaReportsByUSPHL.xml</file>
             <description>Get Influenza report data for the 2019 and 2020 outbreaks from the US Center for Disease Control, reported by US public health labs
 </description>
         </component>
         <component name="getInfluenzaReportsByUCLA">
-            <displayName>getInfluenzaReportsByUCLA</displayName>
+            <displayName>get influenza reports by ucla</displayName>
             <file>getInfluenzaReportsByUCLA.xml</file>
             <description>Get Influenza report data for the 2019 and 2020 outbreaks from the US Center for Disease Control, reported by US clinical labs
 </description>
         </component>
         <component name="getTimeSeriesDataForMultipleProvinces">
-            <displayName>getTimeSeriesDataForMultipleProvinces</displayName>
+            <displayName>get time series data for multiple provinces</displayName>
             <file>getTimeSeriesDataForMultipleProvinces.xml</file>
             <description>Get COVID-19 time series data for a set of provinces in a country
 </description>
         </component>
         <component name="getTotalGlobalVaccineDosesAdministered">
-            <displayName>getTotalGlobalVaccineDosesAdministered</displayName>
+            <displayName>get total global vaccine doses administered</displayName>
             <file>getTotalGlobalVaccineDosesAdministered.xml</file>
             <description>Get total global COVID-19 vaccine doses administered. Sourced from https://covid.ourworldindata.org/
 </description>
         </component>
         <component name="getUSAStatusByCounty">
-            <displayName>getUSAStatusByCounty</displayName>
+            <displayName>get usastatus by county</displayName>
             <file>getUSAStatusByCounty.xml</file>
             <description>Get COVID-19 totals for a specific county
 </description>
         </component>
         <component name="getVaccineTrialData">
-            <displayName>getVaccineTrialData</displayName>
+            <displayName>get vaccine trial data</displayName>
             <file>getVaccineTrialData.xml</file>
             <description>Get vaccine trial data from RAPS (Regulatory Affairs Professional Society). Specifically published by Jeff Craven at https://www.raps.org/news-and-articles/news-articles/2020/3/covid-19-vaccine-tracker
 </description>
         </component>
         <component name="getStatusBySubRegionUsingAppleMobilotyData">
-            <displayName>getStatusBySubRegionUsingAppleMobilotyData</displayName>
+            <displayName>get status by sub region using apple mobiloty data</displayName>
             <file>getStatusBySubRegionUsingAppleMobilotyData.xml</file>
             <description>Get COVID-19 Apple mobility data for subregions of a country
 </description>
         </component>
         <component name="getTimeSeriesForAllCountriesAndProvinces">
-            <displayName>getTimeSeriesForAllCountriesAndProvinces</displayName>
+            <displayName>get time series for all countries and provinces</displayName>
             <file>getTimeSeriesForAllCountriesAndProvinces.xml</file>
             <description>Get COVID-19 time series data for all countries and their provinces
 </description>
         </component>
         <component name="getGovernmentReportedDataByCountry">
-            <displayName>getGovernmentReportedDataByCountry</displayName>
+            <displayName>get government reported data by country</displayName>
             <file>getGovernmentReportedDataByCountry.xml</file>
             <description>Get COVID-19 government reported data for a specific country
 </description>
         </component>
         <component name="getVaccineCoverageOfAllUSAStates">
-            <displayName>getVaccineCoverageOfAllUSAStates</displayName>
+            <displayName>get vaccine coverage of all usastates</displayName>
             <file>getVaccineCoverageOfAllUSAStates.xml</file>
             <description>Get COVID-19 vaccine doses administered for all states that have reported rolling out vaccination. Sourced  from https://covid.ourworldindata.org/
 </description>
         </component>
         <component name="getAllUSAStatesStatus">
-            <displayName>getAllUSAStatesStatus</displayName>
+            <displayName>get all usastates status</displayName>
             <file>getAllUSAStatesStatus.xml</file>
             <description>Get COVID-19 totals for all US States
 </description>
         </component>
         <component name="getUSAStatusByState">
-            <displayName>getUSAStatusByState</displayName>
+            <displayName>get usastatus by state</displayName>
             <file>getUSAStatusByState.xml</file>
             <description>Get COVID-19 totals for specific US State(s)
 </description>
         </component>
         <component name="getTimeSeriesForUSANYT">
-            <displayName>getTimeSeriesForUSANYT</displayName>
+            <displayName>get time series for usanyt</displayName>
             <file>getTimeSeriesForUSANYT.xml</file>
             <description>Get COVID-19 time series data for the entire USA, with an entry for each day since the pandemic began
 </description>
         </component>
         <component name="getTimeSeriesBycountry">
-            <displayName>getTimeSeriesBycountry</displayName>
+            <displayName>get time series bycountry</displayName>
             <file>getTimeSeriesBycountry.xml</file>
             <description>Get COVID-19 time series data for a specific country
 </description>
         </component>
         <component name="getTherapeuticsTrialData">
-            <displayName>getTherapeuticsTrialData</displayName>
+            <displayName>get therapeutics trial data</displayName>
             <file>getTherapeuticsTrialData.xml</file>
             <description>Get therapeutics trial data from RAPS (Regulatory Affairs Professional Society). Specifically published by Jeff Craven at https://www.raps.org/news-and-articles/news-articles/2020/3/covid-19-therapeutics-tracker
 </description>
         </component>
         <component name="getUSACountiesDataByState">
-            <displayName>getUSACountiesDataByState</displayName>
+            <displayName>get usacounties data by state</displayName>
             <file>getUSACountiesDataByState.xml</file>
             <description>Get COVID-19 time series data for all counties in a specified US state
 </description>
         </component>
         <component name="getInfluenzaLikeIllnessData">
-            <displayName>getInfluenzaLikeIllnessData</displayName>
+            <displayName>get influenza like illness data</displayName>
             <file>getInfluenzaLikeIllnessData.xml</file>
             <description>Get Influenza-like-illness data for the 2019 and 2020 outbreaks from the US Center for Disease Control
 </description>
         </component>
         <component name="getTimeSeriesByProvince">
-            <displayName>getTimeSeriesByProvince</displayName>
+            <displayName>get time series by province</displayName>
             <file>getTimeSeriesByProvince.xml</file>
             <description>Get COVID-19 time series data for a specific province in a country
 </description>
         </component>
         <component name="getGlobalStatus">
-            <displayName>getGlobalStatus</displayName>
+            <displayName>get global status</displayName>
             <file>getGlobalStatus.xml</file>
             <description>Get global COVID-19 totals for today, yesterday and two days ago
 </description>
         </component>
         <component name="getTimeSeriesForAllUSAStatesNYT">
-            <displayName>getTimeSeriesForAllUSAStatesNYT</displayName>
+            <displayName>get time series for all usastates nyt</displayName>
             <file>getTimeSeriesForAllUSAStatesNYT.xml</file>
             <description>Get COVID-19 time series data for all states, with an entry for each day since the pandemic began
 </description>

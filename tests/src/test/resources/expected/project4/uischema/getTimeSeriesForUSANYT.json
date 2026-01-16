@@ -1,7 +1,7 @@
 {
   "connectorName": "project4",
   "operationName": "getTimeSeriesForUSANYT",
-  "title": "getTimeSeriesForUSANYT",
+  "title": "get time series for usanyt",
   "help": "Get COVID-19 time series data for the entire USA, with an entry for each day since the pandemic began\n",
   "elements": [
     {
@@ -28,9 +28,7 @@
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
-              "elements": [
-                
-              ]
+              "elements": []
             }
           },
           {

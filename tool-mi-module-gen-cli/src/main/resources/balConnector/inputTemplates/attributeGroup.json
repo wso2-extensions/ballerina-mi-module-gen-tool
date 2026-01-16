@@ -1,5 +1,6 @@
 {
-                  "type": "attributeGroup",
-                  "value": {
-                    "groupName": "{{name}}",
-                    "elements": [
+  "type": "attributeGroup",
+  "value": {
+    "groupName": "{{name}}",
+    "collapsed": {{collapsed}},
+    "elements": [

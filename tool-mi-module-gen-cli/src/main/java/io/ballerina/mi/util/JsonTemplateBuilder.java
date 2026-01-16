@@ -47,8 +47,9 @@ public class JsonTemplateBuilder {
     }
 
     public JsonTemplateBuilder addSeparator(String separator) {
-        result.append(separator);
-        return this;
+        // Always treat plain separators the same as conditional ones with condition=true
+        // This keeps commas on the same line as the closing brace when templates end with a newline.
+        return addConditionalSeparator(true, separator);
     }
 
     public JsonTemplateBuilder addConditionalSeparator(boolean condition, String separator) {
