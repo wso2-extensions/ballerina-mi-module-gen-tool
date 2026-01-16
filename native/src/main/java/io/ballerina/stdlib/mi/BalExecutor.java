@@ -151,14 +151,9 @@ public class BalExecutor {
         // Null jsonString indicates the record needs to be reconstructed from flattened fields
         if (jsonString == null) {
             // This is a flattened record from init function
-            String recordParamName = (jsonString != null) ? jsonString : paramName; // e.g., "config"
-            
-            // Need to determine the connection type prefix to access the flattened fields
-            // Try to get it from the function name property
-            String functionName = context.getProperty(Constants.FUNCTION_NAME).toString();
-            
+            String recordParamName = paramName; // e.g., "config"
+
             // For init functions, find the connection type from the context properties
-            // The pattern is {CONNECTIONTYPE}_paramFunctionName = "init"
             String connectionType = findConnectionTypeForParam(context, recordParamName);
             
             if (connectionType != null) {

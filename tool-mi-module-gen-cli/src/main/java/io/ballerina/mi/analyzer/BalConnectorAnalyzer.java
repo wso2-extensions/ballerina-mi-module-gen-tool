@@ -381,6 +381,9 @@ public class BalConnectorAnalyzer implements Analyzer {
                         String defaultValue = functionParamDefaults.get(paramName);
                         if (defaultValue.startsWith("\"") && defaultValue.endsWith("\"")) {
                             defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
+                        } else if ("()".equals(defaultValue)) {
+                            // Convert Ballerina nil to empty string for UI schema
+                            defaultValue = "";
                         }
                         param.setDefaultValue(defaultValue);
                         param.setRequired(false);

@@ -48,7 +48,7 @@
                     "name": "allowNull",
                     "displayName": "allowNull",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "()",
+                    "defaultValue": "",
                     "required": "false",
                     "helpTip": "",
                     "validateType": "",
