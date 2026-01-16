@@ -250,10 +250,7 @@ public class BalExecutor {
             fieldIndex++;
         }
         
-        // Log the reconstructed record for debugging
         String recordJsonString = recordJson.toString();
-        log.info("Reconstructed record '" + recordParamName + "' with connection type '" + connectionType + "': " + recordJsonString);
-        System.out.println("Reconstructed record '" + recordParamName + "' with connection type '" + connectionType + "': " + recordJsonString);
         
         // Convert JSON object to BMap
         return JsonUtils.parse(recordJsonString);
