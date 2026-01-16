@@ -970,8 +970,9 @@ public class ConnectorSerializer {
             if (!isFirst[0]) {
                 result.append("\n    ");
             }
+            String sanitizedParamName = Utils.sanitizeParamName(functionParam.getValue());
             result.append(String.format("<parameter name=\"%s\" description=\"%s\"/>",
-                    functionParam.getValue(), escapeXml(description)));
+                    sanitizedParamName, escapeXml(description)));
             isFirst[0] = false;
         }
     }

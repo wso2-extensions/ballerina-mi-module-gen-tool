@@ -20,7 +20,7 @@
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
     <parameter name="query" description=""/>
-    <parameter name="&#x27;limit" description=""/>
+    <parameter name="limit" description=""/>
     <sequence>
         <property name="param0" value="query"/>
         <property name="paramType0" value="string"/>

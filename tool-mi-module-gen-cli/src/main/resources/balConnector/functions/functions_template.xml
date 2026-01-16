@@ -32,7 +32,7 @@
     <parameter name="{{sanitizeParamName value}}" description="{{description}}"/>
     {{/each ~}}
     {{else ~}}
-    <parameter name="{{value}}" description="{{description}}"/>
+    <parameter name="{{sanitizeParamName value}}" description="{{description}}"/>
     {{/eq ~}}
     {{/each ~}}
     <sequence>
