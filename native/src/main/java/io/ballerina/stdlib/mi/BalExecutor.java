@@ -292,9 +292,7 @@ public class BalExecutor {
             case FLOAT:
                 current.addProperty(finalField, Double.parseDouble(valueStr));
                 break;
-            case DECIMAL:
-                current.addProperty(finalField, valueStr); // Keep as string for decimals
-                break;
+
             default:
                 // String and other types
                 current.addProperty(finalField, valueStr);
