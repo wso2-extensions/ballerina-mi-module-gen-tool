@@ -1,7 +1,7 @@
 {
   "connectorName": "project5",
   "operationName": "deleteUser",
-  "title": "deleteUser",
+  "title": "delete user",
   "help": "",
   "elements": [
     {

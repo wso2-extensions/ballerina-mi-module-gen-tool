@@ -1,7 +1,7 @@
 {
   "connectorName": "project5",
   "operationName": "updateUser",
-  "title": "updateUser",
+  "title": "update user",
   "help": "",
   "elements": [
     {

@@ -19,27 +19,27 @@
 <component name="functions" type="synapse/template">
     <subComponents>
         <component name="createUser">
-            <displayName>createUser</displayName>
+            <displayName>create user</displayName>
             <file>createUser.xml</file>
             <description></description>
         </component>
         <component name="deleteUser">
-            <displayName>deleteUser</displayName>
+            <displayName>delete user</displayName>
             <file>deleteUser.xml</file>
             <description></description>
         </component>
         <component name="updateUser">
-            <displayName>updateUser</displayName>
+            <displayName>update user</displayName>
             <file>updateUser.xml</file>
             <description></description>
         </component>
         <component name="getUsers">
-            <displayName>getUsers</displayName>
+            <displayName>get users</displayName>
             <file>getUsers.xml</file>
             <description></description>
         </component>
         <component name="Testing123">
-            <displayName>Testing123</displayName>
+            <displayName>testing123</displayName>
             <file>Testing123.xml</file>
             <description></description>
         </component>
