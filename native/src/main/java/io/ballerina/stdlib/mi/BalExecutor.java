@@ -267,15 +267,14 @@ public class BalExecutor {
      */
     private void setNestedField(com.google.gson.JsonObject jsonObject, String fieldPath, Object value, String fieldType) {
         String[] parts = fieldPath.split("\\.");
-        com.google.gson.JsonObject current = jsonObject;
         
         // Navigate/create nested objects up to the second-to-last part
         for (int i = 0; i < parts.length - 1; i++) {
             String part = parts[i];
-            if (!current.has(part)) {
-                current.add(part, new com.google.gson.JsonObject());
+            if (!jsonObject.has(part)) {
+                jsonObject.add(part, new com.google.gson.JsonObject());
             }
-            current = current.getAsJsonObject(part);
+            jsonObject = jsonObject.getAsJsonObject(part);
         }
         
         // Set the final field value with appropriate type
@@ -284,18 +283,18 @@ public class BalExecutor {
         
         switch (fieldType) {
             case BOOLEAN:
-                current.addProperty(finalField, Boolean.parseBoolean(valueStr));
+                jsonObject.addProperty(finalField, Boolean.parseBoolean(valueStr));
                 break;
             case INT:
-                current.addProperty(finalField, Long.parseLong(valueStr));
+                jsonObject.addProperty(finalField, Long.parseLong(valueStr));
                 break;
             case FLOAT:
-                current.addProperty(finalField, Double.parseDouble(valueStr));
+                jsonObject.addProperty(finalField, Double.parseDouble(valueStr));
                 break;
 
             default:
                 // String and other types
-                current.addProperty(finalField, valueStr);
+                jsonObject.addProperty(finalField, valueStr);
                 break;
         }
     }
