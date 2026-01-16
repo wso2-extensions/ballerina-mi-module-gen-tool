@@ -597,20 +597,22 @@ public class ConnectorSerializer {
                                                            JsonTemplateBuilder builder,
                                                            boolean isCombo, boolean expandRecords, String groupName) throws IOException {
         String paramType = functionParam.getParamType();
-        String paramValue = functionParam.getValue();
+        String originalParamValue = functionParam.getValue();
+        String displayParamValue = originalParamValue;
 
         
-        // For display and ID generation, remove group prefix if we're in a group context
+        // For display purposes, remove group prefix if we're in a group context
         // For nested fields like "http1Settings.proxy.host" in "Proxy" group, 
         // remove everything up to and including the group name segment
-        if (groupName != null && !groupName.isEmpty() && paramValue != null) {
-            paramValue = removeGroupPrefix(paramValue, groupName);
+        if (groupName != null && !groupName.isEmpty() && displayParamValue != null) {
+            displayParamValue = removeGroupPrefix(displayParamValue, groupName);
         }
         
-        String sanitizedParamName = Utils.sanitizeParamName(paramValue);
-        String displayName = paramValue;
+        // The 'name' attribute must match the XML parameter name (full path like "server.host")
+        String sanitizedParamName = Utils.sanitizeParamName(originalParamValue);
         
-        // Ensure display name is friendly (not fully qualified) by taking the last segment
+        // Display name is the human-friendly version (last segment only)
+        String displayName = displayParamValue;
         if (displayName.contains(".")) {
              displayName = displayName.substring(displayName.lastIndexOf('.') + 1);
         }
@@ -671,8 +673,8 @@ public class ConnectorSerializer {
                 if (!unionFunctionParam.getUnionMemberParams().isEmpty()) {
                     // If groupName is not provided but we're in a group context, detect it from the field path
                     String effectiveGroupName = groupName;
-                    if (effectiveGroupName == null && paramValue != null && paramValue.contains(".")) {
-                        String immediateParent = getImmediateParentSegment(paramValue);
+                    if (effectiveGroupName == null && originalParamValue != null && originalParamValue.contains(".")) {
+                        String immediateParent = getImmediateParentSegment(originalParamValue);
                         if (immediateParent != null) {
                             effectiveGroupName = immediateParent;
                         }
@@ -1096,19 +1098,7 @@ public class ConnectorSerializer {
                             fieldParam.setEnableCondition(mergedCondition);
                         }
 
-                        // Remove the group name prefix from the field name
-                        String originalFieldName = fieldParam.getValue();
-                        String shortFieldName = removeGroupPrefix(originalFieldName, groupName);
 
-                        // For UnionFunctionParam, we need to update the enable conditions of its members
-                        // because the combo field name (derived from param name) is changing.
-                        boolean isUnion = fieldParam instanceof UnionFunctionParam;
-                        String savedFieldName = fieldParam.getValue();
-                        
-                        if (isUnion) {
-                            updateEnableConditionsForUnionMembers((UnionFunctionParam) fieldParam, savedFieldName, shortFieldName);
-                        }
-                        fieldParam.setValue(shortFieldName);
 
                         // Add indentation before the first attribute in the group
                         if (i == 0) {
@@ -1117,11 +1107,7 @@ public class ConnectorSerializer {
                         // Pass groupName to remove prefix from displayName
                         writeJsonAttributeForFunctionParam(fieldParam, i, groupFields.size(), builder, false, expandRecords, groupName);
 
-                        // Restore original field name and conditions
-                        fieldParam.setValue(savedFieldName);
-                        if (isUnion) {
-                            updateEnableConditionsForUnionMembers((UnionFunctionParam) fieldParam, shortFieldName, savedFieldName);
-                        }
+
                     }
 
                     // Close the attributeGroup - close elements array, value object, and attributeGroup object

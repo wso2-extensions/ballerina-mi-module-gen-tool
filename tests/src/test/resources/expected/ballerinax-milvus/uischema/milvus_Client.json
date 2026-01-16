@@ -58,7 +58,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "token",
+                          "name": "authConfig.token",
                           "displayName": "token",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -80,7 +80,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "username",
+                          "name": "credentialsConfig.username",
                           "displayName": "username",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -93,7 +93,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "password",
+                          "name": "credentialsConfig.password",
                           "displayName": "password",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -232,7 +232,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "clientKeyPath",
+                          "name": "secureConfig.clientKeyPath",
                           "displayName": "clientKeyPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -245,7 +245,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "clientPemPath",
+                          "name": "secureConfig.clientPemPath",
                           "displayName": "clientPemPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -258,7 +258,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "serverPemPath",
+                          "name": "secureConfig.serverPemPath",
                           "displayName": "serverPemPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -271,7 +271,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "caPemPath",
+                          "name": "secureConfig.caPemPath",
                           "displayName": "caPemPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
