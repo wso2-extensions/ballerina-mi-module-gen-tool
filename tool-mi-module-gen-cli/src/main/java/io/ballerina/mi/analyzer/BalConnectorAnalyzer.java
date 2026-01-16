@@ -218,11 +218,11 @@ public class BalConnectorAnalyzer implements Analyzer {
             try {
                 operationIdOpt = Utils.getOpenApiOperationId(methodSymbol, module, semanticModel);
                 if (operationIdOpt.isPresent()) {
-                    System.out.println("Found operationId: " + operationIdOpt.get() + " for method: " + methodSymbol.getName().orElse("<unknown>"));
+                    printStream.println("Found operationId: " + operationIdOpt.get() + " for method: " + methodSymbol.getName().orElse("<unknown>"));
                 }
             } catch (Exception e) {
                 // If syntax tree access fails, continue without operationId
-                System.out.println("Error extracting operationId for method: " + methodSymbol.getName().orElse("<unknown>") + " - " + e.getMessage());
+                printStream.println("Error extracting operationId for method: " + methodSymbol.getName().orElse("<unknown>") + " - " + e.getMessage());
             }
             
             // Add operationId to context if found
