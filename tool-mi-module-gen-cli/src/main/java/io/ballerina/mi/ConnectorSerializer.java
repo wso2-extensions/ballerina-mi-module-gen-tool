@@ -624,7 +624,7 @@ public class ConnectorSerializer {
         switch (paramType) {
             case STRING, XML, JSON, MAP, ARRAY:
                 Attribute stringAttr = new Attribute(sanitizedParamName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        "", functionParam.isRequired(), functionParam.getDescription(), "",
+                        defaultValue, functionParam.isRequired(), functionParam.getDescription(), "",
                         "", isCombo);
                 stringAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);

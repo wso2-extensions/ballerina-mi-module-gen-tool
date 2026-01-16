@@ -20,10 +20,14 @@
     <parameter name="name" description="Unique name the connection is identified by"/>
     <parameter name="connectionType" description="Connection type"/>
     <!-- TODO: if union, the selected member type becomes a parameter-->
-    
+    <parameter name="baseUrl" description=""/>
     <sequence>
         <property name="PROJECT5_SIMPLECLIENT_objectTypeName" value="SimpleClient"/>
-        
+        <property name="PROJECT5_SIMPLECLIENT_paramSize" value="1"/>
+        <property name="PROJECT5_SIMPLECLIENT_paramFunctionName" value="init"/>
+        <property name="PROJECT5_SIMPLECLIENT_param0" value="baseUrl"/>
+        <property name="PROJECT5_SIMPLECLIENT_paramType0" value="string"/>
+
         <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project5"/>

@@ -28,7 +28,7 @@ public type User record {|
 public client class SimpleClient {
     private final http:Client httpClient;
 
-    function init(string baseUrl) returns error? {
+    public function init(string baseUrl) returns error? {
         self.httpClient = check new (baseUrl);
     }
 

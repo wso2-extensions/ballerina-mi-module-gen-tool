@@ -1070,7 +1070,7 @@
                     "name": "serviceUrl",
                     "displayName": "serviceUrl",
                     "inputType": "stringOrExpression",
-                    "defaultValue": "",
+                    "defaultValue": "https://disease.sh",
                     "required": "false",
                     "helpTip": "",
                     "validateType": "",

@@ -29,7 +29,7 @@
         <property name="paramFunctionName" value="createUser"/>
         <property name="returnType" value="union"/>
 
-        <class name="io.ballerina.stdlib.mi.Mediator">
+        <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project5"/>
             <property name="version" value="1"/>

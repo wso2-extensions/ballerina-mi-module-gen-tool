@@ -10,6 +10,21 @@
         "groupName": "General",
         "elements": [
           {
+            "type": "attribute",
+            "value": {
+              "name": "configRef",
+              "displayName": "Connection",
+              "inputType": "connection",
+              "allowedConnectionTypes": [
+                "project5_SimpleClient"
+              ],
+              "defaultType": "connection.project5_SimpleClient",
+              "defaultValue": "",
+              "required": "true",
+              "helpTip": "Connection to be used"
+            }
+          },
+          {
             "type": "attributeGroup",
             "value": {
               "groupName": "Input Variables",
