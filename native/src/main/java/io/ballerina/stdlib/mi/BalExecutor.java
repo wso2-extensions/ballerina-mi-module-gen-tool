@@ -193,95 +193,19 @@ public class BalExecutor {
     
     /**
      * Finds the connection type prefix for a given record parameter name.
-     * Searches through context properties to find the pattern {CONNECTIONTYPE}_{recordParamName}_param0.
+     * Gets the connectionType directly from the function stack template parameters.
      * 
      * @param context The message context
      * @param recordParamName The record parameter name (e.g., "config")
      * @return The connection type prefix or null if not found
      */
     private String findConnectionTypeForParam(MessageContext context, String recordParamName) {
-        // Strategy: Look for the SIZE property which tells us how many params we have
-        // Then check param0, param1, etc. to find which one matches our recordParamName
-        // Once we find it, we know the index and can construct the connection type
-        
-        try {
-            // The flattened fields use pattern: {CONNECTIONTYPE}_{recordParamName}_param0
-            // We need to find the {CONNECTIONTYPE} part
-            // We know that there's a property like "{CONNECTIONTYPE}_param0" = "config"
-            // So let's try to deduce the connection type by checking combinations
-            
-            // Get the SIZE to know how many parameters we have
-            Object sizeObj = context.getProperty(Constants.SIZE);
-            if (sizeObj != null) {
-                int size = Integer.parseInt(sizeObj.toString());
-                
-                // For each parameter index, check if the value matches our recordParamName
-                for (int i = 0; i < size; i++) {
-                    String paramKey = "param" + i;
-                    Object paramValue = context.getProperty(paramKey);
-                    
-                    if (paramValue != null && paramValue.toString().equals(recordParamName)) {
-                        // Found it! Now try to find the connection type prefix
-                        // The connection type has properties like {CONNECTIONTYPE}_param{i}
-                        // Try to find it by checking for {CONNECTIONTYPE}_paramFunctionName = "init"
-                        
-                        // Since we can't iterate all properties, use a workaround:
-                        // Try a brute force approach with common separators
-                        // The connection type is usually {MODULE}_{CLASS} in uppercase
-                        // Let's scan for known patterns by checking if {PREFIX}_param0 exists
-                        
-                        // Actually, a simpler approach: check if there's a property
-                        // named differently with _param0 suffix
-                        // We can use the fact that the template parameter name is different
-                        // from the context property name
-                        
-                        // The template parameter is just "config" but the property is
-                        // "{CONNECTIONTYPE}_config_param0"
-                        // So we need to get the value of "param0" from lookup, which should give us "config"
-                        // Then we check for properties ending with "_config_param0"
-                        
-                        // Workaround: Try common module prefixes
-                        Object functionNameProp = context.getProperty(Constants.FUNCTION_NAME);
-                        if (functionNameProp != null && "init".equals(functionNameProp.toString())) {
-                            // We're in an init function call
-                            // Look for the objectTypeName which has the connection type prefix
-                            // Try to find it by testing common patterns
-                            String testKey = recordParamName + "_param0";
-                            
-                            // Build potential connection types from org.module.Client pattern
-                            // For now, use a heuristic: try uppercase versions
-                            String[] testPrefixes = buildPotentialPrefixes(context);
-                            
-                            for (String prefix : testPrefixes) {
-                                Object testProp = context.getProperty(prefix + "_" + testKey);
-                                if (testProp != null) {
-                                    return prefix;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error finding connection type for record parameter: " + recordParamName, e);
+        // Get connectionType directly from the function stack
+        Object connectionType = lookupTemplateParameter(context, "connectionType");
+        if (connectionType != null) {
+            return connectionType.toString();
         }
-        
         return null;
-    }
-    
-    /**
-     * Builds potential connection type prefixes from the context.
-     * This is a heuristic approach since we can't enumerate all properties.
-     */
-    private String[] buildPotentialPrefixes(MessageContext context) {
-        java.util.List<String> prefixes = new java.util.ArrayList<>();
-        
-        // Try to get hints from the BalConnectorConfig if it's been set
-        // For now, use common patterns
-        // TODO: Make this more dynamic by storing the connection type in a well-known property
-        prefixes.add("GOOGLEAPIS_GMAIL_CLIENT");
-        
-        return prefixes.toArray(new String[0]);
     }
 
     /**
