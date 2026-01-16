@@ -147,10 +147,9 @@ public class BalExecutor {
     }
 
     private Object createRecordValue(String jsonString, String paramName, MessageContext context, int paramIndex) {
-        // Check if this is a flattened record from init function or a regular JSON record
-        // If jsonString doesn't look like JSON (doesn't start with '{' or '['), it's likely a record name
-        // that needs to be reconstructed from flattened fields
-        if (jsonString == null || (!jsonString.startsWith("{") && !jsonString.startsWith("[") && !jsonString.startsWith("'"))) {
+        // Check if this is a flattened record from init function
+        // Null jsonString indicates the record needs to be reconstructed from flattened fields
+        if (jsonString == null) {
             // This is a flattened record from init function
             String recordParamName = (jsonString != null) ? jsonString : paramName; // e.g., "config"
             
