@@ -28,6 +28,9 @@
         <property name="paramSize" value="3"/>
         <property name="paramFunctionName" value="createUser"/>
         <property name="returnType" value="union"/>
+        <property name="functionType" value="RESOURCE"/>
+        <property name="resourceAccessor" value="post"/>
+        <property name="pathParamSize" value="0"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
