@@ -64,7 +64,17 @@ public class BalExecutor {
             if (callable instanceof Module) {
                 result = rt.callFunction((Module) callable, context.getProperty(Constants.FUNCTION_NAME).toString(), null, args);
             } else if (callable instanceof BObject) {
-                result = rt.callMethod((BObject) callable, context.getProperty(FUNCTION_NAME).toString(), null, args);
+                // Check if this is a resource function
+                String functionType = getPropertyAsString(context, Constants.FUNCTION_TYPE);
+                if (Constants.FUNCTION_TYPE_RESOURCE.equals(functionType)) {
+                    // For resource functions, use the accessor as method name and prepend path params to args
+                    String resourceAccessor = getPropertyAsString(context, Constants.RESOURCE_ACCESSOR);
+                    Object[] argsWithPathParams = prependPathParams(args, context);
+                    result = rt.callMethod((BObject) callable, resourceAccessor, null, argsWithPathParams);
+                } else {
+                    // For remote/other functions, use the synapse name (paramFunctionName)
+                    result = rt.callMethod((BObject) callable, context.getProperty(FUNCTION_NAME).toString(), null, args);
+                }
             } else {
                 throw new SynapseException("Unsupported callable type: " + callable.getClass().getName());
             }
@@ -106,6 +116,76 @@ public class BalExecutor {
             Object param = getParameter(context, "param" + i, "paramType" + i, i);
             args[i] = param;
         }
+    }
+
+    /**
+     * Get a property value as a String from the MessageContext.
+     * Returns null if the property doesn't exist.
+     */
+    private String getPropertyAsString(MessageContext context, String propertyName) {
+        Object value = context.getProperty(propertyName);
+        return value != null ? value.toString() : null;
+    }
+
+    /**
+     * Prepend path parameter values to the args array for resource function invocation.
+     * Path params are passed as the first arguments to resource methods in Ballerina.
+     *
+     * @param args The original function arguments
+     * @param context The message context containing path param values
+     * @return A new array with path params prepended to the original args
+     */
+    private Object[] prependPathParams(Object[] args, MessageContext context) {
+        String pathParamSizeStr = getPropertyAsString(context, Constants.PATH_PARAM_SIZE);
+        int pathParamSize = pathParamSizeStr != null ? Integer.parseInt(pathParamSizeStr) : 0;
+
+        if (pathParamSize == 0) {
+            return args;
+        }
+
+        Object[] pathParams = new Object[pathParamSize];
+        for (int i = 0; i < pathParamSize; i++) {
+            String pathParamName = getPropertyAsString(context, "pathParam" + i);
+            String pathParamType = getPropertyAsString(context, "pathParamType" + i);
+
+            // Get the path param value from template parameters
+            Object pathParamValue = lookupTemplateParameter(context, pathParamName);
+
+            if (pathParamValue != null) {
+                // Convert path param to appropriate type
+                pathParams[i] = convertPathParam(pathParamValue.toString(), pathParamType);
+            } else {
+                log.warn("Path parameter '" + pathParamName + "' not found in context");
+                pathParams[i] = null;
+            }
+        }
+
+        // Create new array with path params prepended
+        Object[] combined = new Object[pathParamSize + args.length];
+        System.arraycopy(pathParams, 0, combined, 0, pathParamSize);
+        System.arraycopy(args, 0, combined, pathParamSize, args.length);
+
+        return combined;
+    }
+
+    /**
+     * Convert a path parameter value to the appropriate Ballerina type.
+     *
+     * @param value The string value of the path parameter
+     * @param type The expected type (string, int, etc.)
+     * @return The converted value
+     */
+    private Object convertPathParam(String value, String type) {
+        if (type == null) {
+            type = Constants.STRING; // Default to string
+        }
+        return switch (type) {
+            case Constants.INT -> Long.parseLong(value);
+            case Constants.FLOAT -> Double.parseDouble(value);
+            case Constants.BOOLEAN -> Boolean.parseBoolean(value);
+            case Constants.DECIMAL -> ValueCreator.createDecimalValue(value);
+            default -> StringUtils.fromString(value); // STRING and others
+        };
     }
 
     public Object getParameter(MessageContext context, String value, String type, int index) {

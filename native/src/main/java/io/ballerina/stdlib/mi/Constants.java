@@ -37,4 +37,12 @@ public class Constants {
     public static final String ARRAY = "array";
     public static final String MAP = "map";
     public static final String SYNAPSE_FUNCTION_STACK = "_SYNAPSE_FUNCTION_STACK";
+
+    // Resource function constants
+    public static final String FUNCTION_TYPE = "functionType";
+    public static final String RESOURCE_ACCESSOR = "resourceAccessor";
+    public static final String PATH_PARAM_SIZE = "pathParamSize";
+    public static final String FUNCTION_TYPE_RESOURCE = "RESOURCE";
+    public static final String FUNCTION_TYPE_REMOTE = "REMOTE";
+    public static final String FUNCTION_TYPE_FUNCTION = "FUNCTION";
 }

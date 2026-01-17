@@ -356,6 +356,11 @@ public class BalConnectorAnalyzer implements Analyzer {
 
             component = new Component(finalSynapseName, docString, functionType, Integer.toString(i), pathParams, List.of(), returnType);
 
+            // For resource functions, store the accessor (HTTP method) for invocation
+            if (functionType == FunctionType.RESOURCE) {
+                component.setResourceAccessor(functionName); // functionName is the accessor (get, post, etc.)
+            }
+
             // Store operationId as a parameter if found
             if (operationIdOpt.isPresent()) {
                 Param operationIdParam = new Param("operationId", operationIdOpt.get());

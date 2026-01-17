@@ -42,6 +42,8 @@ public class Component extends ModelElement {
     private final List<PathParamType> pathParams;
     private final List<Type> queryParams;
     private final String returnType;
+    // For resource functions: the HTTP accessor (get, post, put, delete, etc.)
+    private String resourceAccessor;
 
     public Component(String name, String documentation, FunctionType functionType, String index, List<PathParamType> pathParams, List<Type> queryParams, String returnType) {
         this.name = name;
@@ -115,6 +117,39 @@ public class Component extends ModelElement {
 
     public FunctionType getFunctionType() {
         return functionType;
+    }
+
+    /**
+     * Get the resource accessor (HTTP method) for resource functions.
+     * @return The accessor (e.g., "get", "post", "put", "delete") or null if not a resource function
+     */
+    public String getResourceAccessor() {
+        return resourceAccessor;
+    }
+
+    /**
+     * Set the resource accessor (HTTP method) for resource functions.
+     * @param resourceAccessor The accessor (e.g., "get", "post", "put", "delete")
+     */
+    public void setResourceAccessor(String resourceAccessor) {
+        this.resourceAccessor = resourceAccessor;
+    }
+
+    /**
+     * Check if this component represents a resource function.
+     * Used by Handlebars templates to conditionally include resource-specific properties.
+     * @return true if this is a resource function, false otherwise
+     */
+    public boolean isResourceFunction() {
+        return functionType == FunctionType.RESOURCE;
+    }
+
+    /**
+     * Get the number of path parameters for resource functions.
+     * @return The count of path parameters
+     */
+    public int getPathParamSize() {
+        return pathParams != null ? pathParams.size() : 0;
     }
 
     public void generateTemplateXml(File connectorFolder, String templatePath, String typeName) {
