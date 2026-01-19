@@ -42,6 +42,7 @@ public class Constants {
     public static final String FUNCTION_TYPE = "functionType";
     public static final String RESOURCE_ACCESSOR = "resourceAccessor";
     public static final String PATH_PARAM_SIZE = "pathParamSize";
+    public static final String JVM_METHOD_NAME = "jvmMethodName";
     public static final String FUNCTION_TYPE_RESOURCE = "RESOURCE";
     public static final String FUNCTION_TYPE_REMOTE = "REMOTE";
     public static final String FUNCTION_TYPE_FUNCTION = "FUNCTION";

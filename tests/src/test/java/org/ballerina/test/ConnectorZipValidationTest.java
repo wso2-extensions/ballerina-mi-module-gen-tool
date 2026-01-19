@@ -92,6 +92,7 @@ public class ConnectorZipValidationTest {
                 {"project4", null},  // project4 is a local bala project
                 {"unionProject", null},
                 {"project6", null},
+                {"project7", null},  // project7 tests Gmail-style resource functions with multiple paths
                 {"nestedRecordConflictProject", null},  // Test for qualified naming with nested record conflicts
                 // Format: {"projectName", "org/package:version"} or {"projectName", null} for local
                 // Example: {"ballerinax-milvus", "ballerina/http:2.15.3"} - uncomment when connector is available

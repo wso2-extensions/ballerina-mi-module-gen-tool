@@ -67,10 +67,11 @@ public class BalExecutor {
                 // Check if this is a resource function
                 String functionType = getPropertyAsString(context, Constants.FUNCTION_TYPE);
                 if (Constants.FUNCTION_TYPE_RESOURCE.equals(functionType)) {
-                    // For resource functions, use the accessor as method name and prepend path params to args
-                    String resourceAccessor = getPropertyAsString(context, Constants.RESOURCE_ACCESSOR);
+                    // For resource functions, use the JVM method name (includes path segments)
+                    // and prepend path params to args
+                    String jvmMethodName = getPropertyAsString(context, Constants.JVM_METHOD_NAME);
                     Object[] argsWithPathParams = prependPathParams(args, context);
-                    result = rt.callMethod((BObject) callable, resourceAccessor, null, argsWithPathParams);
+                    result = rt.callMethod((BObject) callable, jvmMethodName, null, argsWithPathParams);
                 } else {
                     // For remote/other functions, use the synapse name (paramFunctionName)
                     result = rt.callMethod((BObject) callable, context.getProperty(FUNCTION_NAME).toString(), null, args);

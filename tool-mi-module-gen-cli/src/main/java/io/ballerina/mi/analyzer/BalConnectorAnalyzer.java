@@ -262,28 +262,38 @@ public class BalConnectorAnalyzer implements Analyzer {
                 synapseNameCount.put(synapseName, 0);
             }
 
-            // Extract path parameters from resource path segments (for resource functions)
+            // Extract path parameters and path segments from resource path (for resource functions)
             List<PathParamType> pathParams = new ArrayList<>();
             Set<String> pathParamNames = new HashSet<>();
-            
+            List<ResourcePathSegment> resourcePathSegments = new ArrayList<>();
+
             if (functionType == FunctionType.RESOURCE && methodSymbol instanceof ResourceMethodSymbol resourceMethod) {
                 try {
                     PathSegmentList resourcePath = (PathSegmentList) resourceMethod.resourcePath();
                     List<PathSegment> segments = resourcePath.list();
-                    
+
                     for (PathSegment segment : segments) {
                         String sig = segment.signature();
                         if (sig != null && sig.startsWith("[") && sig.endsWith("]")) {
-                            // This is a path parameter segment
+                            // This is a path parameter segment (e.g., "[string userId]")
                             String inside = sig.substring(1, sig.length() - 1).trim();
                             String paramName = inside;
+                            String paramType = "string"; // default type
                             int lastSpace = inside.lastIndexOf(' ');
                             if (lastSpace >= 0 && lastSpace + 1 < inside.length()) {
+                                paramType = inside.substring(0, lastSpace).trim();
                                 paramName = inside.substring(lastSpace + 1);
                             }
                             if (!paramName.isEmpty()) {
                                 pathParamNames.add(paramName);
+                                // Add as a dynamic path segment
+                                resourcePathSegments.add(new ResourcePathSegment(paramName, paramType));
                             }
+                        } else if (sig != null && !sig.isEmpty()) {
+                            // This is a static path segment (e.g., "users", "drafts")
+                            // Remove any leading quote (for escaped Ballerina keywords like 'import)
+                            String staticSegment = sig.startsWith("'") ? sig.substring(1) : sig;
+                            resourcePathSegments.add(new ResourcePathSegment(staticSegment));
                         }
                     }
                 } catch (Exception e) {
@@ -356,9 +366,10 @@ public class BalConnectorAnalyzer implements Analyzer {
 
             component = new Component(finalSynapseName, docString, functionType, Integer.toString(i), pathParams, List.of(), returnType);
 
-            // For resource functions, store the accessor (HTTP method) for invocation
+            // For resource functions, store the accessor and path segments for invocation
             if (functionType == FunctionType.RESOURCE) {
                 component.setResourceAccessor(functionName); // functionName is the accessor (get, post, etc.)
+                component.setResourcePathSegments(resourcePathSegments);
             }
 
             // Store operationId as a parameter if found
