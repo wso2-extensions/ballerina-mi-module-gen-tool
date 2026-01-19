@@ -33,6 +33,7 @@
         <property name="functionType" value="RESOURCE"/>
         <property name="resourceAccessor" value="put"/>
         <property name="pathParamSize" value="1"/>
+        <property name="jvmMethodName" value="$put$items$$itemId"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>

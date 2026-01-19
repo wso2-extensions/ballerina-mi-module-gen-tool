@@ -29,6 +29,7 @@
         <property name="functionType" value="RESOURCE"/>
         <property name="resourceAccessor" value="delete"/>
         <property name="pathParamSize" value="1"/>
+        <property name="jvmMethodName" value="$delete$items$$itemId"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>

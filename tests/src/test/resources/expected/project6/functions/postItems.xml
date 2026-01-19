@@ -30,6 +30,7 @@
         <property name="functionType" value="RESOURCE"/>
         <property name="resourceAccessor" value="post"/>
         <property name="pathParamSize" value="0"/>
+        <property name="jvmMethodName" value="$post$items"/>
 
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>

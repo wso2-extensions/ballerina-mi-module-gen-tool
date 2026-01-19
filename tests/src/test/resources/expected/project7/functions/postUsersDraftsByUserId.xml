@@ -16,27 +16,28 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<template xmlns="http://ws.apache.org/ns/synapse" name="getItemsSearch">
+<template xmlns="http://ws.apache.org/ns/synapse" name="postUsersDraftsByUserId">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="query" description=""/>
-    <parameter name="limit" description=""/>
+    <parameter name="postUsersDraftsByUserId" description=""/>
+    <parameter name="draft" description=""/>
     <sequence>
-        <property name="param0" value="query"/>
-        <property name="paramType0" value="string"/>
-        <property name="param1" value="limit"/>
-        <property name="paramType1" value="int"/>
-        <property name="paramSize" value="2"/>
-        <property name="paramFunctionName" value="getItemsSearch"/>
+        <property name="param0" value="draft"/>
+        <property name="paramType0" value="record"/>
+        <property name="param0_recordName" value="Draft" />
+        <property name="paramSize" value="3"/>
+        <property name="paramFunctionName" value="postUsersDraftsByUserId"/>
+        <property name="pathParam0" value="userId"/>
+        <property name="pathParamType0" value="string"/>
         <property name="returnType" value="union"/>
-        <property name="functionType" value="RESOURCE"/>
-        <property name="resourceAccessor" value="get"/>
-        <property name="pathParamSize" value="0"/>
-        <property name="jvmMethodName" value="$get$items$search"/>
 
+        <property name="functionType" value="RESOURCE"/>
+        <property name="resourceAccessor" value="post"/>
+        <property name="pathParamSize" value="1"/>
+        <property name="jvmMethodName" value="$post$users$$userId$drafts"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
-            <property name="moduleName" value="project6"/>
+            <property name="moduleName" value="project7"/>
             <property name="version" value="1"/>
         </class>
     </sequence>
