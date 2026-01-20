@@ -24,10 +24,11 @@
     <parameter name="apiKey" description=""/>
     <sequence>
         <property name="PROJECT7_GMAILMOCKCLIENT_objectTypeName" value="GmailMockClient"/>
-        <property name="PROJECT7_GMAILMOCKCLIENT_paramSize" value="2"/>
+        <property name="PROJECT7_GMAILMOCKCLIENT_paramSize" value="1"/>
         <property name="PROJECT7_GMAILMOCKCLIENT_paramFunctionName" value="init"/>
         <property name="PROJECT7_GMAILMOCKCLIENT_param0" value="config"/>
         <property name="PROJECT7_GMAILMOCKCLIENT_paramType0" value="record"/>
+        <property name="PROJECT7_GMAILMOCKCLIENT_param0_recordName" value="ConnectionConfig"/>
         <property name="PROJECT7_GMAILMOCKCLIENT_config_param0" value="baseUrl"/>
         <property name="PROJECT7_GMAILMOCKCLIENT_config_paramType0" value="string"/>
         <property name="PROJECT7_GMAILMOCKCLIENT_config_param1" value="apiKey"/>

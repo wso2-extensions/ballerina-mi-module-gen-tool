@@ -19,8 +19,8 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="getUsersMessagesByUserIdById">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="getUsersMessagesByUserIdById" description=""/>
-    <parameter name="getUsersMessagesByUserIdById" description=""/>
+    <parameter name="id" description=""/>
+    <parameter name="userId" description=""/>
     <sequence>
         <property name="paramSize" value="0"/>
         <property name="paramFunctionName" value="getUsersMessagesByUserIdById"/>
@@ -33,7 +33,7 @@
         <property name="functionType" value="RESOURCE"/>
         <property name="resourceAccessor" value="get"/>
         <property name="pathParamSize" value="2"/>
-        <property name="jvmMethodName" value="$get$users$$userId$messages$$id"/>
+        <property name="jvmMethodName" value="$get$users$$$messages$$"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project7"/>

@@ -271,6 +271,31 @@ public class ConnectorSerializer {
                 }
                 return new Handlebars.SafeString(output);
             });
+            handlebar.registerHelper("writeComponentXmlParameters", (context, options) -> {
+                Component component = (Component) context;
+                StringBuilder result = new StringBuilder();
+                
+                // Path Params
+                if (component.getPathParams() != null) {
+                    for (PathParamType param : component.getPathParams()) {
+                        result.append(String.format("    <parameter name=\"%s\" description=\"\"/>\n", param.name));
+                    }
+                }
+
+                // Query Params
+                if (component.getQueryParams() != null) {
+                    for (Type param : component.getQueryParams()) {
+                        result.append(String.format("    <parameter name=\"%s\" description=\"\"/>\n", param.name));
+                    }
+                }
+                
+                String output = result.toString();
+                if (!output.isEmpty() && output.endsWith("\n")) {
+                    output = output.substring(0, output.length() - 1);
+                }
+                
+                return new Handlebars.SafeString(output);
+            });
             handlebar.registerHelper("writeConfigJsonProperties", (context, options) -> {
                 Component component = (Component) context;
                 JsonTemplateBuilder builder = new JsonTemplateBuilder();
@@ -882,10 +907,12 @@ public class ConnectorSerializer {
                     connectionType, indexHolder[0], recordParam.getValue()));
             result.append(String.format("\n        <property name=\"%s_paramType%d\" value=\"%s\"/>",
                     connectionType, indexHolder[0], RECORD));
+            result.append(String.format("\n        <property name=\"%s_param%d_recordName\" value=\"%s\"/>",
+                    connectionType, indexHolder[0], recordParam.getRecordName()));
             isFirst[0] = false;
             int recordParamIndex = indexHolder[0];
             indexHolder[0]++;
-            
+
             // Then, write record fields with the record parameter name prefix
             int[] fieldIndexHolder = {0};
             String recordParamName = recordParam.getValue();

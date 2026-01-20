@@ -405,7 +405,7 @@ public class BalConnectorAnalyzer implements Analyzer {
                         param.setRequired(false);
                     }
                     component.setFunctionParam(param);
-                    paramIndex += countExpandedParams(param);
+                    paramIndex++;
                 }
                 Param sizeParam = new Param("paramSize", Integer.toString(paramIndex));
                 Param functionNameParam = new Param("paramFunctionName", component.getName());

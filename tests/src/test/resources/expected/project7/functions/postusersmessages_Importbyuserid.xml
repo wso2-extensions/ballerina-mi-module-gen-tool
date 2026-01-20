@@ -19,13 +19,13 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="postUsersMessages_importByUserId">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="postUsersMessages_importByUserId" description=""/>
+    <parameter name="userId" description=""/>
     <parameter name="message" description=""/>
     <sequence>
         <property name="param0" value="message"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="Message" />
-        <property name="paramSize" value="3"/>
+        <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="postUsersMessages_importByUserId"/>
         <property name="pathParam0" value="userId"/>
         <property name="pathParamType0" value="string"/>
@@ -34,7 +34,7 @@
         <property name="functionType" value="RESOURCE"/>
         <property name="resourceAccessor" value="post"/>
         <property name="pathParamSize" value="1"/>
-        <property name="jvmMethodName" value="$post$users$$userId$messages$import"/>
+        <property name="jvmMethodName" value="$post$users$$$messages$import"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project7"/>

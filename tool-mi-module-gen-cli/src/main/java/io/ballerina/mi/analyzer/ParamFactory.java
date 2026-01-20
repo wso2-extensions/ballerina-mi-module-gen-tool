@@ -87,7 +87,12 @@ public class ParamFactory {
         RecordFunctionParam recordParam = new RecordFunctionParam(Integer.toString(index), paramName, TypeDescKind.RECORD.getName());
         recordParam.setParamKind(parameterSymbol.paramKind());
         recordParam.setTypeSymbol(typeSymbol);
-        recordParam.setRecordName(actualTypeSymbol.getName().orElse(paramName));
+        // Try to get name from the original type symbol first (for type references like ConnectionConfig)
+        // Fall back to actual type symbol name, then parameter name
+        String recordName = typeSymbol.getName()
+                .or(() -> actualTypeSymbol.getName())
+                .orElse(paramName);
+        recordParam.setRecordName(recordName);
 
         // Set required based on parameter kind
         if (parameterSymbol.paramKind() == ParameterKind.DEFAULTABLE) {

@@ -19,12 +19,7 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="{{name}}">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    {{#each queryParams ~}}
-    <parameter name="{{name}}" description="{{documentation}}"/>
-    {{/each ~}}
-    {{#each pathParams ~}}
-    <parameter name="{{name}}" description="{{documentation}}"/>
-    {{/each ~}}
+{{{writeComponentXmlParameters this}}}
     {{#each functionParams ~}}
     {{#eq paramType "union" ~}}
     <parameter name="{{sanitizeParamName value}}DataType" description="Select the data type for '{{value}}' parameter"/>

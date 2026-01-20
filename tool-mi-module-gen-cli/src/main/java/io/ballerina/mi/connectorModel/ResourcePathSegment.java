@@ -91,8 +91,8 @@ public class ResourcePathSegment {
      */
     public String toJvmMethodNameComponent() {
         if (isParameter) {
-            // Path parameters use $$ prefix in JVM method names
-            return "$$" + value;
+            // Path parameters use $$ as placeholder in XML, which is replaced by ^ in runtime
+            return "$$";
         } else {
             // Static segments use $ prefix
             return "$" + value;

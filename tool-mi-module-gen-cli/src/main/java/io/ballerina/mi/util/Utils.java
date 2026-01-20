@@ -165,6 +165,12 @@ public class Utils {
             Files.walkFileTree(sourceDirPath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    // Skip macOS-specific files that cause extraction issues in MI
+                    String fileName = file.getFileName().toString();
+                    if (shouldSkipFile(fileName)) {
+                        return FileVisitResult.CONTINUE;
+                    }
+
                     Path targetFile = sourceDirPath.relativize(file);
                     outputStream.putNextEntry(new ZipEntry(targetFile.toString()));
                     Files.copy(file, outputStream);
@@ -174,6 +180,12 @@ public class Utils {
 
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    // Skip macOS-specific directories
+                    String dirName = dir.getFileName().toString();
+                    if (shouldSkipDirectory(dirName)) {
+                        return FileVisitResult.SKIP_SUBTREE;
+                    }
+
                     if (!dir.equals(sourceDirPath)) {
                         Path targetDir = sourceDirPath.relativize(dir);
                         outputStream.putNextEntry(new ZipEntry(targetDir + "/"));
@@ -183,6 +195,40 @@ public class Utils {
                 }
             });
         }
+    }
+
+    /**
+     * Check if a file should be skipped during ZIP creation.
+     * Skips macOS-specific files that cause extraction issues in MI.
+     *
+     * @param fileName The name of the file to check
+     * @return true if the file should be skipped, false otherwise
+     */
+    private static boolean shouldSkipFile(String fileName) {
+        // Skip .DS_Store files (macOS Finder metadata)
+        if (".DS_Store".equals(fileName)) {
+            return true;
+        }
+        // Skip AppleDouble resource fork files (._* files)
+        if (fileName.startsWith("._")) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if a directory should be skipped during ZIP creation.
+     * Skips macOS-specific directories that cause extraction issues in MI.
+     *
+     * @param dirName The name of the directory to check
+     * @return true if the directory should be skipped, false otherwise
+     */
+    private static boolean shouldSkipDirectory(String dirName) {
+        // Skip __MACOSX directory (created by macOS archiver)
+        if ("__MACOSX".equals(dirName)) {
+            return true;
+        }
+        return false;
     }
 
     /**

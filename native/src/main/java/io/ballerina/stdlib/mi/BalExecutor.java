@@ -57,12 +57,15 @@ public class BalExecutor {
     protected Log log = LogFactory.getLog(BalExecutor.class);
 
     public boolean execute(Runtime rt, Object callable, MessageContext context) throws AxisFault, BallerinaExecutionException {
-        Object[] args = new Object[Integer.parseInt(context.getProperty(Constants.SIZE).toString())];
+        String paramSize = getPropertyAsString(context, Constants.SIZE);
+        int size = (paramSize != null && !paramSize.isEmpty()) ? Integer.parseInt(paramSize) : 0;
+        Object[] args = new Object[size];
         setParameters(args, context);
         try {
             Object result;
             if (callable instanceof Module) {
-                result = rt.callFunction((Module) callable, context.getProperty(Constants.FUNCTION_NAME).toString(), null, args);
+                String functionName = getPropertyAsString(context, Constants.FUNCTION_NAME);
+                result = rt.callFunction((Module) callable, functionName, null, args);
             } else if (callable instanceof BObject) {
                 // Check if this is a resource function
                 String functionType = getPropertyAsString(context, Constants.FUNCTION_TYPE);
@@ -70,11 +73,26 @@ public class BalExecutor {
                     // For resource functions, use the JVM method name (includes path segments)
                     // and prepend path params to args
                     String jvmMethodName = getPropertyAsString(context, Constants.JVM_METHOD_NAME);
+                    if (jvmMethodName != null) {
+                        jvmMethodName = jvmMethodName.replace("$$", "$^");
+                    }
+                    // Fallback to FUNCTION_NAME if jvmMethodName is not available
+                    // This handles cases where resource functions don't have path segments
+                    if (jvmMethodName == null || jvmMethodName.isEmpty()) {
+                        jvmMethodName = getPropertyAsString(context, FUNCTION_NAME);
+                    }
+                    if (jvmMethodName == null || jvmMethodName.isEmpty()) {
+                        throw new SynapseException("Neither jvmMethodName nor paramFunctionName is available for resource function invocation");
+                    }
                     Object[] argsWithPathParams = prependPathParams(args, context);
-                    result = rt.callMethod((BObject) callable, jvmMethodName, null, argsWithPathParams);
+
+                    // Use direct call() method for resource functions since Runtime.callMethod
+                    // doesn't properly support resource method dispatch with path parameters
+                    result = ((BObject) callable).call(null, jvmMethodName, argsWithPathParams);
                 } else {
                     // For remote/other functions, use the synapse name (paramFunctionName)
-                    result = rt.callMethod((BObject) callable, context.getProperty(FUNCTION_NAME).toString(), null, args);
+                    String functionName = getPropertyAsString(context, Constants.FUNCTION_NAME);
+                    result = rt.callMethod((BObject) callable, functionName, null, args);
                 }
             } else {
                 throw new SynapseException("Unsupported callable type: " + callable.getClass().getName());
@@ -190,13 +208,25 @@ public class BalExecutor {
     }
 
     public Object getParameter(MessageContext context, String value, String type, int index) {
-        String paramName = context.getProperty(value).toString();
+        String paramName = getPropertyAsString(context, value);
+        if (paramName == null) {
+            log.error("Parameter definition property '" + value + "' not found in context. Check if the generated XML artifacts are correct.");
+            throw new SynapseException("Parameter definition property '" + value + "' is missing");
+        }
+
         Object param = lookupTemplateParameter(context, paramName);
         String paramType;
         if (value.matches("param\\d+Union.*")) {
             paramType = type;
         } else {
-            paramType = context.getProperty(type).toString();
+            paramType = getPropertyAsString(context, type);
+            if (paramType == null) {
+                // If paramType property is missing, maybe default or error?
+                // For safety, log and fail, or default to string if param exists?
+                // But paramType is critical for conversion.
+                log.warn("Parameter type property '" + type + "' not found in context. Defaulting to STRING.");
+                paramType = Constants.STRING;
+            }
         }
         if (param == null && !UNION.equals(paramType) && !RECORD.equals(paramType)) {
             log.error("Error in getting the ballerina function parameter: " + paramName);
@@ -236,31 +266,48 @@ public class BalExecutor {
 
             // For init functions, find the connection type from the context properties
             String connectionType = findConnectionTypeForParam(context, recordParamName);
-            
-            if (connectionType != null) {
-                // Reconstruct the record from flattened fields
-                Object reconstructedBMap = reconstructRecordFromFields(recordParamName, context, connectionType);
-                
-                // Now convert the BMap to the typed record
-                String recordName = context.getProperty("param" + paramIndex + "_recordName").toString();
-                BMap<BString, Object> recValue = ValueCreator.createRecordValue(BalConnectorConfig.getModule(), recordName);
-                Type recType = recValue.getType();
-                
-                // Convert the reconstructed BMap to JSON and then to typed record
-                if (reconstructedBMap instanceof BMap) {
-                    String jsonStr = ((io.ballerina.runtime.internal.values.MapValueImpl<?, ?>) reconstructedBMap).getJSONString();
-                    BString jsonBString = StringUtils.fromString(jsonStr);
-                    return FromJsonStringWithType.fromJsonStringWithType(jsonBString, ValueCreator.createTypedescValue(recType));
-                }
+
+            if (connectionType == null) {
+                throw new SynapseException("Cannot create record value: jsonString is null and connectionType not found. " +
+                        "Parameter '" + paramName + "' at index " + paramIndex + " may be missing required value.");
             }
+
+            // Reconstruct the record from flattened fields
+            Object reconstructedBMap = reconstructRecordFromFields(recordParamName, context, connectionType);
+
+            // Now convert the BMap to the typed record
+            // For init/config, use connectionType prefix for property name
+            String recordNamePropertyKey = connectionType + "_param" + paramIndex + "_recordName";
+            Object recordNameObj = context.getProperty(recordNamePropertyKey);
+            if (recordNameObj == null) {
+                throw new SynapseException("Record name not found for parameter at index " + paramIndex +
+                        ". Ensure '" + recordNamePropertyKey + "' property is set in the synapse template.");
+            }
+            String recordName = recordNameObj.toString();
+            BMap<BString, Object> recValue = ValueCreator.createRecordValue(BalConnectorConfig.getModule(), recordName);
+            Type recType = recValue.getType();
+
+            // Convert the reconstructed BMap to JSON and then to typed record
+            if (reconstructedBMap instanceof BMap) {
+                String jsonStr = ((io.ballerina.runtime.internal.values.MapValueImpl<?, ?>) reconstructedBMap).getJSONString();
+                BString jsonBString = StringUtils.fromString(jsonStr);
+                return FromJsonStringWithType.fromJsonStringWithType(jsonBString, ValueCreator.createTypedescValue(recType));
+            }
+
+            throw new SynapseException("Failed to reconstruct record from flattened fields for parameter '" + paramName + "'");
         }
-        
+
         // Original logic for regular JSON record values
         if (jsonString.startsWith("'") && jsonString.endsWith("'")) {
             jsonString = jsonString.substring(1, jsonString.length() - 1);
         }
         BString jsonBString = StringUtils.fromString(jsonString);
-        String recordName = context.getProperty("param" + paramIndex + "_recordName").toString();
+        Object recordNameObj = context.getProperty("param" + paramIndex + "_recordName");
+        if (recordNameObj == null) {
+            throw new SynapseException("Record name not found for parameter at index " + paramIndex +
+                    ". Ensure 'param" + paramIndex + "_recordName' property is set in the synapse template.");
+        }
+        String recordName = recordNameObj.toString();
         BMap<BString, Object> recValue = ValueCreator.createRecordValue(BalConnectorConfig.getModule(), recordName);
         Type recType = recValue.getType();
         return FromJsonStringWithType.fromJsonStringWithType(jsonBString, ValueCreator.createTypedescValue(recType));
