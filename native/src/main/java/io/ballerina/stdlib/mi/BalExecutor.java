@@ -334,7 +334,15 @@ public class BalExecutor {
      */
     private Object[] prependPathParams(Object[] args, MessageContext context) {
         String pathParamSizeStr = getPropertyAsString(context, Constants.PATH_PARAM_SIZE);
-        int pathParamSize = pathParamSizeStr != null ? Integer.parseInt(pathParamSizeStr) : 0;
+        int pathParamSize = 0;
+        if (pathParamSizeStr != null) {
+            try {
+                pathParamSize = Integer.parseInt(pathParamSizeStr);
+            } catch (NumberFormatException e) {
+                log.warn("Invalid PATH_PARAM_SIZE value '" + pathParamSizeStr +
+                        "'. Defaulting path parameter size to 0.", e);
+            }
+        }
 
         if (pathParamSize == 0) {
             return args;
