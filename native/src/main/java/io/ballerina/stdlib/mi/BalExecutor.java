@@ -384,13 +384,18 @@ public class BalExecutor {
         if (type == null) {
             type = Constants.STRING; // Default to string
         }
-        return switch (type) {
-            case Constants.INT -> Long.parseLong(value);
-            case Constants.FLOAT -> Double.parseDouble(value);
-            case Constants.BOOLEAN -> Boolean.parseBoolean(value);
-            case Constants.DECIMAL -> ValueCreator.createDecimalValue(value);
-            default -> StringUtils.fromString(value); // STRING and others
-        };
+        try {
+            return switch (type) {
+                case Constants.INT -> Long.parseLong(value);
+                case Constants.FLOAT -> Double.parseDouble(value);
+                case Constants.BOOLEAN -> Boolean.parseBoolean(value);
+                case Constants.DECIMAL -> ValueCreator.createDecimalValue(value);
+                default -> StringUtils.fromString(value); // STRING and others
+            };
+        } catch (NumberFormatException e) {
+            throw new SynapseException(
+                    "Invalid value '" + value + "' for path parameter type '" + type + "'", e);
+        }
     }
 
     public Object getParameter(MessageContext context, String value, String type, int index) {
