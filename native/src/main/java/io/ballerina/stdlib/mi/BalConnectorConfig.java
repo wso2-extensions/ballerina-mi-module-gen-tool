@@ -92,7 +92,13 @@ public class BalConnectorConfig extends AbstractConnector {
                     throw new ConnectException("Required property '" + paramSizeName + "' is missing in message context");
                 }
                 
-                Object[] args = new Object[Integer.parseInt(paramSize)];
+                int paramCount;
+                try {
+                    paramCount = Integer.parseInt(paramSize);
+                } catch (NumberFormatException e) {
+                    throw new ConnectException("Invalid value for property '" + paramSizeName + "': expected an integer but got '" + paramSize + "'");
+                }
+                Object[] args = new Object[paramCount];
                 setParameters(args, messageContext, connectionType);
                 
                 String objectTypeNameKey = connectionType + "_objectTypeName";
