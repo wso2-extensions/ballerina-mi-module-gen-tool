@@ -18,10 +18,14 @@
   -->
 <template xmlns="http://ws.apache.org/ns/synapse" name="{{name}}">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
-    <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>{{{writeComponentXmlParameters this}}}{{#each functionParams}}{{#eq paramType "union"}}
-    <parameter name="{{sanitizeParamName value}}DataType" description="Select the data type for '{{value}}' parameter"/>{{#each unionMemberParams}}
-    <parameter name="{{sanitizeParamName value}}" description="{{description}}"/>{{/each}}{{else}}
-    <parameter name="{{sanitizeParamName value}}" description="{{description}}"/>{{/eq}}{{/each}}
+    <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>{{{writeComponentXmlParameters this}}}{{#each functionParams~}}
+{{#eq paramType "union"}}
+    <parameter name="{{sanitizeParamName value}}DataType" description="Select the data type for '{{value}}' parameter"/>
+{{~#each unionMemberParams}}
+    <parameter name="{{sanitizeParamName value}}" description="{{description}}"/>
+{{~/each}}{{else}}
+    <parameter name="{{sanitizeParamName value}}" description="{{description}}"/>
+{{~/eq}}{{/each}}
     <sequence>
         {{#each functionParams ~}}
         <property name="param{{@index}}" value="{{sanitizeParamName value}}"/>
@@ -47,6 +51,7 @@
         <property name="pathParamSize" value="{{pathParamSize}}"/>
         <property name="jvmMethodName" value="{{jvmMethodName}}"/>
         {{/if ~}}
+
         <class name="{{#if parent.initComponent}}io.ballerina.stdlib.mi.BalConnectorFunction{{else}}io.ballerina.stdlib.mi.Mediator{{/if}}">
             <property name="orgName" value="{{parent.parent.orgName}}"/>
             <property name="moduleName" value="{{parent.parent.moduleName}}"/>
