@@ -797,46 +797,55 @@ public class Utils {
     }
 
     /**
-     * Convert a string to PascalCase.
-     * Example: "user-profiles" -> "UserProfiles", "userId" -> "UserId"
-     */
-    /**
-     * Sanitizes a parameter name by removing leading single quotes from quoted identifiers.
-     * 
-     * <p>In Ballerina, a single quote (') is used before a variable or identifier name to create
-     * a quoted identifier. This allows using reserved keywords (like if, while, string, int) as
-     * names for variables, functions, or fields. For example, 'start is a valid quoted identifier.</p>
-     * 
-     * <p>However, when generating XML and JSON files for MI connectors, these quoted identifiers
-     * can cause issues:
-     * <ul>
-     *   <li>XML attribute names cannot start with a single quote (e.g., name="'start" is invalid)</li>
-     *   <li>JSON property names with leading quotes may cause parsing issues</li>
-     * </ul>
-     * </p>
-     * 
-     * <p>This method sanitizes quoted identifiers by removing the leading quote(s) for use in
-     * XML/JSON generation, while the original quoted name is preserved for display purposes.</p>
-     *
-     * @param paramName the parameter name to sanitize (may be a quoted identifier like 'start)
-     * @return the sanitized parameter name with leading quotes removed (e.g., 'start -> start)
-     */
-    public static String sanitizeParamName(String paramName) {
-        if (paramName == null) {
-            return "";
-        }
-        String sanitized = paramName;
-        // Remove leading single quotes from quoted identifiers
-        // In Ballerina, 'start is a quoted identifier, we need 'start -> start for XML/JSON
-        while (sanitized.startsWith("'")) {
-            sanitized = sanitized.substring(1);
-        }
-        // If the name is empty after removing quotes, use a default
-        if (sanitized.isEmpty()) {
-            sanitized = "param";
-        }
-        return sanitized;
+ * Convert a string to PascalCase.
+ * Example: "user-profiles" -> "UserProfiles", "userId" -> "UserId"
+ */
+/**
+ * Sanitizes a parameter name by removing leading single quotes from quoted identifiers
+ * and replacing dots with underscores for Synapse compatibility.
+ * 
+ * <p>In Ballerina, a single quote (') is used before a variable or identifier name to create
+ * a quoted identifier. This allows using reserved keywords (like if, while, string, int) as
+ * names for variables, functions, or fields. For example, 'start is a valid quoted identifier.</p>
+ * 
+ * <p>However, when generating XML and JSON files for MI connectors, these quoted identifiers
+ * can cause issues:
+ * <ul>
+ *   <li>XML attribute names cannot start with a single quote (e.g., name="'start" is invalid)</li>
+ *   <li>JSON property names with leading quotes may cause parsing issues</li>
+ *   <li>Synapse template parameters with dots are not correctly stored/retrieved (e.g., auth.token fails)</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>This method sanitizes parameter names by:
+ * <ol>
+ *   <li>Removing the leading quote(s) for use in XML/JSON generation</li>
+ *   <li>Replacing dots with underscores for Synapse template parameter compatibility</li>
+ * </ol>
+ * The original name is preserved for display purposes.</p>
+ *
+ * @param paramName the parameter name to sanitize (may be a quoted identifier like 'start or contain dots like auth.token)
+ * @return the sanitized parameter name with leading quotes removed and dots replaced with underscores
+ */
+public static String sanitizeParamName(String paramName) {
+    if (paramName == null) {
+        return "";
     }
+    String sanitized = paramName;
+    // Remove leading single quotes from quoted identifiers
+    // In Ballerina, 'start is a quoted identifier, we need 'start -> start for XML/JSON
+    while (sanitized.startsWith("'")) {
+        sanitized = sanitized.substring(1);
+    }
+    // Replace dots with underscores for Synapse template parameter compatibility
+    // Synapse/MI cannot correctly handle parameter names with dots (e.g., auth.token)
+    sanitized = sanitized.replace(".", "_");
+    // If the name is empty after sanitization, use a default
+    if (sanitized.isEmpty()) {
+        sanitized = "param";
+    }
+    return sanitized;
+}
 
     private static String toPascalCase(String str) {
         if (str == null || str.isEmpty()) {

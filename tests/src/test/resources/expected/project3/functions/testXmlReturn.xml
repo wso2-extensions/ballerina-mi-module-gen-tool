@@ -27,7 +27,7 @@
         <property name="paramFunctionName" value="testXmlReturn"/>
         <property name="returnType" value="xml"/>
 
-        <class name="io.ballerina.stdlib.mi.Mediator">
+        <class name="io_ballerina_stdlib_mi_Mediator">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project3"/>
             <property name="version" value="1"/>

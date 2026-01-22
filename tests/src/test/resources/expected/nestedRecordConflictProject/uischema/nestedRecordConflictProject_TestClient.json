@@ -36,7 +36,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "server.host",
+                          "name": "server_host",
                           "displayName": "host",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -62,7 +62,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "server.protocol",
+                          "name": "server_protocol",
                           "displayName": "protocol",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -84,7 +84,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "database.host",
+                          "name": "database_host",
                           "displayName": "host",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -110,7 +110,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "database.database",
+                          "name": "database_database",
                           "displayName": "database",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",

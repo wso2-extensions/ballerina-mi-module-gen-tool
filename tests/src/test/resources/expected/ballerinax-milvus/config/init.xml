@@ -21,9 +21,9 @@
     <parameter name="connectionType" description="Connection type"/>
     <!-- TODO: if union, the selected member type becomes a parameter-->
     <parameter name="serviceUrl" description=""/>
-    <parameter name="authConfig.token" description="A valid access token to access the specified Milvus instance"/>
-    <parameter name="credentialsConfig.username" description="The username used to connect to the specified Milvus instance"/>
-    <parameter name="credentialsConfig.password" description="The password used to connect to the specified Milvus instance"/>
+    <parameter name="authConfig_token" description="A valid access token to access the specified Milvus instance"/>
+    <parameter name="credentialsConfig_username" description="The username used to connect to the specified Milvus instance"/>
+    <parameter name="credentialsConfig_password" description="The password used to connect to the specified Milvus instance"/>
     <parameter name="idleTimeout" description="The idle timeout for a connection"/>
     <parameter name="keepAliveTime" description="The time between keep-alive probes sent by the client to the server. (Default: 55 seconds)"/>
     <parameter name="keepAliveTimeout" description="The timeout duration for the server to respond to a keep-alive probe sent by the client. (Default: 20 seconds)"/>
@@ -33,10 +33,10 @@
     <parameter name="databaseName" description="The name of the database to which the target Milvus instance belongs"/>
     <parameter name="serverName" description="The expected name of the server"/>
     <parameter name="proxyAddress" description="The proxy server’s address through which the connection is to be established"/>
-    <parameter name="secureConfig.clientKeyPath" description="The path to the client key file for mutual authentication"/>
-    <parameter name="secureConfig.clientPemPath" description="The path to the client PEM file for mutual authentication"/>
-    <parameter name="secureConfig.serverPemPath" description="The path to the server PEM file for mutual authentication"/>
-    <parameter name="secureConfig.caPemPath" description="The path to the CA PEM file for mutual authentication"/>
+    <parameter name="secureConfig_clientKeyPath" description="The path to the client key file for mutual authentication"/>
+    <parameter name="secureConfig_clientPemPath" description="The path to the client PEM file for mutual authentication"/>
+    <parameter name="secureConfig_serverPemPath" description="The path to the server PEM file for mutual authentication"/>
+    <parameter name="secureConfig_caPemPath" description="The path to the CA PEM file for mutual authentication"/>
     <sequence>
         <property name="MILVUS_CLIENT_objectTypeName" value="Client"/>
         <property name="MILVUS_CLIENT_paramSize" value="17"/>
@@ -78,7 +78,7 @@
         <property name="MILVUS_CLIENT_config_param15" value="secureConfig.caPemPath"/>
         <property name="MILVUS_CLIENT_config_paramType15" value="string"/>
 
-        <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
+        <class name="io_ballerina_stdlib_mi_BalConnectorConfig">
             <property name="orgName" value="ballerinax"/>
             <property name="moduleName" value="milvus"/>
             <property name="version" value="1"/>

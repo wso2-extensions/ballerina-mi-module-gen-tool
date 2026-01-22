@@ -19,6 +19,7 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="processWithError">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
+
     <parameter name="shouldThrowError" description=""/>
     <sequence>
         <property name="param0" value="shouldThrowError"/>
@@ -27,6 +28,7 @@
         <property name="paramFunctionName" value="processWithError"/>
         <property name="returnType" value="union"/>
 
+        <property name="functionType" value="REMOTE"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="unionProject"/>

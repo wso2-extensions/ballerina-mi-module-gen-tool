@@ -28,7 +28,7 @@
         <property name="paramFunctionName" value="query"/>
         <property name="returnType" value="union"/>
 
-        <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
+        <class name="io_ballerina_stdlib_mi_BalConnectorFunction">
             <property name="orgName" value="ballerinax"/>
             <property name="moduleName" value="milvus"/>
             <property name="version" value="1"/>

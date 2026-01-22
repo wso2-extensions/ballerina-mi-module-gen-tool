@@ -19,7 +19,7 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="deleteUser">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="deleteUser" description=""/>
+    <parameter name="userId" description=""/>
     <sequence>
         <property name="operationId" value="deleteUser"/>
         <property name="paramSize" value="0"/>
@@ -27,10 +27,11 @@
         <property name="pathParam0" value="userId"/>
         <property name="pathParamType0" value="string"/>
         <property name="returnType" value="union"/>
+
         <property name="functionType" value="RESOURCE"/>
         <property name="resourceAccessor" value="delete"/>
         <property name="pathParamSize" value="1"/>
-
+        <property name="jvmMethodName" value="$delete$users$$"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project5"/>

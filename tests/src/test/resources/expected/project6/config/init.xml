@@ -24,10 +24,11 @@
     <parameter name="apiKey" description=""/>
     <sequence>
         <property name="PROJECT6_APICLIENT_objectTypeName" value="ApiClient"/>
-        <property name="PROJECT6_APICLIENT_paramSize" value="2"/>
+        <property name="PROJECT6_APICLIENT_paramSize" value="1"/>
         <property name="PROJECT6_APICLIENT_paramFunctionName" value="init"/>
         <property name="PROJECT6_APICLIENT_param0" value="config"/>
         <property name="PROJECT6_APICLIENT_paramType0" value="record"/>
+        <property name="PROJECT6_APICLIENT_param0_recordName" value="ConnectionConfig"/>
         <property name="PROJECT6_APICLIENT_config_param0" value="baseUrl"/>
         <property name="PROJECT6_APICLIENT_config_paramType0" value="string"/>
         <property name="PROJECT6_APICLIENT_config_param1" value="apiKey"/>

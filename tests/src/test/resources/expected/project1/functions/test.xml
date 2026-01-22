@@ -19,6 +19,7 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="test">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
+
     <parameter name="xmlA" description=""/>
     <parameter name="xmlB" description=""/>
     <parameter name="xmlC" description=""/>
@@ -33,6 +34,7 @@
         <property name="paramFunctionName" value="test"/>
         <property name="returnType" value="xml"/>
 
+        <property name="functionType" value="FUNCTION"/>
         <class name="io.ballerina.stdlib.mi.Mediator">
             <property name="orgName" value="org"/>
             <property name="moduleName" value="project1"/>

@@ -19,18 +19,18 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="deleteItemsByItemId">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="deleteItemsByItemId" description=""/>
+    <parameter name="itemId" description=""/>
     <sequence>
         <property name="paramSize" value="0"/>
         <property name="paramFunctionName" value="deleteItemsByItemId"/>
         <property name="pathParam0" value="itemId"/>
         <property name="pathParamType0" value="string"/>
         <property name="returnType" value="union"/>
+
         <property name="functionType" value="RESOURCE"/>
         <property name="resourceAccessor" value="delete"/>
         <property name="pathParamSize" value="1"/>
-        <property name="jvmMethodName" value="$delete$items$$itemId"/>
-
+        <property name="jvmMethodName" value="$delete$items$$"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project6"/>

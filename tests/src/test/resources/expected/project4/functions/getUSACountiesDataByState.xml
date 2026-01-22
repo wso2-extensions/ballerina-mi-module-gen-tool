@@ -19,6 +19,7 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="getUSACountiesDataByState">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
+
     <parameter name="state" description=""/>
     <parameter name="lastdays" description=""/>
     <sequence>
@@ -30,6 +31,7 @@
         <property name="paramFunctionName" value="getUSACountiesDataByState"/>
         <property name="returnType" value="union"/>
 
+        <property name="functionType" value="REMOTE"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project4"/>

@@ -19,6 +19,7 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="processNumberType">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
+
     <parameter name="valueDataType" description="Select the data type for 'value' parameter"/>
     <parameter name="valueInt" description=""/>
     <parameter name="valueFloat" description=""/>
@@ -33,6 +34,7 @@
         <property name="paramFunctionName" value="processNumberType"/>
         <property name="returnType" value="string"/>
 
+        <property name="functionType" value="REMOTE"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="unionProject"/>
