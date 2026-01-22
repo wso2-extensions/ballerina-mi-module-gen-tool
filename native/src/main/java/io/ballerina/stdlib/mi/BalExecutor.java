@@ -66,7 +66,14 @@ public class BalExecutor {
 
     public boolean execute(Runtime rt, Object callable, MessageContext context) throws AxisFault, BallerinaExecutionException {
         String paramSize = getPropertyAsString(context, Constants.SIZE);
-        int size = (paramSize != null && !paramSize.isEmpty()) ? Integer.parseInt(paramSize) : 0;
+        int size = 0;
+        if (paramSize != null && !paramSize.isEmpty()) {
+            try {
+                size = Integer.parseInt(paramSize);
+            } catch (NumberFormatException e) {
+                throw new SynapseException("Invalid value for property '" + Constants.SIZE + "': " + paramSize, e);
+            }
+        }
         Object[] args = new Object[size];
         setParameters(args, context);
         try {
