@@ -19,7 +19,6 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="processNullableString">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-
     <parameter name="value" description=""/>
     <sequence>
         <property name="param0" value="value"/>
@@ -27,7 +26,6 @@
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="processNullableString"/>
         <property name="returnType" value="string"/>
-
         <property name="functionType" value="REMOTE"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>

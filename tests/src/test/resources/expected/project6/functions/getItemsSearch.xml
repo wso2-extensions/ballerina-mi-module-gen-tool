@@ -19,7 +19,6 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="getItemsSearch">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-
     <parameter name="query" description=""/>
     <parameter name="limit" description=""/>
     <sequence>
@@ -30,7 +29,6 @@
         <property name="paramSize" value="2"/>
         <property name="paramFunctionName" value="getItemsSearch"/>
         <property name="returnType" value="union"/>
-
         <property name="functionType" value="RESOURCE"/>
         <property name="resourceAccessor" value="get"/>
         <property name="pathParamSize" value="0"/>

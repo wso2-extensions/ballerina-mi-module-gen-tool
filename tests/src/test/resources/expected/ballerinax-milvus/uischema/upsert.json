@@ -37,9 +37,9 @@
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
+                    "helpTip": "Expecting JSON object",
+                    "validateType": "regex",
+                    "matchPattern": "^(\\{[\\s\\S]*\\}|\\$\\{.+\\})$"
                   }
                 }
               ]

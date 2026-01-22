@@ -39,12 +39,13 @@
     <parameter name="secureConfig_caPemPath" description="The path to the CA PEM file for mutual authentication"/>
     <sequence>
         <property name="MILVUS_CLIENT_objectTypeName" value="Client"/>
-        <property name="MILVUS_CLIENT_paramSize" value="17"/>
+        <property name="MILVUS_CLIENT_paramSize" value="2"/>
         <property name="MILVUS_CLIENT_paramFunctionName" value="init"/>
         <property name="MILVUS_CLIENT_param0" value="serviceUrl"/>
         <property name="MILVUS_CLIENT_paramType0" value="string"/>
         <property name="MILVUS_CLIENT_param1" value="config"/>
         <property name="MILVUS_CLIENT_paramType1" value="record"/>
+        <property name="MILVUS_CLIENT_param1_recordName" value="ConnectionConfig"/>
         <property name="MILVUS_CLIENT_config_param0" value="authConfig.token"/>
         <property name="MILVUS_CLIENT_config_paramType0" value="string"/>
         <property name="MILVUS_CLIENT_config_param1" value="credentialsConfig.username"/>
@@ -78,7 +79,7 @@
         <property name="MILVUS_CLIENT_config_param15" value="secureConfig.caPemPath"/>
         <property name="MILVUS_CLIENT_config_paramType15" value="string"/>
 
-        <class name="io_ballerina_stdlib_mi_BalConnectorConfig">
+        <class name="io.ballerina.stdlib.mi.BalConnectorConfig">
             <property name="orgName" value="ballerinax"/>
             <property name="moduleName" value="milvus"/>
             <property name="version" value="1"/>

@@ -19,7 +19,6 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="postItems">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-
     <parameter name="item" description=""/>
     <sequence>
         <property name="param0" value="item"/>
@@ -28,7 +27,6 @@
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="postItems"/>
         <property name="returnType" value="union"/>
-
         <property name="functionType" value="RESOURCE"/>
         <property name="resourceAccessor" value="post"/>
         <property name="pathParamSize" value="0"/>

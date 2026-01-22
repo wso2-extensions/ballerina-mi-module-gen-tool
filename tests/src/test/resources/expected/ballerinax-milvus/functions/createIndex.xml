@@ -24,11 +24,11 @@
         <property name="param0" value="request"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="CreateIndexRequest" />
-        <property name="paramSize" value="3"/>
+        <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="createIndex"/>
         <property name="returnType" value="union"/>
-
-        <class name="io_ballerina_stdlib_mi_BalConnectorFunction">
+        <property name="functionType" value="REMOTE"/>
+        <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="ballerinax"/>
             <property name="moduleName" value="milvus"/>
             <property name="version" value="1"/>
