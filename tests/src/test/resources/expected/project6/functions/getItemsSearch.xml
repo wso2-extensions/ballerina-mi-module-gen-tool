@@ -29,7 +29,10 @@
         <property name="paramSize" value="2"/>
         <property name="paramFunctionName" value="getItemsSearch"/>
         <property name="returnType" value="union"/>
-
+        <property name="functionType" value="RESOURCE"/>
+        <property name="resourceAccessor" value="get"/>
+        <property name="pathParamSize" value="0"/>
+        <property name="jvmMethodName" value="$get$items$search"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project6"/>

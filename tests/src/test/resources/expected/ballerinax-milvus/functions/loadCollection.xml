@@ -26,7 +26,7 @@
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="loadCollection"/>
         <property name="returnType" value="union"/>
-
+        <property name="functionType" value="REMOTE"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="ballerinax"/>
             <property name="moduleName" value="milvus"/>

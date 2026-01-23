@@ -24,10 +24,13 @@
         <property name="param0" value="item"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="Item" />
-        <property name="paramSize" value="3"/>
+        <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="postItems"/>
         <property name="returnType" value="union"/>
-
+        <property name="functionType" value="RESOURCE"/>
+        <property name="resourceAccessor" value="post"/>
+        <property name="pathParamSize" value="0"/>
+        <property name="jvmMethodName" value="$post$items"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project6"/>

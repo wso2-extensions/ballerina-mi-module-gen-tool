@@ -49,7 +49,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "http1Settings.keepAlive",
+                          "name": "http1Settings_keepAlive",
                           "displayName": "keepAlive",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -62,7 +62,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "http1Settings.chunking",
+                          "name": "http1Settings_chunking",
                           "displayName": "chunking",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -81,7 +81,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "http1Settings.proxy.host",
+                                "name": "http1Settings_proxy_host",
                                 "displayName": "host",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -107,7 +107,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "http1Settings.proxy.userName",
+                                "name": "http1Settings_proxy_userName",
                                 "displayName": "userName",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -120,7 +120,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "http1Settings.proxy.password",
+                                "name": "http1Settings_proxy_password",
                                 "displayName": "password",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -371,7 +371,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "cache.policy",
+                          "name": "cache_policy",
                           "displayName": "policy",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -480,7 +480,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "circuitBreaker.statusCodes",
+                          "name": "circuitBreaker_statusCodes",
                           "displayName": "statusCodes",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -554,7 +554,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "retryConfig.statusCodes",
+                          "name": "retryConfig_statusCodes",
                           "displayName": "statusCodes",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -637,7 +637,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "secureSocket.certDataType",
+                          "name": "secureSocket_certDataType",
                           "displayName": "certDataType",
                           "inputType": "combo",
                           "comboValues": [
@@ -652,7 +652,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "secureSocket.certString",
+                          "name": "secureSocket_certString",
                           "displayName": "certString",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -662,7 +662,7 @@
                           "matchPattern": "",
                           "enableCondition": [
                             {
-                              "secureSocket.certDataType": "string"
+                              "secureSocket_certDataType": "string"
                             }
                           ]
                         }
@@ -676,7 +676,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "secureSocket.cert.path",
+                                "name": "secureSocket_cert_path",
                                 "displayName": "path",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -686,7 +686,7 @@
                                 "matchPattern": "",
                                 "enableCondition": [
                                   {
-                                    "secureSocket.certDataType": "TrustStore"
+                                    "secureSocket_certDataType": "TrustStore"
                                   }
                                 ]
                               }
@@ -694,7 +694,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "secureSocket.cert.password",
+                                "name": "secureSocket_cert_password",
                                 "displayName": "password",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -704,7 +704,7 @@
                                 "matchPattern": "",
                                 "enableCondition": [
                                   {
-                                    "secureSocket.certDataType": "TrustStore"
+                                    "secureSocket_certDataType": "TrustStore"
                                   }
                                 ]
                               }
@@ -715,7 +715,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "secureSocket.keyDataType",
+                          "name": "secureSocket_keyDataType",
                           "displayName": "keyDataType",
                           "inputType": "combo",
                           "comboValues": [
@@ -736,7 +736,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "secureSocket.key.path",
+                                "name": "secureSocket_key_path",
                                 "displayName": "path",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -746,7 +746,7 @@
                                 "matchPattern": "",
                                 "enableCondition": [
                                   {
-                                    "secureSocket.keyDataType": "KeyStore"
+                                    "secureSocket_keyDataType": "KeyStore"
                                   }
                                 ]
                               }
@@ -754,7 +754,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "secureSocket.key.password",
+                                "name": "secureSocket_key_password",
                                 "displayName": "password",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -764,7 +764,7 @@
                                 "matchPattern": "",
                                 "enableCondition": [
                                   {
-                                    "secureSocket.keyDataType": "KeyStore"
+                                    "secureSocket_keyDataType": "KeyStore"
                                   }
                                 ]
                               }
@@ -772,7 +772,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "secureSocket.key.certFile",
+                                "name": "secureSocket_key_certFile",
                                 "displayName": "certFile",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -782,7 +782,7 @@
                                 "matchPattern": "",
                                 "enableCondition": [
                                   {
-                                    "secureSocket.keyDataType": "CertKey"
+                                    "secureSocket_keyDataType": "CertKey"
                                   }
                                 ]
                               }
@@ -790,7 +790,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "secureSocket.key.keyFile",
+                                "name": "secureSocket_key_keyFile",
                                 "displayName": "keyFile",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -800,7 +800,7 @@
                                 "matchPattern": "",
                                 "enableCondition": [
                                   {
-                                    "secureSocket.keyDataType": "CertKey"
+                                    "secureSocket_keyDataType": "CertKey"
                                   }
                                 ]
                               }
@@ -808,7 +808,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "secureSocket.key.keyPassword",
+                                "name": "secureSocket_key_keyPassword",
                                 "displayName": "keyPassword",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -818,7 +818,7 @@
                                 "matchPattern": "",
                                 "enableCondition": [
                                   {
-                                    "secureSocket.keyDataType": "CertKey"
+                                    "secureSocket_keyDataType": "CertKey"
                                   }
                                 ]
                               }
@@ -835,7 +835,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "secureSocket.protocol.name",
+                                "name": "secureSocket_protocol_name",
                                 "displayName": "name",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -848,7 +848,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "secureSocket.protocol.versions",
+                                "name": "secureSocket_protocol_versions",
                                 "displayName": "versions",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -870,7 +870,7 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "secureSocket.certValidation.type",
+                                "name": "secureSocket_certValidation_type",
                                 "displayName": "type",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
@@ -912,7 +912,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "secureSocket.ciphers",
+                          "name": "secureSocket_ciphers",
                           "displayName": "ciphers",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -977,7 +977,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "secureSocket.serverName",
+                          "name": "secureSocket_serverName",
                           "displayName": "serverName",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -999,7 +999,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "proxy.host",
+                          "name": "proxy_host",
                           "displayName": "host",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -1025,7 +1025,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "proxy.userName",
+                          "name": "proxy_userName",
                           "displayName": "userName",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
@@ -1038,7 +1038,7 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "proxy.password",
+                          "name": "proxy_password",
                           "displayName": "password",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",

@@ -86,13 +86,32 @@ public class BalConnectorConfig extends AbstractConnector {
 //                Type type = recValue.getType();
 //                Object o = FromJsonStringWithType.fromJsonStringWithType(jsonString, ValueCreator.createTypedescValue(type));
 
-                Object[] args = new Object[Integer.parseInt(messageContext.getProperty(connectionType + "_" + Constants.SIZE).toString())];
+                String paramSizeName = connectionType + "_" + Constants.SIZE;
+                String paramSize = getPropertyAsString(messageContext, paramSizeName);
+                if (paramSize == null) {
+                    throw new ConnectException("Required property '" + paramSizeName + "' is missing in message context");
+                }
+                
+                int paramCount;
+                try {
+                    paramCount = Integer.parseInt(paramSize);
+                } catch (NumberFormatException e) {
+                    throw new ConnectException("Invalid value for property '" + paramSizeName + "': expected an integer but got '" + paramSize + "'");
+                }
+                Object[] args = new Object[paramCount];
                 setParameters(args, messageContext, connectionType);
-                clientObject = ValueCreator.createObjectValue(module, messageContext.getProperty(connectionType + "_objectTypeName").toString(), args);
+                
+                String objectTypeNameKey = connectionType + "_objectTypeName";
+                String objectTypeName = getPropertyAsString(messageContext, objectTypeNameKey);
+                if (objectTypeName == null) {
+                    throw new ConnectException("Required property '" + objectTypeNameKey + "' is missing in message context");
+                }
+                
+                clientObject = ValueCreator.createObjectValue(module, objectTypeName, args);
             } catch (BError clientError) {
                 handleException(clientError.getMessage(), messageContext);
             }
-            BalConnectorConnection balConnection = new BalConnectorConnection(module, messageContext.getProperty(connectionType + "_objectTypeName").toString(), clientObject);
+            BalConnectorConnection balConnection = new BalConnectorConnection(module, getPropertyAsString(messageContext, connectionType + "_objectTypeName"), clientObject);
             try {
                 handler.createConnection(connectorName, connectionName, balConnection, messageContext);
             } catch (NoSuchMethodError e) {
@@ -100,7 +119,12 @@ public class BalConnectorConfig extends AbstractConnector {
             }
         }
         messageContext.setProperty("connectionName", connectionName);
-        }
+    }
+    
+    private String getPropertyAsString(MessageContext context, String key) {
+        Object property = context.getProperty(key);
+        return property != null ? property.toString() : null;
+    }
 
     private void init() {
         module = new Module(orgName, moduleName, version);

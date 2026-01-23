@@ -136,12 +136,14 @@ public class RecordReconstructionTest {
         messageContext.setProperty(connectionType + "_" + recordParamName + "_paramType5", "boolean");
 
         // Set the actual values as template parameters
+        // Note: Use underscores instead of dots because Synapse can't handle dots in parameter names
+        // and the code converts dots to underscores when looking up template parameters
         messageContext.setProperty("httpVersion", "HTTP_1_1");
-        messageContext.setProperty("http1Settings.keepAlive", "ALWAYS");
-        messageContext.setProperty("http1Settings.proxy.host", "localhost");
-        messageContext.setProperty("http1Settings.proxy.port", "8080");
+        messageContext.setProperty("http1Settings_keepAlive", "ALWAYS");
+        messageContext.setProperty("http1Settings_proxy_host", "localhost");
+        messageContext.setProperty("http1Settings_proxy_port", "8080");
         messageContext.setProperty("timeout", "60.0");
-        messageContext.setProperty("cache.enabled", "true");
+        messageContext.setProperty("cache_enabled", "true");
 
         // Use reflection to access the private reconstructRecordFromFields method
         Method reconstructMethod = BalExecutor.class.getDeclaredMethod(

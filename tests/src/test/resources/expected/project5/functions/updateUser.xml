@@ -19,19 +19,23 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="updateUser">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="updateUser" description=""/>
+    <parameter name="userId" description=""/>
     <parameter name="updatedUser" description=""/>
     <sequence>
         <property name="param0" value="updatedUser"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="User" />
         <property name="operationId" value="updateUser"/>
-        <property name="paramSize" value="3"/>
+        <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="updateUser"/>
         <property name="pathParam0" value="userId"/>
         <property name="pathParamType0" value="string"/>
         <property name="returnType" value="union"/>
 
+        <property name="functionType" value="RESOURCE"/>
+        <property name="resourceAccessor" value="put"/>
+        <property name="pathParamSize" value="1"/>
+        <property name="jvmMethodName" value="$put$users$$"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project5"/>

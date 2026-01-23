@@ -42,6 +42,10 @@ public class Component extends ModelElement {
     private final List<PathParamType> pathParams;
     private final List<Type> queryParams;
     private final String returnType;
+    // For resource functions: the HTTP accessor (get, post, put, delete, etc.)
+    private String resourceAccessor;
+    // For resource functions: all path segments (both static and dynamic)
+    private List<ResourcePathSegment> resourcePathSegments;
 
     public Component(String name, String documentation, FunctionType functionType, String index, List<PathParamType> pathParams, List<Type> queryParams, String returnType) {
         this.name = name;
@@ -115,6 +119,93 @@ public class Component extends ModelElement {
 
     public FunctionType getFunctionType() {
         return functionType;
+    }
+
+    /**
+     * Get the resource accessor (HTTP method) for resource functions.
+     * @return The accessor (e.g., "get", "post", "put", "delete") or null if not a resource function
+     */
+    public String getResourceAccessor() {
+        return resourceAccessor;
+    }
+
+    /**
+     * Set the resource accessor (HTTP method) for resource functions.
+     * @param resourceAccessor The accessor (e.g., "get", "post", "put", "delete")
+     */
+    public void setResourceAccessor(String resourceAccessor) {
+        this.resourceAccessor = resourceAccessor;
+    }
+
+    /**
+     * Check if this component represents a resource function.
+     * Used by Handlebars templates to conditionally include resource-specific properties.
+     * @return true if this is a resource function, false otherwise
+     */
+    public boolean isResourceFunction() {
+        return functionType == FunctionType.RESOURCE;
+    }
+
+    /**
+     * Get the number of path parameters for resource functions.
+     * @return The count of path parameters
+     */
+    public int getPathParamSize() {
+        return pathParams != null ? pathParams.size() : 0;
+    }
+
+    /**
+     * Get the resource path segments for resource functions.
+     * @return List of path segments (both static and dynamic)
+     */
+    public List<ResourcePathSegment> getResourcePathSegments() {
+        return resourcePathSegments;
+    }
+
+    /**
+     * Set the resource path segments for resource functions.
+     * @param resourcePathSegments List of path segments
+     */
+    public void setResourcePathSegments(List<ResourcePathSegment> resourcePathSegments) {
+        this.resourcePathSegments = resourcePathSegments;
+    }
+
+    /**
+     * Generates the JVM method name for invoking this resource function.
+     * The format follows Ballerina's internal encoding:
+     * $<accessor>$<segment1>[$[$<param1>]]$<segment2>...
+     *
+     * Examples:
+     * - resource function get items() -> $get$items
+     * - resource function get items/[string itemId]() -> $get$items$$itemId
+     * - resource function get users/[string userId]/drafts() -> $get$users$$userId$drafts
+     *
+     * @return The JVM method name for runtime invocation
+     */
+    public String getJvmMethodName() {
+        if (!isResourceFunction() || resourceAccessor == null) {
+            return null;
+        }
+
+        StringBuilder methodName = new StringBuilder();
+        methodName.append("$").append(resourceAccessor);
+
+        if (resourcePathSegments != null) {
+            for (ResourcePathSegment segment : resourcePathSegments) {
+                methodName.append(segment.toJvmMethodNameComponent());
+            }
+        }
+
+        return methodName.toString();
+    }
+
+    /**
+     * Get the number of resource path segments.
+     * Used for XML template generation.
+     * @return The count of path segments
+     */
+    public int getResourcePathSegmentSize() {
+        return resourcePathSegments != null ? resourcePathSegments.size() : 0;
     }
 
     public void generateTemplateXml(File connectorFolder, String templatePath, String typeName) {

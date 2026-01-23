@@ -24,10 +24,10 @@
         <property name="param0" value="request"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="UpsertRequest" />
-        <property name="paramSize" value="7"/>
+        <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="upsert"/>
         <property name="returnType" value="union"/>
-
+        <property name="functionType" value="REMOTE"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="ballerinax"/>
             <property name="moduleName" value="milvus"/>

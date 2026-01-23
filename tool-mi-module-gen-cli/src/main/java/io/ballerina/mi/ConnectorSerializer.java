@@ -271,6 +271,37 @@ public class ConnectorSerializer {
                 }
                 return new Handlebars.SafeString(output);
             });
+            handlebar.registerHelper("writeComponentXmlParameters", (context, options) -> {
+                Component component = (Component) context;
+                StringBuilder result = new StringBuilder();
+                
+                // Path Params
+                if (component.getPathParams() != null) {
+                    for (PathParamType param : component.getPathParams()) {
+                        result.append(String.format("    <parameter name=\"%s\" description=\"\"/>\n", param.name));
+                    }
+                }
+
+                // Query Params
+                if (component.getQueryParams() != null) {
+                    for (Type param : component.getQueryParams()) {
+                        result.append(String.format("    <parameter name=\"%s\" description=\"\"/>\n", param.name));
+                    }
+                }
+                
+                String output = result.toString();
+                if (output.isEmpty()) {
+                    return new Handlebars.SafeString("");
+                }
+                // Add leading newline so params appear on new line after overwriteBody
+                output = "\n" + output;
+                // Remove trailing newline to avoid blank line before functionParams
+                if (output.endsWith("\n")) {
+                    output = output.substring(0, output.length() - 1);
+                }
+
+                return new Handlebars.SafeString(output);
+            });
             handlebar.registerHelper("writeConfigJsonProperties", (context, options) -> {
                 Component component = (Component) context;
                 JsonTemplateBuilder builder = new JsonTemplateBuilder();
@@ -621,21 +652,37 @@ public class ConnectorSerializer {
         
         String defaultValue = functionParam.getDefaultValue() != null ? functionParam.getDefaultValue() : "";
         switch (paramType) {
-            case STRING, XML, JSON, MAP, ARRAY:
+            case STRING, XML, MAP, ARRAY:
                 Attribute stringAttr = new Attribute(sanitizedParamName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
                         defaultValue, functionParam.isRequired(), functionParam.getDescription(), "",
                         "", isCombo);
                 stringAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);
                 break;
+            case JSON:
+                // JSON parameters get a concise hint and validation
+                String jsonHelpTip = functionParam.getDescription();
+                if (jsonHelpTip == null || jsonHelpTip.isEmpty()) {
+                    jsonHelpTip = "Expecting JSON object";
+                }
+                Attribute jsonAttr = new Attribute(sanitizedParamName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
+                        defaultValue, functionParam.isRequired(), jsonHelpTip, VALIDATE_TYPE_REGEX,
+                        JSON_OBJECT_REGEX, isCombo);
+                jsonAttr.setEnableCondition(functionParam.getEnableCondition());
+                builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, jsonAttr);
+                break;
             case RECORD:
                 if (expandRecords) {
                     writeRecordFields(functionParam, builder, expandRecords, groupName);
                 } else {
-                    // Treat as single stringOrExpression field for regular function params
+                    // Generate concise hint and validation for non-expanded records
+                    String recordHelpTip = functionParam.getDescription();
+                    if (recordHelpTip == null || recordHelpTip.isEmpty()) {
+                        recordHelpTip = "Expecting JSON object";
+                    }
                     Attribute recordAttr = new Attribute(functionParam.getValue(), displayName,
                             INPUT_TYPE_STRING_OR_EXPRESSION, defaultValue, functionParam.isRequired(),
-                            functionParam.getDescription(), "", "", isCombo);
+                            recordHelpTip, VALIDATE_TYPE_REGEX, JSON_OBJECT_REGEX, isCombo);
                     recordAttr.setEnableCondition(functionParam.getEnableCondition());
                     builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, recordAttr);
                 }
@@ -882,10 +929,12 @@ public class ConnectorSerializer {
                     connectionType, indexHolder[0], recordParam.getValue()));
             result.append(String.format("\n        <property name=\"%s_paramType%d\" value=\"%s\"/>",
                     connectionType, indexHolder[0], RECORD));
+            result.append(String.format("\n        <property name=\"%s_param%d_recordName\" value=\"%s\"/>",
+                    connectionType, indexHolder[0], recordParam.getRecordName()));
             isFirst[0] = false;
             int recordParamIndex = indexHolder[0];
             indexHolder[0]++;
-            
+
             // Then, write record fields with the record parameter name prefix
             int[] fieldIndexHolder = {0};
             String recordParamName = recordParam.getValue();

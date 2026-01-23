@@ -165,6 +165,12 @@ public class Utils {
             Files.walkFileTree(sourceDirPath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    // Skip macOS-specific files that cause extraction issues in MI
+                    String fileName = file.getFileName().toString();
+                    if (shouldSkipFile(fileName)) {
+                        return FileVisitResult.CONTINUE;
+                    }
+
                     Path targetFile = sourceDirPath.relativize(file);
                     outputStream.putNextEntry(new ZipEntry(targetFile.toString()));
                     Files.copy(file, outputStream);
@@ -174,6 +180,12 @@ public class Utils {
 
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    // Skip macOS-specific directories
+                    String dirName = dir.getFileName().toString();
+                    if (shouldSkipDirectory(dirName)) {
+                        return FileVisitResult.SKIP_SUBTREE;
+                    }
+
                     if (!dir.equals(sourceDirPath)) {
                         Path targetDir = sourceDirPath.relativize(dir);
                         outputStream.putNextEntry(new ZipEntry(targetDir + "/"));
@@ -183,6 +195,40 @@ public class Utils {
                 }
             });
         }
+    }
+
+    /**
+     * Check if a file should be skipped during ZIP creation.
+     * Skips macOS-specific files that cause extraction issues in MI.
+     *
+     * @param fileName The name of the file to check
+     * @return true if the file should be skipped, false otherwise
+     */
+    private static boolean shouldSkipFile(String fileName) {
+        // Skip .DS_Store files (macOS Finder metadata)
+        if (".DS_Store".equals(fileName)) {
+            return true;
+        }
+        // Skip AppleDouble resource fork files (._* files)
+        if (fileName.startsWith("._")) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if a directory should be skipped during ZIP creation.
+     * Skips macOS-specific directories that cause extraction issues in MI.
+     *
+     * @param dirName The name of the directory to check
+     * @return true if the directory should be skipped, false otherwise
+     */
+    private static boolean shouldSkipDirectory(String dirName) {
+        // Skip __MACOSX directory (created by macOS archiver)
+        if ("__MACOSX".equals(dirName)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -751,46 +797,55 @@ public class Utils {
     }
 
     /**
-     * Convert a string to PascalCase.
-     * Example: "user-profiles" -> "UserProfiles", "userId" -> "UserId"
-     */
-    /**
-     * Sanitizes a parameter name by removing leading single quotes from quoted identifiers.
-     * 
-     * <p>In Ballerina, a single quote (') is used before a variable or identifier name to create
-     * a quoted identifier. This allows using reserved keywords (like if, while, string, int) as
-     * names for variables, functions, or fields. For example, 'start is a valid quoted identifier.</p>
-     * 
-     * <p>However, when generating XML and JSON files for MI connectors, these quoted identifiers
-     * can cause issues:
-     * <ul>
-     *   <li>XML attribute names cannot start with a single quote (e.g., name="'start" is invalid)</li>
-     *   <li>JSON property names with leading quotes may cause parsing issues</li>
-     * </ul>
-     * </p>
-     * 
-     * <p>This method sanitizes quoted identifiers by removing the leading quote(s) for use in
-     * XML/JSON generation, while the original quoted name is preserved for display purposes.</p>
-     *
-     * @param paramName the parameter name to sanitize (may be a quoted identifier like 'start)
-     * @return the sanitized parameter name with leading quotes removed (e.g., 'start -> start)
-     */
-    public static String sanitizeParamName(String paramName) {
-        if (paramName == null) {
-            return "";
-        }
-        String sanitized = paramName;
-        // Remove leading single quotes from quoted identifiers
-        // In Ballerina, 'start is a quoted identifier, we need 'start -> start for XML/JSON
-        while (sanitized.startsWith("'")) {
-            sanitized = sanitized.substring(1);
-        }
-        // If the name is empty after removing quotes, use a default
-        if (sanitized.isEmpty()) {
-            sanitized = "param";
-        }
-        return sanitized;
+ * Convert a string to PascalCase.
+ * Example: "user-profiles" -> "UserProfiles", "userId" -> "UserId"
+ */
+/**
+ * Sanitizes a parameter name by removing leading single quotes from quoted identifiers
+ * and replacing dots with underscores for Synapse compatibility.
+ * 
+ * <p>In Ballerina, a single quote (') is used before a variable or identifier name to create
+ * a quoted identifier. This allows using reserved keywords (like if, while, string, int) as
+ * names for variables, functions, or fields. For example, 'start is a valid quoted identifier.</p>
+ * 
+ * <p>However, when generating XML and JSON files for MI connectors, these quoted identifiers
+ * can cause issues:
+ * <ul>
+ *   <li>XML attribute names cannot start with a single quote (e.g., name="'start" is invalid)</li>
+ *   <li>JSON property names with leading quotes may cause parsing issues</li>
+ *   <li>Synapse template parameters with dots are not correctly stored/retrieved (e.g., auth.token fails)</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>This method sanitizes parameter names by:
+ * <ol>
+ *   <li>Removing the leading quote(s) for use in XML/JSON generation</li>
+ *   <li>Replacing dots with underscores for Synapse template parameter compatibility</li>
+ * </ol>
+ * The original name is preserved for display purposes.</p>
+ *
+ * @param paramName the parameter name to sanitize (may be a quoted identifier like 'start or contain dots like auth.token)
+ * @return the sanitized parameter name with leading quotes removed and dots replaced with underscores
+ */
+public static String sanitizeParamName(String paramName) {
+    if (paramName == null) {
+        return "";
     }
+    String sanitized = paramName;
+    // Remove leading single quotes from quoted identifiers
+    // In Ballerina, 'start is a quoted identifier, we need 'start -> start for XML/JSON
+    while (sanitized.startsWith("'")) {
+        sanitized = sanitized.substring(1);
+    }
+    // Replace dots with underscores for Synapse template parameter compatibility
+    // Synapse/MI cannot correctly handle parameter names with dots (e.g., auth.token)
+    sanitized = sanitized.replace(".", "_");
+    // If the name is empty after sanitization, use a default
+    if (sanitized.isEmpty()) {
+        sanitized = "param";
+    }
+    return sanitized;
+}
 
     private static String toPascalCase(String str) {
         if (str == null || str.isEmpty()) {

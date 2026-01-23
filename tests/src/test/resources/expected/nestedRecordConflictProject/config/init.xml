@@ -20,18 +20,19 @@
     <parameter name="name" description="Unique name the connection is identified by"/>
     <parameter name="connectionType" description="Connection type"/>
     <!-- TODO: if union, the selected member type becomes a parameter-->
-    <parameter name="server.host" description=""/>
-    <parameter name="server.port" description=""/>
-    <parameter name="server.protocol" description=""/>
-    <parameter name="database.host" description=""/>
-    <parameter name="database.port" description=""/>
-    <parameter name="database.database" description=""/>
+    <parameter name="server_host" description=""/>
+    <parameter name="server_port" description=""/>
+    <parameter name="server_protocol" description=""/>
+    <parameter name="database_host" description=""/>
+    <parameter name="database_port" description=""/>
+    <parameter name="database_database" description=""/>
     <sequence>
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_objectTypeName" value="TestClient"/>
-        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramSize" value="6"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramSize" value="1"/>
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramFunctionName" value="init"/>
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param0" value="config"/>
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_paramType0" value="record"/>
+        <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_param0_recordName" value="ConnectionConfig"/>
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_param0" value="server.host"/>
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_paramType0" value="string"/>
         <property name="NESTEDRECORDCONFLICTPROJECT_TESTCLIENT_config_param1" value="server.port"/>
