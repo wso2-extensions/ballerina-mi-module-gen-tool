@@ -2,5 +2,6 @@
   "type": "attributeGroup",
   "value": {
     "groupName": "{{name}}",
-    "collapsed": {{collapsed}},
+    "collapsed": {{collapsed}}{{#if enableCondition}},
+    "enableCondition": {{{enableCondition}}}{{/if}},
     "elements": [

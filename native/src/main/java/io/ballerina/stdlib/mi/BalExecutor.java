@@ -419,10 +419,21 @@ public class BalExecutor {
                 paramType = Constants.STRING;
             }
         }
-        if (param == null && !UNION.equals(paramType) && !RECORD.equals(paramType)) {
-            log.error("Error in getting the ballerina function parameter: " + paramName);
-            throw new SynapseException("Parameter '" + paramName + "' is missing");
+        if (param == null) {
+            // For UNION and RECORD types, we pass null to the handler methods as they might 
+            // reconstruction logic (e.g. from flattened fields)
+            if (UNION.equals(paramType)) {
+                return getUnionParameter(paramName, context, index);
+            } else if (RECORD.equals(paramType)) {
+                return createRecordValue(null, paramName, context, index);
+            }
+            
+            // For other types, return null if the value is missing.
+            // This assumes the Ballerina parameter is optional/nullable.
+            // If it is required, the function invocation will fail later with a type error.
+            return null;
         }
+        
         return switch (paramType) {
             case BOOLEAN -> Boolean.parseBoolean((String) param);
             case INT -> Long.parseLong((String) param);
@@ -655,7 +666,7 @@ public class BalExecutor {
     /**
      * Reconstructs a record from flattened fields stored in the context properties.
      * Used for init function parameters where record fields are flattened in the XML.
-     * 
+     *
      * @param recordParamName The name of the record parameter (e.g., "config")
      * @param context The message context containing property values
      * @param connectionType The connection type prefix (e.g., "GOOGLEAPIS_GMAIL_CLIENT")
@@ -670,14 +681,48 @@ public class BalExecutor {
         log.info("DEBUG: recordParamName=" + recordParamName + ", connectionType=" + connectionType);
         
         com.google.gson.JsonObject recordJson = new com.google.gson.JsonObject();
+
+        // First pass: collect all union field paths and their selected types
+        java.util.Map<String, String> unionFieldSelectedTypes = new java.util.HashMap<>();
+        int tempIndex = 0;
+        while (true) {
+            String fieldNameKey = connectionType + "_" + recordParamName + "_param" + tempIndex;
+            String fieldTypeKey = connectionType + "_" + recordParamName + "_paramType" + tempIndex;
+            Object fieldNameObj = context.getProperty(fieldNameKey);
+            Object fieldTypeObj = context.getProperty(fieldTypeKey);
+
+            if (fieldNameObj == null || fieldTypeObj == null) {
+                break;
+            }
+
+            String fieldPath = fieldNameObj.toString();
+            String fieldType = fieldTypeObj.toString();
+
+            if (UNION.equals(fieldType)) {
+                String dataTypeKey = connectionType + "_" + recordParamName + "_dataType" + tempIndex;
+                Object dataTypeParamNameObj = context.getProperty(dataTypeKey);
+                if (dataTypeParamNameObj != null) {
+                    String dataTypeParamName = dataTypeParamNameObj.toString();
+                    Object selectedTypeObj = lookupTemplateParameter(context, dataTypeParamName);
+                    if (selectedTypeObj != null) {
+                        unionFieldSelectedTypes.put(fieldPath, selectedTypeObj.toString());
+                        log.info("DEBUG: Union field '" + fieldPath + "' has selected type: " + selectedTypeObj);
+                    }
+                }
+            }
+            tempIndex++;
+        }
+
+        // Second pass: process all fields
         int fieldIndex = 0;
-        
         while (true) {
             String fieldNameKey = connectionType + "_" + recordParamName + "_param" + fieldIndex;
             String fieldTypeKey = connectionType + "_" + recordParamName + "_paramType" + fieldIndex;
-            
+            String unionMemberKey = connectionType + "_" + recordParamName + "_unionMember" + fieldIndex;
+
             Object fieldNameObj = context.getProperty(fieldNameKey);
             Object fieldTypeObj = context.getProperty(fieldTypeKey);
+            Object unionMemberObj = context.getProperty(unionMemberKey);
             
             log.info("DEBUG: Checking fieldIndex=" + fieldIndex + ", fieldNameKey=" + fieldNameKey + " -> " + fieldNameObj);
             log.info("DEBUG: Checking fieldIndex=" + fieldIndex + ", fieldTypeKey=" + fieldTypeKey + " -> " + fieldTypeObj);
@@ -686,10 +731,61 @@ public class BalExecutor {
                 log.info("DEBUG: No more fields found at index " + fieldIndex);
                 break; // No more fields
             }
-            
+
             String fieldPath = fieldNameObj.toString();
             String fieldType = fieldTypeObj.toString();
-            
+            String unionMemberType = unionMemberObj != null ? unionMemberObj.toString() : null;
+
+            // Handle union type field itself
+            if (UNION.equals(fieldType)) {
+                // If this union field itself belongs to a parent union member, check if it should be included
+                if (unionMemberType != null) {
+                    String parentUnionPath = findParentUnionPath(fieldPath, unionFieldSelectedTypes.keySet());
+                    if (parentUnionPath != null) {
+                        String selectedType = unionFieldSelectedTypes.get(parentUnionPath);
+                        if (selectedType != null && !selectedType.equals(unionMemberType)) {
+                            // This union field belongs to a different union member, skip it and its nested fields
+                            log.info("DEBUG: Skipping union field '" + fieldPath + "' (belongs to " + unionMemberType +
+                                     ", but selected type is " + selectedType + ")");
+                            fieldIndex++;
+                            continue;
+                        }
+                    }
+                }
+                
+                // Check if this is a "Leaf Union" (value provided directly, e.g. string|string[])
+                // Use sanitized path for lookup as done for regular fields
+                String sanitizedFieldPath = fieldPath.replace(".", "_");
+                Object unionValue = lookupTemplateParameter(context, sanitizedFieldPath);
+                
+                if (unionValue != null) {
+                    log.info("DEBUG: Found direct value for union field '" + fieldPath + "': " + unionValue);
+                    setNestedField(recordJson, fieldPath, unionValue, fieldType);
+                    fieldIndex++;
+                    continue;
+                }
+                
+                log.info("DEBUG: Processing union field at path=" + fieldPath + " (nested fields will provide values)");
+                fieldIndex++;
+                continue;
+            }
+
+            // If this field belongs to a union member, check if it matches the selected type
+            if (unionMemberType != null) {
+                // Find the parent union field path for this field
+                String parentUnionPath = findParentUnionPath(fieldPath, unionFieldSelectedTypes.keySet());
+                if (parentUnionPath != null) {
+                    String selectedType = unionFieldSelectedTypes.get(parentUnionPath);
+                    if (selectedType != null && !selectedType.equals(unionMemberType)) {
+                        // This field belongs to a different union member, skip it
+                        log.info("DEBUG: Skipping field '" + fieldPath + "' (belongs to " + unionMemberType +
+                                 ", but selected type is " + selectedType + ")");
+                        fieldIndex++;
+                        continue;
+                    }
+                }
+            }
+
             // Get the actual field value from the template parameters
             // Convert dots to underscores because Synapse parameter names use underscores
             // (e.g., field path "auth.token" maps to parameter name "auth_token")
@@ -705,27 +801,34 @@ public class BalExecutor {
             } else {
                 log.warn("DEBUG: Field '" + fieldPath + "' has NULL value - NOT SETTING");
             }
-            
+
             fieldIndex++;
         }
-        
+
         String recordJsonString = recordJson.toString();
         log.info("DEBUG: Final reconstructed JSON: " + recordJsonString);
         log.info("=== DEBUG: reconstructRecordFromFields END ===");
         
         // Convert JSON object to BMap
-        Object parseResult = JsonUtils.parse(recordJsonString);
-        
-        // Check if parsing returned an error
-        if (parseResult instanceof BError) {
-            BError error = (BError) parseResult;
-            log.error("DEBUG: JsonUtils.parse returned an error: " + error.getMessage());
-            log.error("DEBUG: Error details: " + error.getDetails());
-            throw new SynapseException("Failed to parse reconstructed JSON for record: " + error.getMessage() + 
-                    ". JSON was: " + recordJsonString);
+        return JsonUtils.parse(recordJsonString);
+    }
+
+    /**
+     * Finds the parent union field path for a given field path.
+     * For example, if fieldPath is "auth.token" and unionPaths contains "auth",
+     * this returns "auth".
+     *
+     * @param fieldPath The full field path (e.g., "auth.token")
+     * @param unionPaths Set of known union field paths
+     * @return The parent union path, or null if not found
+     */
+    private String findParentUnionPath(String fieldPath, java.util.Set<String> unionPaths) {
+        for (String unionPath : unionPaths) {
+            if (fieldPath.startsWith(unionPath + ".")) {
+                return unionPath;
+            }
         }
-        
-        return parseResult;
+        return null;
     }
     
     /**
