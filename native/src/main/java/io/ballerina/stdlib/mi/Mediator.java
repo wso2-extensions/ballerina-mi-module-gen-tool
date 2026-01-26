@@ -22,6 +22,8 @@ import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
 import org.apache.axis2.AxisFault;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.SynapseException;
 import org.apache.synapse.mediators.AbstractMediator;
 
 public class Mediator extends AbstractMediator {
@@ -56,9 +58,12 @@ public class Mediator extends AbstractMediator {
         try {
             return balExecutor.execute(rt, module, context);
         } catch (AxisFault | BallerinaExecutionException e) {
-            handleException("Error while executing ballerina", e, context);
+            context.setProperty(SynapseConstants.ERROR_CODE, "BALLERINA_EXECUTION_ERROR");
+            context.setProperty(SynapseConstants.ERROR_MESSAGE, e.getMessage());
+            context.setProperty(SynapseConstants.ERROR_DETAIL, e.getCause() != null ? e.getCause().toString() : e.toString());
+            context.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
+            throw new SynapseException(e.getMessage(), e);
         }
-        return false;
     }
 
     private void init() {

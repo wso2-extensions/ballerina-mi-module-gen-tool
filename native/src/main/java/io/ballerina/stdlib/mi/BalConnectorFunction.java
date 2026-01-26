@@ -21,6 +21,7 @@ package io.ballerina.stdlib.mi;
 import io.ballerina.runtime.api.values.BObject;
 import org.apache.axis2.AxisFault;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.wso2.integration.connector.core.AbstractConnector;
 import org.wso2.integration.connector.core.ConnectException;
 import org.wso2.integration.connector.core.connection.ConnectionHandler;
@@ -45,7 +46,11 @@ public class BalConnectorFunction extends AbstractConnector {
         try {
             balExecutor.execute(BalConnectorConfig.getRuntime(), clientObj, messageContext);
         } catch (AxisFault | BallerinaExecutionException e) {
-            handleException("Error while executing ballerina", e, messageContext);
+            messageContext.setProperty(SynapseConstants.ERROR_CODE, "BALLERINA_EXECUTION_ERROR");
+            messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, e.getMessage());
+            messageContext.setProperty(SynapseConstants.ERROR_DETAIL, e.getCause() != null ? e.getCause().toString() : e.toString());
+            messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
+            throw new ConnectException(e, e.getMessage());
         }
     }
 

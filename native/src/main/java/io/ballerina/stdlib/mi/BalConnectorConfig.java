@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.mediators.template.TemplateContext;
 import org.wso2.integration.connector.core.AbstractConnector;
 import org.wso2.integration.connector.core.ConnectException;
@@ -109,7 +110,11 @@ public class BalConnectorConfig extends AbstractConnector {
                 
                 clientObject = ValueCreator.createObjectValue(module, objectTypeName, args);
             } catch (BError clientError) {
-                handleException(clientError.getMessage(), messageContext);
+                messageContext.setProperty(SynapseConstants.ERROR_CODE, "BALLERINA_CLIENT_ERROR");
+                messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, clientError.getMessage());
+                messageContext.setProperty(SynapseConstants.ERROR_DETAIL, clientError.toString());
+                messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, clientError);
+                throw new ConnectException(clientError, clientError.getMessage());
             }
             BalConnectorConnection balConnection = new BalConnectorConnection(module, getPropertyAsString(messageContext, connectionType + "_objectTypeName"), clientObject);
             try {

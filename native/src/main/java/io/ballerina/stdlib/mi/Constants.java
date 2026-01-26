@@ -46,4 +46,9 @@ public class Constants {
     public static final String FUNCTION_TYPE_RESOURCE = "RESOURCE";
     public static final String FUNCTION_TYPE_REMOTE = "REMOTE";
     public static final String FUNCTION_TYPE_FUNCTION = "FUNCTION";
+
+    // Error handling constants
+    public static final String ERROR_EXCEPTION = "ERROR_EXCEPTION";
+    public static final String ERROR_CODE = "ERROR_CODE";
+    public static final String ERROR_MESSAGE = "ERROR_MESSAGE";
 }

@@ -499,7 +499,9 @@ public class TestUnionDataType {
             Assert.fail("Expected an exception to be thrown");
         } catch (Throwable t) {
             String msg = t.getMessage() == null ? "" : t.getMessage();
-            Assert.assertEquals(msg, "Error while executing ballerina");
+            // Exception message now contains the actual Ballerina error message
+            Assert.assertTrue(msg.contains("Operation failed") || msg.contains("Invalid input"),
+                    "Exception message should contain Ballerina error details");
             Assert.assertEquals(t.getCause().getClass(), BallerinaExecutionException.class,
                     "Cause should be BallerinaExecutionException");
             Assert.assertEquals(t.getCause().getMessage(), "Operation failed: Invalid input provided",
