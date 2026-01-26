@@ -62,7 +62,7 @@
                           "displayName": "token",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": "false",
                           "helpTip": "A valid access token to access the specified Milvus instance",
                           "validateType": "",
                           "matchPattern": ""
@@ -84,7 +84,7 @@
                           "displayName": "username",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": "false",
                           "helpTip": "The username used to connect to the specified Milvus instance",
                           "validateType": "",
                           "matchPattern": ""
@@ -97,7 +97,7 @@
                           "displayName": "password",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": "false",
                           "helpTip": "The password used to connect to the specified Milvus instance",
                           "validateType": "",
                           "matchPattern": ""
@@ -236,7 +236,7 @@
                           "displayName": "clientKeyPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": "false",
                           "helpTip": "The path to the client key file for mutual authentication",
                           "validateType": "",
                           "matchPattern": ""
@@ -249,7 +249,7 @@
                           "displayName": "clientPemPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": "false",
                           "helpTip": "The path to the client PEM file for mutual authentication",
                           "validateType": "",
                           "matchPattern": ""
@@ -262,7 +262,7 @@
                           "displayName": "serverPemPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": "false",
                           "helpTip": "The path to the server PEM file for mutual authentication",
                           "validateType": "",
                           "matchPattern": ""
@@ -275,7 +275,7 @@
                           "displayName": "caPemPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": "false",
                           "helpTip": "The path to the CA PEM file for mutual authentication",
                           "validateType": "",
                           "matchPattern": ""

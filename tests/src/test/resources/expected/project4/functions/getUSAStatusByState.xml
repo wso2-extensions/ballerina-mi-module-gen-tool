@@ -19,7 +19,6 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="getUSAStatusByState">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-
     <parameter name="states" description=""/>
     <parameter name="yesterday" description=""/>
     <parameter name="allowNull" description=""/>
@@ -33,7 +32,6 @@
         <property name="paramSize" value="3"/>
         <property name="paramFunctionName" value="getUSAStatusByState"/>
         <property name="returnType" value="union"/>
-
         <property name="functionType" value="REMOTE"/>
         <class name="io.ballerina.stdlib.mi.BalConnectorFunction">
             <property name="orgName" value="testOrg"/>

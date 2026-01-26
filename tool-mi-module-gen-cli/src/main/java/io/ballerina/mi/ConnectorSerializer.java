@@ -46,6 +46,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.StringJoiner;
 
 import static io.ballerina.mi.util.Constants.*;
@@ -243,8 +245,9 @@ public class ConnectorSerializer {
                 }
                 StringBuilder result = new StringBuilder();
                 boolean[] isFirst = {true};
+                Set<String> processedParams = new HashSet<>();
                 for (FunctionParam functionParam : functionParams) {
-                    writeXmlParameterElements(functionParam, result, isFirst);
+                    writeXmlParameterElements(functionParam, result, isFirst, processedParams);
                 }
                 // Remove trailing newline and indentation
                 String output = result.toString();
@@ -714,22 +717,8 @@ public class ConnectorSerializer {
                     throw new IllegalArgumentException("FunctionParam with paramType 'union' must be an instance of UnionFunctionParam for parameter: " + functionParam.getValue());
                 }
                 // Gather the data types in the union
+                // Gather the data types in the union
                 if (!unionFunctionParam.getUnionMemberParams().isEmpty()) {
-                    // If groupName is not provided but we're in a group context, detect it from the field path
-                    String effectiveGroupName = groupName;
-                    if (effectiveGroupName == null && originalParamValue != null && originalParamValue.contains(".")) {
-                        String immediateParent = getImmediateParentSegment(originalParamValue);
-                        if (immediateParent != null) {
-                            effectiveGroupName = immediateParent;
-                        }
-                    }
-                    
-                    Combo comboField = getComboField(unionFunctionParam, functionParam.getValue(),
-                            functionParam.getDescription(), effectiveGroupName);
-                    builder.addFromTemplate(COMBO_TEMPLATE_PATH, comboField);
-
-                    // Add attribute fields for each type with enable conditions
-                    // Filter out union members that are themselves empty unions (would produce no output)
                     List<FunctionParam> unionMembers = unionFunctionParam.getUnionMemberParams();
                     List<FunctionParam> validMembers = new ArrayList<>();
                     for (FunctionParam member : unionMembers) {
@@ -740,9 +729,36 @@ public class ConnectorSerializer {
                         validMembers.add(member);
                     }
 
-                    // Add separator after combo field if there are valid members
-                    if (!validMembers.isEmpty()) {
-                        builder.addSeparator(ATTRIBUTE_SEPARATOR);
+                    // Determine if we should show the combo box
+                    boolean showCombo = validMembers.size() > 1;
+
+                    // If groupName is not provided but we're in a group context, detect it from the field path
+                    String effectiveGroupName = groupName;
+                    if (effectiveGroupName == null && originalParamValue != null && originalParamValue.contains(".")) {
+                        String immediateParent = getImmediateParentSegment(originalParamValue);
+                        if (immediateParent != null) {
+                            effectiveGroupName = immediateParent;
+                        }
+                    } else if (!showCombo && validMembers.size() == 1) {
+                         // Even if not strictly a group, if we are skipping combo, we might want to ensure proper naming
+                         // But logic below handles effectiveGroupName fine.
+                    }
+
+                    if (showCombo) {
+                        Combo comboField = getComboField(unionFunctionParam, functionParam.getValue(),
+                                functionParam.getDescription(), effectiveGroupName);
+                        builder.addFromTemplate(COMBO_TEMPLATE_PATH, comboField);
+
+                        // Add separator after combo field if there are valid members
+                        if (!validMembers.isEmpty()) {
+                            builder.addSeparator(ATTRIBUTE_SEPARATOR);
+                        }
+                    } else if (validMembers.size() == 1) {
+                        // If only one option, we skip the combo.
+                        // We must update the member's enable condition to remove dependency on the (missing) combo.
+                        // Instead, it should inherit the Union's parent condition directly.
+                        FunctionParam singleMember = validMembers.get(0);
+                        singleMember.setEnableCondition(functionParam.getEnableCondition());
                     }
 
                     // Aggregate record members to write them together (prevents duplicate groups)
@@ -781,9 +797,11 @@ public class ConnectorSerializer {
                         for (FunctionParam member : recordMembers) {
                             if (member instanceof RecordFunctionParam recordParam) {
                                 String memberCondition = member.getEnableCondition();
+                                // If we skipped combo, memberCondition is already reset to parent condition (above).
+                                // If we have combo, memberCondition includes "combo == X".
+                                
                                 for (FunctionParam field : recordParam.getRecordFieldParams()) {
-                                    // Propagate member condition to field - essential because virtualRecordParam
-                                    // will only hold the union's general condition, not the specific member selection condition
+                                    // Propagate member condition to field
                                     String fieldCondition = field.getEnableCondition();
                                     String mergedCondition = mergeEnableConditions(memberCondition, fieldCondition);
                                     field.setEnableCondition(mergedCondition);
@@ -891,6 +909,10 @@ public class ConnectorSerializer {
         if (groupName != null && !groupName.isEmpty() && paramName != null) {
             // Remove group prefix from paramName first, then add "DataType"
             String displayParamName = removeGroupPrefix(paramName, groupName);
+            // For deeply nested fields, just take the last segment for display
+            if (displayParamName.contains(".")) {
+                displayParamName = displayParamName.substring(displayParamName.lastIndexOf('.') + 1);
+            }
             comboDisplayName = String.format("%s%s", Utils.sanitizeParamName(displayParamName), "DataType");
         }
         
@@ -966,11 +988,31 @@ public class ConnectorSerializer {
     private static void writeRecordFieldParamProperties(FunctionParam fieldParam, String connectionType,
                                                         String recordParamName, StringBuilder result,
                                                         int[] fieldIndexHolder) {
+        writeRecordFieldParamPropertiesWithUnionMember(fieldParam, connectionType, recordParamName, result,
+                fieldIndexHolder, null);
+    }
+
+    /**
+     * Writes XML properties for record field parameters, with support for tracking union member types.
+     * When a field belongs to a union member record, the unionMemberType parameter indicates which
+     * union member type this field belongs to, enabling runtime reconstruction of the correct record type.
+     *
+     * @param fieldParam The field parameter to write
+     * @param connectionType The connection type prefix
+     * @param recordParamName The record parameter name
+     * @param result The StringBuilder to append to
+     * @param fieldIndexHolder The current field index (mutable)
+     * @param unionMemberType The union member type name if this field belongs to a union member record, null otherwise
+     */
+    private static void writeRecordFieldParamPropertiesWithUnionMember(FunctionParam fieldParam, String connectionType,
+                                                        String recordParamName, StringBuilder result,
+                                                        int[] fieldIndexHolder, String unionMemberType) {
         // If this is a nested record, recursively expand its fields
         if (fieldParam instanceof RecordFunctionParam nestedRecordParam && !nestedRecordParam.getRecordFieldParams().isEmpty()) {
-            // Recursively expand nested record fields
+            // Recursively expand nested record fields, preserving union member context
             for (FunctionParam nestedFieldParam : nestedRecordParam.getRecordFieldParams()) {
-                writeRecordFieldParamProperties(nestedFieldParam, connectionType, recordParamName, result, fieldIndexHolder);
+                writeRecordFieldParamPropertiesWithUnionMember(nestedFieldParam, connectionType, recordParamName,
+                        result, fieldIndexHolder, unionMemberType);
             }
         } else if (fieldParam instanceof UnionFunctionParam unionFieldParam) {
             // Write the union field with the record parameter name prefix
@@ -988,7 +1030,32 @@ public class ConnectorSerializer {
             result.append(String.format("\n        <property name=\"%s_%s_dataType%d\" value=\"%s\"/>",
                     connectionType, recordParamName, fieldIndexHolder[0],
                     String.format("%s_%s", sanitizedParamName, "DataType")));
+
+            // If this union field is inside another union member, add the unionMember property
+            if (unionMemberType != null) {
+                result.append(String.format("\n        <property name=\"%s_%s_unionMember%d\" value=\"%s\"/>",
+                        connectionType, recordParamName, fieldIndexHolder[0], unionMemberType));
+            }
+
             fieldIndexHolder[0]++;
+
+            // Now recursively write the fields of each union member that is a record type
+            // This allows runtime to know what fields belong to which union member
+            for (FunctionParam memberParam : unionFieldParam.getUnionMemberParams()) {
+                if (memberParam instanceof RecordFunctionParam recordMemberParam) {
+                    // Get the union member type name (e.g., "BearerTokenConfig", "OAuth2RefreshTokenGrantConfig")
+                    String memberTypeName = recordMemberParam.getDisplayTypeName();
+                    if (memberTypeName == null || memberTypeName.isEmpty()) {
+                        memberTypeName = recordMemberParam.getRecordName();
+                    }
+                    // Recursively write record fields with the union member type context
+                    for (FunctionParam recordField : recordMemberParam.getRecordFieldParams()) {
+                        writeRecordFieldParamPropertiesWithUnionMember(recordField, connectionType, recordParamName,
+                                result, fieldIndexHolder, memberTypeName);
+                    }
+                }
+                // For primitive union members (string, int, etc.), no additional fields to write
+            }
         } else {
             // Write the leaf field with the record parameter name prefix
             result.append("\n        ");
@@ -999,29 +1066,81 @@ public class ConnectorSerializer {
                     connectionType, recordParamName, fieldIndexHolder[0], fieldValue));
             result.append(String.format("\n        <property name=\"%s_%s_paramType%d\" value=\"%s\"/>",
                     connectionType, recordParamName, fieldIndexHolder[0], fieldParam.getParamType()));
+
+            // If this field belongs to a union member record, add the unionMember property
+            if (unionMemberType != null) {
+                result.append(String.format("\n        <property name=\"%s_%s_unionMember%d\" value=\"%s\"/>",
+                        connectionType, recordParamName, fieldIndexHolder[0], unionMemberType));
+            }
+
             fieldIndexHolder[0]++;
         }
     }
 
     /**
      * Writes XML parameter elements for function params, expanding record fields as separate parameters.
+     * Also expands UnionFunctionParams into their discriminant (DataType) and member fields.
      */
-    private static void writeXmlParameterElements(FunctionParam functionParam, StringBuilder result, boolean[] isFirst) {
+    private static void writeXmlParameterElements(FunctionParam functionParam, StringBuilder result, boolean[] isFirst, Set<String> processedParams) {
         if (functionParam instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
             // Expand record fields as separate parameters
             for (FunctionParam fieldParam : recordParam.getRecordFieldParams()) {
-                writeXmlParameterElements(fieldParam, result, isFirst);
+                writeXmlParameterElements(fieldParam, result, isFirst, processedParams);
+            }
+        } else if (functionParam instanceof UnionFunctionParam unionParam) {
+            // Expand Union: Add DataType param and expand members
+
+            // 1. DataType parameter
+            String sanitizedParamName = Utils.sanitizeParamName(unionParam.getValue());
+            String dataTypeParamName = sanitizedParamName + "_DataType";
+            
+            if (!processedParams.contains(dataTypeParamName)) {
+                String description = functionParam.getDescription() != null ? functionParam.getDescription() : "";
+                if (!isFirst[0]) {
+                    result.append("\n    ");
+                }
+                result.append(String.format("<parameter name=\"%s\" description=\"%s\"/>",
+                        dataTypeParamName, escapeXml(description)));
+                isFirst[0] = false;
+                processedParams.add(dataTypeParamName);
+            }
+
+            // 2. Expand all union members properties
+            for (FunctionParam member : unionParam.getUnionMemberParams()) {
+                // If member is Record, expand its fields
+                if (member instanceof RecordFunctionParam memberRecord) {
+                    for (FunctionParam field : memberRecord.getRecordFieldParams()) {
+                        writeXmlParameterElements(field, result, isFirst, processedParams);
+                    }
+                } else if (member instanceof UnionFunctionParam) {
+                    // Nested union? Recurse
+                    writeXmlParameterElements(member, result, isFirst, processedParams);
+                } else {
+                    // Simple member? This is tricky. 
+                    // Usually Union member params are not named 'auth', they are the fields inside the type.
+                    // If it's a simple type union e.g. string|int, we might treat it as a single parameter?
+                    // But writeXmlParameterElements(member) would try to write parameter named after member value?
+                    // For now, assume auth is Record|Record union (which is the case here).
+                    writeXmlParameterElements(member, result, isFirst, processedParams);
+                }
             }
         } else {
             // Generate single parameter element
+            String sanitizedParamName = Utils.sanitizeParamName(functionParam.getValue());
+            
+            // Deduplicate: Don't write if already written
+            if (processedParams.contains(sanitizedParamName)) {
+                return;
+            }
+            
             String description = functionParam.getDescription() != null ? functionParam.getDescription() : "";
             if (!isFirst[0]) {
                 result.append("\n    ");
             }
-            String sanitizedParamName = Utils.sanitizeParamName(functionParam.getValue());
             result.append(String.format("<parameter name=\"%s\" description=\"%s\"/>",
                     sanitizedParamName, escapeXml(description)));
             isFirst[0] = false;
+            processedParams.add(sanitizedParamName);
         }
     }
 
@@ -1128,6 +1247,14 @@ public class ConnectorSerializer {
                     }
                 } else {
                     AttributeGroup attributeGroup = new AttributeGroup(displayGroupName);
+
+                    // Propagate parent's enable condition to the group itself
+                    // This ensures the group header is hidden when its parent union member is not selected
+                    String parentCondition = functionParam.getEnableCondition();
+                    if (parentCondition != null && !parentCondition.isEmpty()) {
+                        attributeGroup.setEnableCondition(parentCondition);
+                    }
+
                     builder.addFromTemplate(ATTRIBUTE_GROUP_TEMPLATE_PATH, attributeGroup);
 
                     // Write fields within this group
@@ -1137,7 +1264,7 @@ public class ConnectorSerializer {
                         FunctionParam fieldParam = groupFields.get(i);
 
                         // Propagate parent's enable condition to the field
-                        String parentCondition = functionParam.getEnableCondition();
+                        // (parentCondition is already set above for the group)
                         if (parentCondition != null && !parentCondition.isEmpty()) {
                             String currentCondition = fieldParam.getEnableCondition();
                             String mergedCondition = mergeEnableConditions(parentCondition, currentCondition);

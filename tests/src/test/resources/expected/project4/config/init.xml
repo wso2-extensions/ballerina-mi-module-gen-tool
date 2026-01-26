@@ -61,8 +61,16 @@ value between 0 and 1"/>
     <parameter name="responseLimits_maxHeaderSize" description=""/>
     <parameter name="responseLimits_maxEntityBodySize" description=""/>
     <parameter name="secureSocket_enable" description=""/>
-    <parameter name="secureSocket_cert" description=""/>
-    <parameter name="secureSocket_key" description=""/>
+    <parameter name="secureSocket_cert_DataType" description=""/>
+    <parameter name="secureSocket_cert_path" description=""/>
+    <parameter name="secureSocket_cert_password" description=""/>
+    <parameter name="secureSocket_certString" description=""/>
+    <parameter name="secureSocket_key_DataType" description=""/>
+    <parameter name="secureSocket_key_path" description=""/>
+    <parameter name="secureSocket_key_password" description=""/>
+    <parameter name="secureSocket_key_certFile" description=""/>
+    <parameter name="secureSocket_key_keyFile" description=""/>
+    <parameter name="secureSocket_key_keyPassword" description=""/>
     <parameter name="secureSocket_protocol_name" description=""/>
     <parameter name="secureSocket_protocol_versions" description=""/>
     <parameter name="secureSocket_certValidation_type" description=""/>
@@ -170,41 +178,62 @@ value between 0 and 1"/>
         <property name="PROJECT4_CLIENT_config_param40" value="secureSocket.cert"/>
         <property name="PROJECT4_CLIENT_config_paramType40" value="union"/>
         <property name="PROJECT4_CLIENT_config_dataType40" value="secureSocket_cert_DataType"/>
-        <property name="PROJECT4_CLIENT_config_param41" value="secureSocket.key"/>
-        <property name="PROJECT4_CLIENT_config_paramType41" value="union"/>
-        <property name="PROJECT4_CLIENT_config_dataType41" value="secureSocket_key_DataType"/>
-        <property name="PROJECT4_CLIENT_config_param42" value="secureSocket.protocol.name"/>
+        <property name="PROJECT4_CLIENT_config_param41" value="secureSocket.cert.path"/>
+        <property name="PROJECT4_CLIENT_config_paramType41" value="string"/>
+        <property name="PROJECT4_CLIENT_config_unionMember41" value="TrustStore"/>
+        <property name="PROJECT4_CLIENT_config_param42" value="secureSocket.cert.password"/>
         <property name="PROJECT4_CLIENT_config_paramType42" value="string"/>
-        <property name="PROJECT4_CLIENT_config_param43" value="secureSocket.protocol.versions"/>
-        <property name="PROJECT4_CLIENT_config_paramType43" value="array"/>
-        <property name="PROJECT4_CLIENT_config_param44" value="secureSocket.certValidation.type"/>
+        <property name="PROJECT4_CLIENT_config_unionMember42" value="TrustStore"/>
+        <property name="PROJECT4_CLIENT_config_param43" value="secureSocket.key"/>
+        <property name="PROJECT4_CLIENT_config_paramType43" value="union"/>
+        <property name="PROJECT4_CLIENT_config_dataType43" value="secureSocket_key_DataType"/>
+        <property name="PROJECT4_CLIENT_config_param44" value="secureSocket.key.path"/>
         <property name="PROJECT4_CLIENT_config_paramType44" value="string"/>
-        <property name="PROJECT4_CLIENT_config_param45" value="secureSocket.certValidation.cacheSize"/>
-        <property name="PROJECT4_CLIENT_config_paramType45" value="int"/>
-        <property name="PROJECT4_CLIENT_config_param46" value="secureSocket.certValidation.cacheValidityPeriod"/>
-        <property name="PROJECT4_CLIENT_config_paramType46" value="int"/>
-        <property name="PROJECT4_CLIENT_config_param47" value="secureSocket.ciphers"/>
-        <property name="PROJECT4_CLIENT_config_paramType47" value="array"/>
-        <property name="PROJECT4_CLIENT_config_param48" value="secureSocket.verifyHostName"/>
-        <property name="PROJECT4_CLIENT_config_paramType48" value="boolean"/>
-        <property name="PROJECT4_CLIENT_config_param49" value="secureSocket.shareSession"/>
-        <property name="PROJECT4_CLIENT_config_paramType49" value="boolean"/>
-        <property name="PROJECT4_CLIENT_config_param50" value="secureSocket.handshakeTimeout"/>
-        <property name="PROJECT4_CLIENT_config_paramType50" value="decimal"/>
-        <property name="PROJECT4_CLIENT_config_param51" value="secureSocket.sessionTimeout"/>
-        <property name="PROJECT4_CLIENT_config_paramType51" value="decimal"/>
-        <property name="PROJECT4_CLIENT_config_param52" value="secureSocket.serverName"/>
-        <property name="PROJECT4_CLIENT_config_paramType52" value="string"/>
-        <property name="PROJECT4_CLIENT_config_param53" value="proxy.host"/>
-        <property name="PROJECT4_CLIENT_config_paramType53" value="string"/>
-        <property name="PROJECT4_CLIENT_config_param54" value="proxy.port"/>
-        <property name="PROJECT4_CLIENT_config_paramType54" value="int"/>
-        <property name="PROJECT4_CLIENT_config_param55" value="proxy.userName"/>
-        <property name="PROJECT4_CLIENT_config_paramType55" value="string"/>
-        <property name="PROJECT4_CLIENT_config_param56" value="proxy.password"/>
-        <property name="PROJECT4_CLIENT_config_paramType56" value="string"/>
-        <property name="PROJECT4_CLIENT_config_param57" value="validation"/>
-        <property name="PROJECT4_CLIENT_config_paramType57" value="boolean"/>
+        <property name="PROJECT4_CLIENT_config_unionMember44" value="KeyStore"/>
+        <property name="PROJECT4_CLIENT_config_param45" value="secureSocket.key.password"/>
+        <property name="PROJECT4_CLIENT_config_paramType45" value="string"/>
+        <property name="PROJECT4_CLIENT_config_unionMember45" value="KeyStore"/>
+        <property name="PROJECT4_CLIENT_config_param46" value="secureSocket.key.certFile"/>
+        <property name="PROJECT4_CLIENT_config_paramType46" value="string"/>
+        <property name="PROJECT4_CLIENT_config_unionMember46" value="CertKey"/>
+        <property name="PROJECT4_CLIENT_config_param47" value="secureSocket.key.keyFile"/>
+        <property name="PROJECT4_CLIENT_config_paramType47" value="string"/>
+        <property name="PROJECT4_CLIENT_config_unionMember47" value="CertKey"/>
+        <property name="PROJECT4_CLIENT_config_param48" value="secureSocket.key.keyPassword"/>
+        <property name="PROJECT4_CLIENT_config_paramType48" value="string"/>
+        <property name="PROJECT4_CLIENT_config_unionMember48" value="CertKey"/>
+        <property name="PROJECT4_CLIENT_config_param49" value="secureSocket.protocol.name"/>
+        <property name="PROJECT4_CLIENT_config_paramType49" value="string"/>
+        <property name="PROJECT4_CLIENT_config_param50" value="secureSocket.protocol.versions"/>
+        <property name="PROJECT4_CLIENT_config_paramType50" value="array"/>
+        <property name="PROJECT4_CLIENT_config_param51" value="secureSocket.certValidation.type"/>
+        <property name="PROJECT4_CLIENT_config_paramType51" value="string"/>
+        <property name="PROJECT4_CLIENT_config_param52" value="secureSocket.certValidation.cacheSize"/>
+        <property name="PROJECT4_CLIENT_config_paramType52" value="int"/>
+        <property name="PROJECT4_CLIENT_config_param53" value="secureSocket.certValidation.cacheValidityPeriod"/>
+        <property name="PROJECT4_CLIENT_config_paramType53" value="int"/>
+        <property name="PROJECT4_CLIENT_config_param54" value="secureSocket.ciphers"/>
+        <property name="PROJECT4_CLIENT_config_paramType54" value="array"/>
+        <property name="PROJECT4_CLIENT_config_param55" value="secureSocket.verifyHostName"/>
+        <property name="PROJECT4_CLIENT_config_paramType55" value="boolean"/>
+        <property name="PROJECT4_CLIENT_config_param56" value="secureSocket.shareSession"/>
+        <property name="PROJECT4_CLIENT_config_paramType56" value="boolean"/>
+        <property name="PROJECT4_CLIENT_config_param57" value="secureSocket.handshakeTimeout"/>
+        <property name="PROJECT4_CLIENT_config_paramType57" value="decimal"/>
+        <property name="PROJECT4_CLIENT_config_param58" value="secureSocket.sessionTimeout"/>
+        <property name="PROJECT4_CLIENT_config_paramType58" value="decimal"/>
+        <property name="PROJECT4_CLIENT_config_param59" value="secureSocket.serverName"/>
+        <property name="PROJECT4_CLIENT_config_paramType59" value="string"/>
+        <property name="PROJECT4_CLIENT_config_param60" value="proxy.host"/>
+        <property name="PROJECT4_CLIENT_config_paramType60" value="string"/>
+        <property name="PROJECT4_CLIENT_config_param61" value="proxy.port"/>
+        <property name="PROJECT4_CLIENT_config_paramType61" value="int"/>
+        <property name="PROJECT4_CLIENT_config_param62" value="proxy.userName"/>
+        <property name="PROJECT4_CLIENT_config_paramType62" value="string"/>
+        <property name="PROJECT4_CLIENT_config_param63" value="proxy.password"/>
+        <property name="PROJECT4_CLIENT_config_paramType63" value="string"/>
+        <property name="PROJECT4_CLIENT_config_param64" value="validation"/>
+        <property name="PROJECT4_CLIENT_config_paramType64" value="boolean"/>
         <property name="PROJECT4_CLIENT_param1" value="serviceUrl"/>
         <property name="PROJECT4_CLIENT_paramType1" value="string"/>
 

@@ -23,6 +23,8 @@ public class AttributeGroup extends Element {
 
     private final boolean collapsed;
 
+    private String enableCondition;
+
     public AttributeGroup (String name) {
         this.name = name;
         this.collapsed = false;
@@ -33,11 +35,25 @@ public class AttributeGroup extends Element {
         this.collapsed = collapsed;
     }
 
+    public AttributeGroup (String name, boolean collapsed, String enableCondition) {
+        this.name = name;
+        this.collapsed = collapsed;
+        this.enableCondition = enableCondition;
+    }
+
     public String getName() {
         return name;
     }
 
     public boolean isCollapsed() {
         return collapsed;
+    }
+
+    public String getEnableCondition() {
+        return enableCondition;
+    }
+
+    public void setEnableCondition(String enableCondition) {
+        this.enableCondition = enableCondition;
     }
 }
