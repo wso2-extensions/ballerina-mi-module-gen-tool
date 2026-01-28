@@ -100,8 +100,8 @@
                                 "defaultValue": "",
                                 "required": "false",
                                 "helpTip": "Proxy server port",
-                                "validateType": "regex",
-                                "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                                "validateType": "",
+                                "matchPattern": ""
                               }
                             },
                             {
@@ -164,8 +164,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       }
                     ]
@@ -180,8 +180,8 @@
                     "defaultValue": "",
                     "required": "false",
                     "helpTip": "The maximum time to wait (in seconds) for a response before closing the connection",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                    "validateType": "",
+                    "matchPattern": ""
                   }
                 },
                 {
@@ -212,8 +212,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -225,8 +225,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -238,8 +238,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -251,8 +251,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -264,8 +264,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -277,8 +277,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -290,8 +290,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -303,8 +303,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       }
                     ]
@@ -351,8 +351,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -364,8 +364,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -418,8 +418,8 @@
                                 "defaultValue": "",
                                 "required": "false",
                                 "helpTip": "Minimum number of requests in a &#x60;RollingWindow&#x60; that will trip the circuit.",
-                                "validateType": "regex",
-                                "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                                "validateType": "",
+                                "matchPattern": ""
                               }
                             },
                             {
@@ -431,8 +431,8 @@
                                 "defaultValue": "",
                                 "required": "false",
                                 "helpTip": "Time period in seconds for which the failure threshold is calculated",
-                                "validateType": "regex",
-                                "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                                "validateType": "",
+                                "matchPattern": ""
                               }
                             },
                             {
@@ -444,8 +444,8 @@
                                 "defaultValue": "",
                                 "required": "false",
                                 "helpTip": "The granularity at which the time window slides. This is measured in seconds.",
-                                "validateType": "regex",
-                                "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                                "validateType": "",
+                                "matchPattern": ""
                               }
                             }
                           ]
@@ -460,8 +460,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "The threshold for request failures. When this threshold exceeds, the circuit trips. The threshold should be a\nvalue between 0 and 1",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -473,8 +473,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "The time period (in seconds) to wait before attempting to make another request to the upstream service",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -508,8 +508,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -521,8 +521,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -534,8 +534,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -547,8 +547,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -582,8 +582,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -595,8 +595,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -608,8 +608,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       }
                     ]
@@ -889,8 +889,8 @@
                                 "defaultValue": "",
                                 "required": "false",
                                 "helpTip": "",
-                                "validateType": "regex",
-                                "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                                "validateType": "",
+                                "matchPattern": ""
                               }
                             },
                             {
@@ -902,8 +902,8 @@
                                 "defaultValue": "",
                                 "required": "false",
                                 "helpTip": "",
-                                "validateType": "regex",
-                                "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                                "validateType": "",
+                                "matchPattern": ""
                               }
                             }
                           ]
@@ -957,8 +957,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -970,8 +970,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {
@@ -1018,8 +1018,8 @@
                           "defaultValue": "",
                           "required": "false",
                           "helpTip": "",
-                          "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "validateType": "",
+                          "matchPattern": ""
                         }
                       },
                       {

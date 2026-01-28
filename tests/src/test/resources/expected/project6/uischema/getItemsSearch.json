@@ -51,8 +51,8 @@
                     "defaultValue": "10",
                     "required": "false",
                     "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                    "validateType": "",
+                    "matchPattern": ""
                   }
                 }
               ]

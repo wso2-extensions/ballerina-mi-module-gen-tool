@@ -71,8 +71,8 @@
                     "defaultValue": "",
                     "required": "false",
                     "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$",
+                    "validateType": "",
+                    "matchPattern": "",
                     "enableCondition": [
                       {
                         "valueDataType": "int"
