@@ -26,7 +26,6 @@
         <property name="pathParam0" value="userId"/>
         <property name="pathParamType0" value="string"/>
         <property name="returnType" value="union"/>
-
         <property name="functionType" value="RESOURCE"/>
         <property name="resourceAccessor" value="get"/>
         <property name="pathParamSize" value="1"/>

@@ -29,8 +29,8 @@
         <property name="paramSize" value="2"/>
         <property name="paramFunctionName" value="validateBooleanOperations"/>
         <property name="returnType" value="boolean"/>
-
-        <class name="io_ballerina_stdlib_mi_Mediator">
+        <property name="functionType" value="FUNCTION"/>
+        <class name="io.ballerina.stdlib.mi.Mediator">
             <property name="orgName" value="testOrg"/>
             <property name="moduleName" value="project3"/>
             <property name="version" value="1"/>

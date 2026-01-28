@@ -502,10 +502,33 @@ public class BalExecutor {
             // Convert the reconstructed BMap to JSON and then to typed record
             if (reconstructedBMap instanceof BMap) {
                 String jsonStr = ((io.ballerina.runtime.internal.values.MapValueImpl<?, ?>) reconstructedBMap).getJSONString();
-                log.info("DEBUG: Converting BMap to typed record. JSON string: " + jsonStr);
+                
+                // ======== PROMINENT LOGGING: Final JSON being passed to Ballerina ========
+                log.info("╔═══════════════════════════════════════════════════════════════════════════════");
+                log.info("║ FINAL CONNECTION CONFIG JSON FOR BALLERINA");
+                log.info("║ Connection Type: " + connectionType);
+                log.info("║ Record Type: " + recordName);
+                log.info("╠═══════════════════════════════════════════════════════════════════════════════");
+                log.info("║ JSON: " + jsonStr);
+                log.info("╚═══════════════════════════════════════════════════════════════════════════════");
+                
                 BString jsonBString = StringUtils.fromString(jsonStr);
-                log.info("=== DEBUG: createRecordValue END (flattened) ===");
-                return FromJsonStringWithType.fromJsonStringWithType(jsonBString, ValueCreator.createTypedescValue(recType));
+                Object typedResult = FromJsonStringWithType.fromJsonStringWithType(jsonBString, ValueCreator.createTypedescValue(recType));
+                
+                // Log the TYPED record to show defaults were applied
+                if (typedResult instanceof BMap) {
+                    String typedJson = ((io.ballerina.runtime.internal.values.MapValueImpl<?, ?>) typedResult).getJSONString();
+                    log.info("╔═══════════════════════════════════════════════════════════════════════════════");
+                    log.info("║ TYPED BALLERINA RECORD (after FromJsonStringWithType - defaults applied)");
+                    log.info("║ Record Type: " + recordName);
+                    log.info("╠═══════════════════════════════════════════════════════════════════════════════");
+                    log.info("║ Typed JSON: " + typedJson);
+                    log.info("╚═══════════════════════════════════════════════════════════════════════════════");
+                }
+                
+                log.info("=== DEBUG: createRecordValue END (flattened) - Result type: " + 
+                        (typedResult != null ? typedResult.getClass().getName() : "null") + " ===");
+                return typedResult;
             }
 
             throw new SynapseException("Failed to reconstruct record from flattened fields for parameter '" + paramName + "'");
