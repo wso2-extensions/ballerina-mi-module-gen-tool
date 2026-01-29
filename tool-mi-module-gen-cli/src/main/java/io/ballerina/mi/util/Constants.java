@@ -49,6 +49,10 @@ public class Constants {
     public static final String INTEGER_REGEX = "^(-?\\\\d+|\\\\$\\\\{.+\\\\}\\\\)$";
     public static final String DECIMAL_REGEX = "^(-?\\\\d+(\\\\.\\\\d+)?|\\\\$\\\\{.+\\\\}\\\\)$";
     public static final String JSON_OBJECT_REGEX = "^(\\\\{[\\\\s\\\\S]*\\\\}|\\\\$\\\\{.+\\\\})$";
+    // Optional field regex patterns - allow empty string OR valid values
+    public static final String INTEGER_REGEX_OPTIONAL = "^$|^(-?\\\\d+|\\\\$\\\\{.+\\\\})$";
+    public static final String DECIMAL_REGEX_OPTIONAL = "^$|^(-?\\\\d+(\\\\.\\\\d+)?|\\\\$\\\\{.+\\\\})$";
+    public static final String JSON_OBJECT_REGEX_OPTIONAL = "^$|^(\\\\{[\\\\s\\\\S]*\\\\}|\\\\$\\\\{.+\\\\})$";
     public static final String ATTRIBUTE_SEPARATOR = ",";
     public static final String ATTRIBUTE_GROUP_END = "\n                    ]\n                  }\n                }";
     public static final String CONNECTOR_TARGET_PATH = "CONNECTOR_TARGET_PATH";

@@ -668,11 +668,11 @@ public class ConnectorSerializer {
                 if (jsonHelpTip == null || jsonHelpTip.isEmpty()) {
                     jsonHelpTip = "Expecting JSON object";
                 }
-                // Only apply regex validation for required fields - optional fields can be empty
-                String jsonValidateType = functionParam.isRequired() ? VALIDATE_TYPE_REGEX : "";
-                String jsonMatchPattern = functionParam.isRequired() ? JSON_OBJECT_REGEX : "";
+                // Apply regex validation for both required and optional fields
+                //  use a pattern that allows empty string OR valid values
+                String jsonMatchPattern = functionParam.isRequired() ? JSON_OBJECT_REGEX : JSON_OBJECT_REGEX_OPTIONAL;
                 Attribute jsonAttr = new Attribute(sanitizedParamName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        defaultValue, functionParam.isRequired(), jsonHelpTip, jsonValidateType,
+                        defaultValue, functionParam.isRequired(), jsonHelpTip, VALIDATE_TYPE_REGEX,
                         jsonMatchPattern, isCombo);
                 jsonAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, jsonAttr);
@@ -686,33 +686,33 @@ public class ConnectorSerializer {
                     if (recordHelpTip == null || recordHelpTip.isEmpty()) {
                         recordHelpTip = "Expecting JSON object";
                     }
-                    // Only apply regex validation for required fields - optional fields can be empty
-                    String recValidateType = functionParam.isRequired() ? VALIDATE_TYPE_REGEX : "";
-                    String recMatchPattern = functionParam.isRequired() ? JSON_OBJECT_REGEX : "";
+                    // Apply regex validation for both required and optional fields.
+                    // Optional fields use a pattern that allows empty string OR valid values
+                    String recMatchPattern = functionParam.isRequired() ? JSON_OBJECT_REGEX : JSON_OBJECT_REGEX_OPTIONAL;
                     Attribute recordAttr = new Attribute(functionParam.getValue(), displayName,
                             INPUT_TYPE_STRING_OR_EXPRESSION, defaultValue, functionParam.isRequired(),
-                            recordHelpTip, recValidateType, recMatchPattern, isCombo);
+                            recordHelpTip, VALIDATE_TYPE_REGEX, recMatchPattern, isCombo);
                     recordAttr.setEnableCondition(functionParam.getEnableCondition());
                     builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, recordAttr);
                 }
                 break;
             case INT:
-                // Only apply regex validation for required fields - optional fields can be empty
-                String intValidateType = functionParam.isRequired() ? VALIDATE_TYPE_REGEX : "";
-                String intMatchPattern = functionParam.isRequired() ? INTEGER_REGEX : "";
+                // Apply regex validation for both required and optional fields.
+                // Optional fields use a pattern that allows empty string OR valid values
+                String intMatchPattern = functionParam.isRequired() ? INTEGER_REGEX : INTEGER_REGEX_OPTIONAL;
                 Attribute intAttr = new Attribute(functionParam.getValue(), displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        defaultValue, functionParam.isRequired(), functionParam.getDescription(), intValidateType,
+                        defaultValue, functionParam.isRequired(), functionParam.getDescription(), VALIDATE_TYPE_REGEX,
                         intMatchPattern, isCombo);
                 intAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, intAttr);
                 break;
             case DECIMAL, FLOAT:
-                // Only apply regex validation for required fields - optional fields can be empty
-                String decValidateType = functionParam.isRequired() ? VALIDATE_TYPE_REGEX : "";
-                String decMatchPattern = functionParam.isRequired() ? DECIMAL_REGEX : "";
+                // Apply regex validation for both required and optional fields.
+                // Optional fields use a pattern that allows empty string OR valid values
+                String decMatchPattern = functionParam.isRequired() ? DECIMAL_REGEX : DECIMAL_REGEX_OPTIONAL;
                 Attribute decAttr = new Attribute(functionParam.getValue(), displayName,
                         INPUT_TYPE_STRING_OR_EXPRESSION, defaultValue, functionParam.isRequired(),
-                        functionParam.getDescription(), decValidateType, decMatchPattern, isCombo);
+                        functionParam.getDescription(), VALIDATE_TYPE_REGEX, decMatchPattern, isCombo);
                 decAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, decAttr);
                 break;
@@ -728,7 +728,6 @@ public class ConnectorSerializer {
                 if (!(functionParam instanceof UnionFunctionParam unionFunctionParam)) {
                     throw new IllegalArgumentException("FunctionParam with paramType 'union' must be an instance of UnionFunctionParam for parameter: " + functionParam.getValue());
                 }
-                // Gather the data types in the union
                 // Gather the data types in the union
                 if (!unionFunctionParam.getUnionMemberParams().isEmpty()) {
                     List<FunctionParam> unionMembers = unionFunctionParam.getUnionMemberParams();
