@@ -40,7 +40,9 @@ import io.ballerina.runtime.api.values.BXml;
 import io.ballerina.runtime.api.types.ClientType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
+
 import java.util.Arrays;
+
 import io.ballerina.runtime.internal.values.MapValueImpl;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -104,23 +106,23 @@ public class BalExecutor {
                     // DEBUG: List available methods to find the correct name for rt.callMethod
                     Type callableType = ((BObject) callable).getType();
                     log.info("DEBUG: BObject Type: " + callableType.getClass().getName());
-                    
+
                     if (callableType instanceof ClientType) {
                         ClientType clientType = (ClientType) callableType;
                         log.info("DEBUG: Processing ClientType resources...");
                         for (ResourceMethodType resource : clientType.getResourceMethods()) {
-                            log.info("DEBUG: Available Resource: Name='" + resource.getName() + 
-                                     "', Path=" + Arrays.toString(resource.getResourcePath()) + 
-                                     ", Accessor=" + resource.getAccessor());
+                            log.info("DEBUG: Available Resource: Name='" + resource.getName() +
+                                    "', Path=" + Arrays.toString(resource.getResourcePath()) +
+                                    ", Accessor=" + resource.getAccessor());
                         }
                         for (MethodType method : clientType.getMethods()) {
                             log.info("DEBUG: Available Method: " + method.getName());
                         }
                     } else {
-                         log.info("DEBUG: Not a ClientType. Type: " + callableType.getClass().getName());
+                        log.info("DEBUG: Not a ClientType. Type: " + callableType.getClass().getName());
                     }
-                    
-                    
+
+
                     // Manual invocation for resources because rt.callMethod doesn't support them well
                     try {
                         // 1. Get Scheduler from Runtime via Reflection
@@ -175,7 +177,7 @@ public class BalExecutor {
                         }
 
                         if (strandCtor == null) {
-                             throw new BallerinaExecutionException("Could not find Strand constructor accepting Scheduler", new Exception("Strand constructor missing"));
+                            throw new BallerinaExecutionException("Could not find Strand constructor accepting Scheduler", new Exception("Strand constructor missing"));
                         }
                         strandCtor.setAccessible(true);
                         Object strand = strandCtor.newInstance(ctorArgs);
@@ -188,70 +190,70 @@ public class BalExecutor {
                         // we cast to BObject which effectively uses the internal class at runtime.
                         // However, adding explicit import `io.ballerina.runtime.internal.scheduling.Strand` is risky if package format changes.
                         // But `BalExecutor` is in native, so it should be fine.
-                        
+
                         // We need to cast our reflected 'strand' object to the Type expected by call method.
                         // The `call` method expects `io.ballerina.runtime.internal.scheduling.Strand`.
                         // If we add the import, we can do it.
-                        
+
                         // Let's try invoking `call` via reflection to avoid Import issues with internal classes if possible.
                         // Method callMethod = callable.getClass().getMethod("call", strandClass, String.class, Object[].class);
                         // result = callMethod.invoke(callable, strand, jvmMethodName, argsWithPathParams);
-                        
+
                         // BUT, if we can import, it's better. `MapValueImpl` is already imported from internal.
                         // So we CAN import Strand.
-                        
+
                         // RETRY: Using imports at top of file (added via separate step if needed, or I can try here).
                         // I will assume I can't easily add imports mid-file. 
                         // I will use Reflection for EVERYTHING to be safe from import errors.
-                         
-                         java.lang.reflect.Method callMethod = callable.getClass().getMethod("call", strandClass, String.class, Object[].class);
-                         result = callMethod.invoke(callable, strand, jvmMethodName, argsWithPathParams);
-                         
-                         // 4. Handle Async Result
-                         if (result == null) {
-                             // Function yielded. We need to wait for the Future inside the strand.
-                             // Strand has a field `future`?
-                             // No, probably need to check implementation.
-                             // Usually `call` returns the value if strict? 
-                             // Wait, generated code: return $value$ or yields.
-                             // If it yields, it returns NULL? 
-                             // We might need to block on `strand.returnValue`?
-                             
-                             // Let's try to assume result is returned if we waited?
-                             // No, we didn't wait. 
-                             
-                             // Simplest Hack: Loop and wait until strand is 'done'.
-                             java.lang.reflect.Method isDoneMsg = strandClass.getMethod("isDone");
-                             while (!(boolean)isDoneMsg.invoke(strand)) {
-                                 Thread.sleep(10); // Spin wait (bad but effective for tool)
-                             }
-                             
-                             // Get result from future
-                             java.lang.reflect.Field futureField = strandClass.getDeclaredField("future");
-                             futureField.setAccessible(true);
-                             Object futureValue = futureField.get(strand);
-                             
-                             if (futureValue != null) {
-                                 Class<?> futureClass = futureValue.getClass();
-                                 java.lang.reflect.Field resultField = futureClass.getDeclaredField("result");
-                                 resultField.setAccessible(true);
-                                 result = resultField.get(futureValue);
-                                 
-                                 // Check for panic/error
-                                 java.lang.reflect.Field panicField = futureClass.getDeclaredField("panic");
-                                 panicField.setAccessible(true);
-                                 Object panic = panicField.get(futureValue);
-                                 if (panic != null) {
-                                     if (panic instanceof BError) {
-                                         throw (BError) panic;
-                                     }
-                                     if (panic instanceof Throwable) {
-                                         throw new BallerinaExecutionException("Panic in Ballerina function: " + ((Throwable)panic).getMessage(), (Throwable) panic);
-                                     }
-                                     throw new BallerinaExecutionException("Panic in Ballerina function: " + panic, new Exception(String.valueOf(panic)));
-                                 }
-                             }
-                         }
+
+                        java.lang.reflect.Method callMethod = callable.getClass().getMethod("call", strandClass, String.class, Object[].class);
+                        result = callMethod.invoke(callable, strand, jvmMethodName, argsWithPathParams);
+
+                        // 4. Handle Async Result
+                        if (result == null) {
+                            // Function yielded. We need to wait for the Future inside the strand.
+                            // Strand has a field `future`?
+                            // No, probably need to check implementation.
+                            // Usually `call` returns the value if strict?
+                            // Wait, generated code: return $value$ or yields.
+                            // If it yields, it returns NULL?
+                            // We might need to block on `strand.returnValue`?
+
+                            // Let's try to assume result is returned if we waited?
+                            // No, we didn't wait.
+
+                            // Simplest Hack: Loop and wait until strand is 'done'.
+                            java.lang.reflect.Method isDoneMsg = strandClass.getMethod("isDone");
+                            while (!(boolean) isDoneMsg.invoke(strand)) {
+                                Thread.sleep(10); // Spin wait (bad but effective for tool)
+                            }
+
+                            // Get result from future
+                            java.lang.reflect.Field futureField = strandClass.getDeclaredField("future");
+                            futureField.setAccessible(true);
+                            Object futureValue = futureField.get(strand);
+
+                            if (futureValue != null) {
+                                Class<?> futureClass = futureValue.getClass();
+                                java.lang.reflect.Field resultField = futureClass.getDeclaredField("result");
+                                resultField.setAccessible(true);
+                                result = resultField.get(futureValue);
+
+                                // Check for panic/error
+                                java.lang.reflect.Field panicField = futureClass.getDeclaredField("panic");
+                                panicField.setAccessible(true);
+                                Object panic = panicField.get(futureValue);
+                                if (panic != null) {
+                                    if (panic instanceof BError) {
+                                        throw (BError) panic;
+                                    }
+                                    if (panic instanceof Throwable) {
+                                        throw new BallerinaExecutionException("Panic in Ballerina function: " + ((Throwable) panic).getMessage(), (Throwable) panic);
+                                    }
+                                    throw new BallerinaExecutionException("Panic in Ballerina function: " + panic, new Exception(String.valueOf(panic)));
+                                }
+                            }
+                        }
 
                     } catch (Exception e) { // ReflectiveOperationException etc
                         // Detect "No such method" from BObject.call logic if any?
@@ -328,7 +330,7 @@ public class BalExecutor {
      * Prepend path parameter values to the args array for resource function invocation.
      * Path params are passed as the first arguments to resource methods in Ballerina.
      *
-     * @param args The original function arguments
+     * @param args    The original function arguments
      * @param context The message context containing path param values
      * @return A new array with path params prepended to the original args
      */
@@ -377,7 +379,7 @@ public class BalExecutor {
      * Convert a path parameter value to the appropriate Ballerina type.
      *
      * @param value The string value of the path parameter
-     * @param type The expected type (string, int, etc.)
+     * @param type  The expected type (string, int, etc.)
      * @return The converted value
      */
     private Object convertPathParam(String value, String type) {
@@ -427,13 +429,13 @@ public class BalExecutor {
             } else if (RECORD.equals(paramType)) {
                 return createRecordValue(null, paramName, context, index);
             }
-            
+
             // For other types, return null if the value is missing.
             // This assumes the Ballerina parameter is optional/nullable.
             // If it is required, the function invocation will fail later with a type error.
             return null;
         }
-        
+
         return switch (paramType) {
             case BOOLEAN -> Boolean.parseBoolean((String) param);
             case INT -> Long.parseLong((String) param);
@@ -460,20 +462,14 @@ public class BalExecutor {
     }
 
     private Object createRecordValue(String jsonString, String paramName, MessageContext context, int paramIndex) {
-        log.info("=== DEBUG: createRecordValue START ===");
-        log.info("DEBUG: jsonString=" + jsonString + ", paramName=" + paramName + ", paramIndex=" + paramIndex);
-        
         // Check if this is a flattened record from init function
         // Null jsonString indicates the record needs to be reconstructed from flattened fields
         if (jsonString == null) {
-            log.info("DEBUG: jsonString is NULL - this is a flattened record from init function");
             // This is a flattened record from init function
             String recordParamName = paramName; // e.g., "config"
 
             // For init functions, find the connection type from the context properties
             String connectionType = findConnectionTypeForParam(context, recordParamName);
-            log.info("DEBUG: Found connectionType=" + connectionType + " for recordParamName=" + recordParamName);
-
             if (connectionType == null) {
                 throw new SynapseException("Cannot create record value: jsonString is null and connectionType not found. " +
                         "Parameter '" + paramName + "' at index " + paramIndex + " may be missing required value.");
@@ -481,54 +477,26 @@ public class BalExecutor {
 
             // Reconstruct the record from flattened fields
             Object reconstructedBMap = reconstructRecordFromFields(recordParamName, context, connectionType);
-            log.info("DEBUG: reconstructedBMap type=" + (reconstructedBMap != null ? reconstructedBMap.getClass().getName() : "null"));
 
             // Now convert the BMap to the typed record
             // For init/config, use connectionType prefix for property name
             String recordNamePropertyKey = connectionType + "_param" + paramIndex + "_recordName";
             Object recordNameObj = context.getProperty(recordNamePropertyKey);
-            log.info("DEBUG: recordNamePropertyKey=" + recordNamePropertyKey + " -> " + recordNameObj);
-            
+
             if (recordNameObj == null) {
                 throw new SynapseException("Record name not found for parameter at index " + paramIndex +
                         ". Ensure '" + recordNamePropertyKey + "' property is set in the synapse template.");
             }
             String recordName = recordNameObj.toString();
-            log.info("DEBUG: Creating record of type: " + recordName);
-            
+
             BMap<BString, Object> recValue = ValueCreator.createRecordValue(BalConnectorConfig.getModule(), recordName);
             Type recType = recValue.getType();
 
             // Convert the reconstructed BMap to JSON and then to typed record
             if (reconstructedBMap instanceof BMap) {
                 String jsonStr = ((io.ballerina.runtime.internal.values.MapValueImpl<?, ?>) reconstructedBMap).getJSONString();
-                
-                // ======== PROMINENT LOGGING: Final JSON being passed to Ballerina ========
-                log.info("╔═══════════════════════════════════════════════════════════════════════════════");
-                log.info("║ FINAL CONNECTION CONFIG JSON FOR BALLERINA");
-                log.info("║ Connection Type: " + connectionType);
-                log.info("║ Record Type: " + recordName);
-                log.info("╠═══════════════════════════════════════════════════════════════════════════════");
-                log.info("║ JSON: " + jsonStr);
-                log.info("╚═══════════════════════════════════════════════════════════════════════════════");
-                
                 BString jsonBString = StringUtils.fromString(jsonStr);
-                Object typedResult = FromJsonStringWithType.fromJsonStringWithType(jsonBString, ValueCreator.createTypedescValue(recType));
-                
-                // Log the TYPED record to show defaults were applied
-                if (typedResult instanceof BMap) {
-                    String typedJson = ((io.ballerina.runtime.internal.values.MapValueImpl<?, ?>) typedResult).getJSONString();
-                    log.info("╔═══════════════════════════════════════════════════════════════════════════════");
-                    log.info("║ TYPED BALLERINA RECORD (after FromJsonStringWithType - defaults applied)");
-                    log.info("║ Record Type: " + recordName);
-                    log.info("╠═══════════════════════════════════════════════════════════════════════════════");
-                    log.info("║ Typed JSON: " + typedJson);
-                    log.info("╚═══════════════════════════════════════════════════════════════════════════════");
-                }
-                
-                log.info("=== DEBUG: createRecordValue END (flattened) - Result type: " + 
-                        (typedResult != null ? typedResult.getClass().getName() : "null") + " ===");
-                return typedResult;
+                return FromJsonStringWithType.fromJsonStringWithType(jsonBString, ValueCreator.createTypedescValue(recType));
             }
 
             throw new SynapseException("Failed to reconstruct record from flattened fields for parameter '" + paramName + "'");
@@ -541,11 +509,11 @@ public class BalExecutor {
             log.info("DEBUG: Stripped surrounding quotes from JSON");
         }
         log.info("DEBUG: Cleaned JSON string: " + jsonString);
-        
+
         // Try to get the record name for typed conversion
         Object recordNameObj = context.getProperty("param" + paramIndex + "_recordName");
         log.info("DEBUG: Looking for recordName at key 'param" + paramIndex + "_recordName' -> " + recordNameObj);
-        
+
         if (recordNameObj != null) {
             String recordName = recordNameObj.toString();
             // Try typed conversion first (works when Strand is available, e.g., in tests)
@@ -561,15 +529,15 @@ public class BalExecutor {
                 // If typed conversion fails (e.g., Strand null in MI runtime), fall back to manual deep conversion
                 log.warn("DEBUG: FromJsonStringWithType failed (likely due to null Strand): " + e.getMessage());
                 log.info("DEBUG: Attempting manual deep conversion for: " + recordName);
-                
+
                 try {
                     // 1. Parse JSON to generic BMap/BArray
                     Object parseResult = JsonUtils.parse(jsonString);
-                    
+
                     // 2. Create the target empty record to get Type info
                     BMap<BString, Object> emptyRecord = ValueCreator.createRecordValue(BalConnectorConfig.getModule(), recordName);
                     Type targetType = emptyRecord.getType();
-                    
+
                     // 3. Perform manual deep conversion
                     Object convertedResult = convertValueToType(parseResult, targetType);
                     log.info("=== DEBUG: createRecordValue END (manual deep conversion) ===");
@@ -580,18 +548,18 @@ public class BalExecutor {
                 }
             }
         }
-        
+
         // Final Fallback: Use JsonUtils.parse for generic JSON (no type checking)
         try {
             Object parseResult = JsonUtils.parse(jsonString);
             log.info("DEBUG: JsonUtils.parse result type: " + (parseResult != null ? parseResult.getClass().getName() : "null"));
-            
+
             if (parseResult instanceof BError) {
                 BError error = (BError) parseResult;
                 log.error("DEBUG: JsonUtils.parse returned an error: " + error.getMessage());
                 throw new SynapseException("Failed to parse JSON for record: " + error.getMessage());
             }
-            
+
             log.info("=== DEBUG: createRecordValue END (generic JSON) ===");
             return parseResult;
         } catch (Exception e) {
@@ -599,7 +567,7 @@ public class BalExecutor {
             throw new SynapseException("Failed to create record value: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Deep converts a generic value (from JsonUtils.parse) to a strictly typed value
      * based on the target Type. This avoids using FromJsonStringWithType which requires a Strand.
@@ -608,17 +576,17 @@ public class BalExecutor {
         if (sourceValue == null) {
             return null;
         }
-        
+
         // Handle Record conversion
         if (targetType.getTag() == TypeTags.RECORD_TYPE_TAG && sourceValue instanceof BMap) {
             return createTypedRecordFromGeneric((BMap<BString, Object>) sourceValue, (StructureType) targetType);
         }
-        
+
         // Handle Array conversion
         if (targetType.getTag() == TypeTags.ARRAY_TAG && sourceValue instanceof BArray) {
             return createTypedArrayFromGeneric((BArray) sourceValue, (ArrayType) targetType);
         }
-        
+
         // Handle Union types (simplified approach - check member types)
         // Note: For now we return sourceValue as-is for unions, primitive types, etc.
         // as they are usually compatible or handled by Ballerina's dynamic typing.
@@ -628,12 +596,12 @@ public class BalExecutor {
     private BMap<BString, Object> createTypedRecordFromGeneric(BMap<BString, Object> genericMap, StructureType targetType) {
         // Create the typed record
         BMap<BString, Object> typedRecord = ValueCreator.createRecordValue(targetType.getPackage(), targetType.getName());
-        
+
         // Migrate fields
         for (Field field : targetType.getFields().values()) {
             String fieldName = field.getFieldName();
             BString bFieldName = StringUtils.fromString(fieldName);
-            
+
             if (genericMap.containsKey(bFieldName)) {
                 Object genericValue = genericMap.get(bFieldName);
                 Object convertedValue = convertValueToType(genericValue, field.getFieldType());
@@ -648,12 +616,12 @@ public class BalExecutor {
         // However, we can convert the elements *inside* the array if possible.
         // Since generic BArray (json[]) can hold any value, replacing generic Maps with Typed Records
         // inside it might be sufficient for Ballerina to accept it, or at least for field access to work.
-        
+
         long size = genericArray.size();
         for (long i = 0; i < size; i++) {
             Object value = genericArray.get(i);
             Object converted = convertValueToType(value, targetType.getElementType());
-            
+
             // Update array element if conversion happened and value changed
             if (value != converted) {
                 // Determine implicit type of array to invoke correct add/put method?
@@ -668,12 +636,12 @@ public class BalExecutor {
         }
         return genericArray;
     }
-    
+
     /**
      * Finds the connection type prefix for a given record parameter name.
      * Gets the connectionType directly from the function stack template parameters.
-     * 
-     * @param context The message context
+     *
+     * @param context         The message context
      * @param recordParamName The record parameter name (e.g., "config")
      * @return The connection type prefix or null if not found
      */
@@ -691,18 +659,18 @@ public class BalExecutor {
      * Used for init function parameters where record fields are flattened in the XML.
      *
      * @param recordParamName The name of the record parameter (e.g., "config")
-     * @param context The message context containing property values
-     * @param connectionType The connection type prefix (e.g., "GOOGLEAPIS_GMAIL_CLIENT")
+     * @param context         The message context containing property values
+     * @param connectionType  The connection type prefix (e.g., "GOOGLEAPIS_GMAIL_CLIENT")
      * @return A JSON object representing the reconstructed record
      */
     private Object reconstructRecordFromFields(String recordParamName, MessageContext context, String connectionType) {
         // Build a JSON object from the flattened fields
         // Fields are stored as {connectionType}_{recordParamName}_param{index} = "fieldPath"
         // e.g., GOOGLEAPIS_GMAIL_CLIENT_config_param0 = "http1Settings.keepAlive"
-        
+
         log.info("=== DEBUG: reconstructRecordFromFields START ===");
         log.info("DEBUG: recordParamName=" + recordParamName + ", connectionType=" + connectionType);
-        
+
         com.google.gson.JsonObject recordJson = new com.google.gson.JsonObject();
 
         // First pass: collect all union field paths and their selected types
@@ -746,10 +714,10 @@ public class BalExecutor {
             Object fieldNameObj = context.getProperty(fieldNameKey);
             Object fieldTypeObj = context.getProperty(fieldTypeKey);
             Object unionMemberObj = context.getProperty(unionMemberKey);
-            
+
             log.info("DEBUG: Checking fieldIndex=" + fieldIndex + ", fieldNameKey=" + fieldNameKey + " -> " + fieldNameObj);
             log.info("DEBUG: Checking fieldIndex=" + fieldIndex + ", fieldTypeKey=" + fieldTypeKey + " -> " + fieldTypeObj);
-            
+
             if (fieldNameObj == null || fieldTypeObj == null) {
                 log.info("DEBUG: No more fields found at index " + fieldIndex);
                 break; // No more fields
@@ -769,25 +737,25 @@ public class BalExecutor {
                         if (selectedType != null && !selectedType.equals(unionMemberType)) {
                             // This union field belongs to a different union member, skip it and its nested fields
                             log.info("DEBUG: Skipping union field '" + fieldPath + "' (belongs to " + unionMemberType +
-                                     ", but selected type is " + selectedType + ")");
+                                    ", but selected type is " + selectedType + ")");
                             fieldIndex++;
                             continue;
                         }
                     }
                 }
-                
+
                 // Check if this is a "Leaf Union" (value provided directly, e.g. string|string[])
                 // Use sanitized path for lookup as done for regular fields
                 String sanitizedFieldPath = fieldPath.replace(".", "_");
                 Object unionValue = lookupTemplateParameter(context, sanitizedFieldPath);
-                
+
                 if (unionValue != null) {
                     log.info("DEBUG: Found direct value for union field '" + fieldPath + "': " + unionValue);
                     setNestedField(recordJson, fieldPath, unionValue, fieldType);
                     fieldIndex++;
                     continue;
                 }
-                
+
                 log.info("DEBUG: Processing union field at path=" + fieldPath + " (nested fields will provide values)");
                 fieldIndex++;
                 continue;
@@ -802,7 +770,7 @@ public class BalExecutor {
                     if (selectedType != null && !selectedType.equals(unionMemberType)) {
                         // This field belongs to a different union member, skip it
                         log.info("DEBUG: Skipping field '" + fieldPath + "' (belongs to " + unionMemberType +
-                                 ", but selected type is " + selectedType + ")");
+                                ", but selected type is " + selectedType + ")");
                         fieldIndex++;
                         continue;
                     }
@@ -814,9 +782,9 @@ public class BalExecutor {
             // (e.g., field path "auth.token" maps to parameter name "auth_token")
             String sanitizedFieldPath = fieldPath.replace(".", "_");
             Object fieldValue = lookupTemplateParameter(context, sanitizedFieldPath);
-            
+
             log.info("DEBUG: Field[" + fieldIndex + "]: path=" + fieldPath + ", sanitized=" + sanitizedFieldPath + ", type=" + fieldType + ", value=" + fieldValue);
-            
+
             if (fieldValue != null) {
                 // Set the nested field value in the JSON object using the original dot-notation path
                 setNestedField(recordJson, fieldPath, fieldValue, fieldType);
@@ -831,7 +799,7 @@ public class BalExecutor {
         String recordJsonString = recordJson.toString();
         log.info("DEBUG: Final reconstructed JSON: " + recordJsonString);
         log.info("=== DEBUG: reconstructRecordFromFields END ===");
-        
+
         // Convert JSON object to BMap
         return JsonUtils.parse(recordJsonString);
     }
@@ -841,7 +809,7 @@ public class BalExecutor {
      * For example, if fieldPath is "auth.token" and unionPaths contains "auth",
      * this returns "auth".
      *
-     * @param fieldPath The full field path (e.g., "auth.token")
+     * @param fieldPath  The full field path (e.g., "auth.token")
      * @param unionPaths Set of known union field paths
      * @return The parent union path, or null if not found
      */
@@ -853,19 +821,19 @@ public class BalExecutor {
         }
         return null;
     }
-    
+
     /**
      * Sets a nested field value in a JSON object using dot notation path.
      * For example, "http1Settings.proxy.host" creates nested objects and sets the value.
-     * 
+     *
      * @param jsonObject The root JSON object
-     * @param fieldPath The dot-notation path (e.g., "http1Settings.proxy.host")
-     * @param value The value to set
-     * @param fieldType The type of the field
+     * @param fieldPath  The dot-notation path (e.g., "http1Settings.proxy.host")
+     * @param value      The value to set
+     * @param fieldType  The type of the field
      */
     private void setNestedField(com.google.gson.JsonObject jsonObject, String fieldPath, Object value, String fieldType) {
         String[] parts = fieldPath.split("\\.");
-        
+
         // Navigate/create nested objects up to the second-to-last part
         for (int i = 0; i < parts.length - 1; i++) {
             String part = parts[i];
@@ -874,11 +842,11 @@ public class BalExecutor {
             }
             jsonObject = jsonObject.getAsJsonObject(part);
         }
-        
+
         // Set the final field value with appropriate type
         String finalField = parts[parts.length - 1];
         String valueStr = value.toString();
-        
+
         switch (fieldType) {
             case BOOLEAN:
                 jsonObject.addProperty(finalField, Boolean.parseBoolean(valueStr));
@@ -948,17 +916,17 @@ public class BalExecutor {
         }
         TemplateContext currentFuncHolder = (TemplateContext) funcStack.peek();
         Object value = currentFuncHolder.getParameterValue(paramName);
-        
+
         // Debug: Log available parameters (only once per template invocation)
         if (value == null && paramName.contains(".")) {
             // Log all available parameter names for debugging
             java.util.Map<String, Object> params = currentFuncHolder.getMappedValues();
             if (params != null && !params.isEmpty()) {
-                LogFactory.getLog(BalExecutor.class).info("DEBUG lookupTemplateParameter: Looking for '" + paramName + 
-                    "' - Available params: " + params.keySet());
+                LogFactory.getLog(BalExecutor.class).info("DEBUG lookupTemplateParameter: Looking for '" + paramName +
+                        "' - Available params: " + params.keySet());
             }
         }
-        
+
         return value;
     }
 
