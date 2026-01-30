@@ -48,7 +48,6 @@ public class Constants {
     public static final String VALIDATE_TYPE_REGEX = "regex";
     public static final String INTEGER_REGEX = "^(-?\\\\d+|\\\\$\\\\{.+\\\\}\\\\)$";
     public static final String DECIMAL_REGEX = "^(-?\\\\d+(\\\\.\\\\d+)?|\\\\$\\\\{.+\\\\}\\\\)$";
-    public static final String JSON_OBJECT_REGEX = "^(\\\\{[\\\\s\\\\S]*\\\\}|\\\\$\\\\{.+\\\\})$";
     // Optional field regex patterns - allow empty string OR valid values
     public static final String INTEGER_REGEX_OPTIONAL = "^$|^(-?\\\\d+|\\\\$\\\\{.+\\\\})$";
     public static final String DECIMAL_REGEX_OPTIONAL = "^$|^(-?\\\\d+(\\\\.\\\\d+)?|\\\\$\\\\{.+\\\\})$";

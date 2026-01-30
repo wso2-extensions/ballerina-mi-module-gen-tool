@@ -670,9 +670,10 @@ public class ConnectorSerializer {
                 }
                 // Apply regex validation for both required and optional fields
                 //  use a pattern that allows empty string OR valid values
-                String jsonMatchPattern = functionParam.isRequired() ? JSON_OBJECT_REGEX : JSON_OBJECT_REGEX_OPTIONAL;
+                String jsonMatchPattern = functionParam.isRequired() ? "" : JSON_OBJECT_REGEX_OPTIONAL;
+                String validationType = functionParam.isRequired() ? JSON : VALIDATE_TYPE_REGEX;
                 Attribute jsonAttr = new Attribute(sanitizedParamName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        defaultValue, functionParam.isRequired(), jsonHelpTip, VALIDATE_TYPE_REGEX,
+                        defaultValue, functionParam.isRequired(), jsonHelpTip, validationType,
                         jsonMatchPattern, isCombo);
                 jsonAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, jsonAttr);
@@ -686,12 +687,11 @@ public class ConnectorSerializer {
                     if (recordHelpTip == null || recordHelpTip.isEmpty()) {
                         recordHelpTip = "Expecting JSON object";
                     }
-                    // Apply regex validation for both required and optional fields.
-                    // Optional fields use a pattern that allows empty string OR valid values
-                    String recMatchPattern = functionParam.isRequired() ? JSON_OBJECT_REGEX : JSON_OBJECT_REGEX_OPTIONAL;
+                    // For non-expanded records (input via UI), we use "json" validation type
+                    // This enables the JSON editor in the UI
                     Attribute recordAttr = new Attribute(functionParam.getValue(), displayName,
                             INPUT_TYPE_STRING_OR_EXPRESSION, defaultValue, functionParam.isRequired(),
-                            recordHelpTip, VALIDATE_TYPE_REGEX, recMatchPattern, isCombo);
+                            recordHelpTip, JSON, "", isCombo);
                     recordAttr.setEnableCondition(functionParam.getEnableCondition());
                     builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, recordAttr);
                 }
