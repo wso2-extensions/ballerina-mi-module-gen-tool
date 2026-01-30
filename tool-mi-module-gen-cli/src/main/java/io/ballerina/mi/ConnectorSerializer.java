@@ -899,26 +899,18 @@ public class ConnectorSerializer {
         }
         String unionComboValues = unionJoiner.toString();
         
-        // Only set default value for TOP-LEVEL combo fields (no enableCondition).
-        // For nested combos (inside another union member), use empty default to prevent
-        // MI Designer from saving unused defaults to XML when parent union is not selected.
-        String enableCondition = unionFunctionParam.getEnableCondition();
+        // Always set the first member as default for all combo fields.
+        // enableCondition controls visibility - hidden fields won't be serialized to XML.
+        FunctionParam firstMember = unionMembers.getFirst();
         String defaultValue;
-        if (enableCondition != null && !enableCondition.isEmpty()) {
-            // Nested combo - don't set default to avoid polluting XML with unused values
-            defaultValue = "";
+        if (firstMember.getParamType().equals(RECORD)) {
+            defaultValue = firstMember.getTypeSymbol().getName().orElseThrow();
+        } else if (firstMember.getParamType().equals(UNION)) {
+            defaultValue = firstMember.getTypeSymbol().getName().orElse(UNION);
         } else {
-            // Top-level combo - set first member as default
-            FunctionParam firstMember = unionMembers.getFirst();
-            if (firstMember.getParamType().equals(RECORD)) {
-                defaultValue = firstMember.getTypeSymbol().getName().orElseThrow();
-            } else if (firstMember.getParamType().equals(UNION)) {
-                // For union types, use type name if available, otherwise use "union"
-                defaultValue = firstMember.getTypeSymbol().getName().orElse(UNION);
-            } else {
-                defaultValue = firstMember.getParamType();
-            }
+            defaultValue = firstMember.getParamType();
         }
+        String enableCondition = unionFunctionParam.getEnableCondition();
         // Combo field for selecting the data type - sanitize the parameter name
         // Keep full qualified name for the combo name (for enable conditions matching)
         String sanitizedParamName = Utils.sanitizeParamName(paramName);
