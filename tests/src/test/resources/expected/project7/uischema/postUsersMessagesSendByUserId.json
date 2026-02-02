@@ -50,8 +50,8 @@
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
                     "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
+                    "helpTip": "Expecting JSON object",
+                    "validateType": "json",
                     "matchPattern": ""
                   }
                 }

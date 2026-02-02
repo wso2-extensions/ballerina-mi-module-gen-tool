@@ -72,7 +72,7 @@
                     "required": "false",
                     "helpTip": "",
                     "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$",
+                    "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
                     "enableCondition": [
                       {
                         "valueDataType": "int"

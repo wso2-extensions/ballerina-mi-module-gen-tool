@@ -668,9 +668,13 @@ public class ConnectorSerializer {
                 if (jsonHelpTip == null || jsonHelpTip.isEmpty()) {
                     jsonHelpTip = "Expecting JSON object";
                 }
+                // Apply regex validation for both required and optional fields
+                //  use a pattern that allows empty string OR valid values
+                String jsonMatchPattern = functionParam.isRequired() ? "" : JSON_OBJECT_REGEX_OPTIONAL;
+                String validationType = functionParam.isRequired() ? JSON : VALIDATE_TYPE_REGEX;
                 Attribute jsonAttr = new Attribute(sanitizedParamName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
-                        defaultValue, functionParam.isRequired(), jsonHelpTip, VALIDATE_TYPE_REGEX,
-                        JSON_OBJECT_REGEX, isCombo);
+                        defaultValue, functionParam.isRequired(), jsonHelpTip, validationType,
+                        jsonMatchPattern, isCombo);
                 jsonAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, jsonAttr);
                 break;
@@ -683,24 +687,32 @@ public class ConnectorSerializer {
                     if (recordHelpTip == null || recordHelpTip.isEmpty()) {
                         recordHelpTip = "Expecting JSON object";
                     }
+                    // For non-expanded records (input via UI), we use "json" validation type
+                    // This enables the JSON editor in the UI
                     Attribute recordAttr = new Attribute(functionParam.getValue(), displayName,
                             INPUT_TYPE_STRING_OR_EXPRESSION, defaultValue, functionParam.isRequired(),
-                            recordHelpTip, VALIDATE_TYPE_REGEX, JSON_OBJECT_REGEX, isCombo);
+                            recordHelpTip, JSON, "", isCombo);
                     recordAttr.setEnableCondition(functionParam.getEnableCondition());
                     builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, recordAttr);
                 }
                 break;
             case INT:
+                // Apply regex validation for both required and optional fields.
+                // Optional fields use a pattern that allows empty string OR valid values
+                String intMatchPattern = functionParam.isRequired() ? INTEGER_REGEX : INTEGER_REGEX_OPTIONAL;
                 Attribute intAttr = new Attribute(functionParam.getValue(), displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
                         defaultValue, functionParam.isRequired(), functionParam.getDescription(), VALIDATE_TYPE_REGEX,
-                        INTEGER_REGEX, isCombo);
+                        intMatchPattern, isCombo);
                 intAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, intAttr);
                 break;
             case DECIMAL, FLOAT:
+                // Apply regex validation for both required and optional fields.
+                // Optional fields use a pattern that allows empty string OR valid values
+                String decMatchPattern = functionParam.isRequired() ? DECIMAL_REGEX : DECIMAL_REGEX_OPTIONAL;
                 Attribute decAttr = new Attribute(functionParam.getValue(), displayName,
                         INPUT_TYPE_STRING_OR_EXPRESSION, defaultValue, functionParam.isRequired(),
-                        functionParam.getDescription(), VALIDATE_TYPE_REGEX, DECIMAL_REGEX, isCombo);
+                        functionParam.getDescription(), VALIDATE_TYPE_REGEX, decMatchPattern, isCombo);
                 decAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, decAttr);
                 break;
@@ -716,7 +728,6 @@ public class ConnectorSerializer {
                 if (!(functionParam instanceof UnionFunctionParam unionFunctionParam)) {
                     throw new IllegalArgumentException("FunctionParam with paramType 'union' must be an instance of UnionFunctionParam for parameter: " + functionParam.getValue());
                 }
-                // Gather the data types in the union
                 // Gather the data types in the union
                 if (!unionFunctionParam.getUnionMemberParams().isEmpty()) {
                     List<FunctionParam> unionMembers = unionFunctionParam.getUnionMemberParams();
@@ -887,16 +898,19 @@ public class ConnectorSerializer {
             unionJoiner.add("\"" + comboItem + "\"");
         }
         String unionComboValues = unionJoiner.toString();
+        
+        // Always set the first member as default for all combo fields.
+        // enableCondition controls visibility - hidden fields won't be serialized to XML.
         FunctionParam firstMember = unionMembers.getFirst();
         String defaultValue;
         if (firstMember.getParamType().equals(RECORD)) {
             defaultValue = firstMember.getTypeSymbol().getName().orElseThrow();
         } else if (firstMember.getParamType().equals(UNION)) {
-            // For union types, use type name if available, otherwise use "union"
             defaultValue = firstMember.getTypeSymbol().getName().orElse(UNION);
         } else {
             defaultValue = firstMember.getParamType();
         }
+        String enableCondition = unionFunctionParam.getEnableCondition();
         // Combo field for selecting the data type - sanitize the parameter name
         // Keep full qualified name for the combo name (for enable conditions matching)
         String sanitizedParamName = Utils.sanitizeParamName(paramName);
@@ -917,7 +931,7 @@ public class ConnectorSerializer {
         }
         
         return new Combo(comboName, comboDisplayName, INPUT_TYPE_COMBO, unionComboValues, defaultValue,
-                unionFunctionParam.isRequired(), unionFunctionParam.getEnableCondition(), helpTip);
+                unionFunctionParam.isRequired(), enableCondition, helpTip);
     }
 
     /**
