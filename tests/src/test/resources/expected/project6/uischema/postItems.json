@@ -1,8 +1,8 @@
 {
   "connectorName": "project6",
   "operationName": "postItems",
-  "title": "post items",
-  "help": "",
+  "title": "Create a new item in the inventory",
+  "help": "Create a new item in the inventory",
   "elements": [
     {
       "type": "attributeGroup",

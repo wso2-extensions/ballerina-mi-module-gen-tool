@@ -1,8 +1,8 @@
 {
   "connectorName": "project6",
   "operationName": "deleteItemsByItemId",
-  "title": "delete items by item id",
-  "help": "",
+  "title": "Delete an item from the inventory",
+  "help": "Delete an item from the inventory",
   "elements": [
     {
       "type": "attributeGroup",

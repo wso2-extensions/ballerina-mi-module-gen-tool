@@ -1,8 +1,8 @@
 {
   "connectorName": "project6",
   "operationName": "getItemsByItemId",
-  "title": "get items by item id",
-  "help": "",
+  "title": "Get a specific item by its unique identifier",
+  "help": "Get a specific item by its unique identifier",
   "elements": [
     {
       "type": "attributeGroup",

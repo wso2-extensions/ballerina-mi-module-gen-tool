@@ -372,10 +372,11 @@ public class BalConnectorAnalyzer implements Analyzer {
                 component.setResourcePathSegments(resourcePathSegments);
             }
 
-            // Store operationId as a parameter if found
+            // Store operationId as a parameter if found and mark the component
             if (operationIdOpt.isPresent()) {
                 Param operationIdParam = new Param("operationId", operationIdOpt.get());
                 component.setParam(operationIdParam);
+                component.setHasOperationId(true);
             }
 
             // Now add all function parameters (we keep them all, synapse name is made unique instead)

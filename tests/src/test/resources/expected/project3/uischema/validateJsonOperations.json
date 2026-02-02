@@ -23,8 +23,8 @@
                     "defaultValue": "",
                     "required": "true",
                     "helpTip": "Expecting JSON object",
-                    "validateType": "regex",
-                    "matchPattern": "^(\\{[\\s\\S]*\\}|\\$\\{.+\\})$"
+                    "validateType": "json",
+                    "matchPattern": ""
                   }
                 },
                 {
@@ -36,8 +36,8 @@
                     "defaultValue": "",
                     "required": "true",
                     "helpTip": "Expecting JSON object",
-                    "validateType": "regex",
-                    "matchPattern": "^(\\{[\\s\\S]*\\}|\\$\\{.+\\})$"
+                    "validateType": "json",
+                    "matchPattern": ""
                   }
                 }
               ]
