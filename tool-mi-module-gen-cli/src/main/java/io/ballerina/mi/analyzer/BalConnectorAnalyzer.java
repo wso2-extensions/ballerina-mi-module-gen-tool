@@ -37,6 +37,8 @@ import io.ballerina.projects.PackageReadmeMd;
 import org.ballerinalang.diagramutil.connector.models.connector.types.PathParamType;
 
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public class BalConnectorAnalyzer implements Analyzer {
@@ -50,9 +52,36 @@ public class BalConnectorAnalyzer implements Analyzer {
     public void analyze(Package compilePackage) {
 
         PackageDescriptor descriptor = compilePackage.descriptor();
-        Connector.getConnector(descriptor);
+        Connector connector = Connector.getConnector(descriptor);
+
+        // Extract icon from the bala package docs folder
+        extractConnectorIcon(compilePackage, connector);
+
         for (Module module : compilePackage.modules()) {
             analyzeModule(compilePackage, module);
+        }
+    }
+
+    /**
+     * Extracts the connector icon from the bala package docs folder.
+     * The icon is typically located at {sourceRoot}/docs/icon.png
+     *
+     * @param compilePackage The compiled package
+     * @param connector The connector to set the icon path on
+     */
+    private void extractConnectorIcon(Package compilePackage, Connector connector) {
+        try {
+            Path sourceRoot = compilePackage.project().sourceRoot();
+            Path docsIconPath = sourceRoot.resolve("docs").resolve("icon.png");
+
+            if (Files.exists(docsIconPath)) {
+                connector.setIconPath(docsIconPath.toString());
+                printStream.println("Found connector icon at: " + docsIconPath);
+            } else {
+                printStream.println("No connector icon found in docs folder. Using default icon.");
+            }
+        } catch (Exception e) {
+            printStream.println("Warning: Could not extract connector icon: " + e.getMessage());
         }
     }
 
@@ -174,11 +203,6 @@ public class BalConnectorAnalyzer implements Analyzer {
         } else {
             connection.setDescription(Utils.getDocString(optionalMetadataNode.get()));
         }
-
-        /**
-         * TODO: DO: Get the icon - from central or context or from the docs dir inside the bala - small and large icon
-         * syntaxNodeAnalysisContext.currentPackage().project().sourceRoot()
-         */
 
         int i = 0;
         Map<String, MethodSymbol> allMethods = new HashMap<>(classSymbol.methods());
