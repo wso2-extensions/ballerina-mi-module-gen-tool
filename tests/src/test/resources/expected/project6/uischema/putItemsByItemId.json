@@ -1,8 +1,8 @@
 {
   "connectorName": "project6",
   "operationName": "putItemsByItemId",
-  "title": "put items by item id",
-  "help": "",
+  "title": "Update an existing item by its ID",
+  "help": "Update an existing item by its ID",
   "elements": [
     {
       "type": "attributeGroup",

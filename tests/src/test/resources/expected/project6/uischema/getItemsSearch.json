@@ -1,8 +1,8 @@
 {
   "connectorName": "project6",
   "operationName": "getItemsSearch",
-  "title": "get items search",
-  "help": "",
+  "title": "Search for items matching the given query",
+  "help": "Search for items matching the given query",
   "elements": [
     {
       "type": "attributeGroup",

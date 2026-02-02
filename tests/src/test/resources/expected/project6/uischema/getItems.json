@@ -1,8 +1,8 @@
 {
   "connectorName": "project6",
   "operationName": "getItems",
-  "title": "get items",
-  "help": "",
+  "title": "Retrieve all items from the inventory",
+  "help": "Retrieve all items from the inventory",
   "elements": [
     {
       "type": "attributeGroup",

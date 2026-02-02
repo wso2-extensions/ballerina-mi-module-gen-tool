@@ -46,6 +46,8 @@ public class Component extends ModelElement {
     private String resourceAccessor;
     // For resource functions: all path segments (both static and dynamic)
     private List<ResourcePathSegment> resourcePathSegments;
+    // Flag to indicate if the component name was derived from OpenAPI operationId
+    private boolean hasOperationId = false;
 
     public Component(String name, String documentation, FunctionType functionType, String index, List<PathParamType> pathParams, List<Type> queryParams, String returnType) {
         this.name = name;
@@ -171,6 +173,22 @@ public class Component extends ModelElement {
     }
 
     /**
+     * Check if the component name was derived from OpenAPI operationId.
+     * @return true if name came from operationId, false otherwise
+     */
+    public boolean hasOperationId() {
+        return hasOperationId;
+    }
+
+    /**
+     * Set whether the component name was derived from OpenAPI operationId.
+     * @param hasOperationId true if name came from operationId
+     */
+    public void setHasOperationId(boolean hasOperationId) {
+        this.hasOperationId = hasOperationId;
+    }
+
+    /**
      * Generates the JVM method name for invoking this resource function.
      * The format follows Ballerina's internal encoding:
      * $<accessor>$<segment1>[$[$<param1>]]$<segment2>...
@@ -239,11 +257,44 @@ public class Component extends ModelElement {
     }
 
     /**
-     * Human-friendly display name derived from the component's technical name.
-     * Used in UI schemas for operation title/label.
-     * Always humanizes the name for user-friendly display (e.g., createUser -> create user).
+     * Human-friendly display name for UI schemas.
+     * For resource functions:
+     *   1. If name came from operationId -> humanize the operationId
+     *   2. If no operationId but documentation exists -> use documentation (first line/sentence)
+     *   3. Otherwise -> humanize the generated name (from path segments)
+     * For remote/other functions:
+     *   - Always humanize the function name (function names are already meaningful)
      */
     public String getDisplayName() {
+        // For non-resource functions, always humanize the name
+        // Remote function names are already meaningful (e.g., getAllContinentsStatus)
+        if (functionType != FunctionType.RESOURCE) {
+            return Utils.humanizeName(this.name);
+        }
+
+        // For resource functions with operationId, humanize the operationId
+        if (hasOperationId) {
+            return Utils.humanizeName(this.name);
+        }
+
+        // For resource functions without operationId, use documentation if available
+        // This avoids confusing titles like "get api 3 serverinfo" from path segments
+        if (documentation != null && !documentation.trim().isEmpty()) {
+            String doc = documentation.trim();
+            // Use first line or first sentence (whichever is shorter)
+            int newlineIndex = doc.indexOf('\n');
+            int periodIndex = doc.indexOf('.');
+
+            if (newlineIndex > 0 && (periodIndex < 0 || newlineIndex < periodIndex)) {
+                return doc.substring(0, newlineIndex).trim();
+            } else if (periodIndex > 0) {
+                return doc.substring(0, periodIndex + 1).trim();
+            }
+            // If no newline or period, use the whole doc (up to reasonable length)
+            return doc.length() > 100 ? doc.substring(0, 100).trim() + "..." : doc;
+        }
+
+        // Fallback: humanize the generated name
         return Utils.humanizeName(this.name);
     }
 }

@@ -19,34 +19,34 @@
 <component name="functions" type="synapse/template">
     <subComponents>
         <component name="postItems">
-            <displayName>post items</displayName>
+            <displayName>Create a new item in the inventory</displayName>
             <file>postItems.xml</file>
-            <description></description>
+            <description>Create a new item in the inventory</description>
         </component>
         <component name="getItemsSearch">
-            <displayName>get items search</displayName>
+            <displayName>Search for items matching the given query</displayName>
             <file>getItemsSearch.xml</file>
-            <description></description>
+            <description>Search for items matching the given query</description>
         </component>
         <component name="putItemsByItemId">
-            <displayName>put items by item id</displayName>
+            <displayName>Update an existing item by its ID</displayName>
             <file>putItemsByItemId.xml</file>
-            <description></description>
+            <description>Update an existing item by its ID</description>
         </component>
         <component name="deleteItemsByItemId">
-            <displayName>delete items by item id</displayName>
+            <displayName>Delete an item from the inventory</displayName>
             <file>deleteItemsByItemId.xml</file>
-            <description></description>
+            <description>Delete an item from the inventory</description>
         </component>
         <component name="getItems">
-            <displayName>get items</displayName>
+            <displayName>Retrieve all items from the inventory</displayName>
             <file>getItems.xml</file>
-            <description></description>
+            <description>Retrieve all items from the inventory</description>
         </component>
         <component name="getItemsByItemId">
-            <displayName>get items by item id</displayName>
+            <displayName>Get a specific item by its unique identifier</displayName>
             <file>getItemsByItemId.xml</file>
-            <description></description>
+            <description>Get a specific item by its unique identifier</description>
         </component>
         </subComponents>
 </component>

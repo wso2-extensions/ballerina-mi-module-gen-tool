@@ -39,14 +39,14 @@ public isolated client class ApiClient {
         self.apiKey = config.apiKey ?: "";
     }
 
-    // GET resource function to retrieve all items
+    # Retrieve all items from the inventory
     isolated resource function get items() returns Item[]|error {
         json response = check self.httpClient->get("/items");
         Item[] items = check response.cloneWithType();
         return items;
     }
 
-    // GET resource function with path parameter to retrieve a specific item
+    # Get a specific item by its unique identifier
     isolated resource function get items/[string itemId]() returns Item|error {
         string path = string `/items/${itemId}`;
         json response = check self.httpClient->get(path);
@@ -54,7 +54,7 @@ public isolated client class ApiClient {
         return item;
     }
 
-    // GET resource function with query parameters
+    # Search for items matching the given query
     isolated resource function get items/search(string query, int 'limit = 10) returns Item[]|error {
         string path = string `/items/search?query=${query}&limit=${'limit}`;
         json response = check self.httpClient->get(path);
@@ -62,14 +62,14 @@ public isolated client class ApiClient {
         return items;
     }
 
-    // POST resource function to create a new item
+    # Create a new item in the inventory
     isolated resource function post items(Item item) returns Item|error {
         json response = check self.httpClient->post("/items", item);
         Item createdItem = check response.cloneWithType();
         return createdItem;
     }
 
-    // PUT resource function to update an item
+    # Update an existing item by its ID
     isolated resource function put items/[string itemId](Item item) returns Item|error {
         string path = string `/items/${itemId}`;
         json response = check self.httpClient->put(path, item);
@@ -77,7 +77,7 @@ public isolated client class ApiClient {
         return updatedItem;
     }
 
-    // DELETE resource function to delete an item
+    # Delete an item from the inventory
     isolated resource function delete items/[string itemId]() returns http:Response|error {
         string path = string `/items/${itemId}`;
         http:Response response = check self.httpClient->delete(path);
