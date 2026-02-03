@@ -187,242 +187,256 @@ public class BalConnectorAnalyzer implements Analyzer {
         // Track generated synapse names to handle duplicates
         Map<String, Integer> synapseNameCount = new HashMap<>();
 
-        methodLoop:
-        for (Map.Entry<String, MethodSymbol> methodEntry : allMethods.entrySet()) {
-            MethodSymbol methodSymbol = methodEntry.getValue();
-            List<Qualifier> qualifierList = methodSymbol.qualifiers();
-            if (!(Utils.containsToken(qualifierList, Qualifier.PUBLIC) ||
-                    Utils.containsToken(qualifierList, Qualifier.REMOTE) ||
-                    Utils.containsToken(qualifierList, Qualifier.RESOURCE))) {
-                continue;
-            }
+            int totalOperations = 0;
+            int skippedOperations = 0;
 
-            String functionName = methodSymbol.getName().get();
-            FunctionType functionType = Utils.getFunctionType(methodSymbol);
-            // For init methods, use Constants.INIT_FUNCTION_NAME as key since we store it that way
-            String functionKey = (functionType == FunctionType.INIT) ? Constants.INIT_FUNCTION_NAME : functionName;
-
-            String returnType = Utils.getReturnTypeName(methodSymbol);
-            String docString = methodSymbol.documentation().map(Utils::getDocString).orElse("");
-            Component component = new Component(functionName, docString, functionType, Integer.toString(i),
-                    List.of(), List.of(), returnType);
-
-            // Get default values for this specific function
-            Map<String, String> functionParamDefaults = defaultValues.getOrDefault(functionKey, Map.of());
-
-            // Prepare context for synapse name generation
-            SynapseNameContext.Builder contextBuilder = SynapseNameContext.builder().module(module);
-            
-            // Extract operationId from @openapi:ResourceInfo annotation if present using syntax tree API
-            Optional<String> operationIdOpt = Optional.empty();
-            try {
-                operationIdOpt = Utils.getOpenApiOperationId(methodSymbol, module, semanticModel);
-                if (operationIdOpt.isPresent()) {
-                    printStream.println("Found operationId: " + operationIdOpt.get() + " for method: " + methodSymbol.getName().orElse("<unknown>"));
+            methodLoop:
+            for (Map.Entry<String, MethodSymbol> methodEntry : allMethods.entrySet()) {
+                MethodSymbol methodSymbol = methodEntry.getValue();
+                List<Qualifier> qualifierList = methodSymbol.qualifiers();
+                if (!(Utils.containsToken(qualifierList, Qualifier.PUBLIC) ||
+                        Utils.containsToken(qualifierList, Qualifier.REMOTE) ||
+                        Utils.containsToken(qualifierList, Qualifier.RESOURCE))) {
+                    continue;
                 }
-            } catch (Exception e) {
-                // If syntax tree access fails, continue without operationId
-                printStream.println("Error extracting operationId for method: " + methodSymbol.getName().orElse("<unknown>") + " - " + e.getMessage());
-            }
-            
-            // Add operationId to context if found
-            operationIdOpt.ifPresent(contextBuilder::operationId);
-            
-            // Extract resource path segments if this is a resource function
-            if (functionType == FunctionType.RESOURCE && methodSymbol instanceof ResourceMethodSymbol resourceMethod) {
+
+                totalOperations++;
+
+                String functionName = methodSymbol.getName().get();
+                FunctionType functionType = Utils.getFunctionType(methodSymbol);
+                // For init methods, use Constants.INIT_FUNCTION_NAME as key since we store it that way
+                String functionKey = (functionType == FunctionType.INIT) ? Constants.INIT_FUNCTION_NAME : functionName;
+
+                String returnType = Utils.getReturnTypeName(methodSymbol);
+                String docString = methodSymbol.documentation().map(Utils::getDocString).orElse("");
+                Component component = new Component(functionName, docString, functionType, Integer.toString(i),
+                        List.of(), List.of(), returnType);
+
+                // Get default values for this specific function
+                Map<String, String> functionParamDefaults = defaultValues.getOrDefault(functionKey, Map.of());
+
+                // Prepare context for synapse name generation
+                SynapseNameContext.Builder contextBuilder = SynapseNameContext.builder().module(module);
+                
+                // Extract operationId from @openapi:ResourceInfo annotation if present using syntax tree API
+                Optional<String> operationIdOpt = Optional.empty();
                 try {
-                    PathSegmentList resourcePath = (PathSegmentList) resourceMethod.resourcePath();
-                    contextBuilder.resourcePathSegments(resourcePath.list());
-                } catch (Exception e) {
-                    // If path extraction fails, continue without path segments
-                }
-            }
-            
-            SynapseNameContext context = contextBuilder.build();
-            
-            // Use priority-based synapse name generation
-            SynapseNameGeneratorManager nameGenerator = new SynapseNameGeneratorManager();
-            Optional<String> synapseNameOpt = nameGenerator.generateSynapseName(methodSymbol, functionType, context);
-            
-            // Fallback to default if no generator succeeded
-            String synapseName = synapseNameOpt.orElseGet(() -> Utils.generateSynapseName(methodSymbol, functionType));
-            
-            // Replace dots with underscores in synapse name if connector module name has dots
-            if (connector.getModuleName().contains(".")) {
-                synapseName = synapseName.replace(".", "_");
-            }
-            
-            // Handle duplicate names by appending numeric suffix
-            String finalSynapseName = synapseName;
-            if (synapseNameCount.containsKey(synapseName)) {
-                int count = synapseNameCount.get(synapseName) + 1;
-                synapseNameCount.put(synapseName, count);
-                finalSynapseName = synapseName + count;
-            } else {
-                synapseNameCount.put(synapseName, 0);
-            }
-
-            // Extract path parameters and path segments from resource path (for resource functions)
-            List<PathParamType> pathParams = new ArrayList<>();
-            Set<String> pathParamNames = new HashSet<>();
-            List<ResourcePathSegment> resourcePathSegments = new ArrayList<>();
-
-            if (functionType == FunctionType.RESOURCE && methodSymbol instanceof ResourceMethodSymbol resourceMethod) {
-                try {
-                    PathSegmentList resourcePath = (PathSegmentList) resourceMethod.resourcePath();
-                    List<PathSegment> segments = resourcePath.list();
-
-                    for (PathSegment segment : segments) {
-                        String sig = segment.signature();
-                        if (sig != null && sig.startsWith("[") && sig.endsWith("]")) {
-                            // This is a path parameter segment (e.g., "[string userId]")
-                            String inside = sig.substring(1, sig.length() - 1).trim();
-                            String paramName = inside;
-                            String paramType = "string"; // default type
-                            int lastSpace = inside.lastIndexOf(' ');
-                            if (lastSpace >= 0 && lastSpace + 1 < inside.length()) {
-                                paramType = inside.substring(0, lastSpace).trim();
-                                paramName = inside.substring(lastSpace + 1);
-                            }
-                            if (!paramName.isEmpty()) {
-                                pathParamNames.add(paramName);
-                                // Add as a dynamic path segment
-                                resourcePathSegments.add(new ResourcePathSegment(paramName, paramType));
-                            }
-                        } else if (sig != null && !sig.isEmpty()) {
-                            // This is a static path segment (e.g., "users", "drafts")
-                            // Remove any leading quote (for escaped Ballerina keywords like 'import)
-                            String staticSegment = sig.startsWith("'") ? sig.substring(1) : sig;
-                            resourcePathSegments.add(new ResourcePathSegment(staticSegment));
-                        }
+                    operationIdOpt = Utils.getOpenApiOperationId(methodSymbol, module, semanticModel);
+                    if (operationIdOpt.isPresent()) {
+                        printStream.println("Found operationId: " + operationIdOpt.get() + " for method: " + methodSymbol.getName().orElse("<unknown>"));
                     }
                 } catch (Exception e) {
-                    // If path extraction fails, continue without path parameters
+                    // If syntax tree access fails, continue without operationId
+                    printStream.println("Error extracting operationId for method: " + methodSymbol.getName().orElse("<unknown>") + " - " + e.getMessage());
                 }
-            }
-            
-            // Now match path parameter names with actual function parameters to get types
-            Optional<List<ParameterSymbol>> params = methodSymbol.typeDescriptor().params();
-            Map<String, ParameterSymbol> paramMap = new HashMap<>();
-            if (params.isPresent()) {
-                for (ParameterSymbol paramSymbol : params.get()) {
-                    paramSymbol.getName().ifPresent(name -> paramMap.put(name, paramSymbol));
+                
+                // Add operationId to context if found
+                operationIdOpt.ifPresent(contextBuilder::operationId);
+                
+                // Extract resource path segments if this is a resource function
+                if (functionType == FunctionType.RESOURCE && methodSymbol instanceof ResourceMethodSymbol resourceMethod) {
+                    try {
+                        PathSegmentList resourcePath = (PathSegmentList) resourceMethod.resourcePath();
+                        contextBuilder.resourcePathSegments(resourcePath.list());
+                    } catch (Exception e) {
+                        // If path extraction fails, continue without path segments
+                    }
                 }
-            }
+                
+                SynapseNameContext context = contextBuilder.build();
+                
+                // Use priority-based synapse name generation
+                SynapseNameGeneratorManager nameGenerator = new SynapseNameGeneratorManager();
+                Optional<String> synapseNameOpt = nameGenerator.generateSynapseName(methodSymbol, functionType, context);
+                
+                // Fallback to default if no generator succeeded
+                String synapseName = synapseNameOpt.orElseGet(() -> Utils.generateSynapseName(methodSymbol, functionType));
+                
+                // Replace dots with underscores in synapse name if connector module name has dots
+                if (connector.getModuleName().contains(".")) {
+                    synapseName = synapseName.replace(".", "_");
+                }
+                
+                // Handle duplicate names by appending numeric suffix
+                String finalSynapseName = synapseName;
+                if (synapseNameCount.containsKey(synapseName)) {
+                    int count = synapseNameCount.get(synapseName) + 1;
+                    synapseNameCount.put(synapseName, count);
+                    finalSynapseName = synapseName + count;
+                } else {
+                    synapseNameCount.put(synapseName, 0);
+                }
 
-            /*
-             * Create PathParamType objects for identified path parameters.
-             * In some generated connectors, the path parameter name used in the resource path segment
-             * does not have a matching function parameter (for example, when the path param is only
-             * used in the path and not re-declared as a separate argument).
-             *
-             * Previously, such path parameters were silently dropped which resulted in:
-             *   - No <property name="pathParam*".../> entries in the Synapse template
-             *   - Missing input fields for those path params in the JSON UI schema
-             *
-             * To avoid losing path parameters, we now:
-             *   - Use the actual parameter type when a matching function parameter exists
-             *   - Fall back to treating the path parameter as a string when there is no match
-             */
-            for (String pathParamName : pathParamNames) {
-                ParameterSymbol paramSymbol = paramMap.get(pathParamName);
-                String paramTypeName;
-                if (paramSymbol != null) {
-                    paramTypeName = Utils.getParamTypeName(Utils.getActualTypeKind(paramSymbol.typeDescriptor()));
-                    // If we cannot resolve a concrete MI type, also fall back to string
-                    if (paramTypeName == null) {
+                // Extract path parameters and path segments from resource path (for resource functions)
+                List<PathParamType> pathParams = new ArrayList<>();
+                Set<String> pathParamNames = new HashSet<>();
+                List<ResourcePathSegment> resourcePathSegments = new ArrayList<>();
+
+                if (functionType == FunctionType.RESOURCE && methodSymbol instanceof ResourceMethodSymbol resourceMethod) {
+                    try {
+                        PathSegmentList resourcePath = (PathSegmentList) resourceMethod.resourcePath();
+                        List<PathSegment> segments = resourcePath.list();
+
+                        for (PathSegment segment : segments) {
+                            String sig = segment.signature();
+                            if (sig != null && sig.startsWith("[") && sig.endsWith("]")) {
+                                // This is a path parameter segment (e.g., "[string userId]")
+                                String inside = sig.substring(1, sig.length() - 1).trim();
+                                String paramName = inside;
+                                String paramType = "string"; // default type
+                                int lastSpace = inside.lastIndexOf(' ');
+                                if (lastSpace >= 0 && lastSpace + 1 < inside.length()) {
+                                    paramType = inside.substring(0, lastSpace).trim();
+                                    paramName = inside.substring(lastSpace + 1);
+                                }
+                                if (!paramName.isEmpty()) {
+                                    pathParamNames.add(paramName);
+                                    // Add as a dynamic path segment
+                                    resourcePathSegments.add(new ResourcePathSegment(paramName, paramType));
+                                }
+                            } else if (sig != null && !sig.isEmpty()) {
+                                // This is a static path segment (e.g., "users", "drafts")
+                                // Remove any leading quote (for escaped Ballerina keywords like 'import)
+                                String staticSegment = sig.startsWith("'") ? sig.substring(1) : sig;
+                                resourcePathSegments.add(new ResourcePathSegment(staticSegment));
+                            }
+                        }
+                    } catch (Exception e) {
+                        // If path extraction fails, continue without path parameters
+                    }
+                }
+                
+                // Now match path parameter names with actual function parameters to get types
+                Optional<List<ParameterSymbol>> params = methodSymbol.typeDescriptor().params();
+                Map<String, ParameterSymbol> paramMap = new HashMap<>();
+                if (params.isPresent()) {
+                    for (ParameterSymbol paramSymbol : params.get()) {
+                        paramSymbol.getName().ifPresent(name -> paramMap.put(name, paramSymbol));
+                    }
+                }
+
+                /*
+                 * Create PathParamType objects for identified path parameters.
+                 * In some generated connectors, the path parameter name used in the resource path segment
+                 * does not have a matching function parameter (for example, when the path param is only
+                 * used in the path and not re-declared as a separate argument).
+                 *
+                 * Previously, such path parameters were silently dropped which resulted in:
+                 *   - No <property name="pathParam*".../> entries in the Synapse template
+                 *   - Missing input fields for those path params in the JSON UI schema
+                 *
+                 * To avoid losing path parameters, we now:
+                 *   - Use the actual parameter type when a matching function parameter exists
+                 *   - Fall back to treating the path parameter as a string when there is no match
+                 */
+                for (String pathParamName : pathParamNames) {
+                    ParameterSymbol paramSymbol = paramMap.get(pathParamName);
+                    String paramTypeName;
+                    if (paramSymbol != null) {
+                        paramTypeName = Utils.getParamTypeName(Utils.getActualTypeKind(paramSymbol.typeDescriptor()));
+                        // If we cannot resolve a concrete MI type, also fall back to string
+                        if (paramTypeName == null) {
+                            paramTypeName = Constants.STRING;
+                        }
+                    } else {
+                        // No matching parameter symbol - assume string path parameter
                         paramTypeName = Constants.STRING;
                     }
-                } else {
-                    // No matching parameter symbol - assume string path parameter
-                    paramTypeName = Constants.STRING;
+
+                    PathParamType pathParam = new PathParamType();
+                    pathParam.name = pathParamName;
+                    pathParam.typeName = paramTypeName;
+                    pathParams.add(pathParam);
                 }
 
-                PathParamType pathParam = new PathParamType();
-                pathParam.name = pathParamName;
-                pathParam.typeName = paramTypeName;
-                pathParams.add(pathParam);
-            }
-
-            // Collect all parameter names (path params, function params) to check for conflicts
-            Set<String> allParamNames = new HashSet<>(pathParamNames);
-            if (params.isPresent()) {
-                List<ParameterSymbol> parameterSymbols = params.get();
-                for (ParameterSymbol parameterSymbol : parameterSymbols) {
-                    Optional<String> paramNameOpt = parameterSymbol.getName();
-                    if (paramNameOpt.isPresent()) {
-                        allParamNames.add(paramNameOpt.get());
-                    }
-                }
-            }
-
-            // Check if synapse name conflicts with any parameter name and make it unique if needed
-            Optional<String> methodNameOpt = methodSymbol.getName();
-            if (allParamNames.contains(finalSynapseName) || 
-                (methodNameOpt.isPresent() && allParamNames.contains(methodNameOpt.get()))) {
-                // Add a suffix to make the synapse name unique and avoid conflicts
-                finalSynapseName = finalSynapseName + "_operation";
-            }
-
-            component = new Component(finalSynapseName, docString, functionType, Integer.toString(i), pathParams, List.of(), returnType);
-
-            // For resource functions, store the accessor and path segments for invocation
-            if (functionType == FunctionType.RESOURCE) {
-                component.setResourceAccessor(functionName); // functionName is the accessor (get, post, etc.)
-                component.setResourcePathSegments(resourcePathSegments);
-            }
-
-            // Store operationId as a parameter if found and mark the component
-            if (operationIdOpt.isPresent()) {
-                Param operationIdParam = new Param("operationId", operationIdOpt.get());
-                component.setParam(operationIdParam);
-                component.setHasOperationId(true);
-            }
-
-            // Now add all function parameters (we keep them all, synapse name is made unique instead)
-            int paramIndex = 0;
-            if (params.isPresent()) {
-                List<ParameterSymbol> parameterSymbols = params.get();
-                for (ParameterSymbol parameterSymbol : parameterSymbols) {
-                    Optional<FunctionParam> functionParam = ParamFactory.createFunctionParam(parameterSymbol, paramIndex);
-                    if (functionParam.isEmpty()) {
-                        String paramType = parameterSymbol.typeDescriptor().typeKind().getName();
-                        printStream.println("Skipping function '" + functionName +
-                                "' due to unsupported parameter type: " + paramType);
-                        continue methodLoop;
-                    }
-
-                    FunctionParam param = functionParam.get();
-                    String paramName = parameterSymbol.getName().orElse("");
-                    if (functionParamDefaults.containsKey(paramName)) {
-                        String defaultValue = functionParamDefaults.get(paramName);
-                        if (defaultValue.startsWith("\"") && defaultValue.endsWith("\"")) {
-                            defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
-                        } else if ("()".equals(defaultValue)) {
-                            // Convert Ballerina nil to empty string for UI schema
-                            defaultValue = "";
+                // Collect all parameter names (path params, function params) to check for conflicts
+                Set<String> allParamNames = new HashSet<>(pathParamNames);
+                if (params.isPresent()) {
+                    List<ParameterSymbol> parameterSymbols = params.get();
+                    for (ParameterSymbol parameterSymbol : parameterSymbols) {
+                        Optional<String> paramNameOpt = parameterSymbol.getName();
+                        if (paramNameOpt.isPresent()) {
+                            allParamNames.add(paramNameOpt.get());
                         }
-                        param.setDefaultValue(defaultValue);
-                        param.setRequired(false);
                     }
-                    component.setFunctionParam(param);
-                    paramIndex++;
                 }
-                Param sizeParam = new Param("paramSize", Integer.toString(paramIndex));
-                Param functionNameParam = new Param("paramFunctionName", component.getName());
-                component.setParam(sizeParam);
-                component.setParam(functionNameParam);
+
+                // Check if synapse name conflicts with any parameter name and make it unique if needed
+                Optional<String> methodNameOpt = methodSymbol.getName();
+                if (allParamNames.contains(finalSynapseName) || 
+                    (methodNameOpt.isPresent() && allParamNames.contains(methodNameOpt.get()))) {
+                    // Add a suffix to make the synapse name unique and avoid conflicts
+                    finalSynapseName = finalSynapseName + "_operation";
+                }
+
+                component = new Component(finalSynapseName, docString, functionType, Integer.toString(i), pathParams, List.of(), returnType);
+
+                // For resource functions, store the accessor and path segments for invocation
+                if (functionType == FunctionType.RESOURCE) {
+                    component.setResourceAccessor(functionName); // functionName is the accessor (get, post, etc.)
+                    component.setResourcePathSegments(resourcePathSegments);
+                }
+
+                // Store operationId as a parameter if found and mark the component
+                if (operationIdOpt.isPresent()) {
+                    Param operationIdParam = new Param("operationId", operationIdOpt.get());
+                    component.setParam(operationIdParam);
+                    component.setHasOperationId(true);
+                }
+
+                // Now add all function parameters (we keep them all, synapse name is made unique instead)
+                int paramIndex = 0;
+                if (params.isPresent()) {
+                    List<ParameterSymbol> parameterSymbols = params.get();
+                    for (ParameterSymbol parameterSymbol : parameterSymbols) {
+                        Optional<FunctionParam> functionParam = ParamFactory.createFunctionParam(parameterSymbol, paramIndex);
+                        if (functionParam.isEmpty()) {
+                            String paramType = parameterSymbol.typeDescriptor().typeKind().getName();
+                            printStream.println("Skipping function '" + functionName +
+                                    "' due to unsupported parameter type: " + paramType);
+                            skippedOperations++;
+                            continue methodLoop;
+                        }
+
+                        FunctionParam param = functionParam.get();
+                        String paramName = parameterSymbol.getName().orElse("");
+                        if (functionParamDefaults.containsKey(paramName)) {
+                            String defaultValue = functionParamDefaults.get(paramName);
+                            if (defaultValue.startsWith("\"") && defaultValue.endsWith("\"")) {
+                                defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
+                            } else if ("()".equals(defaultValue)) {
+                                // Convert Ballerina nil to empty string for UI schema
+                                defaultValue = "";
+                            }
+                            param.setDefaultValue(defaultValue);
+                            param.setRequired(false);
+                        }
+                        component.setFunctionParam(param);
+                        paramIndex++;
+                    }
+                    Param sizeParam = new Param("paramSize", Integer.toString(paramIndex));
+                    Param functionNameParam = new Param("paramFunctionName", component.getName());
+                    component.setParam(sizeParam);
+                    component.setParam(functionNameParam);
+                }
+                if (functionType == FunctionType.INIT) {
+                    // objectTypeName is only needed on Connection, not on Component
+                    // to avoid duplication in generated XML
+                    connection.setInitComponent(component);
+                } else {
+                    connection.setComponent(component);
+                }
+                i++;
             }
-            if (functionType == FunctionType.INIT) {
-                // objectTypeName is only needed on Connection, not on Component
-                // to avoid duplication in generated XML
-                connection.setInitComponent(component);
-            } else {
-                connection.setComponent(component);
+
+            if (totalOperations > 0 && (double) skippedOperations / totalOperations >= 0.5) {
+                String message = String.format("WARNING: %d out of %d operations (%.1f%%) were skipped due to unsupported parameter types. Artifact generation for '%s' will be skipped.",
+                        skippedOperations, totalOperations, (double) skippedOperations / totalOperations * 100, clientClassName);
+                printStream.println(message);
+                return;
             }
-            i++;
-        }
-        connector.setConnection(connection);
+            
+            connector.setConnection(connection);
     }
 
     private boolean isClientClass(ClassSymbol classSymbol) {
