@@ -433,6 +433,7 @@ public class BalConnectorAnalyzer implements Analyzer {
                 String message = String.format("WARNING: %d out of %d operations (%.1f%%) were skipped due to unsupported parameter types. Artifact generation for '%s' will be skipped.",
                         skippedOperations, totalOperations, (double) skippedOperations / totalOperations * 100, clientClassName);
                 printStream.println(message);
+                connector.setGenerationAborted(true, message);
                 return;
             }
             
