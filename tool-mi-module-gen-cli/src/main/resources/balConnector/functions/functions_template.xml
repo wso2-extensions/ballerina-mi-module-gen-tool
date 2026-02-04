@@ -35,9 +35,9 @@
         {{/eq ~}}
         {{#eq paramType "map" ~}}
         <property name="mapValueType{{@index}}" value="{{mapValueType this}}"/>
-        {{#if (isMapOfRecord this)}}
+        {{~#if (isMapOfRecord this)}}
         <property name="mapRecordFields{{@index}}" value="{{mapRecordFieldNames this}}"/>
-        {{/if}}
+        {{~/if~}}
         {{/eq ~}}
         {{#eq paramType "record" ~}}
         <property name="param{{@index}}_recordName" value="{{unwrapOptional typeSymbol.name}}" />
