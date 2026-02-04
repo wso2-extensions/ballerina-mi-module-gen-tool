@@ -50,6 +50,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import static io.ballerina.mi.util.Constants.*;
 import static io.ballerina.mi.util.Constants.RECORD;
@@ -405,6 +406,42 @@ public class ConnectorSerializer {
                 TypeDescKind memberKind = Utils.getActualTypeKind(memberType);
                 String elementType = Utils.getParamTypeName(memberKind);
                 return elementType != null ? elementType : "";
+            });
+            handlebar.registerHelper("mapValueType", (context, options) -> {
+                if (!(context instanceof MapFunctionParam mapParam)) {
+                    return "";
+                }
+                TypeSymbol valueType = mapParam.getValueTypeSymbol();
+                if (valueType == null) {
+                    return "";
+                }
+                TypeDescKind valueKind = Utils.getActualTypeKind(valueType);
+                String valueTypeName = Utils.getParamTypeName(valueKind);
+                return valueTypeName != null ? valueTypeName : "";
+            });
+            handlebar.registerHelper("isMapOfRecord", (context, options) -> {
+                if (!(context instanceof MapFunctionParam mapParam)) {
+                    return false;
+                }
+                TypeSymbol valueType = mapParam.getValueTypeSymbol();
+                if (valueType == null) {
+                    return false;
+                }
+                TypeDescKind valueKind = Utils.getActualTypeKind(valueType);
+                return valueKind == TypeDescKind.RECORD;
+            });
+            handlebar.registerHelper("mapRecordFieldNames", (context, options) -> {
+                if (!(context instanceof MapFunctionParam mapParam)) {
+                    return "";
+                }
+                List<FunctionParam> valueFields = mapParam.getValueFieldParams();
+                if (valueFields == null || valueFields.isEmpty()) {
+                    return "";
+                }
+                // Return comma-separated field names
+                return valueFields.stream()
+                        .map(FunctionParam::getValue)
+                        .collect(Collectors.joining(","));
             });
             handlebar.registerHelper("unwrapOptional", ((context, options) -> {
                 if (context instanceof Optional<?> optional) {

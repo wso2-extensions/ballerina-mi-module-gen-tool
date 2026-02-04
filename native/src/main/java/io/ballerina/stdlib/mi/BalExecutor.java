@@ -512,7 +512,7 @@ public class BalExecutor {
                 case XML -> getBXmlParameter(context, value);
                 case RECORD -> createRecordValue((String) param, paramName, context, index);
                 case ARRAY -> getArrayParameter((String) param, context, value);
-                case MAP -> getMapParameter(param);
+                case MAP -> getMapParameter(param, context, value);
                 case UNION -> getUnionParameter(paramName, context, index);
                 default -> null;
             };
@@ -1013,7 +1013,7 @@ public class BalExecutor {
         }
     }
 
-    private BMap getMapParameter(Object param) {
+    private BMap getMapParameter(Object param, MessageContext context, String valueKey) {
         String jsonString;
         if (param instanceof String strParam) {
             if (strParam.startsWith("'") && strParam.endsWith("'")) {
@@ -1049,7 +1049,7 @@ public class BalExecutor {
                 return ValueCreator.createMapValue();
             }
 
-            // Check if first element is a map with "key" field (table format)
+            // Check if first element is a map with "key" field (table format - object array)
             Object firstElement = array.get(0);
             if (firstElement instanceof BMap) {
                 BMap firstRow = (BMap) firstElement;
@@ -1060,7 +1060,38 @@ public class BalExecutor {
                 }
             }
 
-            throw new SynapseException("Map parameter array is not in table format (expected objects with 'key' field)");
+            // Check if first element is an array (2D array format from MI Studio)
+            if (firstElement instanceof BArray) {
+                log.info("2D array format detected from MI Studio. Transforming to map...");
+
+                // Extract parameter index from valueKey (e.g., "param0" -> 0)
+                int paramIndex = -1;
+                String indexStr = valueKey.replaceAll("\\D+", "");
+                if (!indexStr.isEmpty()) {
+                    try {
+                        paramIndex = Integer.parseInt(indexStr);
+                    } catch (NumberFormatException e) {
+                        log.warn("Could not extract parameter index from valueKey: " + valueKey);
+                    }
+                }
+
+                // Get field names from context if this is map<Record>
+                String[] fieldNames = null;
+                if (paramIndex >= 0) {
+                    Object fieldNamesObj = context.getProperty("mapRecordFields" + paramIndex);
+                    if (fieldNamesObj != null) {
+                        String fieldNamesStr = fieldNamesObj.toString();
+                        fieldNames = fieldNamesStr.split(",");
+                        log.info("Map record field names: " + fieldNamesStr);
+                    }
+                }
+
+                // Transform 2D array format: [["k1", "v1"], ["k2", "v2"]] -> {k1: v1, k2: v2}
+                return transform2DArrayToMap(array, fieldNames);
+            }
+
+            log.error("Unexpected format - first element type: " + firstElement.getClass().getSimpleName());
+            throw new SynapseException("Map parameter array is not in table format (expected objects with 'key' field or 2D array)");
         }
 
         throw new SynapseException("Map parameter must be a JSON object or table array");
@@ -1122,6 +1153,83 @@ public class BalExecutor {
         }
 
         log.info("Table to map transformation complete. Result map size: " + resultMap.size());
+        return resultMap;
+    }
+
+    /**
+     * Transform 2D array format (from MI Studio) to map.
+     * MI Studio sometimes serializes table data as 2D arrays instead of array of objects.
+     *
+     * For simple maps:
+     * Input: [["k1", "v1"], ["k2", "v2"]]
+     * Output: {"k1": "v1", "k2": "v2"}
+     *
+     * For map<Record>:
+     * Input: [["k1", "f1", "f2"], ["k2", "f3", "f4"]] with fieldNames=["name", "value"]
+     * Output: {"k1": {"name": "f1", "value": "f2"}, "k2": {"name": "f3", "value": "f4"}}
+     *
+     * @param array2D The 2D array from MI Studio
+     * @param fieldNames Optional field names for map<Record>, null for simple maps
+     */
+    private BMap transform2DArrayToMap(BArray array2D, String[] fieldNames) {
+        log.info("Starting 2D array to map transformation. Input array size: " + array2D.size());
+        if (fieldNames != null) {
+            log.info("Using field names: " + String.join(", ", fieldNames));
+        }
+        BMap resultMap = ValueCreator.createMapValue();
+
+        for (int i = 0; i < array2D.size(); i++) {
+            Object element = array2D.get(i);
+            if (element instanceof BArray) {
+                BArray row = (BArray) element;
+
+                if (row.size() == 0) {
+                    log.warn("Row " + i + " is empty, skipping");
+                    continue;
+                }
+
+                // First element is always the key
+                Object keyObj = row.get(0);
+                String keyStr;
+                if (keyObj instanceof BString) {
+                    keyStr = ((BString) keyObj).getValue();
+                } else {
+                    keyStr = keyObj.toString();
+                }
+                BString key = StringUtils.fromString(keyStr);
+
+                if (row.size() == 2) {
+                    // Simple map: [key, value]
+                    Object value = row.get(1);
+                    log.info("Row " + i + ": Simple map entry - key='" + keyStr + "', value='" + value + "'");
+                    resultMap.put(key, value);
+                } else if (row.size() > 2) {
+                    // map<Record>: [key, field1, field2, ...]
+                    BMap recordValue = ValueCreator.createMapValue();
+                    log.info("Row " + i + ": map<Record> entry - key='" + keyStr + "', fields=" + (row.size() - 1));
+
+                    // Use provided field names or fall back to generic names
+                    for (int j = 1; j < row.size(); j++) {
+                        String fieldName;
+                        if (fieldNames != null && (j - 1) < fieldNames.length) {
+                            fieldName = fieldNames[j - 1];
+                        } else {
+                            fieldName = "field" + (j - 1);
+                        }
+                        Object fieldValue = row.get(j);
+                        recordValue.put(StringUtils.fromString(fieldName), fieldValue);
+                        log.info("  Field '" + fieldName + "' = " + fieldValue);
+                    }
+                    resultMap.put(key, recordValue);
+                } else {
+                    log.warn("Row " + i + " has only key, no value. Skipping.");
+                }
+            } else {
+                log.warn("Row " + i + " is not an array, skipping. Type: " + element.getClass().getSimpleName());
+            }
+        }
+
+        log.info("2D array to map transformation complete. Result map size: " + resultMap.size());
         return resultMap;
     }
 
