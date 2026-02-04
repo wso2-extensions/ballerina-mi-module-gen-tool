@@ -5,7 +5,7 @@
                     "displayName": "{{displayName}}",
                     "inputType": "{{inputType}}",
                     "defaultValue": "{{defaultValue}}",
-                    "required": "{{required}}",
+                    "required": {{required}},
                     "helpTip": "{{helpTip}}",
                     "validateType": "{{validateType}}",
                     "matchPattern": "{{matchPattern}}"{{#if enableCondition}},
