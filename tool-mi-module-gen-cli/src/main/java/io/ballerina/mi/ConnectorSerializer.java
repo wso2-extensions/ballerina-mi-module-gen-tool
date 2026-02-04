@@ -24,6 +24,7 @@ import io.ballerina.mi.connectorModel.*;
 import io.ballerina.mi.connectorModel.attributeModel.Attribute;
 import io.ballerina.mi.connectorModel.attributeModel.AttributeGroup;
 import io.ballerina.mi.connectorModel.attributeModel.Combo;
+import io.ballerina.mi.connectorModel.attributeModel.Table;
 import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.JsonTemplateBuilder;
 import io.ballerina.mi.util.Utils;
@@ -655,12 +656,38 @@ public class ConnectorSerializer {
         
         String defaultValue = functionParam.getDefaultValue() != null ? functionParam.getDefaultValue() : "";
         switch (paramType) {
-            case STRING, XML, MAP, ARRAY:
+            case STRING, XML:
                 Attribute stringAttr = new Attribute(sanitizedParamName, displayName, INPUT_TYPE_STRING_OR_EXPRESSION,
                         defaultValue, functionParam.isRequired(), functionParam.getDescription(), "",
                         "", isCombo);
                 stringAttr.setEnableCondition(functionParam.getEnableCondition());
                 builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, stringAttr);
+                break;
+            case MAP:
+                if (functionParam instanceof MapFunctionParam mapParam && mapParam.isRenderAsTable()) {
+                    writeMapAsTable(mapParam, builder, isCombo);
+                } else {
+                    // Fall back to JSON input for complex maps
+                    Attribute mapAttr = new Attribute(sanitizedParamName, displayName,
+                        INPUT_TYPE_STRING_OR_EXPRESSION, defaultValue, functionParam.isRequired(),
+                        functionParam.getDescription() != null ? functionParam.getDescription() : "Expecting JSON object with key-value pairs",
+                        JSON, "", isCombo);
+                    mapAttr.setEnableCondition(functionParam.getEnableCondition());
+                    builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, mapAttr);
+                }
+                break;
+            case ARRAY:
+                if (functionParam instanceof ArrayFunctionParam arrayParam && arrayParam.isRenderAsTable()) {
+                    writeArrayAsTable(arrayParam, builder, isCombo);
+                } else {
+                    // Fall back to JSON input for complex arrays
+                    Attribute arrayAttr = new Attribute(sanitizedParamName, displayName,
+                        INPUT_TYPE_STRING_OR_EXPRESSION, defaultValue, functionParam.isRequired(),
+                        functionParam.getDescription() != null ? functionParam.getDescription() : "Expecting JSON array",
+                        JSON, "", isCombo);
+                    arrayAttr.setEnableCondition(functionParam.getEnableCondition());
+                    builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, arrayAttr);
+                }
                 break;
             case JSON:
                 // JSON parameters get a concise hint and validation
@@ -1360,6 +1387,311 @@ public class ConnectorSerializer {
         }
     }
     
+    /**
+     * Writes a map parameter as a table UI with key and value columns.
+     * For simple value types, creates a 2-column table (key, value).
+     * For record value types, creates a multi-column table (key, field1, field2, ...).
+     */
+    private static void writeMapAsTable(MapFunctionParam mapParam, JsonTemplateBuilder builder, boolean isCombo)
+            throws IOException {
+
+        String paramName = Utils.sanitizeParamName(mapParam.getValue());
+        String displayName = mapParam.getValue();
+        if (displayName.contains(".")) {
+            displayName = displayName.substring(displayName.lastIndexOf('.') + 1);
+        }
+        displayName = Utils.sanitizeParamName(displayName);
+
+        List<Attribute> tableColumns = new ArrayList<>();
+
+        // First column: key (always required for maps)
+        Attribute keyColumn = new Attribute(
+            "key",
+            "Key",
+            INPUT_TYPE_STRING_OR_EXPRESSION,
+            "",
+            true,
+            "Key for the map entry",
+            "",
+            "",
+            false
+        );
+        tableColumns.add(keyColumn);
+
+        // Value column(s) based on map value type
+        if (mapParam.getValueFieldParams() != null && !mapParam.getValueFieldParams().isEmpty()) {
+            // Complex value (record) - create column for each field
+            for (FunctionParam valueField : mapParam.getValueFieldParams()) {
+                Attribute column = createAttributeForMapValueField(valueField);
+                tableColumns.add(column);
+            }
+        } else {
+            // Simple value (string, int, etc.)
+            Attribute valueColumn = createSimpleValueColumn(mapParam);
+            tableColumns.add(valueColumn);
+        }
+
+        String description = mapParam.getDescription() != null ?
+            mapParam.getDescription() :
+            "Configure " + displayName + " entries";
+
+        // Set tableKey and tableValue to actual element names
+        String tableKey = tableColumns.isEmpty() ? "" : tableColumns.get(0).getName();
+        String tableValue = tableColumns.size() < 2 ? tableKey : tableColumns.get(tableColumns.size() - 1).getName();
+
+        Table table = new Table(
+            paramName,
+            displayName,
+            displayName,
+            description,
+            tableKey,
+            tableValue,
+            tableColumns,
+            mapParam.getEnableCondition(),
+            mapParam.isRequired()
+        );
+
+        builder.addFromTemplate(TABLE_TEMPLATE_PATH, table);
+    }
+
+    /**
+     * Writes an array parameter as a table UI with element columns.
+     * For simple element types, creates a single-column table.
+     * For record element types, creates a multi-column table (field1, field2, ...).
+     */
+    private static void writeArrayAsTable(ArrayFunctionParam arrayParam, JsonTemplateBuilder builder, boolean isCombo)
+            throws IOException {
+
+        String paramName = Utils.sanitizeParamName(arrayParam.getValue());
+        String displayName = arrayParam.getValue();
+        if (displayName.contains(".")) {
+            displayName = displayName.substring(displayName.lastIndexOf('.') + 1);
+        }
+        displayName = Utils.sanitizeParamName(displayName);
+
+        List<Attribute> tableColumns = new ArrayList<>();
+
+        // For arrays, we don't have a key column - just value column(s)
+        if (arrayParam.getElementFieldParams() != null && !arrayParam.getElementFieldParams().isEmpty()) {
+            // Complex element (record) - create column for each field
+            for (FunctionParam elementField : arrayParam.getElementFieldParams()) {
+                Attribute column = createAttributeForElementField(elementField);
+                tableColumns.add(column);
+            }
+        } else {
+            // Simple element (string, int, etc.)
+            Attribute column = createSimpleElementColumn(arrayParam);
+            tableColumns.add(column);
+        }
+
+        String description = arrayParam.getDescription() != null ?
+            arrayParam.getDescription() :
+            "Configure " + displayName + " entries";
+
+        // Set tableKey and tableValue to actual element names
+        String tableKey = tableColumns.isEmpty() ? "" : tableColumns.get(0).getName();
+        String tableValue = tableColumns.size() < 2 ? tableKey : tableColumns.get(tableColumns.size() - 1).getName();
+
+        Table table = new Table(
+            paramName,
+            displayName,
+            displayName,
+            description,
+            tableKey,
+            tableValue,
+            tableColumns,
+            arrayParam.getEnableCondition(),
+            arrayParam.isRequired()
+        );
+
+        builder.addFromTemplate(TABLE_TEMPLATE_PATH, table);
+    }
+
+    /**
+     * Creates a simple value column for map parameters with primitive value types.
+     */
+    private static Attribute createSimpleValueColumn(MapFunctionParam mapParam) {
+        TypeSymbol valueTypeSymbol = mapParam.getValueTypeSymbol();
+        TypeDescKind valueTypeKind = Utils.getActualTypeKind(valueTypeSymbol);
+
+        String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
+        String validateType = "";
+        String matchPattern = "";
+        String helpTip = "Value for the map entry";
+
+        // Set validation based on value type
+        switch (valueTypeKind) {
+            case INT:
+                validateType = VALIDATE_TYPE_REGEX;
+                matchPattern = INTEGER_REGEX;
+                helpTip = "Integer value";
+                break;
+            case FLOAT, DECIMAL:
+                validateType = VALIDATE_TYPE_REGEX;
+                matchPattern = DECIMAL_REGEX;
+                helpTip = "Decimal value";
+                break;
+            case BOOLEAN:
+                inputType = INPUT_TYPE_BOOLEAN;
+                helpTip = "Boolean value (true/false)";
+                break;
+            default:
+                // String or other types - no validation
+                break;
+        }
+
+        return new Attribute(
+            "value",
+            "Value",
+            inputType,
+            "",
+            true,  // Values in maps are always required
+            helpTip,
+            validateType,
+            matchPattern,
+            false
+        );
+    }
+
+    /**
+     * Creates a simple element column for array parameters with primitive element types.
+     */
+    private static Attribute createSimpleElementColumn(ArrayFunctionParam arrayParam) {
+        TypeSymbol elementTypeSymbol = arrayParam.getElementTypeSymbol();
+        TypeDescKind elementTypeKind = Utils.getActualTypeKind(elementTypeSymbol);
+
+        String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
+        String validateType = "";
+        String matchPattern = "";
+        String helpTip = "Array element";
+        String columnName = "value";
+
+        // Set validation based on element type
+        switch (elementTypeKind) {
+            case INT:
+                validateType = VALIDATE_TYPE_REGEX;
+                matchPattern = INTEGER_REGEX;
+                helpTip = "Integer value";
+                columnName = "value";
+                break;
+            case FLOAT, DECIMAL:
+                validateType = VALIDATE_TYPE_REGEX;
+                matchPattern = DECIMAL_REGEX;
+                helpTip = "Decimal value";
+                columnName = "value";
+                break;
+            case BOOLEAN:
+                inputType = INPUT_TYPE_BOOLEAN;
+                helpTip = "Boolean value (true/false)";
+                columnName = "value";
+                break;
+            default:
+                // String or other types - no validation
+                columnName = "value";
+                break;
+        }
+
+        return new Attribute(
+            columnName,
+            StringUtils.capitalize(columnName),
+            inputType,
+            "",
+            true,  // Array elements are always required
+            helpTip,
+            validateType,
+            matchPattern,
+            false
+        );
+    }
+
+    /**
+     * Creates an attribute column for a record field in a map value.
+     */
+    private static Attribute createAttributeForMapValueField(FunctionParam fieldParam) {
+        String fieldName = fieldParam.getValue();
+        String displayName = StringUtils.capitalize(fieldName);
+        String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
+        String validateType = "";
+        String matchPattern = "";
+        String helpTip = fieldParam.getDescription() != null ? fieldParam.getDescription() : displayName;
+
+        TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldParam.getTypeSymbol());
+
+        // Set validation based on field type
+        switch (fieldTypeKind) {
+            case INT:
+                validateType = fieldParam.isRequired() ? VALIDATE_TYPE_REGEX : VALIDATE_TYPE_REGEX;
+                matchPattern = fieldParam.isRequired() ? INTEGER_REGEX : INTEGER_REGEX_OPTIONAL;
+                break;
+            case FLOAT, DECIMAL:
+                validateType = fieldParam.isRequired() ? VALIDATE_TYPE_REGEX : VALIDATE_TYPE_REGEX;
+                matchPattern = fieldParam.isRequired() ? DECIMAL_REGEX : DECIMAL_REGEX_OPTIONAL;
+                break;
+            case BOOLEAN:
+                inputType = INPUT_TYPE_BOOLEAN;
+                break;
+            default:
+                // String or other types - no validation
+                break;
+        }
+
+        return new Attribute(
+            fieldName,
+            displayName,
+            inputType,
+            "",
+            fieldParam.isRequired(),
+            helpTip,
+            validateType,
+            matchPattern,
+            false
+        );
+    }
+
+    /**
+     * Creates an attribute column for a record field in an array element.
+     */
+    private static Attribute createAttributeForElementField(FunctionParam fieldParam) {
+        String fieldName = fieldParam.getValue();
+        String displayName = StringUtils.capitalize(fieldName);
+        String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
+        String validateType = "";
+        String matchPattern = "";
+        String helpTip = fieldParam.getDescription() != null ? fieldParam.getDescription() : displayName;
+
+        TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldParam.getTypeSymbol());
+
+        // Set validation based on field type
+        switch (fieldTypeKind) {
+            case INT:
+                validateType = fieldParam.isRequired() ? VALIDATE_TYPE_REGEX : VALIDATE_TYPE_REGEX;
+                matchPattern = fieldParam.isRequired() ? INTEGER_REGEX : INTEGER_REGEX_OPTIONAL;
+                break;
+            case FLOAT, DECIMAL:
+                validateType = fieldParam.isRequired() ? VALIDATE_TYPE_REGEX : VALIDATE_TYPE_REGEX;
+                matchPattern = fieldParam.isRequired() ? DECIMAL_REGEX : DECIMAL_REGEX_OPTIONAL;
+                break;
+            case BOOLEAN:
+                inputType = INPUT_TYPE_BOOLEAN;
+                break;
+            default:
+                // String or other types - no validation
+                break;
+        }
+
+        return new Attribute(
+            fieldName,
+            displayName,
+            inputType,
+            "",
+            fieldParam.isRequired(),
+            helpTip,
+            validateType,
+            matchPattern,
+            false
+        );
+    }
+
     /**
      * Converts camelCase or PascalCase string to Title Case with spaces.
      * For example:
