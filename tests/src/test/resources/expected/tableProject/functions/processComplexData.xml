@@ -23,6 +23,7 @@
     <sequence>
         <property name="param0" value="data"/>
         <property name="paramType0" value="map"/>
+        <property name="mapValueType0" value=""/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="processComplexData"/>
         <property name="returnType" value="union"/>

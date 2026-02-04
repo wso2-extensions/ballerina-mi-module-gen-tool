@@ -23,6 +23,7 @@
     <sequence>
         <property name="param0" value="features"/>
         <property name="paramType0" value="map"/>
+        <property name="mapValueType0" value="boolean"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="configureFeatures"/>
         <property name="returnType" value="union"/>

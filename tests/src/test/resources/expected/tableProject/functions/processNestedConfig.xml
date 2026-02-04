@@ -23,6 +23,7 @@
     <sequence>
         <property name="param0" value="config"/>
         <property name="paramType0" value="map"/>
+        <property name="mapValueType0" value="map"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="processNestedConfig"/>
         <property name="returnType" value="union"/>

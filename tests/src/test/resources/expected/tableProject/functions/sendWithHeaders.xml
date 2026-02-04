@@ -23,6 +23,7 @@
     <sequence>
         <property name="param0" value="headers"/>
         <property name="paramType0" value="map"/>
+        <property name="mapValueType0" value="string"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="sendWithHeaders"/>
         <property name="returnType" value="union"/>

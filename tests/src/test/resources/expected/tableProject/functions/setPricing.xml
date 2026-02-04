@@ -23,6 +23,7 @@
     <sequence>
         <property name="param0" value="prices"/>
         <property name="paramType0" value="map"/>
+        <property name="mapValueType0" value="decimal"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="setPricing"/>
         <property name="returnType" value="union"/>
