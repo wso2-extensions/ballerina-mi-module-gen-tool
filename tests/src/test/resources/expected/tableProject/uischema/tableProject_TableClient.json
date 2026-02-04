@@ -1,0 +1,85 @@
+{
+  "connectorName": "tableProject",
+  "connectionName": "tableProject_TableClient",
+  "title": "Connection Config for tableProject_TableClient connection",
+  "help": "<h1>tableProject_TableClient Connection</h1> <b></b>",
+  "elements": [
+    {
+      "type": "attribute",
+      "value": {
+        "name": "connectionName",
+        "displayName": "Connection Name",
+        "inputType": "string",
+        "defaultValue": "tableProject_TableClient_connection_1",
+        "required": "true",
+        "helpTip": "The name for the tableProject_TableClient connection",
+        "validation": "nameWithoutSpecialCharactors"
+      }
+    },
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Basic",
+              "collapsed": false,
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "baseUrl",
+                    "displayName": "baseUrl",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": true,
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Advanced",
+              "collapsed": true,
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "defaultHeaders",
+                    "displayName": "defaultHeaders",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "Expecting JSON object with key-value pairs",
+                    "validateType": "json",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "allowedOrigins",
+                    "displayName": "allowedOrigins",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "Expecting JSON array",
+                    "validateType": "json",
+                    "matchPattern": ""
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
