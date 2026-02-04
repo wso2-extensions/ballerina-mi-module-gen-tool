@@ -278,42 +278,101 @@ public class BalExecutor {
                 throw new SynapseException("Unsupported callable type: " + callable.getClass().getName());
             }
             if (result instanceof BError bError) {
+                log.error("Function execution returned BError: " + bError.getMessage());
                 throw new BallerinaExecutionException(bError.getMessage(), bError.fillInStackTrace());
             }
+            log.info("Function execution successful, processing response...");
             Object processedResult = processResponse(result);
+            log.info("Response processed, processed result type: " + (processedResult != null ? processedResult.getClass().getSimpleName() : "null"));
+
             ConnectorResponse connectorResponse = new DefaultConnectorResponse();
-            if (isOverwriteBody(context)) {
+            String resultProperty = getResultProperty(context);
+            boolean overwriteBody = isOverwriteBody(context);
+            log.info("Setting result - overwriteBody=" + overwriteBody + ", resultProperty=" + resultProperty);
+
+            if (overwriteBody) {
+                log.info("Calling PayloadWriter.overwriteBody with processed result");
                 PayloadWriter.overwriteBody(context, processedResult);
+                log.info("PayloadWriter.overwriteBody completed successfully");
             } else {
+                log.info("Setting payload on ConnectorResponse");
                 connectorResponse.setPayload(processedResult);
             }
-            context.setVariable(getResultProperty(context), connectorResponse);
+            context.setVariable(resultProperty, connectorResponse);
+            log.info("Result variable set successfully, invocation complete");
         } catch (BError bError) {
+            log.error("BError caught during execution: " + bError.getMessage(), bError);
             throw new BallerinaExecutionException(bError.getMessage(), bError.fillInStackTrace());
+        } catch (Exception e) {
+            log.error("Unexpected error during execution: " + e.getMessage(), e);
+            throw new SynapseException("Error during Ballerina function execution", e);
         }
         return true;
     }
 
     private Object processResponse(Object result) {
+        if (result == null) {
+            log.info("Processing response: null result");
+            return null;
+        }
+
+        String resultType = result.getClass().getSimpleName();
+        log.info("Processing response of type: " + resultType);
+
         if (result instanceof BXml) {
+            log.info("Converting BXml to OMElement");
             return BXmlConverter.toOMElement((BXml) result);
         } else if (result instanceof BDecimal) {
-            return ((BDecimal) result).value().toString();
+            String value = ((BDecimal) result).value().toString();
+            log.info("Converting BDecimal to String: " + value);
+            return value;
         } else if (result instanceof BString) {
-            return ((BString) result).getValue();
+            String value = ((BString) result).getValue();
+            log.info("Converting BString to String: " + value);
+            return value;
         } else if (result instanceof BArray) {
             // Convert BArray to JSON format for MI consumption
+            log.info("Converting BArray to JsonElement");
             return JsonParser.parseString(TypeConverter.arrayToJsonString((BArray) result));
         } else if (result instanceof BMap) {
+            log.info("Converting BMap to JsonElement");
             return JsonParser.parseString(((MapValueImpl<?, ?>) result).getJSONString());
+        } else if (result instanceof Long || result instanceof Integer) {
+            // Convert int to JsonElement for proper payload writing
+            String value = result.toString();
+            log.info("Converting int/Long to JsonElement: " + value);
+            return JsonParser.parseString(value);
+        } else if (result instanceof Boolean) {
+            // Convert boolean to JsonElement for proper payload writing
+            String value = result.toString();
+            log.info("Converting Boolean to JsonElement: " + value);
+            return JsonParser.parseString(value);
+        } else if (result instanceof Double || result instanceof Float) {
+            // Convert float to JsonElement for proper payload writing
+            String value = result.toString();
+            log.info("Converting float/Double to JsonElement: " + value);
+            return JsonParser.parseString(value);
         }
+
+        log.warn("Unhandled result type: " + resultType + ", returning as-is");
         return result;
     }
 
     private void setParameters(Object[] args, MessageContext context) {
+        log.info("Setting parameters for function, args count: " + args.length);
         for (int i = 0; i < args.length; i++) {
             Object param = getParameter(context, "param" + i, "paramType" + i, i);
             args[i] = param;
+            String paramType = param != null ? param.getClass().getSimpleName() : "null";
+            log.info("Parameter[" + i + "] set - type: " + paramType);
+            if (param instanceof BArray) {
+                BArray array = (BArray) param;
+                log.info("Parameter[" + i + "] is BArray with size: " + array.size());
+                if (array.size() > 0) {
+                    Object firstElem = array.get(0);
+                    log.info("Parameter[" + i + "] first element type: " + (firstElem != null ? firstElem.getClass().getSimpleName() : "null"));
+                }
+            }
         }
     }
 
@@ -401,13 +460,18 @@ public class BalExecutor {
     }
 
     public Object getParameter(MessageContext context, String value, String type, int index) {
+        log.info("getParameter called - value: " + value + ", type: " + type + ", index: " + index);
+
         String paramName = getPropertyAsString(context, value);
         if (paramName == null) {
             log.error("Parameter definition property '" + value + "' not found in context. Check if the generated XML artifacts are correct.");
             throw new SynapseException("Parameter definition property '" + value + "' is missing");
         }
+        log.info("Parameter name: " + paramName);
 
         Object param = lookupTemplateParameter(context, paramName);
+        log.info("Parameter value from context: " + (param != null ? "present" : "null"));
+
         String paramType;
         if (value.matches("param\\d+Union.*")) {
             paramType = type;
@@ -421,6 +485,7 @@ public class BalExecutor {
                 paramType = Constants.STRING;
             }
         }
+        log.info("Parameter type: " + paramType);
         if (param == null) {
             // For UNION and RECORD types, we pass null to the handler methods as they might 
             // reconstruction logic (e.g. from flattened fields)
@@ -436,20 +501,27 @@ public class BalExecutor {
             return null;
         }
 
-        return switch (paramType) {
-            case BOOLEAN -> Boolean.parseBoolean((String) param);
-            case INT -> Long.parseLong((String) param);
-            case STRING -> StringUtils.fromString((String) param);
-            case FLOAT -> Double.parseDouble((String) param);
-            case DECIMAL -> ValueCreator.createDecimalValue((String) param);
-            case JSON -> getJsonParameter(param);
-            case XML -> getBXmlParameter(context, value);
-            case RECORD -> createRecordValue((String) param, paramName, context, index);
-            case ARRAY -> getArrayParameter((String) param, context, value);
-            case MAP -> getMapParameter(param);
-            case UNION -> getUnionParameter(paramName, context, index);
-            default -> null;
-        };
+        try {
+            Object result = switch (paramType) {
+                case BOOLEAN -> Boolean.parseBoolean((String) param);
+                case INT -> Long.parseLong((String) param);
+                case STRING -> StringUtils.fromString((String) param);
+                case FLOAT -> Double.parseDouble((String) param);
+                case DECIMAL -> ValueCreator.createDecimalValue((String) param);
+                case JSON -> getJsonParameter(param);
+                case XML -> getBXmlParameter(context, value);
+                case RECORD -> createRecordValue((String) param, paramName, context, index);
+                case ARRAY -> getArrayParameter((String) param, context, value);
+                case MAP -> getMapParameter(param);
+                case UNION -> getUnionParameter(paramName, context, index);
+                default -> null;
+            };
+            log.info("getParameter returning - type: " + (result != null ? result.getClass().getSimpleName() : "null"));
+            return result;
+        } catch (Exception e) {
+            log.error("Error in getParameter for " + paramName + " (type: " + paramType + "): " + e.getMessage(), e);
+            throw new SynapseException("Failed to process parameter " + paramName, e);
+        }
     }
 
     private Object getUnionParameter(String paramName, MessageContext context, int index) {
@@ -952,16 +1024,101 @@ public class BalExecutor {
             parsed = JsonUtils.parse(param.toString());
         }
 
-        // Validate that the parsed result is a BMap, not a BArray
+        // If parsed is a BMap, return it directly
         if (parsed instanceof BMap) {
+            log.info("Map parameter received in direct JSON object format");
             return (BMap) parsed;
-        } else {
-            throw new SynapseException("Map parameter must be a JSON object, not an array");
         }
+
+        // If parsed is a BArray, check if it's table format: [{"key": "k1", "value": "v1"}, ...]
+        if (parsed instanceof BArray) {
+            BArray array = (BArray) parsed;
+            log.info("Map parameter received as array, checking for table format. Array size: " + array.size());
+
+            if (array.size() == 0) {
+                log.info("Empty array received, returning empty map");
+                return ValueCreator.createMapValue();
+            }
+
+            // Check if first element is a map with "key" field (table format)
+            Object firstElement = array.get(0);
+            if (firstElement instanceof BMap) {
+                BMap firstRow = (BMap) firstElement;
+                if (firstRow.containsKey(StringUtils.fromString("key"))) {
+                    log.info("Table format detected (has 'key' field). Transforming table array to map...");
+                    // Transform table format to map: [{"key": k, "value": v}] -> {k: v}
+                    return transformTableToMap(array);
+                }
+            }
+
+            throw new SynapseException("Map parameter array is not in table format (expected objects with 'key' field)");
+        }
+
+        throw new SynapseException("Map parameter must be a JSON object or table array");
+    }
+
+    /**
+     * Transform table array format to map.
+     * Input: [{"key": "k1", "value": "v1"}, {"key": "k2", "value": "v2"}]
+     * Output: {"k1": "v1", "k2": "v2"}
+     *
+     * For map<Record>, the structure is:
+     * Input: [{"key": "k1", "field1": "f1", "field2": "f2"}, ...]
+     * Output: {"k1": {"field1": "f1", "field2": "f2"}, ...}
+     */
+    private BMap transformTableToMap(BArray tableArray) {
+        log.info("Starting table to map transformation. Input array size: " + tableArray.size());
+        BMap resultMap = ValueCreator.createMapValue();
+        BString keyFieldName = StringUtils.fromString("key");
+
+        for (int i = 0; i < tableArray.size(); i++) {
+            Object element = tableArray.get(i);
+            if (element instanceof BMap) {
+                BMap row = (BMap) element;
+
+                // Extract the key
+                Object keyObj = row.get(keyFieldName);
+                if (keyObj == null) {
+                    throw new SynapseException("Table row missing 'key' field at index " + i);
+                }
+
+                // Convert key to string
+                String keyStr;
+                if (keyObj instanceof BString) {
+                    keyStr = ((BString) keyObj).getValue();
+                } else {
+                    keyStr = keyObj.toString();
+                }
+                BString key = StringUtils.fromString(keyStr);
+
+                // Check if this is a simple map (has "value" field) or map<Record> (has other fields)
+                if (row.size() == 2 && row.containsKey(StringUtils.fromString("value"))) {
+                    // Simple map: extract value
+                    Object value = row.get(StringUtils.fromString("value"));
+                    log.info("Row " + i + ": Simple map entry - key='" + keyStr + "', value='" + value + "'");
+                    resultMap.put(key, value);
+                } else {
+                    // map<Record>: create record object without the key field
+                    log.info("Row " + i + ": map<Record> entry - key='" + keyStr + "', fields=" + (row.size() - 1));
+                    BMap recordValue = ValueCreator.createMapValue();
+                    for (Object rowKey : row.getKeys()) {
+                        BString rowKeyStr = (BString) rowKey;
+                        if (!rowKeyStr.getValue().equals("key")) {
+                            recordValue.put(rowKeyStr, row.get(rowKeyStr));
+                        }
+                    }
+                    resultMap.put(key, recordValue);
+                }
+            }
+        }
+
+        log.info("Table to map transformation complete. Result map size: " + resultMap.size());
+        return resultMap;
     }
 
     /**
      * Get array parameter from context and convert to Ballerina array.
+     * Handles both direct JSON array format and table format.
      * Delegates to TypeConverter for the actual conversion logic.
      *
      * @param jsonArrayString JSON array string
@@ -977,7 +1134,6 @@ public class BalExecutor {
                 paramIndex = Integer.parseInt(indexStr);
             } catch (NumberFormatException e) {
                 log.error("Invalid parameter index in valueKey: " + valueKey, e);
-                // Optionally, handle error (e.g., throw, return null, etc.)
                 return null;
             }
         } else {
@@ -987,9 +1143,135 @@ public class BalExecutor {
 
         // Get the array element type from context
         String elementType = context.getProperty("arrayElementType" + paramIndex).toString();
+        log.info("Array parameter received. Element type: " + elementType);
+        log.info("Array parameter JSON string (original): " + jsonArrayString);
 
-        // Use shared TypeConverter for conversion
-        return TypeConverter.convertToArray(jsonArrayString, elementType);
+        // Clean up invalid JSON (trailing commas from MI Studio table UI)
+        String cleanedJson = cleanupJsonString(jsonArrayString);
+        if (!cleanedJson.equals(jsonArrayString)) {
+            log.info("JSON cleaned up (removed trailing commas): " + cleanedJson);
+        }
+
+        // For record arrays, parse and return directly (table format is already correct)
+        if ("record".equals(elementType)) {
+            log.info("Record array detected - using direct format (no transformation needed)");
+            try {
+                Object parsed = JsonUtils.parse(cleanedJson);
+                log.info("Record array parsed successfully, type: " + (parsed != null ? parsed.getClass().getSimpleName() : "null"));
+                if (parsed instanceof BArray) {
+                    BArray array = (BArray) parsed;
+                    log.info("Parsed record array size: " + array.size());
+                }
+                return parsed;
+            } catch (Exception e) {
+                log.error("Failed to parse record array JSON: " + e.getMessage(), e);
+                throw new SynapseException("Failed to parse record array: " + e.getMessage(), e);
+            }
+        }
+
+        // For simple type arrays, check if it's in table format and transform if needed
+        Object parsed = JsonUtils.parse(cleanedJson);
+        if (parsed instanceof BArray) {
+            BArray array = (BArray) parsed;
+            log.info("Array size: " + array.size());
+            if (array.size() > 0) {
+                Object firstElement = array.get(0);
+                // If first element is a map with "value" field, it's table format
+                if (firstElement instanceof BMap) {
+                    BMap firstRow = (BMap) firstElement;
+                    if (firstRow.containsKey(StringUtils.fromString("value")) && firstRow.size() == 1) {
+                        log.info("Table format detected for simple array (has 'value' field). Transforming...");
+                        // Transform table format to simple array: [{"value": "v1"}] -> ["v1"]
+                        String transformedJson = transformTableArrayToSimpleArray(array);
+                        log.info("Transformed JSON: " + transformedJson);
+                        return TypeConverter.convertToArray(transformedJson, elementType);
+                    } else {
+                        log.info("Array contains objects but not in table format (field count: " + firstRow.size() + ")");
+                    }
+                } else {
+                    log.info("Array already in direct format (elements are primitives)");
+                }
+            }
+        }
+
+        // Use shared TypeConverter for conversion (direct format)
+        log.info("Using direct format conversion");
+        try {
+            Object result = TypeConverter.convertToArray(cleanedJson, elementType);
+            log.info("TypeConverter.convertToArray completed successfully");
+            return result;
+        } catch (Exception e) {
+            log.error("TypeConverter.convertToArray failed: " + e.getMessage(), e);
+            throw new SynapseException("Failed to convert array: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Clean up JSON string to fix common issues from MI Studio table UI serialization.
+     * - Removes trailing commas before closing brackets/braces: ,] or ,}
+     *
+     * @param json Original JSON string
+     * @return Cleaned JSON string
+     */
+    private String cleanupJsonString(String json) {
+        if (json == null) {
+            return null;
+        }
+        // Remove trailing commas before ] or }
+        // Pattern: comma followed by optional whitespace, then ] or }
+        return json.replaceAll(",\\s*([\\]\\}])", "$1");
+    }
+
+    /**
+     * Transform table array format to simple array for primitive types.
+     * Input: [{"value": "v1"}, {"value": "v2"}, {"value": "v3"}]
+     * Output: ["v1", "v2", "v3"]
+     *
+     * @param tableArray BArray in table format
+     * @return JSON string of simple array
+     */
+    private String transformTableArrayToSimpleArray(BArray tableArray) {
+        log.info("Starting table array to simple array transformation. Input size: " + tableArray.size());
+        BString valueFieldName = StringUtils.fromString("value");
+        StringBuilder jsonBuilder = new StringBuilder("[");
+
+        for (int i = 0; i < tableArray.size(); i++) {
+            if (i > 0) {
+                jsonBuilder.append(",");
+            }
+
+            Object element = tableArray.get(i);
+            if (element instanceof BMap) {
+                BMap row = (BMap) element;
+                Object value = row.get(valueFieldName);
+
+                if (value == null) {
+                    throw new SynapseException("Table row missing 'value' field at index " + i);
+                }
+
+                // Serialize the value
+                String valueType = value.getClass().getSimpleName();
+                if (value instanceof BString) {
+                    // Escape and quote strings
+                    String strValue = ((BString) value).getValue();
+                    log.info("Row " + i + ": String value = '" + strValue + "'");
+                    jsonBuilder.append("\"").append(strValue.replace("\"", "\\\"")).append("\"");
+                } else if (value instanceof Boolean || value instanceof Number) {
+                    // Primitives don't need quotes
+                    log.info("Row " + i + ": " + valueType + " value = " + value);
+                    jsonBuilder.append(value.toString());
+                } else {
+                    // For other types, use toString
+                    log.info("Row " + i + ": " + valueType + " value (toString) = '" + value.toString() + "'");
+                    jsonBuilder.append("\"").append(value.toString().replace("\"", "\\\"")).append("\"");
+                }
+            }
+        }
+
+        jsonBuilder.append("]");
+        String result = jsonBuilder.toString();
+        log.info("Table array transformation complete. Result: " + result);
+        return result;
     }
 
     private static String getResultProperty(MessageContext context) {
