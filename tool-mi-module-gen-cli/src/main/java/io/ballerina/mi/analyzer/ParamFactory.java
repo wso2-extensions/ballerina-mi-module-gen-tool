@@ -19,6 +19,8 @@
 package io.ballerina.mi.analyzer;
 
 import io.ballerina.compiler.api.impl.symbols.BallerinaUnionTypeSymbol;
+import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
+import io.ballerina.compiler.api.symbols.MapTypeSymbol;
 import io.ballerina.compiler.api.symbols.ParameterKind;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
@@ -26,7 +28,9 @@ import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.mi.connectorModel.ArrayFunctionParam;
 import io.ballerina.mi.connectorModel.FunctionParam;
+import io.ballerina.mi.connectorModel.MapFunctionParam;
 import io.ballerina.mi.connectorModel.RecordFunctionParam;
 import io.ballerina.mi.connectorModel.UnionFunctionParam;
 import io.ballerina.mi.util.Utils;
@@ -70,6 +74,12 @@ public class ParamFactory {
             }
             if (actualTypeKind == TypeDescKind.RECORD) {
                 return createRecordFunctionParam(parameterSymbol, index);
+            }
+            if (actualTypeKind == TypeDescKind.MAP) {
+                return createMapFunctionParam(parameterSymbol, index);
+            }
+            if (actualTypeKind == TypeDescKind.ARRAY) {
+                return createArrayFunctionParam(parameterSymbol, index);
             }
             FunctionParam functionParam = new FunctionParam(Integer.toString(index), parameterSymbol.getName().orElseThrow(), paramType);
             functionParam.setParamKind(parameterSymbol.paramKind());
@@ -322,6 +332,175 @@ public class ParamFactory {
                     functionParam.addUnionMemberParam(memberParam);
                     memberIndex++;
                 }
+            }
+        }
+    }
+
+    private static Optional<FunctionParam> createMapFunctionParam(ParameterSymbol parameterSymbol, int index) {
+        String paramName = parameterSymbol.getName().orElseThrow();
+        TypeSymbol typeSymbol = parameterSymbol.typeDescriptor();
+        TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(typeSymbol);
+
+        MapFunctionParam mapParam = new MapFunctionParam(Integer.toString(index), paramName, TypeDescKind.MAP.getName());
+        mapParam.setParamKind(parameterSymbol.paramKind());
+        mapParam.setTypeSymbol(typeSymbol);
+
+        // Set required based on parameter kind
+        if (parameterSymbol.paramKind() == ParameterKind.DEFAULTABLE) {
+            mapParam.setRequired(false);
+        }
+
+        // Extract key and value type information
+        if (actualTypeSymbol instanceof MapTypeSymbol mapTypeSymbol) {
+            Optional<TypeSymbol> valueTypeOpt = mapTypeSymbol.typeParameter();
+            if (valueTypeOpt.isPresent()) {
+                TypeSymbol valueType = valueTypeOpt.get();
+                mapParam.setValueTypeSymbol(valueType);
+
+                // Determine if we should render as table
+                TypeDescKind valueTypeKind = Utils.getActualTypeKind(valueType);
+                boolean shouldRenderAsTable = shouldMapRenderAsTable(valueType, valueTypeKind);
+                mapParam.setRenderAsTable(shouldRenderAsTable);
+
+                // If value is a record and we're rendering as table, expand its fields
+                if (shouldRenderAsTable && valueTypeKind == TypeDescKind.RECORD) {
+                    TypeSymbol actualValueType = Utils.getActualTypeSymbol(valueType);
+                    if (actualValueType instanceof RecordTypeSymbol recordTypeSymbol) {
+                        populateMapValueFields(mapParam, recordTypeSymbol);
+                    }
+                }
+            }
+        }
+
+        return Optional.of(mapParam);
+    }
+
+    private static Optional<FunctionParam> createArrayFunctionParam(ParameterSymbol parameterSymbol, int index) {
+        String paramName = parameterSymbol.getName().orElseThrow();
+        TypeSymbol typeSymbol = parameterSymbol.typeDescriptor();
+        TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(typeSymbol);
+
+        ArrayFunctionParam arrayParam = new ArrayFunctionParam(Integer.toString(index), paramName, TypeDescKind.ARRAY.getName());
+        arrayParam.setParamKind(parameterSymbol.paramKind());
+        arrayParam.setTypeSymbol(typeSymbol);
+
+        // Set required based on parameter kind
+        if (parameterSymbol.paramKind() == ParameterKind.DEFAULTABLE) {
+            arrayParam.setRequired(false);
+        }
+
+        // Extract element type information
+        if (actualTypeSymbol instanceof ArrayTypeSymbol arrayTypeSymbol) {
+            TypeSymbol elementType = arrayTypeSymbol.memberTypeDescriptor();
+            arrayParam.setElementTypeSymbol(elementType);
+
+            // Determine if we should render as table
+            TypeDescKind elementTypeKind = Utils.getActualTypeKind(elementType);
+            boolean shouldRenderAsTable = shouldArrayRenderAsTable(elementType, elementTypeKind);
+            arrayParam.setRenderAsTable(shouldRenderAsTable);
+
+            // If element is a record and we're rendering as table, expand its fields
+            if (shouldRenderAsTable && elementTypeKind == TypeDescKind.RECORD) {
+                TypeSymbol actualElementType = Utils.getActualTypeSymbol(elementType);
+                if (actualElementType instanceof RecordTypeSymbol recordTypeSymbol) {
+                    populateArrayElementFields(arrayParam, recordTypeSymbol);
+                }
+            }
+        }
+
+        return Optional.of(arrayParam);
+    }
+
+    private static boolean shouldMapRenderAsTable(TypeSymbol valueType, TypeDescKind valueTypeKind) {
+        // Render as table for simple value types
+        if (valueTypeKind == TypeDescKind.STRING ||
+            valueTypeKind == TypeDescKind.INT ||
+            valueTypeKind == TypeDescKind.BOOLEAN ||
+            valueTypeKind == TypeDescKind.FLOAT ||
+            valueTypeKind == TypeDescKind.DECIMAL) {
+            return true;
+        }
+
+        // For record values, render as table if field count is reasonable
+        if (valueTypeKind == TypeDescKind.RECORD) {
+            TypeSymbol actualType = Utils.getActualTypeSymbol(valueType);
+            if (actualType instanceof RecordTypeSymbol recordType) {
+                int fieldCount = recordType.fieldDescriptors().size();
+                return fieldCount > 0 && fieldCount <= 5;  // Key + 5 fields = 6 columns max
+            }
+        }
+
+        return false;  // Complex types, nested maps, unions, etc. use JSON input
+    }
+
+    private static boolean shouldArrayRenderAsTable(TypeSymbol elementType, TypeDescKind elementTypeKind) {
+        // Render as table for simple element types
+        if (elementTypeKind == TypeDescKind.STRING ||
+            elementTypeKind == TypeDescKind.INT ||
+            elementTypeKind == TypeDescKind.BOOLEAN ||
+            elementTypeKind == TypeDescKind.FLOAT ||
+            elementTypeKind == TypeDescKind.DECIMAL) {
+            return true;
+        }
+
+        // For record elements, render as table if field count is reasonable
+        if (elementTypeKind == TypeDescKind.RECORD) {
+            TypeSymbol actualType = Utils.getActualTypeSymbol(elementType);
+            if (actualType instanceof RecordTypeSymbol recordType) {
+                int fieldCount = recordType.fieldDescriptors().size();
+                return fieldCount > 0 && fieldCount <= 10;  // More fields allowed than maps (no key column)
+            }
+        }
+
+        return false;  // Arrays, nested arrays, unions, etc. use JSON input
+    }
+
+    private static void populateMapValueFields(MapFunctionParam mapParam, RecordTypeSymbol recordTypeSymbol) {
+        Map<String, RecordFieldSymbol> fieldDescriptors = recordTypeSymbol.fieldDescriptors();
+        int fieldIndex = 0;
+
+        for (Map.Entry<String, RecordFieldSymbol> entry : fieldDescriptors.entrySet()) {
+            String fieldName = entry.getKey();
+            RecordFieldSymbol fieldSymbol = entry.getValue();
+            TypeSymbol fieldTypeSymbol = fieldSymbol.typeDescriptor();
+            TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldTypeSymbol);
+            String fieldType = Utils.getParamTypeName(fieldTypeKind);
+
+            if (fieldType != null) {
+                FunctionParam fieldParam = new FunctionParam(Integer.toString(fieldIndex), fieldName, fieldType);
+                fieldParam.setTypeSymbol(fieldTypeSymbol);
+                fieldParam.setRequired(!fieldSymbol.isOptional());
+
+                fieldSymbol.documentation().ifPresent(doc ->
+                    doc.description().ifPresent(fieldParam::setDescription));
+
+                mapParam.addValueFieldParam(fieldParam);
+                fieldIndex++;
+            }
+        }
+    }
+
+    private static void populateArrayElementFields(ArrayFunctionParam arrayParam, RecordTypeSymbol recordTypeSymbol) {
+        Map<String, RecordFieldSymbol> fieldDescriptors = recordTypeSymbol.fieldDescriptors();
+        int fieldIndex = 0;
+
+        for (Map.Entry<String, RecordFieldSymbol> entry : fieldDescriptors.entrySet()) {
+            String fieldName = entry.getKey();
+            RecordFieldSymbol fieldSymbol = entry.getValue();
+            TypeSymbol fieldTypeSymbol = fieldSymbol.typeDescriptor();
+            TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldTypeSymbol);
+            String fieldType = Utils.getParamTypeName(fieldTypeKind);
+
+            if (fieldType != null) {
+                FunctionParam fieldParam = new FunctionParam(Integer.toString(fieldIndex), fieldName, fieldType);
+                fieldParam.setTypeSymbol(fieldTypeSymbol);
+                fieldParam.setRequired(!fieldSymbol.isOptional());
+
+                fieldSymbol.documentation().ifPresent(doc ->
+                    doc.description().ifPresent(fieldParam::setDescription));
+
+                arrayParam.addElementFieldParam(fieldParam);
+                fieldIndex++;
             }
         }
     }
