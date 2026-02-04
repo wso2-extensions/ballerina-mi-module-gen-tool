@@ -1014,15 +1014,24 @@ public class BalExecutor {
     }
 
     private BMap getMapParameter(Object param) {
-        Object parsed;
+        String jsonString;
         if (param instanceof String strParam) {
             if (strParam.startsWith("'") && strParam.endsWith("'")) {
                 strParam = strParam.substring(1, strParam.length() - 1);
             }
-            parsed = JsonUtils.parse(strParam);
+            jsonString = strParam;
         } else {
-            parsed = JsonUtils.parse(param.toString());
+            jsonString = param.toString();
         }
+
+        // Clean up invalid JSON (trailing commas from MI Studio table UI)
+        log.info("Map parameter JSON string (original): " + jsonString);
+        String cleanedJson = cleanupJsonString(jsonString);
+        if (!cleanedJson.equals(jsonString)) {
+            log.info("JSON cleaned up (removed trailing commas): " + cleanedJson);
+        }
+
+        Object parsed = JsonUtils.parse(cleanedJson);
 
         // If parsed is a BMap, return it directly
         if (parsed instanceof BMap) {
