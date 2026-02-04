@@ -125,6 +125,6 @@ bal run
 &#x60;&#x60;&#x60;
 </description>
     </component>
-    <icon>icon/icon-small.gif</icon>
+    <icon>icon/icon-small.png</icon>
     <displayName>milvus</displayName>
 </connector>
