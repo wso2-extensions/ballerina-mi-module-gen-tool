@@ -29,29 +29,42 @@ public class AbortionTest {
          ArtifactGenerationUtil.setupBallerinaHome();
          String projectPathStr = "src/test/resources/ballerina/unsupportedProject";
          java.nio.file.Path projectDir = java.nio.file.Paths.get(projectPathStr);
-         
+
          // Pack the project to create a .bala file
          java.nio.file.Path balaPath = ArtifactGenerationUtil.packBallerinaProject(projectDir);
-         
-         // Unzip the bala to a temporary directory
-         java.nio.file.Path extractedBala = projectDir.resolve("target").resolve("extracted-bala");
-         if (java.nio.file.Files.exists(extractedBala)) {
-             io.ballerina.mi.util.Utils.deleteDirectory(extractedBala);
-         }
-         java.nio.file.Files.createDirectories(extractedBala);
-         unzip(balaPath, extractedBala);
 
-         String projectName = "unsupportedProject";
-         String targetPath = projectDir.resolve("target").resolve("mi-artifacts").toString();
-         
-         // The generation should verify that NO artifacts are generated.
-         // ArtifactGenerationUtil throws AssertionError if no zip is found.
+         // Use temporary directories for extracted bala contents and MI artifacts output
+         java.nio.file.Path extractedBala = null;
+         java.nio.file.Path targetDir = null;
          try {
-             ArtifactGenerationUtil.generateExpectedArtifacts(extractedBala.toAbsolutePath().toString(), targetPath, projectName);
-             Assert.fail("Artifact generation should have produced no artifacts, but it seems to have succeeded/found artifacts.");
-         } catch (AssertionError e) {
-             Assert.assertTrue(e.getMessage().contains("Generated zip file not found"), 
-                 "Expected 'Generated zip file not found' error, but got: " + e.getMessage());
+             extractedBala = java.nio.file.Files.createTempDirectory("unsupported-extracted-bala-");
+             targetDir = java.nio.file.Files.createTempDirectory("unsupported-mi-artifacts-");
+
+             // Unzip the bala to the temporary directory
+             unzip(balaPath, extractedBala);
+
+             String projectName = "unsupportedProject";
+             String targetPath = targetDir.toString();
+
+             // The generation should verify that NO artifacts are generated.
+             // ArtifactGenerationUtil throws AssertionError if no zip is found.
+             try {
+                 ArtifactGenerationUtil.generateExpectedArtifacts(
+                         extractedBala.toAbsolutePath().toString(), targetPath, projectName);
+                 Assert.fail("Artifact generation should have produced no artifacts, but it seems to have " +
+                         "succeeded/found artifacts.");
+             } catch (AssertionError e) {
+                 Assert.assertTrue(e.getMessage().contains("Generated zip file not found"),
+                         "Expected 'Generated zip file not found' error, but got: " + e.getMessage());
+             }
+         } finally {
+             // Clean up temporary directories to avoid leaving stray files on disk
+             if (extractedBala != null && java.nio.file.Files.exists(extractedBala)) {
+                 io.ballerina.mi.util.Utils.deleteDirectory(extractedBala);
+             }
+             if (targetDir != null && java.nio.file.Files.exists(targetDir)) {
+                 io.ballerina.mi.util.Utils.deleteDirectory(targetDir);
+             }
          }
     }
 
