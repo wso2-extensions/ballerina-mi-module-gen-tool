@@ -388,8 +388,10 @@ public class BalConnectorAnalyzer implements Analyzer {
                     component.setHasOperationId(true);
                 }
 
+
                 // Now add all function parameters (we keep them all, synapse name is made unique instead)
                 int paramIndex = 0;
+                boolean shouldSkipOperation = false;
                 if (params.isPresent()) {
                     List<ParameterSymbol> parameterSymbols = params.get();
                     for (ParameterSymbol parameterSymbol : parameterSymbols) {
@@ -399,7 +401,8 @@ public class BalConnectorAnalyzer implements Analyzer {
                             printStream.println("Skipping function '" + functionName +
                                     "' due to unsupported parameter type: " + paramType);
                             skippedOperations++;
-                            continue;
+                            shouldSkipOperation = true;
+                            break; // Exit parameter loop, skip this entire operation
                         }
 
                         FunctionParam param = functionParam.get();
@@ -418,27 +421,42 @@ public class BalConnectorAnalyzer implements Analyzer {
                         component.setFunctionParam(param);
                         paramIndex++;
                     }
-                    Param sizeParam = new Param("paramSize", Integer.toString(paramIndex));
-                    Param functionNameParam = new Param("paramFunctionName", component.getName());
-                    component.setParam(sizeParam);
-                    component.setParam(functionNameParam);
+                    
+                    // Only add component if we didn't skip due to unsupported parameter
+                    if (!shouldSkipOperation) {
+                        Param sizeParam = new Param("paramSize", Integer.toString(paramIndex));
+                        Param functionNameParam = new Param("paramFunctionName", component.getName());
+                        component.setParam(sizeParam);
+                        component.setParam(functionNameParam);
+                    }
                 }
-                if (functionType == FunctionType.INIT) {
-                    // objectTypeName is only needed on Connection, not on Component
-                    // to avoid duplication in generated XML
-                    connection.setInitComponent(component);
-                } else {
-                    connection.setComponent(component);
+                
+                // Only add the component if it wasn't skipped
+                if (!shouldSkipOperation) {
+                    if (functionType == FunctionType.INIT) {
+                        // objectTypeName is only needed on Connection, not on Component
+                        // to avoid duplication in generated XML
+                        connection.setInitComponent(component);
+                    } else {
+                        connection.setComponent(component);
+                    }
+                    i++;
                 }
-                i++;
             }
 
-            if (totalOperations > 0 && (double) skippedOperations / totalOperations >= 0.5) {
-                String message = String.format("WARNING: %d out of %d operations (%.1f%%) were skipped due to unsupported parameter types. Artifact generation for '%s' will be skipped.",
-                        skippedOperations, totalOperations, (double) skippedOperations / totalOperations * 100, clientClassName);
+            // Abort generation only if no operations exist
+            if (totalOperations == 0) {
+                String message = String.format("WARNING: No operations found in class '%s'. Artifact generation will be skipped.", clientClassName);
                 printStream.println(message);
                 connector.setGenerationAborted(true, message);
                 return;
+            }
+            
+            // Show warning if skip rate is >= 50%, but continue with generation
+            if (totalOperations > 0 && (double) skippedOperations / totalOperations >= 0.5) {
+                String message = String.format("WARNING: %d out of %d operations (%.1f%%) were skipped due to unsupported parameter types. Continuing with partial artifact generation for '%s'.",
+                        skippedOperations, totalOperations, (double) skippedOperations / totalOperations * 100, clientClassName);
+                printStream.println(message);
             }
             
             connector.setConnection(connection);
