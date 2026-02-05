@@ -190,7 +190,6 @@ public class BalConnectorAnalyzer implements Analyzer {
             int totalOperations = 0;
             int skippedOperations = 0;
 
-            methodLoop:
             for (Map.Entry<String, MethodSymbol> methodEntry : allMethods.entrySet()) {
                 MethodSymbol methodSymbol = methodEntry.getValue();
                 List<Qualifier> qualifierList = methodSymbol.qualifiers();
@@ -400,7 +399,7 @@ public class BalConnectorAnalyzer implements Analyzer {
                             printStream.println("Skipping function '" + functionName +
                                     "' due to unsupported parameter type: " + paramType);
                             skippedOperations++;
-                            continue methodLoop;
+                            continue;
                         }
 
                         FunctionParam param = functionParam.get();
