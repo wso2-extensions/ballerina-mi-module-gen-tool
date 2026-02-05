@@ -257,15 +257,9 @@ public class BalConnectorAnalyzer implements Analyzer {
                     synapseName = synapseName.replace(".", "_");
                 }
                 
-                // Handle duplicate names by appending numeric suffix
+                // NOTE: Defer duplicate-name bookkeeping until after parameter validation
+                // to avoid reserving names for methods that will be skipped
                 String finalSynapseName = synapseName;
-                if (synapseNameCount.containsKey(synapseName)) {
-                    int count = synapseNameCount.get(synapseName) + 1;
-                    synapseNameCount.put(synapseName, count);
-                    finalSynapseName = synapseName + count;
-                } else {
-                    synapseNameCount.put(synapseName, 0);
-                }
 
                 // Extract path parameters and path segments from resource path (for resource functions)
                 List<PathParamType> pathParams = new ArrayList<>();
@@ -363,10 +357,21 @@ public class BalConnectorAnalyzer implements Analyzer {
 
                 // Check if synapse name conflicts with any parameter name and make it unique if needed
                 Optional<String> methodNameOpt = methodSymbol.getName();
-                if (allParamNames.contains(finalSynapseName) || 
+                if (allParamNames.contains(synapseName) || 
                     (methodNameOpt.isPresent() && allParamNames.contains(methodNameOpt.get()))) {
                     // Add a suffix to make the synapse name unique and avoid conflicts
-                    finalSynapseName = finalSynapseName + "_operation";
+                    synapseName = synapseName + "_operation";
+                }
+                
+                // NOW handle duplicate names by appending numeric suffix
+                // (All parameters are validated, so this method will not be skipped)
+                if (synapseNameCount.containsKey(synapseName)) {
+                    int count = synapseNameCount.get(synapseName) + 1;
+                    synapseNameCount.put(synapseName, count);
+                    finalSynapseName = synapseName + count;
+                } else {
+                    synapseNameCount.put(synapseName, 0);
+                    finalSynapseName = synapseName;
                 }
 
                 component = new Component(finalSynapseName, docString, functionType, Integer.toString(i), pathParams, List.of(), returnType);
