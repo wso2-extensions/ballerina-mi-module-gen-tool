@@ -35,11 +35,18 @@ public class ArrayFunctionParam extends FunctionParam {
     private TypeSymbol elementTypeSymbol;
     private List<FunctionParam> elementFieldParams;
     private boolean renderAsTable;
+    private boolean is2DArray;
+    private boolean isUnionArray;
+    private List<String> unionMemberTypeNames;
+    private TypeSymbol innerElementTypeSymbol;
 
     public ArrayFunctionParam(String index, String name, String paramType) {
         super(index, name, paramType);
         this.elementFieldParams = new ArrayList<>();
         this.renderAsTable = false;
+        this.is2DArray = false;
+        this.isUnionArray = false;
+        this.unionMemberTypeNames = new ArrayList<>();
     }
 
     public TypeSymbol getElementTypeSymbol() {
@@ -68,5 +75,37 @@ public class ArrayFunctionParam extends FunctionParam {
 
     public void setRenderAsTable(boolean renderAsTable) {
         this.renderAsTable = renderAsTable;
+    }
+
+    public boolean is2DArray() {
+        return is2DArray;
+    }
+
+    public void set2DArray(boolean is2DArray) {
+        this.is2DArray = is2DArray;
+    }
+
+    public boolean isUnionArray() {
+        return isUnionArray;
+    }
+
+    public void setUnionArray(boolean isUnionArray) {
+        this.isUnionArray = isUnionArray;
+    }
+
+    public List<String> getUnionMemberTypeNames() {
+        return unionMemberTypeNames;
+    }
+
+    public void setUnionMemberTypeNames(List<String> unionMemberTypeNames) {
+        this.unionMemberTypeNames = unionMemberTypeNames;
+    }
+
+    public TypeSymbol getInnerElementTypeSymbol() {
+        return innerElementTypeSymbol;
+    }
+
+    public void setInnerElementTypeSymbol(TypeSymbol innerElementTypeSymbol) {
+        this.innerElementTypeSymbol = innerElementTypeSymbol;
     }
 }

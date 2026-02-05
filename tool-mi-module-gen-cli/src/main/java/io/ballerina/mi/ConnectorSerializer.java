@@ -24,6 +24,7 @@ import io.ballerina.mi.connectorModel.*;
 import io.ballerina.mi.connectorModel.attributeModel.Attribute;
 import io.ballerina.mi.connectorModel.attributeModel.AttributeGroup;
 import io.ballerina.mi.connectorModel.attributeModel.Combo;
+import io.ballerina.mi.connectorModel.attributeModel.Element;
 import io.ballerina.mi.connectorModel.attributeModel.Table;
 import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.JsonTemplateBuilder;
@@ -715,7 +716,13 @@ public class ConnectorSerializer {
                 break;
             case ARRAY:
                 if (functionParam instanceof ArrayFunctionParam arrayParam && arrayParam.isRenderAsTable()) {
-                    writeArrayAsTable(arrayParam, builder, isCombo);
+                    if (arrayParam.is2DArray()) {
+                        writeNestedArrayAsTable(arrayParam, builder, isCombo);
+                    } else if (arrayParam.isUnionArray()) {
+                        writeUnionArrayAsTable(arrayParam, builder, isCombo);
+                    } else {
+                        writeArrayAsTable(arrayParam, builder, isCombo);
+                    }
                 } else {
                     // Fall back to JSON input for complex arrays
                     Attribute arrayAttr = new Attribute(sanitizedParamName, displayName,
@@ -1439,7 +1446,7 @@ public class ConnectorSerializer {
         }
         displayName = Utils.sanitizeParamName(displayName);
 
-        List<Attribute> tableColumns = new ArrayList<>();
+        List<Element> tableColumns = new ArrayList<>();
 
         // First column: key (always required for maps)
         Attribute keyColumn = new Attribute(
@@ -1506,7 +1513,7 @@ public class ConnectorSerializer {
         }
         displayName = Utils.sanitizeParamName(displayName);
 
-        List<Attribute> tableColumns = new ArrayList<>();
+        List<Element> tableColumns = new ArrayList<>();
 
         // For arrays, we don't have a key column - just value column(s)
         if (arrayParam.getElementFieldParams() != null && !arrayParam.getElementFieldParams().isEmpty()) {
@@ -1526,6 +1533,211 @@ public class ConnectorSerializer {
             "Configure " + displayName + " entries";
 
         // Set tableKey and tableValue to actual element names
+        String tableKey = tableColumns.isEmpty() ? "" : tableColumns.get(0).getName();
+        String tableValue = tableColumns.size() < 2 ? tableKey : tableColumns.get(tableColumns.size() - 1).getName();
+
+        Table table = new Table(
+            paramName,
+            displayName,
+            displayName,
+            description,
+            tableKey,
+            tableValue,
+            tableColumns,
+            arrayParam.getEnableCondition(),
+            arrayParam.isRequired()
+        );
+
+        builder.addFromTemplate(TABLE_TEMPLATE_PATH, table);
+    }
+
+    /**
+     * Writes a 2D array parameter as a nested table UI.
+     * The outer table has a single element which is itself a Table (nested).
+     * For example, string[][] produces an outer table with one nested table element containing a "value" string column.
+     */
+    private static void writeNestedArrayAsTable(ArrayFunctionParam arrayParam, JsonTemplateBuilder builder,
+                                                 boolean isCombo) throws IOException {
+
+        String paramName = Utils.sanitizeParamName(arrayParam.getValue());
+        String displayName = arrayParam.getValue();
+        if (displayName.contains(".")) {
+            displayName = displayName.substring(displayName.lastIndexOf('.') + 1);
+        }
+        displayName = Utils.sanitizeParamName(displayName);
+
+        // Build inner table columns based on inner element type
+        List<Element> innerColumns = new ArrayList<>();
+        TypeSymbol innerElementType = arrayParam.getInnerElementTypeSymbol();
+
+        if (innerElementType != null) {
+            TypeDescKind innerKind = Utils.getActualTypeKind(innerElementType);
+
+            if (innerKind == TypeDescKind.RECORD) {
+                // Inner array of records - expand fields as columns
+                TypeSymbol actualInnerType = Utils.getActualTypeSymbol(innerElementType);
+                if (actualInnerType instanceof io.ballerina.compiler.api.symbols.RecordTypeSymbol recordType) {
+                    for (java.util.Map.Entry<String, io.ballerina.compiler.api.symbols.RecordFieldSymbol> entry :
+                            recordType.fieldDescriptors().entrySet()) {
+                        String fieldName = entry.getKey();
+                        io.ballerina.compiler.api.symbols.RecordFieldSymbol fieldSymbol = entry.getValue();
+                        TypeSymbol fieldTypeSymbol = fieldSymbol.typeDescriptor();
+                        TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldTypeSymbol);
+
+                        String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
+                        String validateType = "";
+                        String matchPattern = "";
+                        String helpTip = fieldName;
+
+                        switch (fieldTypeKind) {
+                            case INT:
+                                validateType = VALIDATE_TYPE_REGEX;
+                                matchPattern = INTEGER_REGEX;
+                                break;
+                            case FLOAT, DECIMAL:
+                                validateType = VALIDATE_TYPE_REGEX;
+                                matchPattern = DECIMAL_REGEX;
+                                break;
+                            case BOOLEAN:
+                                inputType = INPUT_TYPE_BOOLEAN;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        innerColumns.add(new Attribute(fieldName, StringUtils.capitalize(fieldName),
+                                inputType, "", !fieldSymbol.isOptional(), helpTip, validateType, matchPattern, false));
+                    }
+                }
+            } else {
+                // Inner array of primitives (string[][], int[][], etc.) - single "value" column
+                String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
+                String validateType = "";
+                String matchPattern = "";
+                String helpTip = "Array element";
+
+                switch (innerKind) {
+                    case INT:
+                        validateType = VALIDATE_TYPE_REGEX;
+                        matchPattern = INTEGER_REGEX;
+                        helpTip = "Integer value";
+                        break;
+                    case FLOAT, DECIMAL:
+                        validateType = VALIDATE_TYPE_REGEX;
+                        matchPattern = DECIMAL_REGEX;
+                        helpTip = "Decimal value";
+                        break;
+                    case BOOLEAN:
+                        inputType = INPUT_TYPE_BOOLEAN;
+                        helpTip = "Boolean value (true/false)";
+                        break;
+                    default:
+                        helpTip = "Value";
+                        break;
+                }
+
+                innerColumns.add(new Attribute("value", "Value", inputType, "", true,
+                        helpTip, validateType, matchPattern, false));
+            }
+        } else {
+            // Fallback - single string value column
+            innerColumns.add(new Attribute("value", "Value", INPUT_TYPE_STRING_OR_EXPRESSION,
+                    "", true, "Value", "", "", false));
+        }
+
+        // Create the inner (nested) table
+        Table innerTable = new Table(
+            "innerArray",
+            "Inner Array",
+            "Inner Array",
+            "Inner array elements",
+            innerColumns.isEmpty() ? "" : innerColumns.get(0).getName(),
+            innerColumns.isEmpty() ? "" : innerColumns.get(innerColumns.size() - 1).getName(),
+            innerColumns,
+            null,
+            true
+        );
+
+        // Create the outer table with the inner table as its single element
+        List<Element> outerElements = new ArrayList<>();
+        outerElements.add(innerTable);
+
+        String description = arrayParam.getDescription() != null ?
+            arrayParam.getDescription() :
+            "Configure " + displayName + " entries";
+
+        Table outerTable = new Table(
+            paramName,
+            displayName,
+            displayName,
+            description,
+            "innerArray",
+            "innerArray",
+            outerElements,
+            arrayParam.getEnableCondition(),
+            arrayParam.isRequired()
+        );
+
+        builder.addFromTemplate(TABLE_TEMPLATE_PATH, outerTable);
+    }
+
+    /**
+     * Writes a union type array parameter as a table UI with a type dropdown and value field per row.
+     * For example, (string|int)[] produces a table with a "type" combo column and a "value" text column.
+     */
+    private static void writeUnionArrayAsTable(ArrayFunctionParam arrayParam, JsonTemplateBuilder builder,
+                                                boolean isCombo) throws IOException {
+
+        String paramName = Utils.sanitizeParamName(arrayParam.getValue());
+        String displayName = arrayParam.getValue();
+        if (displayName.contains(".")) {
+            displayName = displayName.substring(displayName.lastIndexOf('.') + 1);
+        }
+        displayName = Utils.sanitizeParamName(displayName);
+
+        List<Element> tableColumns = new ArrayList<>();
+
+        // Type selector column (combo dropdown with union member types)
+        List<String> memberTypes = arrayParam.getUnionMemberTypeNames();
+        if (memberTypes != null && !memberTypes.isEmpty()) {
+            StringJoiner comboJoiner = new StringJoiner(",", "[", "]");
+            for (String memberType : memberTypes) {
+                comboJoiner.add("\"" + memberType + "\"");
+            }
+            String comboValues = comboJoiner.toString();
+            String defaultType = memberTypes.get(0);
+
+            Combo typeColumn = new Combo(
+                "type",
+                "Type",
+                INPUT_TYPE_COMBO,
+                comboValues,
+                defaultType,
+                true,
+                null,
+                "Select the data type for this element"
+            );
+            tableColumns.add(typeColumn);
+        }
+
+        // Value column (string input - no validation since type varies)
+        Attribute valueColumn = new Attribute(
+            "value",
+            "Value",
+            INPUT_TYPE_STRING_OR_EXPRESSION,
+            "",
+            true,
+            "Element value",
+            "",
+            "",
+            false
+        );
+        tableColumns.add(valueColumn);
+
+        String description = arrayParam.getDescription() != null ?
+            arrayParam.getDescription() :
+            "Configure " + displayName + " entries";
+
         String tableKey = tableColumns.isEmpty() ? "" : tableColumns.get(0).getName();
         String tableValue = tableColumns.size() < 2 ? tableKey : tableColumns.get(tableColumns.size() - 1).getName();
 

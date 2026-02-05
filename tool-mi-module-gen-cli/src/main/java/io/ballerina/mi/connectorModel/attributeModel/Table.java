@@ -21,18 +21,24 @@ package io.ballerina.mi.connectorModel.attributeModel;
 import java.util.List;
 
 public class Table extends Element {
+
+    @Override
+    public String getElementType() {
+        return "table";
+    }
+
     private final String name;
     private final String displayName;
     private final String title;
     private final String description;
     private final String tableKey;
     private final String tableValue;
-    private final List<Attribute> elements;
+    private final List<Element> elements;
     private final String enableCondition;
     private final Boolean required;
 
     public Table(String name, String displayName, String title, String description,
-                 String tableKey, String tableValue, List<Attribute> elements,
+                 String tableKey, String tableValue, List<Element> elements,
                  String enableCondition, Boolean required) {
         this.name = name;
         this.displayName = displayName;
@@ -45,6 +51,7 @@ public class Table extends Element {
         this.required = required;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -69,7 +76,7 @@ public class Table extends Element {
         return tableValue;
     }
 
-    public List<Attribute> getElements() {
+    public List<Element> getElements() {
         return elements;
     }
 

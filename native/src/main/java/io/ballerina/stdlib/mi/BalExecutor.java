@@ -1286,6 +1286,66 @@ public class BalExecutor {
             }
         }
 
+        // For 2D arrays (element type is "array"), handle nested table format
+        if ("array".equals(elementType)) {
+            log.info("2D array detected - handling nested table format");
+            try {
+                Object parsed = JsonUtils.parse(cleanedJson);
+                if (parsed instanceof BArray outerArray) {
+                    log.info("2D array outer size: " + outerArray.size());
+                    // Check if it's in nested table format: [{"innerArray": [{"value":"v1"},...]}, ...]
+                    if (outerArray.size() > 0) {
+                        Object firstElement = outerArray.get(0);
+                        if (firstElement instanceof BMap firstRow) {
+                            BString innerArrayKey = StringUtils.fromString("innerArray");
+                            if (firstRow.containsKey(innerArrayKey)) {
+                                log.info("Nested table format detected. Transforming to 2D array...");
+                                String transformed = transformNestedTableTo2DArray(outerArray);
+                                log.info("Transformed 2D array JSON: " + transformed);
+                                return JsonUtils.parse(transformed);
+                            }
+                        }
+                    }
+                }
+                // Already in direct 2D array format
+                log.info("2D array already in direct format");
+                return parsed;
+            } catch (Exception e) {
+                log.error("Failed to parse 2D array JSON: " + e.getMessage(), e);
+                throw new SynapseException("Failed to parse 2D array: " + e.getMessage(), e);
+            }
+        }
+
+        // For union arrays, parse as raw JSON and return directly
+        if ("union".equals(elementType)) {
+            log.info("Union array detected - handling table format with type/value columns");
+            try {
+                Object parsed = JsonUtils.parse(cleanedJson);
+                if (parsed instanceof BArray array) {
+                    log.info("Union array size: " + array.size());
+                    // Check if it's in table format with "type" and "value" fields
+                    if (array.size() > 0) {
+                        Object firstElement = array.get(0);
+                        if (firstElement instanceof BMap firstRow) {
+                            if (firstRow.containsKey(StringUtils.fromString("type")) &&
+                                firstRow.containsKey(StringUtils.fromString("value"))) {
+                                log.info("Union table format detected. Transforming to typed array...");
+                                String transformed = transformUnionTableToArray(array);
+                                log.info("Transformed union array JSON: " + transformed);
+                                return JsonUtils.parse(transformed);
+                            }
+                        }
+                    }
+                }
+                // Already in direct format
+                log.info("Union array already in direct format");
+                return parsed;
+            } catch (Exception e) {
+                log.error("Failed to parse union array JSON: " + e.getMessage(), e);
+                throw new SynapseException("Failed to parse union array: " + e.getMessage(), e);
+            }
+        }
+
         // For simple type arrays, check if it's in table format and transform if needed
         Object parsed = JsonUtils.parse(cleanedJson);
         if (parsed instanceof BArray) {
@@ -1337,6 +1397,168 @@ public class BalExecutor {
         // Remove trailing commas before ] or }
         // Pattern: comma followed by optional whitespace, then ] or }
         return json.replaceAll(",\\s*([\\]\\}])", "$1");
+    }
+
+    /**
+     * Transform nested table format to 2D array.
+     * Input: [{"innerArray": [{"value": "v1"}, {"value": "v2"}]}, {"innerArray": [{"value": "v3"}]}]
+     * Output: [["v1", "v2"], ["v3"]]
+     *
+     * Also handles record inner arrays:
+     * Input: [{"innerArray": [{"name": "a", "age": 1}]}, ...]
+     * Output: [[{"name": "a", "age": 1}], ...]
+     *
+     * @param outerArray BArray in nested table format
+     * @return JSON string of 2D array
+     */
+    private String transformNestedTableTo2DArray(BArray outerArray) {
+        BString innerArrayKey = StringUtils.fromString("innerArray");
+        BString valueKey = StringUtils.fromString("value");
+        StringBuilder jsonBuilder = new StringBuilder("[");
+
+        for (int i = 0; i < outerArray.size(); i++) {
+            if (i > 0) {
+                jsonBuilder.append(",");
+            }
+
+            Object outerElement = outerArray.get(i);
+            if (outerElement instanceof BMap outerRow) {
+                Object innerValue = outerRow.get(innerArrayKey);
+                if (innerValue instanceof BArray innerArray) {
+                    jsonBuilder.append("[");
+                    for (int j = 0; j < innerArray.size(); j++) {
+                        if (j > 0) {
+                            jsonBuilder.append(",");
+                        }
+                        Object innerElement = innerArray.get(j);
+                        if (innerElement instanceof BMap innerRow) {
+                            // Check if it's simple format with just "value" field
+                            if (innerRow.containsKey(valueKey) && innerRow.size() == 1) {
+                                Object val = innerRow.get(valueKey);
+                                appendJsonValue(jsonBuilder, val);
+                            } else {
+                                // Record format - write as object
+                                jsonBuilder.append(innerElement.toString());
+                            }
+                        } else {
+                            appendJsonValue(jsonBuilder, innerElement);
+                        }
+                    }
+                    jsonBuilder.append("]");
+                } else {
+                    // If inner value is not an array, just pass it through
+                    jsonBuilder.append("[]");
+                }
+            } else {
+                jsonBuilder.append("[]");
+            }
+        }
+
+        jsonBuilder.append("]");
+        return jsonBuilder.toString();
+    }
+
+    /**
+     * Transform union table format to a simple array of typed values.
+     * Input: [{"type": "string", "value": "hello"}, {"type": "int", "value": "42"}]
+     * Output: ["hello", 42]
+     *
+     * @param array BArray in union table format
+     * @return JSON string of typed array
+     */
+    private String transformUnionTableToArray(BArray array) {
+        BString typeKey = StringUtils.fromString("type");
+        BString valueFieldName = StringUtils.fromString("value");
+        StringBuilder jsonBuilder = new StringBuilder("[");
+
+        for (int i = 0; i < array.size(); i++) {
+            if (i > 0) {
+                jsonBuilder.append(",");
+            }
+
+            Object element = array.get(i);
+            if (element instanceof BMap row) {
+                Object typeObj = row.get(typeKey);
+                Object valueObj = row.get(valueFieldName);
+                String type = typeObj != null ? typeObj.toString() : "string";
+                String value = valueObj != null ? valueObj.toString() : "";
+
+                log.info("Union row " + i + ": type=" + type + ", value=" + value);
+
+                switch (type) {
+                    case "int":
+                        try {
+                            Long.parseLong(value);
+                            jsonBuilder.append(value);
+                        } catch (NumberFormatException e) {
+                            jsonBuilder.append("\"").append(escapeJsonString(value)).append("\"");
+                        }
+                        break;
+                    case "float":
+                    case "decimal":
+                        try {
+                            Double.parseDouble(value);
+                            jsonBuilder.append(value);
+                        } catch (NumberFormatException e) {
+                            jsonBuilder.append("\"").append(escapeJsonString(value)).append("\"");
+                        }
+                        break;
+                    case "boolean":
+                        if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+                            jsonBuilder.append(value.toLowerCase());
+                        } else {
+                            jsonBuilder.append("\"").append(escapeJsonString(value)).append("\"");
+                        }
+                        break;
+                    default:
+                        // string and other types
+                        jsonBuilder.append("\"").append(escapeJsonString(value)).append("\"");
+                        break;
+                }
+            }
+        }
+
+        jsonBuilder.append("]");
+        return jsonBuilder.toString();
+    }
+
+    /**
+     * Appends a JSON value to the StringBuilder, properly quoting strings.
+     */
+    private void appendJsonValue(StringBuilder builder, Object value) {
+        if (value == null) {
+            builder.append("null");
+        } else {
+            String str = value.toString();
+            // Try to detect numeric/boolean values
+            try {
+                Long.parseLong(str);
+                builder.append(str);
+                return;
+            } catch (NumberFormatException ignored) {}
+            try {
+                Double.parseDouble(str);
+                builder.append(str);
+                return;
+            } catch (NumberFormatException ignored) {}
+            if ("true".equals(str) || "false".equals(str)) {
+                builder.append(str);
+                return;
+            }
+            builder.append("\"").append(escapeJsonString(str)).append("\"");
+        }
+    }
+
+    /**
+     * Escapes special characters for JSON string values.
+     */
+    private String escapeJsonString(String value) {
+        if (value == null) return "";
+        return value.replace("\\", "\\\\")
+                     .replace("\"", "\\\"")
+                     .replace("\n", "\\n")
+                     .replace("\r", "\\r")
+                     .replace("\t", "\\t");
     }
 
     /**

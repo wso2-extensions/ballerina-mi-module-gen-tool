@@ -399,11 +399,38 @@ public class ParamFactory {
             boolean shouldRenderAsTable = shouldArrayRenderAsTable(elementType, elementTypeKind);
             arrayParam.setRenderAsTable(shouldRenderAsTable);
 
-            // If element is a record and we're rendering as table, expand its fields
-            if (shouldRenderAsTable && elementTypeKind == TypeDescKind.RECORD) {
-                TypeSymbol actualElementType = Utils.getActualTypeSymbol(elementType);
-                if (actualElementType instanceof RecordTypeSymbol recordTypeSymbol) {
-                    populateArrayElementFields(arrayParam, recordTypeSymbol);
+            if (shouldRenderAsTable) {
+                if (elementTypeKind == TypeDescKind.RECORD) {
+                    // Record array - expand its fields
+                    TypeSymbol actualElementType = Utils.getActualTypeSymbol(elementType);
+                    if (actualElementType instanceof RecordTypeSymbol recordTypeSymbol) {
+                        populateArrayElementFields(arrayParam, recordTypeSymbol);
+                    }
+                } else if (elementTypeKind == TypeDescKind.ARRAY) {
+                    // 2D array (e.g., string[][], int[][]) - extract inner element type
+                    arrayParam.set2DArray(true);
+                    TypeSymbol actualElementType = Utils.getActualTypeSymbol(elementType);
+                    if (actualElementType instanceof ArrayTypeSymbol innerArrayType) {
+                        TypeSymbol innerElementType = innerArrayType.memberTypeDescriptor();
+                        arrayParam.setInnerElementTypeSymbol(innerElementType);
+                    }
+                } else if (elementTypeKind == TypeDescKind.UNION) {
+                    // Union type array (e.g., (string|int)[]) - extract union member type names
+                    arrayParam.setUnionArray(true);
+                    TypeSymbol actualElementType = Utils.getActualTypeSymbol(elementType);
+                    if (actualElementType instanceof UnionTypeSymbol unionType) {
+                        java.util.List<String> memberNames = new java.util.ArrayList<>();
+                        for (TypeSymbol member : unionType.memberTypeDescriptors()) {
+                            TypeDescKind memberKind = Utils.getActualTypeKind(member);
+                            if (memberKind != TypeDescKind.NIL) {
+                                String memberName = Utils.getParamTypeName(memberKind);
+                                if (memberName != null && !memberNames.contains(memberName)) {
+                                    memberNames.add(memberName);
+                                }
+                            }
+                        }
+                        arrayParam.setUnionMemberTypeNames(memberNames);
+                    }
                 }
             }
         }
@@ -426,7 +453,7 @@ public class ParamFactory {
             TypeSymbol actualType = Utils.getActualTypeSymbol(valueType);
             if (actualType instanceof RecordTypeSymbol recordType) {
                 int fieldCount = recordType.fieldDescriptors().size();
-                return fieldCount > 0 && fieldCount <= 5;  // Key + 5 fields = 6 columns max
+                return fieldCount > 0;
             }
         }
 
@@ -448,11 +475,21 @@ public class ParamFactory {
             TypeSymbol actualType = Utils.getActualTypeSymbol(elementType);
             if (actualType instanceof RecordTypeSymbol recordType) {
                 int fieldCount = recordType.fieldDescriptors().size();
-                return fieldCount > 0 && fieldCount <= 10;  // More fields allowed than maps (no key column)
+                return fieldCount > 0;
             }
         }
 
-        return false;  // Arrays, nested arrays, unions, etc. use JSON input
+        // 2D arrays (e.g., string[][], int[][]) - render as nested table
+        if (elementTypeKind == TypeDescKind.ARRAY) {
+            return true;
+        }
+
+        // Union type arrays (e.g., (string|int)[]) - render as table with type dropdown
+        if (elementTypeKind == TypeDescKind.UNION) {
+            return true;
+        }
+
+        return false;  // Other complex types use JSON input
     }
 
     private static void populateMapValueFields(MapFunctionParam mapParam, RecordTypeSymbol recordTypeSymbol) {
