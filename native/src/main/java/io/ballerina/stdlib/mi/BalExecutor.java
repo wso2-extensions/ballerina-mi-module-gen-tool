@@ -303,6 +303,8 @@ public class BalExecutor {
         } catch (BError bError) {
             log.error("BError caught during execution: " + bError.getMessage(), bError);
             throw new BallerinaExecutionException(bError.getMessage(), bError.fillInStackTrace());
+        } catch (AxisFault | BallerinaExecutionException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Unexpected error during execution: " + e.getMessage(), e);
             throw new SynapseException("Error during Ballerina function execution", e);
