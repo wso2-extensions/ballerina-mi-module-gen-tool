@@ -34,6 +34,7 @@
                   "value": {
                     "name": "metadata",
                     "displayName": "metadata",
+                    "title": "metadata",
                     "description": "Configure metadata entries",
                     "tableKey": "key",
                     "tableValue": "value",

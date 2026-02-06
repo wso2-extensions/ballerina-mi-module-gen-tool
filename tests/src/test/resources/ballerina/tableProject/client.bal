@@ -25,6 +25,21 @@ public type Tag record {|
     string label;
 |};
 
+// Extended record with many fields (>10) to test removal of field count limit
+public type ExtendedRecord record {|
+    string field1;
+    string field2;
+    int field3;
+    int field4;
+    boolean field5;
+    string field6;
+    string field7;
+    decimal field8;
+    string field9;
+    string field10;
+    string field11;
+|};
+
 // Connection configuration with optional maps and arrays
 public type ConnectionConfig record {|
     string baseUrl;
@@ -163,7 +178,7 @@ public isolated client class TableClient {
         return "Matrix processed: " + matrix.length().toString();
     }
 
-    // Test 15: Array of arrays with integers (should fall back to JSON input)
+    // Test 15: Array of arrays with integers (should render as nested table)
     # Calculate sum of nested arrays
     # + numbers - Nested integer arrays
     # + return - Total sum
@@ -175,5 +190,29 @@ public isolated client class TableClient {
             }
         }
         return sum;
+    }
+
+    // Test 16: Union type array (should render as table with type dropdown + value)
+    # Process mixed data
+    # + items - Array of string or integer values
+    # + return - Processing result
+    remote isolated function processMixedData((string|int)[] items) returns string|error {
+        return "Mixed data processed: " + items.length().toString();
+    }
+
+    // Test 17: Large record for array (>10 fields) - should now render as table (no limit)
+    # Process extended records
+    # + records - Array of extended records
+    # + return - Processing result
+    remote isolated function processExtendedRecords(ExtendedRecord[] records) returns string|error {
+        return "Extended records processed: " + records.length().toString();
+    }
+
+    // Test 18: Large record for map (>5 fields) - should now render as table (no limit)
+    # Process large map records
+    # + data - Map of extended records
+    # + return - Processing result
+    remote isolated function processLargeMapRecords(map<ExtendedRecord> data) returns string|error {
+        return "Large map records processed: " + data.length().toString();
     }
 }

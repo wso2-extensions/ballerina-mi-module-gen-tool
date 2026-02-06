@@ -34,6 +34,7 @@
                   "value": {
                     "name": "flags",
                     "displayName": "flags",
+                    "title": "flags",
                     "description": "Configure flags entries",
                     "tableKey": "value",
                     "tableValue": "value",

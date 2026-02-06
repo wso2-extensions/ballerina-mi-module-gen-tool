@@ -30,16 +30,49 @@
               "groupName": "Input Variables",
               "elements": [
                 {
-                  "type": "attribute",
+                  "type": "table",
                   "value": {
                     "name": "matrix",
                     "displayName": "matrix",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": true,
-                    "helpTip": "Expecting JSON array",
-                    "validateType": "json",
-                    "matchPattern": ""
+                    "title": "matrix",
+                    "description": "Configure matrix entries",
+                    "tableKey": "Row",
+                    "tableValue": "rowLabel",
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "rowLabel",
+                          "displayName": "Row Label",
+                          "inputType": "stringOrExpression",
+                          "required": false,
+                          "helpTip": "Label for this row (optional)"
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "value": {
+                          "name": "innerArray",
+                          "displayName": "Inner Array",
+                          "title": "Inner Array",
+                          "description": "Inner array elements",
+                          "tableKey": "value",
+                          "tableValue": "value",
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "value",
+                                "displayName": "Value",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Value"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
                   }
                 }
               ]

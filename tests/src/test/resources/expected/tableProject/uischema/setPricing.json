@@ -34,6 +34,7 @@
                   "value": {
                     "name": "prices",
                     "displayName": "prices",
+                    "title": "prices",
                     "description": "Configure prices entries",
                     "tableKey": "key",
                     "tableValue": "value",
@@ -57,7 +58,7 @@
                           "required": true,
                           "helpTip": "Decimal value",
                           "validateType": "regex",
-                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$"
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
                         }
                       }
                     ]

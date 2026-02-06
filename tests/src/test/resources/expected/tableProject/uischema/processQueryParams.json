@@ -34,6 +34,7 @@
                   "value": {
                     "name": "queryParams",
                     "displayName": "queryParams",
+                    "title": "queryParams",
                     "description": "Configure queryParams entries",
                     "tableKey": "key",
                     "tableValue": "value",
@@ -57,7 +58,7 @@
                           "required": true,
                           "helpTip": "Integer value",
                           "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
                         }
                       }
                     ]

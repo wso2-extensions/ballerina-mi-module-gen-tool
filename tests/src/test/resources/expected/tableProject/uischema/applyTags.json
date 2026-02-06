@@ -34,6 +34,7 @@
                   "value": {
                     "name": "tagList",
                     "displayName": "tagList",
+                    "title": "tagList",
                     "description": "Configure tagList entries",
                     "tableKey": "category",
                     "tableValue": "label",

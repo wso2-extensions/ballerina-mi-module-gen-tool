@@ -1,8 +1,8 @@
 {
   "connectorName": "tableProject",
-  "operationName": "sendWithHeaders",
-  "title": "send with headers",
-  "help": "Send request with custom headers",
+  "operationName": "processMixedData",
+  "title": "process mixed data",
+  "help": "Process mixed data",
   "elements": [
     {
       "type": "attributeGroup",
@@ -32,21 +32,26 @@
                 {
                   "type": "table",
                   "value": {
-                    "name": "headers",
-                    "displayName": "headers",
-                    "title": "headers",
-                    "description": "Configure headers entries",
-                    "tableKey": "key",
+                    "name": "items",
+                    "displayName": "items",
+                    "title": "items",
+                    "description": "Configure items entries",
+                    "tableKey": "type",
                     "tableValue": "value",
                     "elements": [
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "key",
-                          "displayName": "Key",
-                          "inputType": "stringOrExpression",
+                          "name": "type",
+                          "displayName": "Type",
+                          "inputType": "combo",
+                          "comboValues": [
+                            "string",
+                            "int"
+                          ],
+                          "defaultValue": "string",
                           "required": true,
-                          "helpTip": "Key for the map entry"
+                          "helpTip": "Select the data type for this element"
                         }
                       },
                       {
@@ -56,7 +61,7 @@
                           "displayName": "Value",
                           "inputType": "stringOrExpression",
                           "required": true,
-                          "helpTip": "Value for the map entry"
+                          "helpTip": "Element value"
                         }
                       }
                     ]

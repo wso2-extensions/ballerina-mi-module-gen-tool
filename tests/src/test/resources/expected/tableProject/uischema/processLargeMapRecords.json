@@ -1,0 +1,208 @@
+{
+  "connectorName": "tableProject",
+  "operationName": "processLargeMapRecords",
+  "title": "process large map records",
+  "help": "Process large map records",
+  "elements": [
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attribute",
+            "value": {
+              "name": "configRef",
+              "displayName": "Connection",
+              "inputType": "connection",
+              "allowedConnectionTypes": [
+                "tableProject_TableClient"
+              ],
+              "defaultType": "connection.tableProject_TableClient",
+              "defaultValue": "",
+              "required": "true",
+              "helpTip": "Connection to be used"
+            }
+          },
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Input Variables",
+              "elements": [
+                {
+                  "type": "table",
+                  "value": {
+                    "name": "data",
+                    "displayName": "data",
+                    "title": "data",
+                    "description": "Configure data entries",
+                    "tableKey": "key",
+                    "tableValue": "field11",
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "key",
+                          "displayName": "Key",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Key for the map entry"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "field1",
+                          "displayName": "Field1",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Field1"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "field2",
+                          "displayName": "Field2",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Field2"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "field3",
+                          "displayName": "Field3",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Field3",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "field4",
+                          "displayName": "Field4",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Field4",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "field5",
+                          "displayName": "Field5",
+                          "inputType": "boolean",
+                          "required": true,
+                          "helpTip": "Field5"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "field6",
+                          "displayName": "Field6",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Field6"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "field7",
+                          "displayName": "Field7",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Field7"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "field8",
+                          "displayName": "Field8",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Field8",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "field9",
+                          "displayName": "Field9",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Field9"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "field10",
+                          "displayName": "Field10",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Field10"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "field11",
+                          "displayName": "Field11",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Field11"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Output",
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "responseVariable",
+                    "displayName": "Output Variable Name",
+                    "inputType": "string",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The target variable in which the output of the operation will be stored"
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "overwriteBody",
+                    "displayName": "Overwrite Message Body",
+                    "inputType": "checkbox",
+                    "defaultValue": "false",
+                    "helpTip": "Replace the Message Body in Message Context with the output payload of the operation (This will remove the payload from the above variable. But other elements such as headers and attributes will remain).",
+                    "required": "false"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

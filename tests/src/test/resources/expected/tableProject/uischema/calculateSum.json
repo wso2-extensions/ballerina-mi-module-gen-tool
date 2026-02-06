@@ -34,6 +34,7 @@
                   "value": {
                     "name": "numbers",
                     "displayName": "numbers",
+                    "title": "numbers",
                     "description": "Configure numbers entries",
                     "tableKey": "value",
                     "tableValue": "value",
@@ -47,7 +48,7 @@
                           "required": true,
                           "helpTip": "Integer value",
                           "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
                         }
                       }
                     ]

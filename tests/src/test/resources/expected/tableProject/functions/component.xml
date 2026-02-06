@@ -33,6 +33,11 @@
             <file>processComplexData.xml</file>
             <description>Process complex data</description>
         </component>
+        <component name="processLargeMapRecords">
+            <displayName>process large map records</displayName>
+            <file>processLargeMapRecords.xml</file>
+            <description>Process large map records</description>
+        </component>
         <component name="addAliases">
             <displayName>add aliases</displayName>
             <file>addAliases.xml</file>
@@ -77,6 +82,16 @@
             <displayName>set metadata</displayName>
             <file>setMetadata.xml</file>
             <description>Set metadata</description>
+        </component>
+        <component name="processExtendedRecords">
+            <displayName>process extended records</displayName>
+            <file>processExtendedRecords.xml</file>
+            <description>Process extended records</description>
+        </component>
+        <component name="processMixedData">
+            <displayName>process mixed data</displayName>
+            <file>processMixedData.xml</file>
+            <description>Process mixed data</description>
         </component>
         <component name="setPricing">
             <displayName>set pricing</displayName>

@@ -34,6 +34,7 @@
                   "value": {
                     "name": "tags",
                     "displayName": "tags",
+                    "title": "tags",
                     "description": "Configure tags entries",
                     "tableKey": "value",
                     "tableValue": "value",
