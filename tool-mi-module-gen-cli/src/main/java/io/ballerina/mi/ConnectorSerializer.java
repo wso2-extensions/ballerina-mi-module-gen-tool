@@ -1553,8 +1553,8 @@ public class ConnectorSerializer {
 
     /**
      * Writes a 2D array parameter as a nested table UI.
-     * The outer table has a single element which is itself a Table (nested).
-     * For example, string[][] produces an outer table with one nested table element containing a "value" string column.
+     * The outer table has a "Row Label" attribute and an inner table for the inner array elements.
+     * For example, int[][] produces an outer table where each row has an inner table for entering integers.
      */
     private static void writeNestedArrayAsTable(ArrayFunctionParam arrayParam, JsonTemplateBuilder builder,
                                                  boolean isCombo) throws IOException {
@@ -1566,100 +1566,58 @@ public class ConnectorSerializer {
         }
         displayName = Utils.sanitizeParamName(displayName);
 
-        // Build inner table columns based on inner element type
-        List<Element> innerColumns = new ArrayList<>();
+        // Build inner column based on inner element type
         TypeSymbol innerElementType = arrayParam.getInnerElementTypeSymbol();
+        TypeDescKind innerKind = innerElementType != null ? Utils.getActualTypeKind(innerElementType) : null;
 
-        if (innerElementType != null) {
-            TypeDescKind innerKind = Utils.getActualTypeKind(innerElementType);
+        String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
+        String validateType = "";
+        String matchPattern = "";
+        String helpTip = "Value";
 
-            if (innerKind == TypeDescKind.RECORD) {
-                // Inner array of records - expand fields as columns
-                TypeSymbol actualInnerType = Utils.getActualTypeSymbol(innerElementType);
-                if (actualInnerType instanceof io.ballerina.compiler.api.symbols.RecordTypeSymbol recordType) {
-                    for (java.util.Map.Entry<String, io.ballerina.compiler.api.symbols.RecordFieldSymbol> entry :
-                            recordType.fieldDescriptors().entrySet()) {
-                        String fieldName = entry.getKey();
-                        io.ballerina.compiler.api.symbols.RecordFieldSymbol fieldSymbol = entry.getValue();
-                        TypeSymbol fieldTypeSymbol = fieldSymbol.typeDescriptor();
-                        TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldTypeSymbol);
-
-                        String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
-                        String validateType = "";
-                        String matchPattern = "";
-                        String helpTip = fieldName;
-
-                        switch (fieldTypeKind) {
-                            case INT:
-                                validateType = VALIDATE_TYPE_REGEX;
-                                matchPattern = INTEGER_REGEX;
-                                break;
-                            case FLOAT, DECIMAL:
-                                validateType = VALIDATE_TYPE_REGEX;
-                                matchPattern = DECIMAL_REGEX;
-                                break;
-                            case BOOLEAN:
-                                inputType = INPUT_TYPE_BOOLEAN;
-                                break;
-                            default:
-                                break;
-                        }
-
-                        innerColumns.add(new Attribute(fieldName, StringUtils.capitalize(fieldName),
-                                inputType, "", !fieldSymbol.isOptional(), helpTip, validateType, matchPattern, false));
-                    }
-                }
-            } else {
-                // Inner array of primitives (string[][], int[][], etc.) - single "value" column
-                String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
-                String validateType = "";
-                String matchPattern = "";
-                String helpTip = "Array element";
-
-                switch (innerKind) {
-                    case INT:
-                        validateType = VALIDATE_TYPE_REGEX;
-                        matchPattern = INTEGER_REGEX;
-                        helpTip = "Integer value";
-                        break;
-                    case FLOAT, DECIMAL:
-                        validateType = VALIDATE_TYPE_REGEX;
-                        matchPattern = DECIMAL_REGEX;
-                        helpTip = "Decimal value";
-                        break;
-                    case BOOLEAN:
-                        inputType = INPUT_TYPE_BOOLEAN;
-                        helpTip = "Boolean value (true/false)";
-                        break;
-                    default:
-                        helpTip = "Value";
-                        break;
-                }
-
-                innerColumns.add(new Attribute("value", "Value", inputType, "", true,
-                        helpTip, validateType, matchPattern, false));
+        if (innerKind != null) {
+            switch (innerKind) {
+                case INT:
+                    validateType = VALIDATE_TYPE_REGEX;
+                    matchPattern = INTEGER_REGEX;
+                    helpTip = "Integer value";
+                    break;
+                case FLOAT, DECIMAL:
+                    validateType = VALIDATE_TYPE_REGEX;
+                    matchPattern = DECIMAL_REGEX;
+                    helpTip = "Decimal value";
+                    break;
+                case BOOLEAN:
+                    inputType = INPUT_TYPE_BOOLEAN;
+                    helpTip = "Boolean value (true/false)";
+                    break;
+                default:
+                    break;
             }
-        } else {
-            // Fallback - single string value column
-            innerColumns.add(new Attribute("value", "Value", INPUT_TYPE_STRING_OR_EXPRESSION,
-                    "", true, "Value", "", "", false));
         }
 
-        // Create the inner (nested) table
+        Attribute innerColumn = new Attribute("value", "Value", inputType, "", true,
+                helpTip, validateType, matchPattern, false);
+        List<Element> innerColumns = new ArrayList<>();
+        innerColumns.add(innerColumn);
+
         Table innerTable = new Table(
             "innerArray",
             "Inner Array",
             "Inner Array",
             "Inner array elements",
-            innerColumns.isEmpty() ? "" : innerColumns.get(0).getName(),
-            innerColumns.isEmpty() ? "" : innerColumns.get(innerColumns.size() - 1).getName(),
+            "value",
+            "value",
             innerColumns,
             null,
-            true
+            false
         );
 
-        // Create the outer table with the inner table as its single element
+        // Build the outer table with rowLabel attribute + inner table
         List<Element> outerElements = new ArrayList<>();
+        Attribute rowLabel = new Attribute("rowLabel", "Row Label", INPUT_TYPE_STRING_OR_EXPRESSION,
+                "", false, "Label for this row (optional)", "", "", false);
+        outerElements.add(rowLabel);
         outerElements.add(innerTable);
 
         String description = arrayParam.getDescription() != null ?
@@ -1671,8 +1629,8 @@ public class ConnectorSerializer {
             displayName,
             displayName,
             description,
-            "innerArray",
-            "innerArray",
+            "Row",
+            "rowLabel",
             outerElements,
             arrayParam.getEnableCondition(),
             arrayParam.isRequired()

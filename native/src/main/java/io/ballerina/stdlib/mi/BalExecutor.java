@@ -41,7 +41,11 @@ import io.ballerina.runtime.api.types.ClientType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.ballerina.runtime.internal.values.MapValueImpl;
 import org.apache.axiom.om.OMElement;
@@ -51,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
+import org.apache.synapse.util.xpath.SynapseExpression;
 import org.apache.synapse.data.connector.ConnectorResponse;
 import org.apache.synapse.data.connector.DefaultConnectorResponse;
 import org.apache.synapse.mediators.template.TemplateContext;
@@ -1288,21 +1293,30 @@ public class BalExecutor {
             }
         }
 
-        // For 2D arrays (element type is "array"), handle nested table format
+        // For 2D arrays (element type is "array"), handle table formats
         if ("array".equals(elementType)) {
-            log.info("2D array detected - handling nested table format");
+            log.info("2D array detected - handling table format");
             try {
                 Object parsed = JsonUtils.parse(cleanedJson);
                 if (parsed instanceof BArray outerArray) {
                     log.info("2D array outer size: " + outerArray.size());
-                    // Check if it's in nested table format: [{"innerArray": [{"value":"v1"},...]}, ...]
                     if (outerArray.size() > 0) {
                         Object firstElement = outerArray.get(0);
                         if (firstElement instanceof BMap firstRow) {
+                            // Check if it's in nested table format: [{"innerArray": [{"value":"v1"},...]}, ...]
                             BString innerArrayKey = StringUtils.fromString("innerArray");
                             if (firstRow.containsKey(innerArrayKey)) {
                                 log.info("Nested table format detected. Transforming to 2D array...");
                                 String transformed = transformNestedTableTo2DArray(outerArray);
+                                log.info("Transformed 2D array JSON: " + transformed);
+                                return JsonUtils.parse(transformed);
+                            }
+                        } else if (firstElement instanceof BArray firstRow) {
+                            // MI Studio nested table format: [["rowLabel", "[{value=...}]"], ...]
+                            // Each inner array has: [0]=rowLabel, [1]=stringified inner table data
+                            if (firstRow.size() >= 2) {
+                                log.info("MI Studio nested table format detected (2D string array). Transforming...");
+                                String transformed = transformMIStudioNestedTableTo2DArray(outerArray, context);
                                 log.info("Transformed 2D array JSON: " + transformed);
                                 return JsonUtils.parse(transformed);
                             }
@@ -1458,6 +1472,142 @@ public class BalExecutor {
 
         jsonBuilder.append("]");
         return jsonBuilder.toString();
+    }
+
+    /**
+     * Transform MI Studio nested table serialization format to 2D array.
+     * MI Studio serializes nested table data as a 2D string array where each row is:
+     * [rowLabel, stringifiedInnerTableData]
+     *
+     * Input: [["row 1","[{value={isExpression=true, value=${10}}}, {value={isExpression=true, value=${20}}}]"]]
+     * Output: [[10, 20]]
+     *
+     * Expression values like ${payload.someField} or ${var.myVar} are evaluated against the MessageContext.
+     *
+     * @param outerArray BArray of BArrays (2D string array from MI Studio)
+     * @param context    MessageContext for evaluating MI expressions
+     * @return JSON string of 2D array
+     */
+    private String transformMIStudioNestedTableTo2DArray(BArray outerArray, MessageContext context) {
+        StringBuilder jsonBuilder = new StringBuilder("[");
+
+        for (int i = 0; i < outerArray.size(); i++) {
+            if (i > 0) {
+                jsonBuilder.append(",");
+            }
+
+            Object outerElement = outerArray.get(i);
+            if (outerElement instanceof BArray innerRow) {
+                // innerRow: [rowLabel, innerTableDataString]
+                // Skip index 0 (rowLabel), parse index 1 (inner table data)
+                if (innerRow.size() >= 2) {
+                    String innerTableStr = innerRow.get(1).toString();
+                    log.info("Parsing inner table string for row " + i + ": " + innerTableStr);
+                    String innerArrayJson = parseInnerTableValues(innerTableStr, context);
+                    jsonBuilder.append(innerArrayJson);
+                } else {
+                    jsonBuilder.append("[]");
+                }
+            } else {
+                jsonBuilder.append("[]");
+            }
+        }
+
+        jsonBuilder.append("]");
+        return jsonBuilder.toString();
+    }
+
+    /**
+     * Parse MI Studio's Java toString() format for inner table data and extract values.
+     * Expression values (${...}) are evaluated against the MessageContext to resolve
+     * variables, payload references, etc.
+     *
+     * Handles expression format: [{value={isExpression=true, value=${10}}}]
+     * Handles expression with variables: [{value={isExpression=true, value=${payload.num}}}]
+     * Handles plain format: [{value=hello}]
+     *
+     * @param innerTableStr The stringified inner table data from MI Studio
+     * @param context       MessageContext for evaluating MI expressions
+     * @return JSON array string with extracted values, e.g. "[10, 20]"
+     */
+    private String parseInnerTableValues(String innerTableStr, MessageContext context) {
+        if (innerTableStr == null || innerTableStr.trim().isEmpty() || "[]".equals(innerTableStr.trim())) {
+            return "[]";
+        }
+
+        // Step 1: Resolve all ${expression} patterns using MI's SynapseExpression evaluator.
+        // This evaluates expressions like ${10} -> 10, ${payload.field} -> actual value,
+        // ${var.myVar} -> variable value, etc.
+        String resolvedStr = resolveSynapseExpressions(innerTableStr, context);
+        log.info("Inner table after expression resolution: " + resolvedStr);
+
+        // Step 2: Extract values from the resolved string.
+        // After resolution, expression entries look like: {value={isExpression=true, value=RESOLVED_VALUE}}
+        // Plain entries look like: {value=LITERAL}
+        StringBuilder result = new StringBuilder("[");
+        List<String> values = new ArrayList<>();
+
+        // Pattern for resolved expression values: ,value=RESOLVED}} or , value=RESOLVED}}
+        // This matches the innermost "value=" inside the isExpression wrapper
+        Pattern resolvedExprPattern = Pattern.compile(",\\s*value=([^{}]+?)\\}\\}");
+        Matcher resolvedMatcher = resolvedExprPattern.matcher(resolvedStr);
+
+        while (resolvedMatcher.find()) {
+            values.add(resolvedMatcher.group(1).trim());
+        }
+
+        if (values.isEmpty()) {
+            // Fallback: try plain value pattern for entries without isExpression wrapper
+            // Matches {value=LITERAL} where LITERAL has no nested braces
+            Pattern plainPattern = Pattern.compile("\\{value=([^{}]+)\\}");
+            Matcher plainMatcher = plainPattern.matcher(resolvedStr);
+            while (plainMatcher.find()) {
+                values.add(plainMatcher.group(1).trim());
+            }
+        }
+
+        for (int i = 0; i < values.size(); i++) {
+            if (i > 0) {
+                result.append(",");
+            }
+            appendJsonValue(result, values.get(i));
+        }
+
+        result.append("]");
+        return result.toString();
+    }
+
+    /**
+     * Resolve all ${expression} patterns in a string using MI's SynapseExpression evaluator.
+     * Each ${...} is evaluated against the MessageContext to resolve payload references,
+     * variables, properties, etc.
+     *
+     * @param text    Text containing ${expression} patterns
+     * @param context MessageContext for expression evaluation
+     * @return Text with all ${expression} patterns replaced by resolved values
+     */
+    private String resolveSynapseExpressions(String text, MessageContext context) {
+        Pattern exprPattern = Pattern.compile("\\$\\{(.+?)\\}");
+        Matcher matcher = exprPattern.matcher(text);
+        StringBuffer resolved = new StringBuffer();
+
+        while (matcher.find()) {
+            String expressionBody = matcher.group(1);
+            String replacement;
+            try {
+                SynapseExpression expression = new SynapseExpression(expressionBody);
+                replacement = expression.stringValueOf(context);
+                log.info("Resolved expression '${" + expressionBody + "}' -> '" + replacement + "'");
+            } catch (Exception e) {
+                log.warn("Failed to evaluate expression '${" + expressionBody + "}': " + e.getMessage()
+                        + ". Using expression body as fallback.");
+                replacement = expressionBody;
+            }
+            matcher.appendReplacement(resolved, Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(resolved);
+
+        return resolved.toString();
     }
 
     /**

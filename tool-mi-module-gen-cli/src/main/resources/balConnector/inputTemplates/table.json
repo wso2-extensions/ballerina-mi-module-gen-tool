@@ -3,24 +3,53 @@
   "value": {
     "name": "{{name}}",
     "displayName": "{{displayName}}",
+    "title": "{{title}}",
     "description": "{{description}}",
     "tableKey": "{{tableKey}}",
     "tableValue": "{{tableValue}}",{{#if enableCondition}}
     "enableCondition": {{{enableCondition}}},{{/if}}
     "elements": [
 {{#each elements}}
-      {
+      {{#if isTable}}{
+        "type": "table",
+        "value": {
+          "name": "{{name}}",
+          "displayName": "{{displayName}}",
+          "title": "{{title}}",
+          "description": "{{description}}",
+          "tableKey": "{{tableKey}}",
+          "tableValue": "{{tableValue}}",
+          "elements": [
+{{#each elements}}
+            {
+              "type": "attribute",
+              "value": {
+                "name": "{{name}}",
+                "displayName": "{{displayName}}",
+                "inputType": "{{inputType}}",
+                "required": {{required}},
+                "helpTip": "{{helpTip}}"{{#if validateType}},
+                "validateType": "{{validateType}}"{{/if}}{{#if matchPattern}},
+                "matchPattern": "{{matchPattern}}"{{/if}}
+              }
+            }{{#unless @last}},{{/unless}}
+{{/each}}
+          ]
+        }
+      }{{else}}{
         "type": "attribute",
         "value": {
           "name": "{{name}}",
           "displayName": "{{displayName}}",
-          "inputType": "{{inputType}}",
+          "inputType": "{{inputType}}",{{#if comboValues}}
+          "comboValues": {{{comboValues}}},{{/if}}{{#if defaultValue}}
+          "defaultValue": "{{defaultValue}}",{{/if}}
           "required": {{required}},
           "helpTip": "{{helpTip}}"{{#if validateType}},
           "validateType": "{{validateType}}"{{/if}}{{#if matchPattern}},
           "matchPattern": "{{matchPattern}}"{{/if}}
         }
-      }{{#unless @last}},{{/unless}}
+      }{{/if}}{{#unless @last}},{{/unless}}
 {{/each}}
     ]
   }
