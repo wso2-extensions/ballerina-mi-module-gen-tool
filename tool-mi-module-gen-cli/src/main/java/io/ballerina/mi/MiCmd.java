@@ -172,7 +172,10 @@ public class MiCmd implements BLauncherCmd {
 
         // Generate MI connector artifacts (XML/JSON files and zip package)
         // Both BuildProject and BalaProject need MI artifacts
-        generateMIArtifacts(executablePath, miArtifactsPath, project instanceof BuildProject);
+        boolean artifactsGenerated = generateMIArtifacts(executablePath, miArtifactsPath, project instanceof BuildProject);
+        if (!artifactsGenerated) {
+            return;
+        }
         boolean isValid = ConnectorValidator.validateConnector(miArtifactsPath);
         if (!isValid) {
             printStream.println("ERROR: MI " + (project instanceof BuildProject ? "module" : "connector") +
@@ -189,7 +192,7 @@ public class MiCmd implements BLauncherCmd {
                 " generation completed successfully.");
     }
 
-    private void generateMIArtifacts(Path sourcePath, Path targetPath, boolean isBuildProject) {
+    private boolean generateMIArtifacts(Path sourcePath, Path targetPath, boolean isBuildProject) {
         printStream.println("Generating MI " + (isBuildProject ? "module" : "connector") + " artifacts...");
 
         Connector connector = Connector.getConnector();
@@ -197,13 +200,18 @@ public class MiCmd implements BLauncherCmd {
         printStream.println("Found " + connector.getComponents().size() + " component(s)");
 
         if (connector.getComponents().isEmpty()) {
-            printStream.println("WARN: No components found. MI " + (isBuildProject ? "module" : "connector") + " artifacts will not be generated.");
-            printStream.println("HINT: Ensure functions are annotated with @mi:Operation");
-            return;
+            if (connector.isGenerationAborted()) {
+                printStream.println("WARN: Skipping MI " + (isBuildProject ? "module" : "connector")
+                        + " artifacts generation. Reason: " + connector.getAbortionReason());
+            } else {
+                printStream.println("WARN: No components found. MI " + (isBuildProject ? "module" : "connector") + " artifacts will not be generated.");
+            }
+            return false;
         }
 
         ConnectorSerializer connectorSerializer = new ConnectorSerializer(sourcePath, targetPath);
         connectorSerializer.serialize(connector);
+        return true;
     }
 
     private void createBinFolder(Path bin) throws IOException {
