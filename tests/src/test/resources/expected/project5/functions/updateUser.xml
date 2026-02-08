@@ -20,11 +20,19 @@
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
     <parameter name="userId" description=""/>
-    <parameter name="updatedUser" description=""/>
+    <parameter name="id" description=""/>
+    <parameter name="name" description=""/>
+    <parameter name="email" description=""/>
     <sequence>
         <property name="param0" value="updatedUser"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="User" />
+        <property name="updatedUser_param0" value="id"/>
+        <property name="updatedUser_paramType0" value="int"/>
+        <property name="updatedUser_param1" value="name"/>
+        <property name="updatedUser_paramType1" value="string"/>
+        <property name="updatedUser_param2" value="email"/>
+        <property name="updatedUser_paramType2" value="string"/>
         <property name="operationId" value="updateUser"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="updateUser"/>

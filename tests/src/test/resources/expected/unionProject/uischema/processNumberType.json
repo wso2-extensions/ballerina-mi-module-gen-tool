@@ -52,10 +52,10 @@
                     "displayName": "valueInt",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\})$",
                     "enableCondition": [
                       {
                         "valueDataType": "int"
@@ -70,10 +70,10 @@
                     "displayName": "valueFloat",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
                     "enableCondition": [
                       {
                         "valueDataType": "float"
@@ -88,10 +88,10 @@
                     "displayName": "valueDecimal",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "regex",
-                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\}\\)$",
+                    "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
                     "enableCondition": [
                       {
                         "valueDataType": "decimal"

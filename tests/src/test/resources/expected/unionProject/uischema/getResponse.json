@@ -36,7 +36,7 @@
                     "displayName": "success",
                     "inputType": "boolean",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""

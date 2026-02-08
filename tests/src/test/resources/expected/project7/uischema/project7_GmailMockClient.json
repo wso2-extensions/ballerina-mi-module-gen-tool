@@ -34,7 +34,7 @@
                     "displayName": "baseUrl",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""
@@ -56,7 +56,7 @@
                     "displayName": "apiKey",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""

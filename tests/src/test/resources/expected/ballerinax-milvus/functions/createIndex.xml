@@ -19,11 +19,19 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="createIndex">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="request" description=""/>
+    <parameter name="collectionName" description="The name of the collection to create an index for"/>
+    <parameter name="primaryKey" description="The name of the primary key of the collection"/>
+    <parameter name="fieldNames" description="The names of the fields to create an index for"/>
     <sequence>
         <property name="param0" value="request"/>
         <property name="paramType0" value="record"/>
-        <property name="param0_recordName" value="CreateIndexRequest" />
+        <property name="param0_recordName" value="" />
+        <property name="request_param0" value="collectionName"/>
+        <property name="request_paramType0" value="string"/>
+        <property name="request_param1" value="primaryKey"/>
+        <property name="request_paramType1" value="string"/>
+        <property name="request_param2" value="fieldNames"/>
+        <property name="request_paramType2" value="array"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="createIndex"/>
         <property name="returnType" value="union"/>

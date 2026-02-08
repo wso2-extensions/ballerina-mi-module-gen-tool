@@ -32,14 +32,49 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "request",
-                    "displayName": "request",
+                    "name": "collectionName",
+                    "displayName": "collectionName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "Expecting JSON object",
-                    "validateType": "json",
+                    "required": true,
+                    "helpTip": "The name of the collection to create",
+                    "validateType": "",
                     "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "dimension",
+                    "displayName": "dimension",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": true,
+                    "helpTip": "The dimension of the collection",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
+                  }
+                },
+                {
+                  "type": "attributeGroup",
+                  "value": {
+                    "groupName": "Advanced",
+                    "collapsed": true,
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "primaryFieldName",
+                          "displayName": "primaryFieldName",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": false,
+                          "helpTip": "The name of the primary field of the collection",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
+                    ]
                   }
                 }
               ]

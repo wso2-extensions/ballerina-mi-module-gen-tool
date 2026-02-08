@@ -19,11 +19,31 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="upsert">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="request" description=""/>
+    <parameter name="collectionName" description="The name of the collection to upsert data into"/>
+    <parameter name="partitionName" description="The name of the partition to upsert data into"/>
+    <parameter name="databaseName" description="The name of the database to upsert data into"/>
+    <parameter name="data_primaryKey_fieldName" description=""/>
+    <parameter name="data_primaryKey_value" description=""/>
+    <parameter name="data_vectors" description="The vectors to upsert into the Milvus collection"/>
+    <parameter name="data_properties" description="The properties to upsert into the Milvus collection"/>
     <sequence>
         <property name="param0" value="request"/>
         <property name="paramType0" value="record"/>
-        <property name="param0_recordName" value="UpsertRequest" />
+        <property name="param0_recordName" value="" />
+        <property name="request_param0" value="collectionName"/>
+        <property name="request_paramType0" value="string"/>
+        <property name="request_param1" value="partitionName"/>
+        <property name="request_paramType1" value="string"/>
+        <property name="request_param2" value="databaseName"/>
+        <property name="request_paramType2" value="string"/>
+        <property name="request_param3" value="data.primaryKey.fieldName"/>
+        <property name="request_paramType3" value="string"/>
+        <property name="request_param4" value="data.primaryKey.value"/>
+        <property name="request_paramType4" value="int"/>
+        <property name="request_param5" value="data.vectors"/>
+        <property name="request_paramType5" value="array"/>
+        <property name="request_param6" value="data.properties"/>
+        <property name="request_paramType6" value="record"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="upsert"/>
         <property name="returnType" value="union"/>

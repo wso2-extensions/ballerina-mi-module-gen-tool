@@ -20,11 +20,19 @@
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
     <parameter name="userId" description=""/>
-    <parameter name="draft" description=""/>
+    <parameter name="id" description=""/>
+    <parameter name="subject" description=""/>
+    <parameter name="body" description=""/>
     <sequence>
         <property name="param0" value="draft"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="Draft" />
+        <property name="draft_param0" value="id"/>
+        <property name="draft_paramType0" value="string"/>
+        <property name="draft_param1" value="subject"/>
+        <property name="draft_paramType1" value="string"/>
+        <property name="draft_param2" value="body"/>
+        <property name="draft_paramType2" value="string"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="postUsersDraftsByUserId"/>
         <property name="pathParam0" value="userId"/>

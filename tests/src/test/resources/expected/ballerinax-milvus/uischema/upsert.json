@@ -32,14 +32,119 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "request",
-                    "displayName": "request",
+                    "name": "collectionName",
+                    "displayName": "collectionName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "Expecting JSON object",
-                    "validateType": "json",
+                    "required": true,
+                    "helpTip": "The name of the collection to upsert data into",
+                    "validateType": "",
                     "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attributeGroup",
+                  "value": {
+                    "groupName": "Data",
+                    "collapsed": false,
+                    "elements": [
+                      {
+                        "type": "attributeGroup",
+                        "value": {
+                          "groupName": "Primary Key",
+                          "collapsed": false,
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "data_primaryKey_fieldName",
+                                "displayName": "fieldName",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": false,
+                                "helpTip": "",
+                                "validateType": "",
+                                "matchPattern": ""
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "data.primaryKey.value",
+                                "displayName": "value",
+                                "inputType": "stringOrExpression",
+                                "defaultValue": "",
+                                "required": false,
+                                "helpTip": "",
+                                "validateType": "regex",
+                                "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "data_vectors",
+                          "displayName": "vectors",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": true,
+                          "helpTip": "The vectors to upsert into the Milvus collection",
+                          "validateType": "json",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "data.properties",
+                          "displayName": "data.properties",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": false,
+                          "helpTip": "The properties to upsert into the Milvus collection",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "attributeGroup",
+                  "value": {
+                    "groupName": "Advanced",
+                    "collapsed": true,
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "partitionName",
+                          "displayName": "partitionName",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": false,
+                          "helpTip": "The name of the partition to upsert data into",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "databaseName",
+                          "displayName": "databaseName",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": false,
+                          "helpTip": "The name of the database to upsert data into",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
+                    ]
                   }
                 }
               ]

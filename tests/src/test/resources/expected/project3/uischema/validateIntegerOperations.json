@@ -21,10 +21,10 @@
                     "displayName": "inputA",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
                   }
                 },
                 {
@@ -34,10 +34,10 @@
                     "displayName": "inputB",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
                   }
                 }
               ]

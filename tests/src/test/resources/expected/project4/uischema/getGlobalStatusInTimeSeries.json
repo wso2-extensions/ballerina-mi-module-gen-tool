@@ -30,16 +30,25 @@
               "groupName": "Input Variables",
               "elements": [
                 {
-                  "type": "attribute",
+                  "type": "attributeGroup",
                   "value": {
-                    "name": "lastdays",
-                    "displayName": "lastdays",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "30",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
+                    "groupName": "Advanced",
+                    "collapsed": true,
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "lastdays",
+                          "displayName": "lastdays",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "30",
+                          "required": false,
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
+                    ]
                   }
                 }
               ]

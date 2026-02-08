@@ -34,7 +34,7 @@
                     "displayName": "httpVersion",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The HTTP version understood by the client",
                     "validateType": "",
                     "matchPattern": ""
@@ -53,7 +53,7 @@
                           "displayName": "keepAlive",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "Specifies whether to reuse a connection for multiple requests",
                           "validateType": "",
                           "matchPattern": ""
@@ -66,7 +66,7 @@
                           "displayName": "chunking",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The chunking behaviour of the request",
                           "validateType": "",
                           "matchPattern": ""
@@ -85,7 +85,7 @@
                                 "displayName": "host",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "Host name of the proxy server",
                                 "validateType": "",
                                 "matchPattern": ""
@@ -98,7 +98,7 @@
                                 "displayName": "port",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "Proxy server port",
                                 "validateType": "regex",
                                 "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -111,7 +111,7 @@
                                 "displayName": "userName",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "Proxy server username",
                                 "validateType": "",
                                 "matchPattern": ""
@@ -124,7 +124,7 @@
                                 "displayName": "password",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "Proxy server password",
                                 "validateType": "",
                                 "matchPattern": ""
@@ -149,7 +149,7 @@
                           "displayName": "http2PriorKnowledge",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -162,7 +162,7 @@
                           "displayName": "http2InitialWindowSize",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -178,7 +178,7 @@
                     "displayName": "timeout",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The maximum time to wait (in seconds) for a response before closing the connection",
                     "validateType": "regex",
                     "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -191,8 +191,8 @@
                     "displayName": "forwarded",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "The choice of setting &#x60;forwarded&#x60;/&#x60;x-forwarded&#x60; header",
+                    "required": false,
+                    "helpTip": "The choice of setting `forwarded`/`x-forwarded` header",
                     "validateType": "",
                     "matchPattern": ""
                   }
@@ -210,7 +210,7 @@
                           "displayName": "maxActiveConnections",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -223,7 +223,7 @@
                           "displayName": "maxIdleConnections",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -236,7 +236,7 @@
                           "displayName": "waitTime",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -249,7 +249,7 @@
                           "displayName": "maxActiveStreamsPerConnection",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -262,7 +262,7 @@
                           "displayName": "minEvictableIdleTime",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -275,7 +275,7 @@
                           "displayName": "timeBetweenEvictionRuns",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -288,7 +288,7 @@
                           "displayName": "minIdleTimeInStaleState",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -301,7 +301,7 @@
                           "displayName": "timeBetweenStaleEviction",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -323,7 +323,7 @@
                           "displayName": "enabled",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -336,7 +336,7 @@
                           "displayName": "isShared",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -349,7 +349,7 @@
                           "displayName": "capacity",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -362,7 +362,7 @@
                           "displayName": "evictionFactor",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -375,7 +375,7 @@
                           "displayName": "policy",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -391,8 +391,8 @@
                     "displayName": "compression",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "Specifies the way of handling compression (&#x60;accept-encoding&#x60;) header",
+                    "required": false,
+                    "helpTip": "Specifies the way of handling compression (`accept-encoding`) header",
                     "validateType": "",
                     "matchPattern": ""
                   }
@@ -416,8 +416,8 @@
                                 "displayName": "requestVolumeThreshold",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
-                                "helpTip": "Minimum number of requests in a &#x60;RollingWindow&#x60; that will trip the circuit.",
+                                "required": false,
+                                "helpTip": "Minimum number of requests in a `RollingWindow` that will trip the circuit.",
                                 "validateType": "regex",
                                 "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
                               }
@@ -429,7 +429,7 @@
                                 "displayName": "timeWindow",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "Time period in seconds for which the failure threshold is calculated",
                                 "validateType": "regex",
                                 "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -442,7 +442,7 @@
                                 "displayName": "bucketSize",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "The granularity at which the time window slides. This is measured in seconds.",
                                 "validateType": "regex",
                                 "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -458,7 +458,7 @@
                           "displayName": "failureThreshold",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The threshold for request failures. When this threshold exceeds, the circuit trips. The threshold should be a\nvalue between 0 and 1",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -471,7 +471,7 @@
                           "displayName": "resetTime",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The time period (in seconds) to wait before attempting to make another request to the upstream service",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -484,9 +484,9 @@
                           "displayName": "statusCodes",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "Array of HTTP response status codes which are considered as failures",
-                          "validateType": "",
+                          "validateType": "json",
                           "matchPattern": ""
                         }
                       }
@@ -506,7 +506,7 @@
                           "displayName": "count",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -519,7 +519,7 @@
                           "displayName": "interval",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -532,7 +532,7 @@
                           "displayName": "backOffFactor",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -545,7 +545,7 @@
                           "displayName": "maxWaitInterval",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -558,9 +558,9 @@
                           "displayName": "statusCodes",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
-                          "helpTip": "",
-                          "validateType": "",
+                          "required": false,
+                          "helpTip": "Expecting JSON array",
+                          "validateType": "json",
                           "matchPattern": ""
                         }
                       }
@@ -580,7 +580,7 @@
                           "displayName": "maxStatusLineLength",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -593,7 +593,7 @@
                           "displayName": "maxHeaderSize",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -606,7 +606,7 @@
                           "displayName": "maxEntityBodySize",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -628,7 +628,7 @@
                           "displayName": "enable",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -656,7 +656,7 @@
                           "displayName": "certString",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": "",
@@ -680,7 +680,7 @@
                                 "displayName": "path",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
@@ -698,7 +698,7 @@
                                 "displayName": "password",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
@@ -740,7 +740,7 @@
                                 "displayName": "path",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
@@ -758,7 +758,7 @@
                                 "displayName": "password",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
@@ -776,7 +776,7 @@
                                 "displayName": "certFile",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
@@ -794,7 +794,7 @@
                                 "displayName": "keyFile",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
@@ -812,7 +812,7 @@
                                 "displayName": "keyPassword",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
@@ -839,7 +839,7 @@
                                 "displayName": "name",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": ""
@@ -852,9 +852,9 @@
                                 "displayName": "versions",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
-                                "helpTip": "",
-                                "validateType": "",
+                                "required": false,
+                                "helpTip": "Expecting JSON array",
+                                "validateType": "json",
                                 "matchPattern": ""
                               }
                             }
@@ -874,7 +874,7 @@
                                 "displayName": "type",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": ""
@@ -887,7 +887,7 @@
                                 "displayName": "cacheSize",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "regex",
                                 "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -900,7 +900,7 @@
                                 "displayName": "cacheValidityPeriod",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "regex",
                                 "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -916,9 +916,9 @@
                           "displayName": "ciphers",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
-                          "helpTip": "",
-                          "validateType": "",
+                          "required": false,
+                          "helpTip": "Expecting JSON array",
+                          "validateType": "json",
                           "matchPattern": ""
                         }
                       },
@@ -929,7 +929,7 @@
                           "displayName": "verifyHostName",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -942,7 +942,7 @@
                           "displayName": "shareSession",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -955,7 +955,7 @@
                           "displayName": "handshakeTimeout",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -968,7 +968,7 @@
                           "displayName": "sessionTimeout",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
@@ -981,7 +981,7 @@
                           "displayName": "serverName",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -1003,7 +1003,7 @@
                           "displayName": "host",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -1016,7 +1016,7 @@
                           "displayName": "port",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
                           "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -1029,7 +1029,7 @@
                           "displayName": "userName",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -1042,7 +1042,7 @@
                           "displayName": "password",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -1058,7 +1058,7 @@
                     "displayName": "validation",
                     "inputType": "boolean",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "Enables the inbound payload validation functionality which provided by the constraint package. Enabled by default",
                     "validateType": "",
                     "matchPattern": ""
@@ -1071,7 +1071,7 @@
                     "displayName": "serviceUrl",
                     "inputType": "stringOrExpression",
                     "defaultValue": "https://disease.sh",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""

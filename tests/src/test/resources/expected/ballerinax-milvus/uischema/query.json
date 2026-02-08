@@ -32,14 +32,62 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "request",
-                    "displayName": "request",
+                    "name": "collectionName",
+                    "displayName": "collectionName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "Expecting JSON object",
-                    "validateType": "json",
+                    "required": true,
+                    "helpTip": "The name of the collection to search data from",
+                    "validateType": "",
                     "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attributeGroup",
+                  "value": {
+                    "groupName": "Advanced",
+                    "collapsed": true,
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "partitionName",
+                          "displayName": "partitionName",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": false,
+                          "helpTip": "The name of the partition to search data from",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "filter",
+                          "displayName": "filter",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": false,
+                          "helpTip": "The filter to search",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "outputFields",
+                          "displayName": "outputFields",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": false,
+                          "helpTip": "The fields to return in the query result",
+                          "validateType": "json",
+                          "matchPattern": ""
+                        }
+                      }
+                    ]
                   }
                 }
               ]

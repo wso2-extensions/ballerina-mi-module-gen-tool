@@ -30,23 +30,32 @@
               "groupName": "Input Variables",
               "elements": [
                 {
-                  "type": "table",
+                  "type": "attributeGroup",
                   "value": {
-                    "name": "aliases",
-                    "displayName": "aliases",
-                    "title": "aliases",
-                    "description": "Configure aliases entries",
-                    "tableKey": "value",
-                    "tableValue": "value",
+                    "groupName": "Advanced",
+                    "collapsed": true,
                     "elements": [
                       {
-                        "type": "attribute",
+                        "type": "table",
                         "value": {
-                          "name": "value",
-                          "displayName": "Value",
-                          "inputType": "stringOrExpression",
-                          "required": true,
-                          "helpTip": "Array element"
+                          "name": "aliases",
+                          "displayName": "aliases",
+                          "title": "aliases",
+                          "description": "Configure aliases entries",
+                          "tableKey": "value",
+                          "tableValue": "value",
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "value",
+                                "displayName": "Value",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Array element"
+                              }
+                            }
+                          ]
                         }
                       }
                     ]

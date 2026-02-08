@@ -34,7 +34,7 @@
                     "displayName": "serviceUrl",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""
@@ -62,7 +62,7 @@
                           "displayName": "token",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "A valid access token to access the specified Milvus instance",
                           "validateType": "",
                           "matchPattern": ""
@@ -84,7 +84,7 @@
                           "displayName": "username",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The username used to connect to the specified Milvus instance",
                           "validateType": "",
                           "matchPattern": ""
@@ -97,7 +97,7 @@
                           "displayName": "password",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The password used to connect to the specified Milvus instance",
                           "validateType": "",
                           "matchPattern": ""
@@ -113,7 +113,7 @@
                     "displayName": "idleTimeout",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The idle timeout for a connection",
                     "validateType": "regex",
                     "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -126,7 +126,7 @@
                     "displayName": "keepAliveTime",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The time between keep-alive probes sent by the client to the server. (Default: 55 seconds)",
                     "validateType": "regex",
                     "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -139,7 +139,7 @@
                     "displayName": "keepAliveTimeout",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The timeout duration for the server to respond to a keep-alive probe sent by the client. (Default: 20 seconds)",
                     "validateType": "regex",
                     "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -152,7 +152,7 @@
                     "displayName": "keepAliveWithoutCalls",
                     "inputType": "boolean",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "Whether to send keep-alive probes without making requests. (Default: false)",
                     "validateType": "",
                     "matchPattern": ""
@@ -165,7 +165,7 @@
                     "displayName": "rpcDeadline",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The deadline for the rpc operation to be completed. The value defaults to 0, which indicates the deadline is disabled",
                     "validateType": "regex",
                     "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -178,7 +178,7 @@
                     "displayName": "connectTimeout",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The timeout duration for this operation. (Default: 10 seconds)",
                     "validateType": "regex",
                     "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
@@ -191,7 +191,7 @@
                     "displayName": "databaseName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The name of the database to which the target Milvus instance belongs",
                     "validateType": "",
                     "matchPattern": ""
@@ -204,7 +204,7 @@
                     "displayName": "serverName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The expected name of the server",
                     "validateType": "",
                     "matchPattern": ""
@@ -217,7 +217,7 @@
                     "displayName": "proxyAddress",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The proxy server’s address through which the connection is to be established",
                     "validateType": "",
                     "matchPattern": ""
@@ -236,7 +236,7 @@
                           "displayName": "clientKeyPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The path to the client key file for mutual authentication",
                           "validateType": "",
                           "matchPattern": ""
@@ -249,7 +249,7 @@
                           "displayName": "clientPemPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The path to the client PEM file for mutual authentication",
                           "validateType": "",
                           "matchPattern": ""
@@ -262,7 +262,7 @@
                           "displayName": "serverPemPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The path to the server PEM file for mutual authentication",
                           "validateType": "",
                           "matchPattern": ""
@@ -275,7 +275,7 @@
                           "displayName": "caPemPath",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The path to the CA PEM file for mutual authentication",
                           "validateType": "",
                           "matchPattern": ""

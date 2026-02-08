@@ -30,33 +30,42 @@
               "groupName": "Input Variables",
               "elements": [
                 {
-                  "type": "table",
+                  "type": "attributeGroup",
                   "value": {
-                    "name": "metadata",
-                    "displayName": "metadata",
-                    "title": "metadata",
-                    "description": "Configure metadata entries",
-                    "tableKey": "key",
-                    "tableValue": "value",
+                    "groupName": "Advanced",
+                    "collapsed": true,
                     "elements": [
                       {
-                        "type": "attribute",
+                        "type": "table",
                         "value": {
-                          "name": "key",
-                          "displayName": "Key",
-                          "inputType": "stringOrExpression",
-                          "required": true,
-                          "helpTip": "Key for the map entry"
-                        }
-                      },
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "value",
-                          "displayName": "Value",
-                          "inputType": "stringOrExpression",
-                          "required": true,
-                          "helpTip": "Value for the map entry"
+                          "name": "metadata",
+                          "displayName": "metadata",
+                          "title": "metadata",
+                          "description": "Configure metadata entries",
+                          "tableKey": "key",
+                          "tableValue": "value",
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "key",
+                                "displayName": "Key",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Key for the map entry"
+                              }
+                            },
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "value",
+                                "displayName": "Value",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Value for the map entry"
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
