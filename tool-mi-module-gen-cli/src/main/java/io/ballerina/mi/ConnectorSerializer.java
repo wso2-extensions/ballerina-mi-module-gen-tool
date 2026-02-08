@@ -2308,7 +2308,11 @@ public class ConnectorSerializer {
     }
 
     /**
-     * This is a private utility method to copy icons
+     * Copies connector icons to the destination folder.
+     * Supports:
+     * 1. Single icon file from bala package (icon.png in docs folder) - used for both small and large
+     * 2. Directory with two PNG files - separates into small and large by file size
+     * 3. Falls back to default icons from resources if no valid icons found
      */
     private static void copyIcons(ClassLoader classLoader, FileSystem fs, Path destination) throws IOException {
         Connector connector = Connector.getConnector();
@@ -2317,21 +2321,47 @@ public class ConnectorSerializer {
             return;
         }
 
-        Path iconPath = destination.getParent().resolve(connector.getIconPath()).normalize();
+        Path iconPath = Paths.get(connector.getIconPath());
+        // If not absolute, resolve against destination parent
+        if (!iconPath.isAbsolute()) {
+            iconPath = destination.getParent().resolve(connector.getIconPath()).normalize();
+        }
+
         if (!Files.exists(iconPath)) {
             copyResources(classLoader, fs, destination, Connector.ICON_FOLDER, ".png");
             return;
         }
 
-        List<Path> paths = Files.walk(iconPath)
-                .filter(f -> f.toString().contains(".png"))
-                .toList();
-
-        if (paths.size() != 2) {
-            copyResources(classLoader, fs, destination, Connector.ICON_FOLDER, ".png");
+        // Handle single icon file (e.g., icon.png from bala docs folder)
+        if (Files.isRegularFile(iconPath)) {
+            copySingleIconAsBoth(iconPath, destination);
             return;
         }
-        copyIcons(destination, paths);
+
+        // Handle directory with PNG files
+        List<Path> paths = Files.walk(iconPath)
+                .filter(f -> f.toString().endsWith(".png"))
+                .toList();
+
+        if (paths.size() == 1) {
+            copySingleIconAsBoth(paths.get(0), destination);
+        } else if (paths.size() == 2) {
+            copyIcons(destination, paths);
+        } else {
+            copyResources(classLoader, fs, destination, Connector.ICON_FOLDER, ".png");
+        }
+    }
+
+    /**
+     * Copies a single icon file as both small and large icons.
+     */
+    private static void copySingleIconAsBoth(Path singleIconPath, Path destination) throws IOException {
+        Path smallOutputPath = destination.resolve(Connector.ICON_FOLDER).resolve(Connector.SMALL_ICON_NAME);
+        Path largeOutputPath = destination.resolve(Connector.ICON_FOLDER).resolve(Connector.LARGE_ICON_NAME);
+        Files.createDirectories(smallOutputPath.getParent());
+
+        copyIconToDestination(singleIconPath, smallOutputPath);
+        copyIconToDestination(singleIconPath, largeOutputPath);
     }
 
     /**
