@@ -6,7 +6,7 @@
                     "inputType": "{{inputType}}",
                     "defaultValue": "{{defaultValue}}",
                     "required": {{required}},
-                    "helpTip": "{{helpTip}}",
+                    "helpTip": "{{{helpTip}}}",
                     "validateType": "{{validateType}}",
                     "matchPattern": "{{matchPattern}}"{{#if enableCondition}},
                     "enableCondition": {{{enableCondition}}}{{/if}}

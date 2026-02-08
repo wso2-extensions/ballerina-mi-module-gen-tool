@@ -19,13 +19,15 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="{{name}}">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>{{{writeComponentXmlParameters this}}}{{#each functionParams~}}
-{{#eq paramType "union"}}
+{{#eq paramType "record"}}
+    {{{writeFunctionRecordXmlParameters this}}}
+{{~else ~}}{{#eq paramType "union"}}
     <parameter name="{{sanitizeParamName value}}DataType" description="Select the data type for '{{value}}' parameter"/>
 {{~#each unionMemberParams}}
     <parameter name="{{sanitizeParamName value}}" description="{{description}}"/>
 {{~/each}}{{else}}
     <parameter name="{{sanitizeParamName value}}" description="{{description}}"/>
-{{~/eq}}{{/each}}
+{{~/eq}}{{~/eq}}{{/each}}
     <sequence>
         {{#each functionParams ~}}
         <property name="param{{@index}}" value="{{sanitizeParamName value}}"/>
@@ -40,7 +42,7 @@
         {{~/if}}
         {{/eq ~}}
         {{#eq paramType "record" ~}}
-        <property name="param{{@index}}_recordName" value="{{unwrapOptional typeSymbol.name}}" />
+        <property name="param{{@index}}_recordName" value="{{unwrapOptional typeSymbol.name}}" />{{{writeFunctionRecordXmlProperties this @index}}}
         {{/eq ~}}
         {{#eq paramType "union" ~}}
         {{#each unionMemberParams ~}}

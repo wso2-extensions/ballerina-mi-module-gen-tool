@@ -146,16 +146,17 @@ public class RecordReconstructionTest {
         messageContext.setProperty("cache_enabled", "true");
 
         // Use reflection to access the private reconstructRecordFromFields method
+        // The method now takes a propertyPrefix (connectionType + "_" + recordParamName) and context
         Method reconstructMethod = BalExecutor.class.getDeclaredMethod(
                 "reconstructRecordFromFields",
                 String.class,
-                MessageContext.class,
-                String.class
+                MessageContext.class
         );
         reconstructMethod.setAccessible(true);
 
-        // Call the reconstruction method
-        Object result = reconstructMethod.invoke(balExecutor, recordParamName, messageContext, connectionType);
+        // Call the reconstruction method with the combined prefix
+        String propertyPrefix = connectionType + "_" + recordParamName;
+        Object result = reconstructMethod.invoke(balExecutor, propertyPrefix, messageContext);
 
         // Verify the result is a BMap (Ballerina map)
         Assert.assertNotNull(result, "Reconstructed record should not be null");
@@ -251,12 +252,12 @@ public class RecordReconstructionTest {
         Method reconstructMethod = BalExecutor.class.getDeclaredMethod(
                 "reconstructRecordFromFields",
                 String.class,
-                MessageContext.class,
-                String.class
+                MessageContext.class
         );
         reconstructMethod.setAccessible(true);
 
-        Object result = reconstructMethod.invoke(balExecutor, recordParamName, messageContext, connectionType);
+        String propertyPrefix = connectionType + "_" + recordParamName;
+        Object result = reconstructMethod.invoke(balExecutor, propertyPrefix, messageContext);
 
         Assert.assertNotNull(result, "Should handle optional fields gracefully");
         io.ballerina.runtime.api.values.BMap<?, ?> reconstructedRecord =

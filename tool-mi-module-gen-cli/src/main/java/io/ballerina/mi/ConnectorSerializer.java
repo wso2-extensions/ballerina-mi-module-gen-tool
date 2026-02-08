@@ -47,10 +47,12 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.StringJoiner;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static io.ballerina.mi.util.Constants.*;
@@ -60,6 +62,12 @@ public class ConnectorSerializer {
 
     private static final String CONFIG_TEMPLATE_PATH = "balConnector" + File.separator + "config";
     private static final String FUNCTION_TEMPLATE_PATH = "balConnector" + File.separator + "functions";
+
+    // Cached Handlebars instances and compiled templates to avoid OOM on large connectors
+    private static Handlebars cachedConnectorHandlebars;
+    private static final Map<String, Template> connectorTemplateCache = new ConcurrentHashMap<>();
+    private static Handlebars cachedSimpleHandlebars;
+    private static final Map<String, Template> simpleTemplateCache = new ConcurrentHashMap<>();
 
     private final PrintStream printStream;
     private final Path sourcePath;
@@ -71,7 +79,403 @@ public class ConnectorSerializer {
         this.printStream = System.out;
     }
 
+    private static synchronized Handlebars getConnectorHandlebars() {
+        if (cachedConnectorHandlebars != null) return cachedConnectorHandlebars;
+        cachedConnectorHandlebars = new Handlebars();
+        registerConnectorHelpers(cachedConnectorHandlebars);
+        return cachedConnectorHandlebars;
+    }
+
+    private static Template getConnectorTemplate(String templateFilePath) throws IOException {
+        Template cached = connectorTemplateCache.get(templateFilePath);
+        if (cached != null) return cached;
+        String content = Utils.readFile(templateFilePath);
+        Template template = getConnectorHandlebars().compileInline(content);
+        connectorTemplateCache.put(templateFilePath, template);
+        return template;
+    }
+
+    private static synchronized Handlebars getSimpleHandlebars() {
+        if (cachedSimpleHandlebars != null) return cachedSimpleHandlebars;
+        cachedSimpleHandlebars = new Handlebars();
+        return cachedSimpleHandlebars;
+    }
+
+    private static Template getSimpleTemplate(String templateFileName) throws IOException {
+        Template cached = simpleTemplateCache.get(templateFileName);
+        if (cached != null) return cached;
+        String content = Utils.readFile(templateFileName);
+        Template template = getSimpleHandlebars().compileInline(content);
+        simpleTemplateCache.put(templateFileName, template);
+        return template;
+    }
+
+    static void clearCaches() {
+        connectorTemplateCache.clear();
+        simpleTemplateCache.clear();
+        cachedConnectorHandlebars = null;
+        cachedSimpleHandlebars = null;
+    }
+
+    private static void registerConnectorHelpers(Handlebars handlebar) {
+        handlebar.registerHelper("eq", (first, options) -> {
+            Object second = options.param(0);
+            if (first == null && second == null) {
+                return options.fn();
+            }
+            if (first != null && first.equals(second)) {
+                return options.fn();
+            }
+            return options.inverse();
+        });
+        handlebar.registerHelper("not", (context, options) -> {
+            if (context instanceof Boolean booleanContext) {
+                return !booleanContext;
+            }
+            return true;
+        });
+        handlebar.registerHelper("escapeChars", (context, options) -> {
+            if (context == null) return "";
+            String value = context.toString().replaceAll("^\"(.*)\"$", "$1");
+            if (value.equals("()")) {
+                return "";
+            }
+            return value.replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("\b", "\\b")
+                    .replace("\f", "\\f")
+                    .replace("\n", "\\n")
+                    .replace("\r", "\\r")
+                    .replace("\t", "\\t")
+                    .replace("\u0000", "\\u0000");
+        });
+        handlebar.registerHelper("sanitizeParamName", (context, options) -> {
+            if (context == null) return "";
+            return Utils.sanitizeParamName(context.toString());
+        });
+        handlebar.registerHelper("checkFuncType", (context, options) -> {
+            FunctionType functionType = (FunctionType) context;
+            return functionType.toString().equals(options.param(0));
+        });
+        handlebar.registerHelper("writeConfigXmlProperties", (context, options) -> {
+            Connection connection = (Connection) context;
+            StringBuilder result = new StringBuilder();
+            List<Type> initParams = connection.getInitComponent() != null ? connection.getInitComponent().getQueryParams() : List.of();
+            for (int i = 0; i < initParams.size(); i++) {
+                writeConfigXmlProperty(initParams.get(i), i, connection.getConnectionType(), result);
+            }
+            return new Handlebars.SafeString(result.toString());
+        });
+        handlebar.registerHelper("writeComponentXmlProperties", (context, options) -> {
+            Component component = (Component) context;
+            StringBuilder result = new StringBuilder();
+            List<PathParamType> pathParams = component.getPathParams();
+            for (int i = 0; i < pathParams.size(); i++) {
+                writeComponentXmlPathProperty(pathParams.get(i), i, result, i == 0);
+            }
+            List<Type> queryParams = component.getQueryParams();
+            for (int i = 0; i < queryParams.size(); i++) {
+                writeComponentXmlQueryProperty(queryParams.get(i), i, result);
+            }
+            // This helper is only used in functions_template.xml, so always append returnType
+            boolean hasPreviousProperties = !pathParams.isEmpty() || !queryParams.isEmpty();
+            String indent = hasPreviousProperties ? "        " : "";
+            result.append(String.format("%s<property name=\"returnType\" value=\"%s\"/>\n",
+                    indent, component.getReturnType()));
+            return new Handlebars.SafeString(result.toString());
+        });
+        handlebar.registerHelper("writeConfigXmlParameters", (context, options) -> {
+            @SuppressWarnings("unchecked")
+            List<FunctionParam> functionParams = (List<FunctionParam>) context;
+            if (functionParams == null) {
+                return new Handlebars.SafeString("");
+            }
+            StringBuilder result = new StringBuilder();
+            boolean[] isFirst = {true};
+            Set<String> processedParams = new HashSet<>();
+            for (FunctionParam functionParam : functionParams) {
+                writeXmlParameterElements(functionParam, result, isFirst, processedParams);
+            }
+            String output = result.toString();
+            if (output.endsWith("\n    ")) {
+                output = output.substring(0, output.length() - 5);
+            }
+            return new Handlebars.SafeString(output);
+        });
+        handlebar.registerHelper("writeConfigXmlParamProperties", (context, options) -> {
+            Connection connection = (Connection) context;
+            StringBuilder result = new StringBuilder();
+            if (connection.getInitComponent() != null) {
+                List<FunctionParam> functionParams = connection.getInitComponent().getFunctionParams();
+                int[] indexHolder = {0};
+                boolean[] isFirst = {true};
+                for (FunctionParam functionParam : functionParams) {
+                    writeXmlParamProperties(functionParam, connection.getConnectionType().toUpperCase(), result, indexHolder, isFirst);
+                }
+            }
+            String output = result.toString();
+            if (!output.isEmpty() && !output.endsWith("\n")) {
+                output = output + "\n";
+            }
+            return new Handlebars.SafeString(output);
+        });
+        handlebar.registerHelper("writeComponentXmlParameters", (context, options) -> {
+            Component component = (Component) context;
+            StringBuilder result = new StringBuilder();
+            if (component.getPathParams() != null) {
+                for (PathParamType param : component.getPathParams()) {
+                    result.append(String.format("    <parameter name=\"%s\" description=\"\"/>\n", param.name));
+                }
+            }
+            if (component.getQueryParams() != null) {
+                for (Type param : component.getQueryParams()) {
+                    result.append(String.format("    <parameter name=\"%s\" description=\"\"/>\n", param.name));
+                }
+            }
+            String output = result.toString();
+            if (output.isEmpty()) {
+                return new Handlebars.SafeString("");
+            }
+            output = "\n" + output;
+            if (output.endsWith("\n")) {
+                output = output.substring(0, output.length() - 1);
+            }
+            return new Handlebars.SafeString(output);
+        });
+        handlebar.registerHelper("writeFunctionRecordXmlParameters", (context, options) -> {
+            FunctionParam functionParam = (FunctionParam) context;
+            StringBuilder result = new StringBuilder();
+            if (functionParam instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
+                boolean[] isFirst = {true};
+                Set<String> processedParams = new HashSet<>();
+                for (FunctionParam fieldParam : recordParam.getRecordFieldParams()) {
+                    writeXmlParameterElements(fieldParam, result, isFirst, processedParams);
+                }
+            } else {
+                String sanitizedParamName = Utils.sanitizeParamName(functionParam.getValue());
+                String description = functionParam.getDescription() != null ? functionParam.getDescription() : "";
+                result.append(String.format("<parameter name=\"%s\" description=\"%s\"/>",
+                        sanitizedParamName, escapeXml(description)));
+            }
+            return new Handlebars.SafeString(result.toString());
+        });
+        handlebar.registerHelper("writeFunctionRecordXmlProperties", (context, options) -> {
+            FunctionParam functionParam = (FunctionParam) context;
+            int paramIndex = options.param(0) instanceof Integer ? (Integer) options.param(0) : Integer.parseInt(options.param(0).toString());
+            StringBuilder result = new StringBuilder();
+            if (functionParam instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
+                int[] fieldIndexHolder = {0};
+                String recordParamName = recordParam.getValue();
+                for (FunctionParam fieldParam : recordParam.getRecordFieldParams()) {
+                    writeFunctionRecordFieldProperties(fieldParam, recordParamName, result, fieldIndexHolder);
+                }
+            }
+            return new Handlebars.SafeString(result.toString());
+        });
+        handlebar.registerHelper("writeConfigJsonProperties", (context, options) -> {
+            Component component = (Component) context;
+            JsonTemplateBuilder builder = new JsonTemplateBuilder();
+            List<FunctionParam> functionParams = component.getFunctionParams();
+
+            List<FunctionParam> basicParams = new ArrayList<>();
+            List<FunctionParam> advancedParams = new ArrayList<>();
+
+            List<FunctionParam> flattenedParams = new ArrayList<>();
+            for (FunctionParam param : functionParams) {
+                if (param instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
+                    flattenedParams.addAll(recordParam.getRecordFieldParams());
+                } else {
+                    flattenedParams.add(param);
+                }
+            }
+
+            for (FunctionParam param : flattenedParams) {
+                boolean isAdvanced = false;
+                if (!param.isRequired() || (param.getDefaultValue() != null && !param.getDefaultValue().isEmpty())) {
+                    isAdvanced = true;
+                }
+                if (isAdvanced) {
+                    advancedParams.add(param);
+                } else {
+                    basicParams.add(param);
+                }
+            }
+
+            if (!basicParams.isEmpty()) {
+                writeAttributeGroup("Basic", basicParams, advancedParams.isEmpty(), builder);
+            }
+            if (!advancedParams.isEmpty()) {
+                writeAttributeGroup("Advanced", advancedParams, true, builder, true);
+            }
+
+            return new Handlebars.SafeString(builder.build());
+        });
+        handlebar.registerHelper("writeComponentJsonProperties", (context, options) -> {
+            Component component = (Component) context;
+            JsonTemplateBuilder builder = new JsonTemplateBuilder();
+
+            List<PathParamType> pathParams = component.getPathParams();
+            int totalPathParams = pathParams.size();
+            for (int i = 0; i < totalPathParams; i++) {
+                PathParamType pathParam = pathParams.get(i);
+                writeJsonAttributeForPathParam(pathParam, i, totalPathParams, builder);
+                if (i < totalPathParams - 1) {
+                    builder.addSeparator(ATTRIBUTE_SEPARATOR);
+                }
+            }
+
+            List<FunctionParam> functionParams = component.getFunctionParams();
+            List<FunctionParam> flattenedParams = new ArrayList<>();
+            for (FunctionParam param : functionParams) {
+                if (param instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
+                    flattenedParams.addAll(recordParam.getRecordFieldParams());
+                } else {
+                    flattenedParams.add(param);
+                }
+            }
+
+            List<FunctionParam> requiredParams = new ArrayList<>();
+            List<FunctionParam> advancedParams = new ArrayList<>();
+            for (FunctionParam param : flattenedParams) {
+                boolean isAdvanced = !param.isRequired()
+                        || (param.getDefaultValue() != null && !param.getDefaultValue().isEmpty());
+                if (isAdvanced) {
+                    advancedParams.add(param);
+                } else {
+                    requiredParams.add(param);
+                }
+            }
+
+            boolean hasPathParams = totalPathParams > 0;
+            boolean hasRequiredParams = !requiredParams.isEmpty();
+            boolean hasAdvancedParams = !advancedParams.isEmpty();
+
+            if (hasPathParams && (hasRequiredParams || hasAdvancedParams)) {
+                builder.addSeparator(ATTRIBUTE_SEPARATOR);
+            }
+
+            int totalRequired = requiredParams.size();
+            for (int i = 0; i < totalRequired; i++) {
+                writeJsonAttributeForFunctionParam(requiredParams.get(i), i, totalRequired, builder, false, true, null);
+            }
+
+            if (hasAdvancedParams) {
+                if (hasRequiredParams) {
+                    builder.addSeparator(ATTRIBUTE_SEPARATOR);
+                }
+                writeAttributeGroup("Advanced", advancedParams, true, builder, true);
+            }
+
+            return new Handlebars.SafeString(builder.build());
+        });
+        handlebar.registerHelper("writeConfigDependency", (context, options) -> {
+            Connector connector = (Connector) context;
+            if (!connector.isBalModule()) {
+                return new Handlebars.SafeString("<dependency component=\"config\"/>");
+            }
+            return new Handlebars.SafeString("");
+        });
+        handlebar.registerHelper("uppercase", (context, options) -> {
+            if (context == null) {
+                return "";
+            }
+            return context.toString().toUpperCase();
+        });
+        handlebar.registerHelper("arrayElementType", (context, options) -> {
+            if (!(context instanceof FunctionParam functionParam)) {
+                return "";
+            }
+            // Use pre-computed value if available (after clearTypeSymbols)
+            if (functionParam instanceof ArrayFunctionParam arrayParam) {
+                String cached = arrayParam.getArrayElementTypeName();
+                if (cached != null) return cached;
+            }
+            // Fallback to TypeSymbol (before clearTypeSymbols)
+            TypeSymbol typeSymbol = functionParam.getTypeSymbol();
+            if (typeSymbol == null) {
+                return "";
+            }
+            TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(typeSymbol);
+            if (!(actualTypeSymbol instanceof ArrayTypeSymbol arrayTypeSymbol)) {
+                return "";
+            }
+            TypeSymbol memberType = arrayTypeSymbol.memberTypeDescriptor();
+            TypeDescKind memberKind = Utils.getActualTypeKind(memberType);
+            String elementType = Utils.getParamTypeName(memberKind);
+            return elementType != null ? elementType : "";
+        });
+        handlebar.registerHelper("mapValueType", (context, options) -> {
+            if (!(context instanceof MapFunctionParam mapParam)) {
+                return "";
+            }
+            // Use pre-computed value
+            String cached = mapParam.getValueTypeName();
+            if (cached != null) return cached;
+            // Fallback to TypeSymbol
+            TypeSymbol valueType = mapParam.getValueTypeSymbol();
+            if (valueType == null) {
+                return "";
+            }
+            TypeDescKind valueKind = Utils.getActualTypeKind(valueType);
+            String valueTypeName = Utils.getParamTypeName(valueKind);
+            return valueTypeName != null ? valueTypeName : "";
+        });
+        handlebar.registerHelper("isMapOfRecord", (context, options) -> {
+            if (!(context instanceof MapFunctionParam mapParam)) {
+                return false;
+            }
+            // Use pre-computed value
+            TypeDescKind valueKind = mapParam.getValueTypeKind();
+            if (valueKind != null) return valueKind == TypeDescKind.RECORD;
+            // Fallback to TypeSymbol
+            TypeSymbol valueType = mapParam.getValueTypeSymbol();
+            if (valueType == null) {
+                return false;
+            }
+            return Utils.getActualTypeKind(valueType) == TypeDescKind.RECORD;
+        });
+        handlebar.registerHelper("mapRecordFieldNames", (context, options) -> {
+            if (!(context instanceof MapFunctionParam mapParam)) {
+                return "";
+            }
+            List<FunctionParam> valueFields = mapParam.getValueFieldParams();
+            if (valueFields == null || valueFields.isEmpty()) {
+                return "";
+            }
+            return valueFields.stream()
+                    .map(FunctionParam::getValue)
+                    .collect(Collectors.joining(","));
+        });
+        handlebar.registerHelper("unwrapOptional", ((context, options) -> {
+            if (context instanceof Optional<?> optional) {
+                if (optional.isPresent()) {
+                    return optional.get();
+                }
+            }
+            return "";
+        }));
+        handlebar.registerHelper("capitalize", ((context, options) -> {
+            if (context instanceof String) {
+                return new Handlebars.SafeString(StringUtils.capitalize((String) context));
+            }
+            return "";
+        }));
+        handlebar.registerHelper("sanitizeModuleName", ((context, options) -> {
+            if (context == null) {
+                return "";
+            }
+            String moduleName = context.toString();
+            return new Handlebars.SafeString(moduleName.replace(".", "_"));
+        }));
+    }
+
+    private static final int BATCH_SIZE = 50;
+
     public void serialize(Connector connector) {
+
+        // Pre-compute TypeSymbol-derived values and release heavy compiler references
+        // to allow the Ballerina semantic model to be garbage collected before serialization
+        connector.clearTypeSymbols();
 
         try {
             Path destinationPath = targetPath.resolve("generated");
@@ -80,9 +484,48 @@ public class ConnectorSerializer {
             } else {
                 Files.createDirectories(destinationPath);
             }
-            generateXmlFiles(destinationPath, connector);
-            //TODO: Do output schema generation
-            generateJsonFiles(destinationPath, connector);
+
+            File connectorFolder = new File(destinationPath.toUri());
+            if (!connectorFolder.exists()) {
+                connectorFolder.mkdir();
+            }
+
+            // Phase 1: Generate aggregate XML files (lightweight, covers all components in one file)
+            System.out.println("Generating aggregate XML files...");
+            connector.generateInstanceXml(connectorFolder);
+            connector.generateFunctionsXml(connectorFolder, Constants.FUNCTION_TEMPLATE_PATH, "functions");
+            if (!connector.isBalModule()) {
+                connector.generateConfigInstanceXml(connectorFolder, CONFIG_TEMPLATE_PATH, "config");
+                connector.generateConfigTemplateXml(connectorFolder, CONFIG_TEMPLATE_PATH, "config");
+            }
+
+            // Phase 2: Generate per-connection config JSON
+            for (Connection connection : connector.getConnections()) {
+                if (connection.getInitComponent() != null) {
+                    connection.getInitComponent().generateUIJson(connectorFolder, CONFIG_TEMPLATE_PATH,
+                            connection.getConnectionType());
+                }
+            }
+
+            // Phase 3: Generate per-component files (XML template + JSON UI schema) in batches
+            int totalComponents = connector.getComponents().size();
+            int processed = 0;
+            for (Connection connection : connector.getConnections()) {
+                for (Component component : connection.getComponents()) {
+                    component.generateTemplateXml(connectorFolder, FUNCTION_TEMPLATE_PATH, "functions");
+                    component.generateUIJson(connectorFolder, FUNCTION_TEMPLATE_PATH, component.getName());
+                    processed++;
+                    if (processed % BATCH_SIZE == 0) {
+                        System.out.println("Processed " + processed + "/" + totalComponents + " components...");
+                        System.gc();
+                    }
+                }
+            }
+            if (processed % BATCH_SIZE != 0) {
+                System.out.println("Processed " + processed + "/" + totalComponents + " components.");
+            }
+
+            // Copy resources and JARs before clearing connector metadata
             URI jarPath = getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
             copyResources(getClass().getClassLoader(), destinationPath, jarPath, connector.getOrgName(),
                     connector.getModuleName(), connector.getMajorVersion());
@@ -93,50 +536,30 @@ public class ConnectorSerializer {
                 Path generatedArtifactPath = Paths.get(System.getProperty(Constants.CONNECTOR_TARGET_PATH));
                 Files.copy(generatedArtifactPath, destinationPath.resolve(Connector.LIB_PATH).resolve(generatedArtifactPath.getFileName()));
             }
+
+            // Extract zip path before clearing connector
             String zipFilePath = targetPath.resolve(connector.getZipFileName()).toString();
+
+            // Aggressively free ALL memory before ZIP packaging:
+            // 1. Clear the Connector model (connections, components, nested FunctionParam trees)
+            connector.clearComponentData();
+            Connector.reset();
+            // 2. Clear Handlebars engines and compiled template caches
+            clearCaches();
+            JsonTemplateBuilder.clearCache();
+            // 3. Request GC with finalization to reclaim as much as possible
+            System.gc();
+            System.runFinalization();
+            System.gc();
+
+            Runtime rt = Runtime.getRuntime();
+            long usedMB = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024);
+            long maxMB = rt.maxMemory() / (1024 * 1024);
+            System.out.println("Packaging connector ZIP... (heap: " + usedMB + "MB used / " + maxMB + "MB max)");
             Utils.zipFolder(destinationPath, zipFilePath);
+            System.out.println("Connector ZIP created successfully.");
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private static void generateXmlFiles(Path connectorFolderPath, Connector connector) {
-        File connectorFolder = new File(connectorFolderPath.toUri());
-        if (!connectorFolder.exists()) {
-            connectorFolder.mkdir();
-        }
-        // Generate the connector.xml
-        connector.generateInstanceXml(connectorFolder);
-        // Generate the component.xml for functions
-        connector.generateFunctionsXml(connectorFolder, Constants.FUNCTION_TEMPLATE_PATH, "functions");
-        if (!connector.isBalModule()) {
-            // Generate the config/component.xml
-            connector.generateConfigInstanceXml(connectorFolder, CONFIG_TEMPLATE_PATH, "config");
-            // Generate the init.xml from config_template.xml
-            connector.generateConfigTemplateXml(connectorFolder, CONFIG_TEMPLATE_PATH, "config");
-        }
-        for (Connection connection : connector.getConnections()) {
-            for (Component component : connection.getComponents()) {
-                component.generateTemplateXml(connectorFolder, FUNCTION_TEMPLATE_PATH, "functions");
-            }
-        }
-    }
-
-    private static void generateJsonFiles(Path connectorFolderPath, Connector connector) {
-        File connectorFolder = new File(connectorFolderPath.toUri());
-        for (Connection connection : connector.getConnections()) {
-            // TODO: revisit this
-            if (connection.getInitComponent() != null) {
-                // Generate config JSON - filename sanitization is handled in generateFileForConnector
-                // Config files use exact connectionType (no PascalCase) to match connectionName
-                connection.getInitComponent().generateUIJson(connectorFolder, CONFIG_TEMPLATE_PATH,
-                        connection.getConnectionType());
-            }
-            for (Component component : connection.getComponents()) {
-                component.generateUIJson(connectorFolder, FUNCTION_TEMPLATE_PATH, component.getName());
-                //TODO: Generate output schemas
-//            component.generateOutputSchemaJson(connectorFolder);
-            }
         }
     }
 
@@ -151,10 +574,8 @@ public class ConnectorSerializer {
      */
     private static void generateFile(String templateName, String outputName, ModelElement element, String extension) {
         try {
-            Handlebars handlebar = new Handlebars();
             String templateFileName = String.format("%s.%s", templateName, extension);
-            String content = Utils.readFile(templateFileName);
-            Template template = handlebar.compileInline(content);
+            Template template = getSimpleTemplate(templateFileName);
             String output = template.apply(element);
 
             String outputFileName = String.format("%s.%s", outputName, extension);
@@ -168,307 +589,8 @@ public class ConnectorSerializer {
                                                  io.ballerina.mi.connectorModel.ModelElement element,
                                                  String extension) {
         try {
-            Handlebars handlebar = new Handlebars();
-            handlebar.registerHelper("eq", (first, options) -> {
-                Object second = options.param(0);
-                if (first == null && second == null) {
-                    return options.fn();
-                }
-                if (first != null && first.equals(second)) {
-                    return options.fn();
-                }
-                return options.inverse();
-            });
-            handlebar.registerHelper("not", (context, options) -> {
-                if (context instanceof Boolean booleanContext) {
-                    return !booleanContext;
-                }
-                return true; // default value if context is not boolean
-            });
-            handlebar.registerHelper("escapeChars", (context, options) -> {
-                if (context == null) return "";
-                String value = context.toString().replaceAll("^\"(.*)\"$", "$1");
-                if (value.equals("()")) {
-                    return "";
-                }
-                return value.replace("\\", "\\\\")
-                        .replace("\"", "\\\"")
-                        .replace("\b", "\\b")
-                        .replace("\f", "\\f")
-                        .replace("\n", "\\n")
-                        .replace("\r", "\\r")
-                        .replace("\t", "\\t")
-                        .replace("\u0000", "\\u0000");
-            });
-            handlebar.registerHelper("sanitizeParamName", (context, options) -> {
-                if (context == null) return "";
-                return Utils.sanitizeParamName(context.toString());
-            });
-            handlebar.registerHelper("checkFuncType", (context, options) -> {
-                FunctionType functionType = (FunctionType) context;
-                return functionType.toString().equals(options.param(0));
-            });
-            handlebar.registerHelper("writeConfigXmlProperties", (context, options) -> {
-                Connection connection = (Connection) context;
-                StringBuilder result = new StringBuilder();
-                List<Type> initParams = connection.getInitComponent() != null ? connection.getInitComponent().getQueryParams() : List.of();
-                for (int i = 0; i < initParams.size(); i++) {
-                    writeConfigXmlProperty(initParams.get(i), i, connection.getConnectionType(), result);
-                }
-                return new Handlebars.SafeString(result.toString());
-            });
-            handlebar.registerHelper("writeComponentXmlProperties", (context, options) -> {
-                Component component = (Component) context;
-                StringBuilder result = new StringBuilder();
-                // Write path parameters first (pathParam0, pathParam1, etc.)
-                List<PathParamType> pathParams = component.getPathParams();
-                for (int i = 0; i < pathParams.size(); i++) {
-                    writeComponentXmlPathProperty(pathParams.get(i), i, result, i == 0);
-                }
-                // Then write query parameters (queryParam0, queryParam1, etc.)
-                List<Type> queryParams = component.getQueryParams();
-                for (int i = 0; i < queryParams.size(); i++) {
-                    writeComponentXmlQueryProperty(queryParams.get(i), i, result);
-                }
-                if (templatePath.equals(FUNCTION_TEMPLATE_PATH)) {
-                    // Only add indentation if there are already properties written
-                    // (Handlebars adds indentation to the first line automatically)
-                    boolean hasPreviousProperties = !pathParams.isEmpty() || !queryParams.isEmpty();
-                    String indent = hasPreviousProperties ? "        " : "";
-                    result.append(String.format("%s<property name=\"returnType\" value=\"%s\"/>\n",
-                            indent, component.getReturnType()));
-                }
-                return new Handlebars.SafeString(result.toString());
-            });
-            handlebar.registerHelper("writeConfigXmlParameters", (context, options) -> {
-                @SuppressWarnings("unchecked")
-                List<FunctionParam> functionParams = (List<FunctionParam>) context;
-                if (functionParams == null) {
-                    return new Handlebars.SafeString("");
-                }
-                StringBuilder result = new StringBuilder();
-                boolean[] isFirst = {true};
-                Set<String> processedParams = new HashSet<>();
-                for (FunctionParam functionParam : functionParams) {
-                    writeXmlParameterElements(functionParam, result, isFirst, processedParams);
-                }
-                // Remove trailing newline and indentation
-                String output = result.toString();
-                if (output.endsWith("\n    ")) {
-                    output = output.substring(0, output.length() - 5);
-                }
-                return new Handlebars.SafeString(output);
-            });
-            handlebar.registerHelper("writeConfigXmlParamProperties", (context, options) -> {
-                Connection connection = (Connection) context;
-                StringBuilder result = new StringBuilder();
-                if (connection.getInitComponent() != null) {
-                    List<FunctionParam> functionParams = connection.getInitComponent().getFunctionParams();
-                    int[] indexHolder = {0};  // Use array to allow modification in lambda
-                    boolean[] isFirst = {true};
-                    for (FunctionParam functionParam : functionParams) {
-                        writeXmlParamProperties(functionParam, connection.getConnectionType().toUpperCase(), result, indexHolder, isFirst);
-                    }
-                }
-                // Ensure output ends with a newline for proper formatting
-                String output = result.toString();
-                if (!output.isEmpty() && !output.endsWith("\n")) {
-                    output = output + "\n";
-                }
-                return new Handlebars.SafeString(output);
-            });
-            handlebar.registerHelper("writeComponentXmlParameters", (context, options) -> {
-                Component component = (Component) context;
-                StringBuilder result = new StringBuilder();
-                
-                // Path Params
-                if (component.getPathParams() != null) {
-                    for (PathParamType param : component.getPathParams()) {
-                        result.append(String.format("    <parameter name=\"%s\" description=\"\"/>\n", param.name));
-                    }
-                }
-
-                // Query Params
-                if (component.getQueryParams() != null) {
-                    for (Type param : component.getQueryParams()) {
-                        result.append(String.format("    <parameter name=\"%s\" description=\"\"/>\n", param.name));
-                    }
-                }
-                
-                String output = result.toString();
-                if (output.isEmpty()) {
-                    return new Handlebars.SafeString("");
-                }
-                // Add leading newline so params appear on new line after overwriteBody
-                output = "\n" + output;
-                // Remove trailing newline to avoid blank line before functionParams
-                if (output.endsWith("\n")) {
-                    output = output.substring(0, output.length() - 1);
-                }
-
-                return new Handlebars.SafeString(output);
-            });
-            handlebar.registerHelper("writeConfigJsonProperties", (context, options) -> {
-                Component component = (Component) context;
-                JsonTemplateBuilder builder = new JsonTemplateBuilder();
-                List<FunctionParam> functionParams = component.getFunctionParams();
-
-                // Split parameters into Basic and Advanced
-                List<FunctionParam> basicParams = new ArrayList<>();
-                List<FunctionParam> advancedParams = new ArrayList<>();
-
-                // Flatten parameters: if a param is a record, extract its fields
-                List<FunctionParam> flattenedParams = new ArrayList<>();
-                for (FunctionParam param : functionParams) {
-                    if (param instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
-                        flattenedParams.addAll(recordParam.getRecordFieldParams());
-                    } else {
-                        flattenedParams.add(param);
-                    }
-                }
-
-                for (FunctionParam param : flattenedParams) {
-                    // Advanced params are optional records or params with default values or optional fields
-                    boolean isAdvanced = false;
-                    if (!param.isRequired() || (param.getDefaultValue() != null && !param.getDefaultValue().isEmpty())) {
-                        isAdvanced = true;
-                    }
-
-                    if (isAdvanced) {
-                        advancedParams.add(param);
-                    } else {
-                        basicParams.add(param);
-                    }
-                }
-
-                // Write Basic Group
-                if (!basicParams.isEmpty()) {
-                    writeAttributeGroup("Basic", basicParams, advancedParams.isEmpty(), builder);
-                }
-
-                // Write Advanced Group
-                if (!advancedParams.isEmpty()) {
-                    writeAttributeGroup("Advanced", advancedParams, true, builder, true);
-                }
-
-                return new Handlebars.SafeString(builder.build());
-            });
-            handlebar.registerHelper("writeComponentJsonProperties", (context, options) -> {
-                Component component = (Component) context;
-                JsonTemplateBuilder builder = new JsonTemplateBuilder();
-
-                // First, add path parameters as input elements
-                List<PathParamType> pathParams = component.getPathParams();
-                int totalPathParams = pathParams.size();
-                for (int i = 0; i < totalPathParams; i++) {
-                    PathParamType pathParam = pathParams.get(i);
-                    writeJsonAttributeForPathParam(pathParam, i, totalPathParams, builder);
-                    // Add separator if not the last path param or if there are function params
-                    if (i < totalPathParams - 1 || !component.getFunctionParams().isEmpty()) {
-                        builder.addSeparator(ATTRIBUTE_SEPARATOR);
-                    }
-                }
-
-                // Then, add regular function parameters
-                List<FunctionParam> functionParams = component.getFunctionParams();
-                for (FunctionParam functionParam : functionParams) {
-                    // Do NOT expand records for regular function parameters
-                    writeJsonAttributeForFunctionParam(functionParam, functionParams.indexOf(functionParam),
-                            functionParams.size(), builder, false, false, null);
-                }
-                return new Handlebars.SafeString(builder.build());
-            });
-            handlebar.registerHelper("writeConfigDependency", (context, options) -> {
-                Connector connector = (Connector) context;
-                if (!connector.isBalModule()) {
-                    return new Handlebars.SafeString("<dependency component=\"config\"/>");
-                }
-                return new Handlebars.SafeString("");
-            });
-            handlebar.registerHelper("uppercase", (context, options) -> {
-                if (context == null) {
-                    return "";
-                }
-                return context.toString().toUpperCase();
-            });
-            handlebar.registerHelper("arrayElementType", (context, options) -> {
-                if (!(context instanceof FunctionParam functionParam)) {
-                    return "";
-                }
-                TypeSymbol typeSymbol = functionParam.getTypeSymbol();
-                if (typeSymbol == null) {
-                    return "";
-                }
-                TypeSymbol actualTypeSymbol = Utils.getActualTypeSymbol(typeSymbol);
-                if (!(actualTypeSymbol instanceof ArrayTypeSymbol arrayTypeSymbol)) {
-                    return "";
-                }
-                TypeSymbol memberType = arrayTypeSymbol.memberTypeDescriptor();
-                TypeDescKind memberKind = Utils.getActualTypeKind(memberType);
-                String elementType = Utils.getParamTypeName(memberKind);
-                return elementType != null ? elementType : "";
-            });
-            handlebar.registerHelper("mapValueType", (context, options) -> {
-                if (!(context instanceof MapFunctionParam mapParam)) {
-                    return "";
-                }
-                TypeSymbol valueType = mapParam.getValueTypeSymbol();
-                if (valueType == null) {
-                    return "";
-                }
-                TypeDescKind valueKind = Utils.getActualTypeKind(valueType);
-                String valueTypeName = Utils.getParamTypeName(valueKind);
-                return valueTypeName != null ? valueTypeName : "";
-            });
-            handlebar.registerHelper("isMapOfRecord", (context, options) -> {
-                if (!(context instanceof MapFunctionParam mapParam)) {
-                    return false;
-                }
-                TypeSymbol valueType = mapParam.getValueTypeSymbol();
-                if (valueType == null) {
-                    return false;
-                }
-                TypeDescKind valueKind = Utils.getActualTypeKind(valueType);
-                return valueKind == TypeDescKind.RECORD;
-            });
-            handlebar.registerHelper("mapRecordFieldNames", (context, options) -> {
-                if (!(context instanceof MapFunctionParam mapParam)) {
-                    return "";
-                }
-                List<FunctionParam> valueFields = mapParam.getValueFieldParams();
-                if (valueFields == null || valueFields.isEmpty()) {
-                    return "";
-                }
-                // Return comma-separated field names
-                return valueFields.stream()
-                        .map(FunctionParam::getValue)
-                        .collect(Collectors.joining(","));
-            });
-            handlebar.registerHelper("unwrapOptional", ((context, options) -> {
-                if (context instanceof Optional<?> optional) {
-                    if (optional.isPresent()) {
-                        return optional.get();
-                    }
-                }
-                return "";
-            }));
-            handlebar.registerHelper("capitalize", ((context, options) -> {
-                if (context instanceof String) {
-                    return new Handlebars.SafeString(StringUtils.capitalize((String) context));
-                }
-                return "";
-            }));
-            handlebar.registerHelper("sanitizeModuleName", ((context, options) -> {
-                if (context == null) {
-                    return "";
-                }
-                String moduleName = context.toString();
-                // Replace dots with underscores
-                return new Handlebars.SafeString(moduleName.replace(".", "_"));
-            }));
             String templateFileName = String.format("%s/%s.%s", templatePath, templateName, extension);
-            String content = Utils.readFile(templateFileName);
-            Template template = handlebar.compileInline(content);
+            Template template = getConnectorTemplate(templateFileName);
             String output = template.apply(element);
             
             // Sanitize filename: config files use exact connectionType (no sanitization),
@@ -952,6 +1074,18 @@ public class ConnectorSerializer {
         }
     }
 
+    private static String getTypeNameOrFallback(FunctionParam member, String fallback) {
+        // Prefer displayTypeName (set during analysis), then resolvedTypeName (from TypeSymbol.getName()),
+        // then try TypeSymbol directly as fallback
+        String name = member.getDisplayTypeName();
+        if (name != null && !name.isEmpty()) return name;
+        name = member.getResolvedTypeName();
+        if (name != null && !name.isEmpty()) return name;
+        TypeSymbol ts = member.getTypeSymbol();
+        if (ts != null) return ts.getName().orElse(fallback);
+        return fallback;
+    }
+
     private static Combo getComboField(UnionFunctionParam unionFunctionParam, String paramName, String helpTip, String groupName) {
         List<FunctionParam> unionMembers = unionFunctionParam.getUnionMemberParams();
         StringJoiner unionJoiner = new StringJoiner(",", "[", "]");
@@ -959,25 +1093,24 @@ public class ConnectorSerializer {
             FunctionParam member = unionMembers.get(i);
             String comboItem;
             if (member.getParamType().equals(RECORD)) {
-                comboItem = member.getTypeSymbol().getName().orElse("Record" + i);
+                comboItem = getTypeNameOrFallback(member, "Record" + i);
             } else if (member.getParamType().equals(UNION)) {
-                // For union types, use type name if available, otherwise use indexed name
-                comboItem = member.getTypeSymbol().getName().orElse("Union" + i);
+                comboItem = getTypeNameOrFallback(member, "Union" + i);
             } else {
                 comboItem = member.getParamType();
             }
             unionJoiner.add("\"" + comboItem + "\"");
         }
         String unionComboValues = unionJoiner.toString();
-        
+
         // Always set the first member as default for all combo fields.
         // enableCondition controls visibility - hidden fields won't be serialized to XML.
         FunctionParam firstMember = unionMembers.getFirst();
         String defaultValue;
         if (firstMember.getParamType().equals(RECORD)) {
-            defaultValue = firstMember.getTypeSymbol().getName().orElseThrow();
+            defaultValue = getTypeNameOrFallback(firstMember, RECORD);
         } else if (firstMember.getParamType().equals(UNION)) {
-            defaultValue = firstMember.getTypeSymbol().getName().orElse(UNION);
+            defaultValue = getTypeNameOrFallback(firstMember, UNION);
         } else {
             defaultValue = firstMember.getParamType();
         }
@@ -1158,6 +1291,105 @@ public class ConnectorSerializer {
                         connectionType, recordParamName, fieldIndexHolder[0], unionMemberType));
             }
 
+            fieldIndexHolder[0]++;
+        }
+    }
+
+    /**
+     * Writes XML property elements for function record field parameters without connectionType prefix.
+     * Used for regular function parameters (not config/init).
+     * Pattern: {recordParamName}_param{fieldIndex} / {recordParamName}_paramType{fieldIndex}
+     */
+    private static void writeFunctionRecordFieldProperties(FunctionParam fieldParam, String recordParamName,
+                                                            StringBuilder result, int[] fieldIndexHolder) {
+        if (fieldParam instanceof RecordFunctionParam nestedRecordParam && !nestedRecordParam.getRecordFieldParams().isEmpty()) {
+            for (FunctionParam nestedFieldParam : nestedRecordParam.getRecordFieldParams()) {
+                writeFunctionRecordFieldProperties(nestedFieldParam, recordParamName, result, fieldIndexHolder);
+            }
+        } else if (fieldParam instanceof UnionFunctionParam unionFieldParam) {
+            String fieldValue = fieldParam.getValue();
+            result.append(String.format("\n        <property name=\"%s_param%d\" value=\"%s\"/>",
+                    recordParamName, fieldIndexHolder[0], fieldValue));
+            result.append(String.format("\n        <property name=\"%s_paramType%d\" value=\"%s\"/>",
+                    recordParamName, fieldIndexHolder[0], fieldParam.getParamType()));
+            String sanitizedParamName = Utils.sanitizeParamName(fieldValue);
+            result.append(String.format("\n        <property name=\"%s_dataType%d\" value=\"%s\"/>",
+                    recordParamName, fieldIndexHolder[0],
+                    String.format("%s_%s", sanitizedParamName, "DataType")));
+            fieldIndexHolder[0]++;
+
+            for (FunctionParam memberParam : unionFieldParam.getUnionMemberParams()) {
+                if (memberParam instanceof RecordFunctionParam recordMemberParam) {
+                    String memberTypeName = recordMemberParam.getDisplayTypeName();
+                    if (memberTypeName == null || memberTypeName.isEmpty()) {
+                        memberTypeName = recordMemberParam.getRecordName();
+                    }
+                    for (FunctionParam recordField : recordMemberParam.getRecordFieldParams()) {
+                        writeFunctionRecordFieldPropertiesWithUnionMember(recordField, recordParamName,
+                                result, fieldIndexHolder, memberTypeName);
+                    }
+                }
+            }
+        } else {
+            String fieldValue = fieldParam.getValue();
+            result.append(String.format("\n        <property name=\"%s_param%d\" value=\"%s\"/>",
+                    recordParamName, fieldIndexHolder[0], fieldValue));
+            result.append(String.format("\n        <property name=\"%s_paramType%d\" value=\"%s\"/>",
+                    recordParamName, fieldIndexHolder[0], fieldParam.getParamType()));
+            fieldIndexHolder[0]++;
+        }
+    }
+
+    /**
+     * Writes XML property elements for function record field parameters with union member tracking.
+     * Used for fields within union member records in function parameters.
+     */
+    private static void writeFunctionRecordFieldPropertiesWithUnionMember(FunctionParam fieldParam, String recordParamName,
+                                                                          StringBuilder result, int[] fieldIndexHolder,
+                                                                          String unionMemberType) {
+        if (fieldParam instanceof RecordFunctionParam nestedRecordParam && !nestedRecordParam.getRecordFieldParams().isEmpty()) {
+            for (FunctionParam nestedFieldParam : nestedRecordParam.getRecordFieldParams()) {
+                writeFunctionRecordFieldPropertiesWithUnionMember(nestedFieldParam, recordParamName,
+                        result, fieldIndexHolder, unionMemberType);
+            }
+        } else if (fieldParam instanceof UnionFunctionParam unionFieldParam) {
+            String fieldValue = fieldParam.getValue();
+            result.append(String.format("\n        <property name=\"%s_param%d\" value=\"%s\"/>",
+                    recordParamName, fieldIndexHolder[0], fieldValue));
+            result.append(String.format("\n        <property name=\"%s_paramType%d\" value=\"%s\"/>",
+                    recordParamName, fieldIndexHolder[0], fieldParam.getParamType()));
+            String sanitizedParamName = Utils.sanitizeParamName(fieldValue);
+            result.append(String.format("\n        <property name=\"%s_dataType%d\" value=\"%s\"/>",
+                    recordParamName, fieldIndexHolder[0],
+                    String.format("%s_%s", sanitizedParamName, "DataType")));
+            if (unionMemberType != null) {
+                result.append(String.format("\n        <property name=\"%s_unionMember%d\" value=\"%s\"/>",
+                        recordParamName, fieldIndexHolder[0], unionMemberType));
+            }
+            fieldIndexHolder[0]++;
+
+            for (FunctionParam memberParam : unionFieldParam.getUnionMemberParams()) {
+                if (memberParam instanceof RecordFunctionParam recordMemberParam) {
+                    String memberTypeName = recordMemberParam.getDisplayTypeName();
+                    if (memberTypeName == null || memberTypeName.isEmpty()) {
+                        memberTypeName = recordMemberParam.getRecordName();
+                    }
+                    for (FunctionParam recordField : recordMemberParam.getRecordFieldParams()) {
+                        writeFunctionRecordFieldPropertiesWithUnionMember(recordField, recordParamName,
+                                result, fieldIndexHolder, memberTypeName);
+                    }
+                }
+            }
+        } else {
+            String fieldValue = fieldParam.getValue();
+            result.append(String.format("\n        <property name=\"%s_param%d\" value=\"%s\"/>",
+                    recordParamName, fieldIndexHolder[0], fieldValue));
+            result.append(String.format("\n        <property name=\"%s_paramType%d\" value=\"%s\"/>",
+                    recordParamName, fieldIndexHolder[0], fieldParam.getParamType()));
+            if (unionMemberType != null) {
+                result.append(String.format("\n        <property name=\"%s_unionMember%d\" value=\"%s\"/>",
+                        recordParamName, fieldIndexHolder[0], unionMemberType));
+            }
             fieldIndexHolder[0]++;
         }
     }
@@ -1567,8 +1799,11 @@ public class ConnectorSerializer {
         displayName = Utils.sanitizeParamName(displayName);
 
         // Build inner column based on inner element type
-        TypeSymbol innerElementType = arrayParam.getInnerElementTypeSymbol();
-        TypeDescKind innerKind = innerElementType != null ? Utils.getActualTypeKind(innerElementType) : null;
+        TypeDescKind innerKind = arrayParam.getInnerElementTypeKind();
+        if (innerKind == null) {
+            TypeSymbol innerElementType = arrayParam.getInnerElementTypeSymbol();
+            innerKind = innerElementType != null ? Utils.getActualTypeKind(innerElementType) : null;
+        }
 
         String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
         String validateType = "";
@@ -1718,8 +1953,11 @@ public class ConnectorSerializer {
      * Creates a simple value column for map parameters with primitive value types.
      */
     private static Attribute createSimpleValueColumn(MapFunctionParam mapParam) {
-        TypeSymbol valueTypeSymbol = mapParam.getValueTypeSymbol();
-        TypeDescKind valueTypeKind = Utils.getActualTypeKind(valueTypeSymbol);
+        TypeDescKind valueTypeKind = mapParam.getValueTypeKind();
+        if (valueTypeKind == null) {
+            TypeSymbol valueTypeSymbol = mapParam.getValueTypeSymbol();
+            valueTypeKind = valueTypeSymbol != null ? Utils.getActualTypeKind(valueTypeSymbol) : TypeDescKind.STRING;
+        }
 
         String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
         String validateType = "";
@@ -1764,8 +2002,11 @@ public class ConnectorSerializer {
      * Creates a simple element column for array parameters with primitive element types.
      */
     private static Attribute createSimpleElementColumn(ArrayFunctionParam arrayParam) {
-        TypeSymbol elementTypeSymbol = arrayParam.getElementTypeSymbol();
-        TypeDescKind elementTypeKind = Utils.getActualTypeKind(elementTypeSymbol);
+        TypeDescKind elementTypeKind = arrayParam.getElementTypeKind();
+        if (elementTypeKind == null) {
+            TypeSymbol elementTypeSymbol = arrayParam.getElementTypeSymbol();
+            elementTypeKind = elementTypeSymbol != null ? Utils.getActualTypeKind(elementTypeSymbol) : TypeDescKind.STRING;
+        }
 
         String inputType = INPUT_TYPE_STRING_OR_EXPRESSION;
         String validateType = "";
@@ -1822,7 +2063,11 @@ public class ConnectorSerializer {
         String matchPattern = "";
         String helpTip = fieldParam.getDescription() != null ? fieldParam.getDescription() : displayName;
 
-        TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldParam.getTypeSymbol());
+        TypeDescKind fieldTypeKind = fieldParam.getResolvedTypeKind();
+        if (fieldTypeKind == null) {
+            TypeSymbol ts = fieldParam.getTypeSymbol();
+            fieldTypeKind = ts != null ? Utils.getActualTypeKind(ts) : TypeDescKind.STRING;
+        }
 
         // Set validation based on field type
         switch (fieldTypeKind) {
@@ -1866,7 +2111,11 @@ public class ConnectorSerializer {
         String matchPattern = "";
         String helpTip = fieldParam.getDescription() != null ? fieldParam.getDescription() : displayName;
 
-        TypeDescKind fieldTypeKind = Utils.getActualTypeKind(fieldParam.getTypeSymbol());
+        TypeDescKind fieldTypeKind = fieldParam.getResolvedTypeKind();
+        if (fieldTypeKind == null) {
+            TypeSymbol ts = fieldParam.getTypeSymbol();
+            fieldTypeKind = ts != null ? Utils.getActualTypeKind(ts) : TypeDescKind.STRING;
+        }
 
         // Set validation based on field type
         switch (fieldTypeKind) {
@@ -2110,8 +2359,9 @@ public class ConnectorSerializer {
      * This is a private utility method to copy png when input and output path given
      */
     private static void copyIconToDestination(Path iconPath, Path destination) throws IOException {
-        InputStream inputStream = Files.newInputStream(iconPath);
-        Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING);
+        try (InputStream inputStream = Files.newInputStream(iconPath)) {
+            Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
     /**

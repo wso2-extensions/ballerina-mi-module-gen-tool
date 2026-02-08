@@ -21,9 +21,12 @@ import io.ballerina.stdlib.mi.BalConnectorConfig;
 import io.ballerina.stdlib.mi.BalConnectorFunction;
 import io.ballerina.stdlib.mi.ModuleInfo;
 import org.apache.synapse.data.connector.DefaultConnectorResponse;
+import org.apache.synapse.mediators.template.TemplateContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.util.Stack;
 
 public class TestRecordType {
     private static final String CONNECTION_NAME = "testRecordConnection";
@@ -53,23 +56,34 @@ public class TestRecordType {
         config.connect(initContext);
     }
 
-    @Test(description = "Test connector with string array parameter")
+    @Test(description = "Test connector with simple record parameter (flattened fields)")
     public void testSimpleRecord() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
+        // Use addParameter for the record param with null value (triggers flattened reconstruction)
+        // and add field values as separate template parameters
         TestMessageContext context = ConnectorContextBuilder.connectorContext()
                 .connectionName(CONNECTION_NAME)
                 .methodName("simpleRecordFunction")
                 .returnType("string")
-                .addParameter("person", "record", "{\"first_name\":\"Alice\",\"last_name\":\"Bob\", \"age\":30}")
+                .addParameter("person", "record", null)
                 .build();
 
-        context.setProperty("param0", "person");
-        context.setProperty("paramType0", "record");
         context.setProperty("param0_recordName", "Person");
-        context.setProperty("paramFunctionName", "simpleRecordFunction");
-        context.setProperty("paramSize", 1);
-        context.setProperty("returnType", "string");
+
+        // Set up flattened record field properties
+        context.setProperty("person_param0", "first_name");
+        context.setProperty("person_paramType0", "string");
+        context.setProperty("person_param1", "last_name");
+        context.setProperty("person_paramType1", "string");
+        context.setProperty("person_param2", "age");
+        context.setProperty("person_paramType2", "int");
+
+        // Field values are looked up from template parameters via the function stack
+        // We need to add them to the template context
+        addTemplateParam(context, "first_name", "Alice");
+        addTemplateParam(context, "last_name", "Bob");
+        addTemplateParam(context, "age", "30");
 
         connector.connect(context);
 
@@ -77,7 +91,7 @@ public class TestRecordType {
         Assert.assertEquals(result, "Alice Bob, 30", "Record should be processed correctly by connector");
     }
 
-    @Test(description = "Test nested record parameter")
+    @Test(description = "Test nested record parameter (flattened fields)")
     public void testNestedRecord() throws Exception {
         BalConnectorFunction connector = new BalConnectorFunction();
 
@@ -85,15 +99,26 @@ public class TestRecordType {
                 .connectionName(CONNECTION_NAME)
                 .methodName("getUserSummary")
                 .returnType("string")
-                .addParameter("user", "record", "{\"name\":\"Alice\",\"address\":{\"street\":\"1 Main St\",\"city\":\"Colombo\"},\"age\":30}")
+                .addParameter("user", "record", null)
                 .build();
 
-        context.setProperty("param0", "user");
-        context.setProperty("paramType0", "record");
         context.setProperty("param0_recordName", "User");
-        context.setProperty("paramFunctionName", "getUserSummary");
-        context.setProperty("paramSize", 1);
-        context.setProperty("returnType", "string");
+
+        // Set up flattened record field properties (nested fields use dot notation)
+        context.setProperty("user_param0", "name");
+        context.setProperty("user_paramType0", "string");
+        context.setProperty("user_param1", "address.street");
+        context.setProperty("user_paramType1", "string");
+        context.setProperty("user_param2", "address.city");
+        context.setProperty("user_paramType2", "string");
+        context.setProperty("user_param3", "age");
+        context.setProperty("user_paramType3", "int");
+
+        // Field values - nested fields use underscore-separated names for template params
+        addTemplateParam(context, "name", "Alice");
+        addTemplateParam(context, "address_street", "1 Main St");
+        addTemplateParam(context, "address_city", "Colombo");
+        addTemplateParam(context, "age", "30");
 
         connector.connect(context);
 
@@ -222,5 +247,18 @@ public class TestRecordType {
         Assert.assertTrue(result.contains("\"first_name\":\"ALICE\""), "First name should be uppercased");
         Assert.assertTrue(result.contains("\"last_name\":\"SMITH\""), "Last name should be uppercased");
         Assert.assertTrue(result.contains("\"age\":25"), "Age should remain unchanged");
+    }
+
+    /**
+     * Helper to add a template parameter to an existing context's function stack.
+     * This simulates what happens when a user fills in a flattened record field in the UI.
+     */
+    @SuppressWarnings("unchecked")
+    private void addTemplateParam(TestMessageContext context, String name, Object value) {
+        Stack<TemplateContext> stack = (Stack<TemplateContext>) context.getProperty("_SYNAPSE_FUNCTION_STACK");
+        if (stack != null && !stack.isEmpty()) {
+            TemplateContext templateContext = stack.peek();
+            templateContext.getMappedValues().put(name, value);
+        }
     }
 }

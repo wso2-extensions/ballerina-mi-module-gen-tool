@@ -18,7 +18,9 @@
 
 package io.ballerina.mi.connectorModel;
 
+import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.mi.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,10 @@ public class MapFunctionParam extends FunctionParam {
     private TypeSymbol valueTypeSymbol;
     private List<FunctionParam> valueFieldParams;
     private boolean renderAsTable;
+
+    // Pre-computed values from TypeSymbol
+    private TypeDescKind valueTypeKind;
+    private String valueTypeName;
 
     public MapFunctionParam(String index, String name, String paramType) {
         super(index, name, paramType);
@@ -57,6 +63,10 @@ public class MapFunctionParam extends FunctionParam {
 
     public void setValueTypeSymbol(TypeSymbol valueTypeSymbol) {
         this.valueTypeSymbol = valueTypeSymbol;
+        if (valueTypeSymbol != null) {
+            this.valueTypeKind = Utils.getActualTypeKind(valueTypeSymbol);
+            this.valueTypeName = Utils.getParamTypeName(this.valueTypeKind);
+        }
     }
 
     public List<FunctionParam> getValueFieldParams() {
@@ -77,5 +87,20 @@ public class MapFunctionParam extends FunctionParam {
 
     public void setRenderAsTable(boolean renderAsTable) {
         this.renderAsTable = renderAsTable;
+    }
+
+    public TypeDescKind getValueTypeKind() {
+        return valueTypeKind;
+    }
+
+    public String getValueTypeName() {
+        return valueTypeName;
+    }
+
+    @Override
+    public void clearTypeSymbol() {
+        super.clearTypeSymbol();
+        this.keyTypeSymbol = null;
+        this.valueTypeSymbol = null;
     }
 }

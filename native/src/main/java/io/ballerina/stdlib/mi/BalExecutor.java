@@ -541,25 +541,29 @@ public class BalExecutor {
     }
 
     private Object createRecordValue(String jsonString, String paramName, MessageContext context, int paramIndex) {
-        // Check if this is a flattened record from init function
+        // Check if this is a flattened record from init or function
         // Null jsonString indicates the record needs to be reconstructed from flattened fields
         if (jsonString == null) {
-            // This is a flattened record from init function
-            String recordParamName = paramName; // e.g., "config"
+            String recordParamName = paramName; // e.g., "config" or "person"
 
-            // For init functions, find the connection type from the context properties
+            // Try to find connection type (present for init/config, absent for regular functions)
             String connectionType = findConnectionTypeForParam(context, recordParamName);
-            if (connectionType == null) {
-                throw new SynapseException("Cannot create record value: jsonString is null and connectionType not found. " +
-                        "Parameter '" + paramName + "' at index " + paramIndex + " may be missing required value.");
+
+            String propertyPrefix;
+            String recordNamePropertyKey;
+            if (connectionType != null) {
+                // Config/init context - use connectionType prefix
+                propertyPrefix = connectionType + "_" + recordParamName;
+                recordNamePropertyKey = connectionType + "_param" + paramIndex + "_recordName";
+            } else {
+                // Function context - no connectionType prefix
+                propertyPrefix = recordParamName;
+                recordNamePropertyKey = "param" + paramIndex + "_recordName";
             }
 
             // Reconstruct the record from flattened fields
-            Object reconstructedBMap = reconstructRecordFromFields(recordParamName, context, connectionType);
+            Object reconstructedBMap = reconstructRecordFromFields(propertyPrefix, context);
 
-            // Now convert the BMap to the typed record
-            // For init/config, use connectionType prefix for property name
-            String recordNamePropertyKey = connectionType + "_param" + paramIndex + "_recordName";
             Object recordNameObj = context.getProperty(recordNamePropertyKey);
 
             if (recordNameObj == null) {
@@ -735,20 +739,21 @@ public class BalExecutor {
 
     /**
      * Reconstructs a record from flattened fields stored in the context properties.
-     * Used for init function parameters where record fields are flattened in the XML.
+     * Used for both init function parameters and regular function parameters where record
+     * fields are flattened in the XML.
      *
-     * @param recordParamName The name of the record parameter (e.g., "config")
-     * @param context         The message context containing property values
-     * @param connectionType  The connection type prefix (e.g., "GOOGLEAPIS_GMAIL_CLIENT")
+     * @param propertyPrefix The prefix for looking up field properties.
+     *                       For config/init: "{connectionType}_{recordParamName}" (e.g., "GMAIL_CLIENT_config")
+     *                       For functions: "{recordParamName}" (e.g., "person")
+     * @param context        The message context containing property values
      * @return A JSON object representing the reconstructed record
      */
-    private Object reconstructRecordFromFields(String recordParamName, MessageContext context, String connectionType) {
+    private Object reconstructRecordFromFields(String propertyPrefix, MessageContext context) {
         // Build a JSON object from the flattened fields
-        // Fields are stored as {connectionType}_{recordParamName}_param{index} = "fieldPath"
-        // e.g., GOOGLEAPIS_GMAIL_CLIENT_config_param0 = "http1Settings.keepAlive"
+        // Fields are stored as {propertyPrefix}_param{index} = "fieldPath"
 
         log.info("=== DEBUG: reconstructRecordFromFields START ===");
-        log.info("DEBUG: recordParamName=" + recordParamName + ", connectionType=" + connectionType);
+        log.info("DEBUG: propertyPrefix=" + propertyPrefix);
 
         com.google.gson.JsonObject recordJson = new com.google.gson.JsonObject();
 
@@ -756,8 +761,8 @@ public class BalExecutor {
         java.util.Map<String, String> unionFieldSelectedTypes = new java.util.HashMap<>();
         int tempIndex = 0;
         while (true) {
-            String fieldNameKey = connectionType + "_" + recordParamName + "_param" + tempIndex;
-            String fieldTypeKey = connectionType + "_" + recordParamName + "_paramType" + tempIndex;
+            String fieldNameKey = propertyPrefix + "_param" + tempIndex;
+            String fieldTypeKey = propertyPrefix + "_paramType" + tempIndex;
             Object fieldNameObj = context.getProperty(fieldNameKey);
             Object fieldTypeObj = context.getProperty(fieldTypeKey);
 
@@ -769,7 +774,7 @@ public class BalExecutor {
             String fieldType = fieldTypeObj.toString();
 
             if (UNION.equals(fieldType)) {
-                String dataTypeKey = connectionType + "_" + recordParamName + "_dataType" + tempIndex;
+                String dataTypeKey = propertyPrefix + "_dataType" + tempIndex;
                 Object dataTypeParamNameObj = context.getProperty(dataTypeKey);
                 if (dataTypeParamNameObj != null) {
                     String dataTypeParamName = dataTypeParamNameObj.toString();
@@ -786,9 +791,9 @@ public class BalExecutor {
         // Second pass: process all fields
         int fieldIndex = 0;
         while (true) {
-            String fieldNameKey = connectionType + "_" + recordParamName + "_param" + fieldIndex;
-            String fieldTypeKey = connectionType + "_" + recordParamName + "_paramType" + fieldIndex;
-            String unionMemberKey = connectionType + "_" + recordParamName + "_unionMember" + fieldIndex;
+            String fieldNameKey = propertyPrefix + "_param" + fieldIndex;
+            String fieldTypeKey = propertyPrefix + "_paramType" + fieldIndex;
+            String unionMemberKey = propertyPrefix + "_unionMember" + fieldIndex;
 
             Object fieldNameObj = context.getProperty(fieldNameKey);
             Object fieldTypeObj = context.getProperty(fieldTypeKey);

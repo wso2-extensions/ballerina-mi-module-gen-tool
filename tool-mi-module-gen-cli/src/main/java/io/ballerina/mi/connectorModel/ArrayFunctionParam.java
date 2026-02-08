@@ -18,7 +18,10 @@
 
 package io.ballerina.mi.connectorModel;
 
+import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.mi.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +43,11 @@ public class ArrayFunctionParam extends FunctionParam {
     private List<String> unionMemberTypeNames;
     private TypeSymbol innerElementTypeSymbol;
 
+    // Pre-computed values from TypeSymbol
+    private TypeDescKind elementTypeKind;
+    private TypeDescKind innerElementTypeKind;
+    private String arrayElementTypeName;
+
     public ArrayFunctionParam(String index, String name, String paramType) {
         super(index, name, paramType);
         this.elementFieldParams = new ArrayList<>();
@@ -55,6 +63,9 @@ public class ArrayFunctionParam extends FunctionParam {
 
     public void setElementTypeSymbol(TypeSymbol elementTypeSymbol) {
         this.elementTypeSymbol = elementTypeSymbol;
+        if (elementTypeSymbol != null) {
+            this.elementTypeKind = Utils.getActualTypeKind(elementTypeSymbol);
+        }
     }
 
     public List<FunctionParam> getElementFieldParams() {
@@ -107,5 +118,42 @@ public class ArrayFunctionParam extends FunctionParam {
 
     public void setInnerElementTypeSymbol(TypeSymbol innerElementTypeSymbol) {
         this.innerElementTypeSymbol = innerElementTypeSymbol;
+        if (innerElementTypeSymbol != null) {
+            this.innerElementTypeKind = Utils.getActualTypeKind(innerElementTypeSymbol);
+        }
+    }
+
+    public TypeDescKind getElementTypeKind() {
+        return elementTypeKind;
+    }
+
+    public TypeDescKind getInnerElementTypeKind() {
+        return innerElementTypeKind;
+    }
+
+    public String getArrayElementTypeName() {
+        return arrayElementTypeName;
+    }
+
+    /**
+     * Pre-computes the array element type name from the main TypeSymbol.
+     * Must be called after setTypeSymbol().
+     */
+    public void preComputeArrayElementType() {
+        TypeSymbol ts = getTypeSymbol();
+        if (ts == null) return;
+        TypeSymbol actual = Utils.getActualTypeSymbol(ts);
+        if (actual instanceof ArrayTypeSymbol arrayTs) {
+            TypeSymbol memberType = arrayTs.memberTypeDescriptor();
+            TypeDescKind memberKind = Utils.getActualTypeKind(memberType);
+            this.arrayElementTypeName = Utils.getParamTypeName(memberKind);
+        }
+    }
+
+    @Override
+    public void clearTypeSymbol() {
+        super.clearTypeSymbol();
+        this.elementTypeSymbol = null;
+        this.innerElementTypeSymbol = null;
     }
 }

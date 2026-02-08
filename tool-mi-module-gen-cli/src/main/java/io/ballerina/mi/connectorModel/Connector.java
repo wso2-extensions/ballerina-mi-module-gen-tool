@@ -183,4 +183,73 @@ public class Connector extends ModelElement {
         }
         ConnectorSerializer.generateXmlForConnector(templatePath, typeName + "_template", file + File.separator + Constants.INIT_FUNCTION_NAME, this);
     }
+
+    /**
+     * Clears the heavy component and connection data from the Connector model.
+     * After all XML/JSON files have been generated, the component tree (with its
+     * deeply nested FunctionParam graphs) is no longer needed. Clearing it frees
+     * significant memory for large connectors before the ZIP packaging step.
+     * Metadata fields (orgName, moduleName, version, etc.) are preserved.
+     */
+    public void clearComponentData() {
+        for (Connection connection : connections) {
+            connection.getComponents().clear();
+        }
+        connections.clear();
+        components.clear();
+    }
+
+    /**
+     * Pre-computes TypeSymbol-derived values and clears TypeSymbol references
+     * to allow the Ballerina compiler's semantic model to be garbage collected.
+     * Must be called after analysis is complete but before serialization starts.
+     */
+    public void clearTypeSymbols() {
+        for (Connection connection : connections) {
+            if (connection.getInitComponent() != null) {
+                clearTypeSymbolsFromComponent(connection.getInitComponent());
+            }
+            for (Component component : connection.getComponents()) {
+                clearTypeSymbolsFromComponent(component);
+            }
+        }
+    }
+
+    private static void clearTypeSymbolsFromComponent(Component component) {
+        if (component.getFunctionParams() != null) {
+            for (FunctionParam param : component.getFunctionParams()) {
+                clearTypeSymbolsFromParam(param);
+            }
+        }
+    }
+
+    private static void clearTypeSymbolsFromParam(FunctionParam param) {
+        if (param instanceof ArrayFunctionParam arrayParam) {
+            arrayParam.preComputeArrayElementType();
+            if (arrayParam.getElementFieldParams() != null) {
+                for (FunctionParam field : arrayParam.getElementFieldParams()) {
+                    clearTypeSymbolsFromParam(field);
+                }
+            }
+        } else if (param instanceof MapFunctionParam mapParam) {
+            if (mapParam.getValueFieldParams() != null) {
+                for (FunctionParam field : mapParam.getValueFieldParams()) {
+                    clearTypeSymbolsFromParam(field);
+                }
+            }
+        } else if (param instanceof RecordFunctionParam recordParam) {
+            if (recordParam.getRecordFieldParams() != null) {
+                for (FunctionParam field : recordParam.getRecordFieldParams()) {
+                    clearTypeSymbolsFromParam(field);
+                }
+            }
+        } else if (param instanceof UnionFunctionParam unionParam) {
+            if (unionParam.getUnionMemberParams() != null) {
+                for (FunctionParam member : unionParam.getUnionMemberParams()) {
+                    clearTypeSymbolsFromParam(member);
+                }
+            }
+        }
+        param.clearTypeSymbol();
+    }
 }

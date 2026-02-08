@@ -28,7 +28,7 @@
                 "displayName": "{{displayName}}",
                 "inputType": "{{inputType}}",
                 "required": {{required}},
-                "helpTip": "{{helpTip}}"{{#if validateType}},
+                "helpTip": "{{{helpTip}}}"{{#if validateType}},
                 "validateType": "{{validateType}}"{{/if}}{{#if matchPattern}},
                 "matchPattern": "{{matchPattern}}"{{/if}}
               }
@@ -45,7 +45,7 @@
           "comboValues": {{{comboValues}}},{{/if}}{{#if defaultValue}}
           "defaultValue": "{{defaultValue}}",{{/if}}
           "required": {{required}},
-          "helpTip": "{{helpTip}}"{{#if validateType}},
+          "helpTip": "{{{helpTip}}}"{{#if validateType}},
           "validateType": "{{validateType}}"{{/if}}{{#if matchPattern}},
           "matchPattern": "{{matchPattern}}"{{/if}}
         }

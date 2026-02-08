@@ -19,7 +19,9 @@
 package io.ballerina.mi.connectorModel;
 
 import io.ballerina.compiler.api.symbols.ParameterKind;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.mi.util.Utils;
 
 public class FunctionParam extends Param {
 
@@ -30,6 +32,10 @@ public class FunctionParam extends Param {
     private String enableCondition;
     private String defaultValue;
     private String displayTypeName;  // For unions/records, stores the actual type name (e.g., "Xgafv" instead of "union")
+
+    // Pre-computed values from TypeSymbol to allow releasing the heavy compiler references
+    private TypeDescKind resolvedTypeKind;
+    private String resolvedTypeName;
 
     public FunctionParam(String index, String name, String paramType) {
         super(index, name);
@@ -56,6 +62,27 @@ public class FunctionParam extends Param {
 
     public void setTypeSymbol(TypeSymbol typeSymbol) {
         this.typeSymbol = typeSymbol;
+        if (typeSymbol != null) {
+            this.resolvedTypeKind = Utils.getActualTypeKind(typeSymbol);
+            this.resolvedTypeName = typeSymbol.getName().orElse(null);
+        }
+    }
+
+    public TypeDescKind getResolvedTypeKind() {
+        return resolvedTypeKind;
+    }
+
+    public String getResolvedTypeName() {
+        return resolvedTypeName;
+    }
+
+    /**
+     * Clears the TypeSymbol reference to allow the Ballerina compiler's semantic model
+     * to be garbage collected. Pre-computed values (resolvedTypeKind, resolvedTypeName)
+     * remain available. Should be called before serialization.
+     */
+    public void clearTypeSymbol() {
+        this.typeSymbol = null;
     }
 
     public boolean isRequired() {

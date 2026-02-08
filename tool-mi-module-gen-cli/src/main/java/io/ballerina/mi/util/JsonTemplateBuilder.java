@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
 package io.ballerina.mi.util;
 
 import com.github.jknack.handlebars.Handlebars;
@@ -23,24 +23,39 @@ import com.github.jknack.handlebars.Template;
 import io.ballerina.mi.connectorModel.attributeModel.Element;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.ballerina.mi.util.Utils.readFile;
 
 
 public class JsonTemplateBuilder {
     private final StringBuilder result;
-    private final Handlebars handlebar;
+
+    private static final Handlebars handlebar = createHandlebars();
+    private static final Map<String, Template> templateCache = new ConcurrentHashMap<>();
+
+    private static Handlebars createHandlebars() {
+        Handlebars hb = new Handlebars();
+        hb.registerHelper("eq", (context, options) -> context != null &&
+                context.equals(options.param(0)));
+        return hb;
+    }
 
     public JsonTemplateBuilder() {
         this.result = new StringBuilder();
-        this.handlebar = new Handlebars();
-        handlebar.registerHelper("eq", (context, options) -> context != null &&
-                context.equals(options.param(0)));
     }
 
     public JsonTemplateBuilder addFromTemplate(String templatePath, Element element) throws IOException {
-        String content = readFile(templatePath);
-        Template template = handlebar.compileInline(content);
+        Template template = templateCache.computeIfAbsent(templatePath, k -> {
+            try {
+                String content = readFile(k);
+                return handlebar.compileInline(content);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
         String output = template.apply(element);
         result.append(output);
         return this;
@@ -71,5 +86,9 @@ public class JsonTemplateBuilder {
 
     public String build() {
         return result.toString();
+    }
+
+    public static void clearCache() {
+        templateCache.clear();
     }
 }

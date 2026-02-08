@@ -42,20 +42,20 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class Utils {
+    private static final Gson PRETTY_GSON = new GsonBuilder()
+            .setPrettyPrinting().disableHtmlEscaping().create();
+
     /**
      * These are utility functions used when generating XML and JSON content
      */
     public static String readFile(String fileName) throws IOException {
-        InputStream inputStream = Utils.class.getClassLoader().getResourceAsStream(fileName.replace("\\", "/"));
-        assert inputStream != null;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        StringBuilder fileContent = new StringBuilder();
-        int character;
-        while ((character = reader.read()) != -1) {
-            fileContent.append((char) character);
+        try (InputStream inputStream = Utils.class.getClassLoader()
+                .getResourceAsStream(fileName.replace("\\", "/"))) {
+            if (inputStream == null) {
+                throw new IOException("Resource not found: " + fileName);
+            }
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
-        reader.close();
-        return fileContent.toString();
     }
 
     /**
@@ -67,9 +67,9 @@ public class Utils {
         if (fileName.endsWith(".json")) {
             outputContent = formatJson(content);
         }
-        FileWriter myWriter = new FileWriter(fileName);
-        myWriter.write(outputContent);
-        myWriter.close();
+        try (FileWriter myWriter = new FileWriter(fileName)) {
+            myWriter.write(outputContent);
+        }
     }
 
     /**
@@ -81,9 +81,8 @@ public class Utils {
      */
     public static String formatJson(String json) {
         try {
-            Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
             JsonElement jsonElement = JsonParser.parseString(json);
-            return gson.toJson(jsonElement);
+            return PRETTY_GSON.toJson(jsonElement);
         } catch (Exception e) {
             // If parsing fails, return the original content
             return json;
@@ -161,11 +160,50 @@ public class Utils {
      * name and Annotations.ZIP_FILE_SUFFIX
      */
     public static void zipFolder(Path sourceDirPath, String zipFilePath) throws IOException {
+        // Prefer the native 'zip' command — it runs in a separate process and avoids
+        // exhausting the JVM's memory when the Ballerina compiler/runtime has already
+        // consumed most of the system's physical memory via off-heap allocations
+        // (Netty direct buffers, NIO channels, etc.).
+        if (tryNativeZip(sourceDirPath, zipFilePath)) {
+            return;
+        }
+        // Fallback: Java-based ZIP
+        zipFolderJava(sourceDirPath, zipFilePath);
+    }
+
+    private static boolean tryNativeZip(Path sourceDirPath, String zipFilePath) throws IOException {
+        try {
+            Path zipPath = Paths.get(zipFilePath).toAbsolutePath();
+            // Delete existing zip if present so 'zip' doesn't append
+            Files.deleteIfExists(zipPath);
+
+            ProcessBuilder pb = new ProcessBuilder(
+                    "zip", "-r", "-q", zipPath.toString(), "."
+            );
+            pb.directory(sourceDirPath.toFile());
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            // Drain output to prevent process blocking
+            try (InputStream is = process.getInputStream()) {
+                is.readAllBytes();
+            }
+            int exitCode = process.waitFor();
+            if (exitCode == 0 && Files.exists(zipPath)) {
+                return true;
+            }
+            System.out.println("Native zip exited with code " + exitCode + ", falling back to Java ZIP.");
+            return false;
+        } catch (Exception e) {
+            // 'zip' not available or failed — fall back to Java
+            return false;
+        }
+    }
+
+    private static void zipFolderJava(Path sourceDirPath, String zipFilePath) throws IOException {
         try (ZipOutputStream outputStream = new ZipOutputStream(Files.newOutputStream(Paths.get(zipFilePath)))) {
             Files.walkFileTree(sourceDirPath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    // Skip macOS-specific files that cause extraction issues in MI
                     String fileName = file.getFileName().toString();
                     if (shouldSkipFile(fileName)) {
                         return FileVisitResult.CONTINUE;
@@ -180,7 +218,6 @@ public class Utils {
 
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    // Skip macOS-specific directories
                     String dirName = dir.getFileName().toString();
                     if (shouldSkipDirectory(dirName)) {
                         return FileVisitResult.SKIP_SUBTREE;
