@@ -42,7 +42,7 @@
         {{~/if}}
         {{/eq ~}}
         {{#eq paramType "record" ~}}
-        <property name="param{{@index}}_recordName" value="{{unwrapOptional typeSymbol.name}}" />{{{writeFunctionRecordXmlProperties this @index}}}
+        <property name="param{{@index}}_recordName" value="{{recordName}}" />{{{writeFunctionRecordXmlProperties this @index}}}
         {{/eq ~}}
         {{#eq paramType "union" ~}}
         {{#each unionMemberParams ~}}
