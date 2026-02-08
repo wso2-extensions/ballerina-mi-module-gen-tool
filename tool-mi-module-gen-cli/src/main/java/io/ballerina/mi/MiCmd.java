@@ -238,8 +238,8 @@ public class MiCmd implements BLauncherCmd {
 
         if (connector.getComponents().isEmpty()) {
             if (connector.isGenerationAborted()) {
-                printStream.println("ERROR: MI " + (isBuildProject ? "module" : "connector") + " artifacts generation aborted.");
-                printStream.println("Reason: " + connector.getAbortionReason());
+                printStream.println("WARN: Skipping MI " + (isBuildProject ? "module" : "connector")
+                        + " artifacts generation. Reason: " + connector.getAbortionReason());
             } else {
                 printStream.println("WARN: No components found. MI " + (isBuildProject ? "module" : "connector") + " artifacts will not be generated.");
             }

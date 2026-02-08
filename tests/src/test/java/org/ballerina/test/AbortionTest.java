@@ -24,7 +24,7 @@ import java.io.File;
 
 public class AbortionTest {
 
-    @Test(description = "Test abortion when skip rate is high")
+    @Test(description = "Test warning when skip rate is high but generation continues")
     public void testAbortionOnHighFailureRate() throws Exception {
          ArtifactGenerationUtil.setupBallerinaHome();
          String projectPathStr = "src/test/resources/ballerina/unsupportedProject";
@@ -44,15 +44,15 @@ public class AbortionTest {
          String projectName = "unsupportedProject";
          String targetPath = projectDir.resolve("target").resolve("mi-artifacts").toString();
          
-         // The generation should verify that NO artifacts are generated.
-         // ArtifactGenerationUtil throws AssertionError if no zip is found.
-         try {
-             ArtifactGenerationUtil.generateExpectedArtifacts(extractedBala.toAbsolutePath().toString(), targetPath, projectName);
-             Assert.fail("Artifact generation should have produced no artifacts, but it seems to have succeeded/found artifacts.");
-         } catch (AssertionError e) {
-             Assert.assertTrue(e.getMessage().contains("Generated zip file not found"), 
-                 "Expected 'Generated zip file not found' error, but got: " + e.getMessage());
-         }
+         // The generation should now succeed with a warning about skipped operations
+         // Previously, it would abort. Now it continues with partial artifact generation.
+         // The method returns void and throws AssertionError if no zip is found.
+         // If this call completes without exception, artifacts were generated successfully.
+         ArtifactGenerationUtil.generateExpectedArtifacts(
+                 extractedBala.toAbsolutePath().toString(), targetPath, projectName);
+         
+         // If we reach here, the generation completed successfully despite high skip rate
+         System.out.println("Artifact generation completed successfully with partial operations");
     }
 
     private void unzip(java.nio.file.Path sourceZip, java.nio.file.Path targetDir) throws java.io.IOException {
