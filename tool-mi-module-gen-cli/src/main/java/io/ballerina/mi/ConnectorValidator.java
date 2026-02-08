@@ -18,6 +18,8 @@
 
 package io.ballerina.mi;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
@@ -35,9 +37,13 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
 
 /**
  * Validator for MI connector artifacts and UI schemas.
@@ -46,13 +52,16 @@ public class ConnectorValidator {
 
     private static final PrintStream ERROR_STREAM = System.err;
     private static final String UI_SCHEMA_PATH = "schema/ui-schema.json";
+    private static final int MAX_SAMPLED_OPERATIONS = 5;
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static JsonSchema uiSchema;
 
     /**
-     * Validates a connector zip file.
+     * Validates a connector zip file. For large connectors (ZIP > 10MB), uses lightweight
+     * validation to avoid OOM. For small connectors, performs full Synapse library and
+     * UI schema validation.
      *
-     * @param connectorPath Path to the connector zip file
+     * @param connectorPath Path to the connector directory containing the zip file
      * @return true if the connector is valid, false otherwise
      */
     public static boolean validateConnector(Path connectorPath) {
@@ -61,44 +70,232 @@ public class ConnectorValidator {
                     .filter(path -> path.toString().endsWith(".zip"))
                     .findFirst()
                     .orElseThrow(() -> new IOException("No connector zip file found in: " + connectorPath));
-            // For large connectors (e.g., Jira with 585 components / 48MB ZIP), both
-            // Synapse library validation (createSynapseLibrary loads the entire ZIP, parses
-            // all XML files into DOM trees, loads the JAR) and UI schema validation (JSON
-            // Schema library initialization + 584 file validations) can exhaust the 2GB heap
-            // after the Ballerina compiler's residual memory usage. The bal launcher configures
-            // the JVM to terminate on OOM (not catchable via try-catch), so we must avoid
-            // triggering it. Skip all validation for large ZIPs — the artifacts are known-correct
-            // since we generated them from our own templates.
+
             long zipSize = Files.size(connectorZipPath);
-            long maxZipForValidation = 10 * 1024 * 1024; // 10MB
-            if (zipSize > maxZipForValidation) {
-                long zipMB = zipSize / (1024 * 1024);
-                ERROR_STREAM.println("WARNING: Connector validation skipped for large connector ZIP (" +
-                        zipMB + "MB). The connector artifacts were generated but could not be fully validated.");
-                return true;
+            if (zipSize > 10 * 1024 * 1024) {
+                return validateLargeConnector(connectorZipPath, connectorPath);
             }
 
+            // Small connector: full validation (existing behavior)
             Library library = LibDeployerUtils.createSynapseLibrary(connectorZipPath.toString());
             if (library == null) {
                 return false;
             }
-            Path uiSchemaPath = connectorPath.resolve("generated").resolve("uischema");
-            if (Files.exists(uiSchemaPath) && Files.isDirectory(uiSchemaPath)) {
-                try (DirectoryStream<Path> uiSchemas = Files.newDirectoryStream(uiSchemaPath)) {
-                    for (Path path : uiSchemas) {
-                        if (path.toString().endsWith(".json")) {
-                            ValidationResult validationResult = validateUISchema(path);
-                            if (!validationResult.valid()) {
-                                ERROR_STREAM.println("UI Schema validation errors in " + path + ":");
-                                ERROR_STREAM.println(validationResult);
-                                return false;
-                            }
-                        }
+            return validateAllUISchemas(connectorPath);
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Lightweight validation for large connectors (ZIP > 10MB). Validates ZIP structure,
+     * connector.xml well-formedness, and a bounded sample of UI schemas to avoid OOM.
+     */
+    private static boolean validateLargeConnector(Path zipPath, Path connectorPath) {
+        long zipMB = 0;
+        try {
+            zipMB = Files.size(zipPath) / (1024 * 1024);
+        } catch (IOException ignored) {
+            // Non-critical — only used for display
+        }
+        ERROR_STREAM.println("Large connector ZIP detected (" + zipMB +
+                "MB). Using lightweight validation.");
+
+        if (!validateZipStructure(zipPath)) {
+            return false;
+        }
+        if (!validateConnectorXml(connectorPath)) {
+            return false;
+        }
+        return validateSampledUISchemas(connectorPath);
+    }
+
+    /**
+     * Validates the ZIP structure by reading the central directory only (no file contents).
+     * Checks for required entries: connector.xml, at least one function XML, one JAR, one UI schema.
+     * Also verifies function XML count doesn't exceed UI schema JSON count (catches truncation).
+     */
+    private static boolean validateZipStructure(Path zipPath) {
+        try (ZipFile zipFile = new ZipFile(zipPath.toFile())) {
+            boolean hasConnectorXml = false;
+            int functionXmlCount = 0;
+            int jarCount = 0;
+            int uiSchemaCount = 0;
+            int totalEntries = 0;
+
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                String name = entry.getName();
+                totalEntries++;
+
+                if (name.equals("connector.xml")) {
+                    hasConnectorXml = true;
+                } else if (name.startsWith("functions/") && name.endsWith(".xml")) {
+                    functionXmlCount++;
+                } else if (name.startsWith("lib/") && name.endsWith(".jar")) {
+                    jarCount++;
+                } else if (name.startsWith("uischema/") && name.endsWith(".json")) {
+                    uiSchemaCount++;
+                }
+            }
+
+            if (!hasConnectorXml) {
+                ERROR_STREAM.println("ZIP structure invalid: missing connector.xml");
+                return false;
+            }
+            if (functionXmlCount == 0) {
+                ERROR_STREAM.println("ZIP structure invalid: no function XML files in functions/");
+                return false;
+            }
+            if (jarCount == 0) {
+                ERROR_STREAM.println("ZIP structure invalid: no JAR files in lib/");
+                return false;
+            }
+            if (uiSchemaCount == 0) {
+                ERROR_STREAM.println("ZIP structure invalid: no UI schema JSON files in uischema/");
+                return false;
+            }
+            if (functionXmlCount > uiSchemaCount) {
+                ERROR_STREAM.println("ZIP structure invalid: function XML count (" + functionXmlCount +
+                        ") exceeds UI schema count (" + uiSchemaCount + ")");
+                return false;
+            }
+
+            ERROR_STREAM.println("ZIP structure valid: " + totalEntries + " entries, " +
+                    functionXmlCount + " functions, " + uiSchemaCount + " UI schemas");
+            return true;
+        } catch (IOException e) {
+            ERROR_STREAM.println("ZIP structure validation failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Validates generated/connector.xml exists and has the expected structure.
+     * Uses simple string checks instead of XML parsers because the Ballerina runtime's
+     * classloader overrides javax.xml factory system properties, making both SAX and
+     * StAX factories unavailable at runtime.
+     */
+    private static boolean validateConnectorXml(Path connectorPath) {
+        Path connectorXml = connectorPath.resolve("generated").resolve("connector.xml");
+        if (!Files.exists(connectorXml)) {
+            ERROR_STREAM.println("connector.xml not found at: " + connectorXml);
+            return false;
+        }
+        try {
+            String content = Files.readString(connectorXml);
+            if (content.isBlank()) {
+                ERROR_STREAM.println("connector.xml is empty");
+                return false;
+            }
+            String trimmed = content.strip();
+            if (!trimmed.contains("<connector>") || !trimmed.contains("</connector>")) {
+                ERROR_STREAM.println("connector.xml is malformed: missing <connector> root element");
+                return false;
+            }
+            return true;
+        } catch (IOException e) {
+            ERROR_STREAM.println("Failed to read connector.xml: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Validates a bounded sample of UI schemas: all connection schemas (identified by having
+     * a "connectionName" top-level key) plus the first few operation schemas.
+     * This avoids loading all schemas into memory while still catching real problems.
+     */
+    private static boolean validateSampledUISchemas(Path connectorPath) {
+        Path uiSchemaDir = connectorPath.resolve("generated").resolve("uischema");
+        if (!Files.exists(uiSchemaDir) || !Files.isDirectory(uiSchemaDir)) {
+            return true;
+        }
+
+        int connectionCount = 0;
+        int operationCount = 0;
+
+        try (DirectoryStream<Path> uiSchemas = Files.newDirectoryStream(uiSchemaDir)) {
+            for (Path path : uiSchemas) {
+                if (!path.toString().endsWith(".json")) {
+                    continue;
+                }
+
+                boolean isConnection = isConnectionUISchema(path);
+                if (isConnection) {
+                    ValidationResult result = validateUISchema(path);
+                    if (!result.valid()) {
+                        ERROR_STREAM.println("UI Schema validation errors in " + path + ":");
+                        ERROR_STREAM.println(result);
+                        return false;
                     }
+                    connectionCount++;
+                } else if (operationCount < MAX_SAMPLED_OPERATIONS) {
+                    ValidationResult result = validateUISchema(path);
+                    if (!result.valid()) {
+                        ERROR_STREAM.println("UI Schema validation errors in " + path + ":");
+                        ERROR_STREAM.println(result);
+                        return false;
+                    }
+                    operationCount++;
                 }
             }
         } catch (IOException e) {
+            ERROR_STREAM.println("Failed to read UI schema directory: " + e.getMessage());
             return false;
+        }
+
+        ERROR_STREAM.println("Validated " + connectionCount + " connection schema(s) and " +
+                operationCount + " sampled operation schema(s).");
+        return true;
+    }
+
+    /**
+     * Checks whether a UI schema JSON file is a connection schema by looking for
+     * a "connectionName" top-level key. Uses Jackson streaming API to read only the
+     * top-level keys without building a full tree.
+     */
+    private static boolean isConnectionUISchema(Path path) {
+        try (JsonParser parser = objectMapper.getFactory().createParser(path.toFile())) {
+            if (parser.nextToken() != JsonToken.START_OBJECT) {
+                return false;
+            }
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
+                String fieldName = parser.currentName();
+                if ("connectionName".equals(fieldName)) {
+                    return true;
+                }
+                parser.nextToken();
+                parser.skipChildren();
+            }
+        } catch (IOException e) {
+            // If we can't parse it, it's not a connection schema — it will be caught
+            // by full validation if sampled
+        }
+        return false;
+    }
+
+    /**
+     * Validates all UI schemas in the generated/uischema/ directory.
+     * Used for small connectors where full validation is feasible.
+     */
+    private static boolean validateAllUISchemas(Path connectorPath) {
+        Path uiSchemaPath = connectorPath.resolve("generated").resolve("uischema");
+        if (Files.exists(uiSchemaPath) && Files.isDirectory(uiSchemaPath)) {
+            try (DirectoryStream<Path> uiSchemas = Files.newDirectoryStream(uiSchemaPath)) {
+                for (Path path : uiSchemas) {
+                    if (path.toString().endsWith(".json")) {
+                        ValidationResult validationResult = validateUISchema(path);
+                        if (!validationResult.valid()) {
+                            ERROR_STREAM.println("UI Schema validation errors in " + path + ":");
+                            ERROR_STREAM.println(validationResult);
+                            return false;
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                return false;
+            }
         }
         return true;
     }
