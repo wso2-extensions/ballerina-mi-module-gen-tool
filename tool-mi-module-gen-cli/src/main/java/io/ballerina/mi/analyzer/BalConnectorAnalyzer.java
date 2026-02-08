@@ -452,10 +452,10 @@ public class BalConnectorAnalyzer implements Analyzer {
             return;
         }
 
-        // Show warning if skip rate is >= 50%, but continue with generation
-        if (totalOperations > 0 && (double) skippedOperations / totalOperations >= 0.5) {
-            String message = String.format("WARNING: %d out of %d operations (%.1f%%) were skipped due to unsupported parameter types. Continuing with partial artifact generation for '%s'.",
-                    skippedOperations, totalOperations, (double) skippedOperations / totalOperations * 100, clientClassName);
+        if (skippedOperations > 0) {
+            String message = String.format("WARNING: %d out of %d operations were skipped due to " +
+                            "unsupported parameter types for '%s'.",
+                    skippedOperations, totalOperations, clientClassName);
             printStream.println(message);
         }
 
