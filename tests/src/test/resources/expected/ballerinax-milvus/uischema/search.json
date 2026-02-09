@@ -45,6 +45,19 @@
                 {
                   "type": "attribute",
                   "value": {
+                    "name": "partitionName",
+                    "displayName": "partitionName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The name of the partition to search data from",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
                     "name": "vectors",
                     "displayName": "vectors",
                     "inputType": "stringOrExpression",
@@ -69,51 +82,29 @@
                   }
                 },
                 {
-                  "type": "attributeGroup",
+                  "type": "attribute",
                   "value": {
-                    "groupName": "Advanced",
-                    "collapsed": true,
-                    "elements": [
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "partitionName",
-                          "displayName": "partitionName",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": false,
-                          "helpTip": "The name of the partition to search data from",
-                          "validateType": "",
-                          "matchPattern": ""
-                        }
-                      },
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "filter",
-                          "displayName": "filter",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": false,
-                          "helpTip": "The filter expression to apply during the search operation",
-                          "validateType": "",
-                          "matchPattern": ""
-                        }
-                      },
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "outputFields",
-                          "displayName": "outputFields",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": false,
-                          "helpTip": "The fields to return in the search result",
-                          "validateType": "json",
-                          "matchPattern": ""
-                        }
-                      }
-                    ]
+                    "name": "filter",
+                    "displayName": "filter",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The filter expression to apply during the search operation",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "outputFields",
+                    "displayName": "outputFields",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The fields to return in the search result",
+                    "validateType": "json",
+                    "matchPattern": ""
                   }
                 }
               ]

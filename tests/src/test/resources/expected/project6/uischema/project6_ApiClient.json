@@ -39,16 +39,7 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                }
-              ]
-            }
-          },
-          {
-            "type": "attributeGroup",
-            "value": {
-              "groupName": "Advanced",
-              "collapsed": true,
-              "elements": [
+                },
                 {
                   "type": "attribute",
                   "value": {

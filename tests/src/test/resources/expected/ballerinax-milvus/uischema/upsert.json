@@ -43,6 +43,32 @@
                   }
                 },
                 {
+                  "type": "attribute",
+                  "value": {
+                    "name": "partitionName",
+                    "displayName": "partitionName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The name of the partition to upsert data into",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "databaseName",
+                    "displayName": "databaseName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The name of the database to upsert data into",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Data",
@@ -105,41 +131,6 @@
                           "defaultValue": "",
                           "required": false,
                           "helpTip": "The properties to upsert into the Milvus collection",
-                          "validateType": "",
-                          "matchPattern": ""
-                        }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "attributeGroup",
-                  "value": {
-                    "groupName": "Advanced",
-                    "collapsed": true,
-                    "elements": [
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "partitionName",
-                          "displayName": "partitionName",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": false,
-                          "helpTip": "The name of the partition to upsert data into",
-                          "validateType": "",
-                          "matchPattern": ""
-                        }
-                      },
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "databaseName",
-                          "displayName": "databaseName",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": false,
-                          "helpTip": "The name of the database to upsert data into",
                           "validateType": "",
                           "matchPattern": ""
                         }

@@ -43,51 +43,42 @@
                   }
                 },
                 {
-                  "type": "attributeGroup",
+                  "type": "attribute",
                   "value": {
-                    "groupName": "Advanced",
-                    "collapsed": true,
-                    "elements": [
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "partitionName",
-                          "displayName": "partitionName",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": false,
-                          "helpTip": "The name of the partition to delete data from",
-                          "validateType": "",
-                          "matchPattern": ""
-                        }
-                      },
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "ids",
-                          "displayName": "ids",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": false,
-                          "helpTip": "The ids of the entries to delete",
-                          "validateType": "json",
-                          "matchPattern": ""
-                        }
-                      },
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "filter",
-                          "displayName": "filter",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": false,
-                          "helpTip": "The filter to delete data from the Milvus collection",
-                          "validateType": "",
-                          "matchPattern": ""
-                        }
-                      }
-                    ]
+                    "name": "partitionName",
+                    "displayName": "partitionName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The name of the partition to delete data from",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "ids",
+                    "displayName": "ids",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The ids of the entries to delete",
+                    "validateType": "json",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "filter",
+                    "displayName": "filter",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The filter to delete data from the Milvus collection",
+                    "validateType": "",
+                    "matchPattern": ""
                   }
                 }
               ]

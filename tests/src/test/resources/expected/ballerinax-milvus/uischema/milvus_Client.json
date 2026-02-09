@@ -39,21 +39,30 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                }
-              ]
-            }
-          },
-          {
-            "type": "attributeGroup",
-            "value": {
-              "groupName": "Advanced",
-              "collapsed": true,
-              "elements": [
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_authConfig",
+                    "displayName": "Configure authConfig",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure authConfig settings",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
                 {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Auth Config",
                     "collapsed": false,
+                    "enableCondition": [
+                      {
+                        "enable_authConfig": "true"
+                      }
+                    ],
                     "elements": [
                       {
                         "type": "attribute",
@@ -65,10 +74,28 @@
                           "required": false,
                           "helpTip": "A valid access token to access the specified Milvus instance",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            {
+                              "enable_authConfig": "true"
+                            }
+                          ]
                         }
                       }
                     ]
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_credentialsConfig",
+                    "displayName": "Configure credentialsConfig",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure credentialsConfig settings",
+                    "validateType": "",
+                    "matchPattern": ""
                   }
                 },
                 {
@@ -76,6 +103,11 @@
                   "value": {
                     "groupName": "Credentials Config",
                     "collapsed": false,
+                    "enableCondition": [
+                      {
+                        "enable_credentialsConfig": "true"
+                      }
+                    ],
                     "elements": [
                       {
                         "type": "attribute",
@@ -87,7 +119,12 @@
                           "required": false,
                           "helpTip": "The username used to connect to the specified Milvus instance",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            {
+                              "enable_credentialsConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -100,7 +137,12 @@
                           "required": false,
                           "helpTip": "The password used to connect to the specified Milvus instance",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            {
+                              "enable_credentialsConfig": "true"
+                            }
+                          ]
                         }
                       }
                     ]
@@ -224,10 +266,28 @@
                   }
                 },
                 {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_secureConfig",
+                    "displayName": "Configure secureConfig",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure secureConfig settings",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Secure Config",
                     "collapsed": false,
+                    "enableCondition": [
+                      {
+                        "enable_secureConfig": "true"
+                      }
+                    ],
                     "elements": [
                       {
                         "type": "attribute",
@@ -239,7 +299,12 @@
                           "required": false,
                           "helpTip": "The path to the client key file for mutual authentication",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            {
+                              "enable_secureConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -252,7 +317,12 @@
                           "required": false,
                           "helpTip": "The path to the client PEM file for mutual authentication",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            {
+                              "enable_secureConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -265,7 +335,12 @@
                           "required": false,
                           "helpTip": "The path to the server PEM file for mutual authentication",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            {
+                              "enable_secureConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -278,7 +353,12 @@
                           "required": false,
                           "helpTip": "The path to the CA PEM file for mutual authentication",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            {
+                              "enable_secureConfig": "true"
+                            }
+                          ]
                         }
                       }
                     ]

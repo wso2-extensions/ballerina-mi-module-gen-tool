@@ -43,51 +43,42 @@
                   }
                 },
                 {
-                  "type": "attributeGroup",
+                  "type": "attribute",
                   "value": {
-                    "groupName": "Advanced",
-                    "collapsed": true,
-                    "elements": [
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "partitionName",
-                          "displayName": "partitionName",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": false,
-                          "helpTip": "The name of the partition to search data from",
-                          "validateType": "",
-                          "matchPattern": ""
-                        }
-                      },
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "filter",
-                          "displayName": "filter",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": false,
-                          "helpTip": "The filter to search",
-                          "validateType": "",
-                          "matchPattern": ""
-                        }
-                      },
-                      {
-                        "type": "attribute",
-                        "value": {
-                          "name": "outputFields",
-                          "displayName": "outputFields",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": false,
-                          "helpTip": "The fields to return in the query result",
-                          "validateType": "json",
-                          "matchPattern": ""
-                        }
-                      }
-                    ]
+                    "name": "partitionName",
+                    "displayName": "partitionName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The name of the partition to search data from",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "filter",
+                    "displayName": "filter",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The filter to search",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "outputFields",
+                    "displayName": "outputFields",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The fields to return in the query result",
+                    "validateType": "json",
+                    "matchPattern": ""
                   }
                 }
               ]

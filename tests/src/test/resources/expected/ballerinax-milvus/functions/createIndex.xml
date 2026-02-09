@@ -25,7 +25,7 @@
     <sequence>
         <property name="param0" value="request"/>
         <property name="paramType0" value="record"/>
-        <property name="param0_recordName" value="" />
+        <property name="param0_recordName" value="CreateIndexRequest" />
         <property name="request_param0" value="collectionName"/>
         <property name="request_paramType0" value="string"/>
         <property name="request_param1" value="primaryKey"/>

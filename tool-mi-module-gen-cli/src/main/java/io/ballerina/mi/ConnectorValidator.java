@@ -104,10 +104,7 @@ public class ConnectorValidator {
         if (!validateZipStructure(zipPath)) {
             return false;
         }
-        if (!validateConnectorXml(connectorPath)) {
-            return false;
-        }
-        return validateSampledUISchemas(connectorPath);
+        return validateConnectorXml(connectorPath);
     }
 
     /**
@@ -330,13 +327,28 @@ public class ConnectorValidator {
      * @param uiSchemaPath Path to the UI schema JSON file
      * @return ValidationResult containing validation status and any error messages
      */
+    // Max file size (5MB) for full JSON schema validation. Larger files use lightweight
+    // streaming validation to avoid OOM — connection configs with deeply flattened records
+    // can produce UI schema JSON files of 50-100MB+.
+    private static final long MAX_FULL_VALIDATION_SIZE = 5 * 1024 * 1024;
+
     public static ValidationResult validateUISchema(Path uiSchemaPath) {
         // Check if file exists
         if (!Files.exists(uiSchemaPath)) {
             return new ValidationResult(false, List.of("UI schema file does not exist: " + uiSchemaPath));
         }
 
-        // Read JSON content
+        try {
+            long fileSize = Files.size(uiSchemaPath);
+            if (fileSize > MAX_FULL_VALIDATION_SIZE) {
+                // Large file: use streaming validation (verify valid JSON without building tree)
+                return validateUISchemaStreaming(uiSchemaPath, fileSize);
+            }
+        } catch (IOException e) {
+            return new ValidationResult(false, List.of("Failed to check UI schema file size: " + e.getMessage()));
+        }
+
+        // Small file: full JSON schema validation
         String jsonContent;
         try {
             jsonContent = Files.readString(uiSchemaPath);
@@ -345,6 +357,43 @@ public class ConnectorValidator {
         }
 
         return validateUISchemaContent(jsonContent);
+    }
+
+    /**
+     * Lightweight validation for large UI schema files. Uses Jackson streaming API
+     * to verify the file is well-formed JSON without building a tree in memory.
+     * Checks that the top-level structure is a JSON object with expected keys.
+     */
+    private static ValidationResult validateUISchemaStreaming(Path uiSchemaPath, long fileSize) {
+        long fileSizeMB = fileSize / (1024 * 1024);
+        ERROR_STREAM.println("Large UI schema (" + fileSizeMB + "MB): " +
+                uiSchemaPath.getFileName() + " — using streaming validation.");
+        try (JsonParser parser = objectMapper.getFactory().createParser(uiSchemaPath.toFile())) {
+            if (parser.nextToken() != JsonToken.START_OBJECT) {
+                return new ValidationResult(false, List.of("UI schema is not a JSON object: " + uiSchemaPath));
+            }
+            boolean hasOperationName = false;
+            boolean hasConnectionName = false;
+            // Read top-level keys to verify structure, skip all values without building tree
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
+                String fieldName = parser.currentName();
+                if ("operationName".equals(fieldName)) {
+                    hasOperationName = true;
+                } else if ("connectionName".equals(fieldName)) {
+                    hasConnectionName = true;
+                }
+                parser.nextToken();
+                parser.skipChildren();
+            }
+            if (!hasOperationName && !hasConnectionName) {
+                return new ValidationResult(false,
+                        List.of("UI schema missing both 'operationName' and 'connectionName': " + uiSchemaPath));
+            }
+            return new ValidationResult(true, List.of());
+        } catch (IOException e) {
+            return new ValidationResult(false,
+                    List.of("UI schema is not valid JSON: " + uiSchemaPath + " — " + e.getMessage()));
+        }
     }
 
     /**

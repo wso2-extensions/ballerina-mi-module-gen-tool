@@ -280,16 +280,8 @@ public class ConnectorSerializer {
             List<FunctionParam> basicParams = new ArrayList<>();
             List<FunctionParam> advancedParams = new ArrayList<>();
 
-            List<FunctionParam> flattenedParams = new ArrayList<>();
+            // Use original hierarchical params — optional nested records get checkbox toggles
             for (FunctionParam param : functionParams) {
-                if (param instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
-                    flattenedParams.addAll(recordParam.getRecordFieldParams());
-                } else {
-                    flattenedParams.add(param);
-                }
-            }
-
-            for (FunctionParam param : flattenedParams) {
                 boolean isAdvanced = false;
                 if (!param.isRequired() || (param.getDefaultValue() != null && !param.getDefaultValue().isEmpty())) {
                     isAdvanced = true;
@@ -302,10 +294,10 @@ public class ConnectorSerializer {
             }
 
             if (!basicParams.isEmpty()) {
-                writeAttributeGroup("Basic", basicParams, advancedParams.isEmpty(), builder);
+                writeAttributeGroup("Basic", basicParams, advancedParams.isEmpty(), builder, true);
             }
             if (!advancedParams.isEmpty()) {
-                writeAttributeGroup("Advanced", advancedParams, true, builder, true);
+                writeAttributeGroup("Advanced", advancedParams, true, builder, true, true);
             }
 
             return new Handlebars.SafeString(builder.build());
@@ -325,18 +317,11 @@ public class ConnectorSerializer {
             }
 
             List<FunctionParam> functionParams = component.getFunctionParams();
-            List<FunctionParam> flattenedParams = new ArrayList<>();
-            for (FunctionParam param : functionParams) {
-                if (param instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
-                    flattenedParams.addAll(recordParam.getRecordFieldParams());
-                } else {
-                    flattenedParams.add(param);
-                }
-            }
 
             List<FunctionParam> requiredParams = new ArrayList<>();
             List<FunctionParam> advancedParams = new ArrayList<>();
-            for (FunctionParam param : flattenedParams) {
+            // Use original hierarchical params — optional nested records get checkbox toggles
+            for (FunctionParam param : functionParams) {
                 boolean isAdvanced = !param.isRequired()
                         || (param.getDefaultValue() != null && !param.getDefaultValue().isEmpty());
                 if (isAdvanced) {
@@ -356,14 +341,14 @@ public class ConnectorSerializer {
 
             int totalRequired = requiredParams.size();
             for (int i = 0; i < totalRequired; i++) {
-                writeJsonAttributeForFunctionParam(requiredParams.get(i), i, totalRequired, builder, false, true, null);
+                writeJsonAttributeForFunctionParam(requiredParams.get(i), i, totalRequired, builder, false, true, null, false);
             }
 
             if (hasAdvancedParams) {
                 if (hasRequiredParams) {
                     builder.addSeparator(ATTRIBUTE_SEPARATOR);
                 }
-                writeAttributeGroup("Advanced", advancedParams, true, builder, true);
+                writeAttributeGroup("Advanced", advancedParams, true, builder, true, false);
             }
 
             return new Handlebars.SafeString(builder.build());
@@ -469,7 +454,36 @@ public class ConnectorSerializer {
         }));
     }
 
-    private static final int BATCH_SIZE = 50;
+    /**
+     * Recursively flattens record parameters to all levels.
+     * This method processes records iteratively to avoid stack overflow and OOM with deeply nested structures.
+     * 
+     * @param params The list of parameters to flatten
+     * @return A list of flattened parameters with all nested record fields expanded
+     */
+    private static List<FunctionParam> flattenRecordParamsRecursively(List<FunctionParam> params) {
+        List<FunctionParam> result = new ArrayList<>();
+        // Use a queue for iterative (breadth-first) processing to avoid deep recursion stack
+        java.util.Deque<FunctionParam> queue = new java.util.ArrayDeque<>(params);
+        
+        while (!queue.isEmpty()) {
+            FunctionParam param = queue.pollFirst();
+            if (param instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
+                // Add all record fields to the front of the queue for processing
+                // This ensures nested records are also flattened
+                for (int i = recordParam.getRecordFieldParams().size() - 1; i >= 0; i--) {
+                    queue.addFirst(recordParam.getRecordFieldParams().get(i));
+                }
+            } else {
+                // Non-record params (or records without fields) are added to result
+                result.add(param);
+            }
+        }
+        
+        return result;
+    }
+
+    private static final int BATCH_SIZE = 10;
 
     public void serialize(Connector connector) {
 
@@ -490,30 +504,18 @@ public class ConnectorSerializer {
                 connectorFolder.mkdir();
             }
 
-            // Phase 1: Generate aggregate XML files (lightweight, covers all components in one file)
-            System.out.println("Generating aggregate XML files...");
-            connector.generateInstanceXml(connectorFolder);
-            connector.generateFunctionsXml(connectorFolder, Constants.FUNCTION_TEMPLATE_PATH, "functions");
-            if (!connector.isBalModule()) {
-                connector.generateConfigInstanceXml(connectorFolder, CONFIG_TEMPLATE_PATH, "config");
-                connector.generateConfigTemplateXml(connectorFolder, CONFIG_TEMPLATE_PATH, "config");
-            }
-
-            // Phase 2: Generate per-connection config JSON
-            for (Connection connection : connector.getConnections()) {
-                if (connection.getInitComponent() != null) {
-                    connection.getInitComponent().generateUIJson(connectorFolder, CONFIG_TEMPLATE_PATH,
-                            connection.getConnectionType());
-                }
-            }
-
-            // Phase 3: Generate per-component files (XML template + JSON UI schema) in batches
+            // Phase 1: Generate per-component files (XML template + JSON UI schema) in batches.
+            // Process components FIRST so each component's deeply nested FunctionParam tree
+            // can be freed immediately after its files are written, preventing OOM on large
+            // connectors like Gmail (32 components with deeply nested records).
             int totalComponents = connector.getComponents().size();
             int processed = 0;
             for (Connection connection : connector.getConnections()) {
                 for (Component component : connection.getComponents()) {
                     component.generateTemplateXml(connectorFolder, FUNCTION_TEMPLATE_PATH, "functions");
                     component.generateUIJson(connectorFolder, FUNCTION_TEMPLATE_PATH, component.getName());
+                    // Free the deeply nested FunctionParam tree now that files are written to disk
+                    component.getFunctionParams().clear();
                     processed++;
                     if (processed % BATCH_SIZE == 0) {
                         System.out.println("Processed " + processed + "/" + totalComponents + " components...");
@@ -523,6 +525,35 @@ public class ConnectorSerializer {
             }
             if (processed % BATCH_SIZE != 0) {
                 System.out.println("Processed " + processed + "/" + totalComponents + " components.");
+            }
+
+            // Reclaim memory from cleared FunctionParam trees before processing init component
+            System.gc();
+
+            // Phase 2: Generate per-connection config JSON
+            for (Connection connection : connector.getConnections()) {
+                if (connection.getInitComponent() != null) {
+                    connection.getInitComponent().generateUIJson(connectorFolder, CONFIG_TEMPLATE_PATH,
+                            connection.getConnectionType());
+                }
+            }
+
+            // Phase 3: Generate aggregate XML files (lightweight, covers all components in one file).
+            // By now all component FunctionParams are cleared (not needed for aggregate XMLs).
+            // Init component FunctionParams are still available for config_template.xml.
+            System.out.println("Generating aggregate XML files...");
+            connector.generateInstanceXml(connectorFolder);
+            connector.generateFunctionsXml(connectorFolder, Constants.FUNCTION_TEMPLATE_PATH, "functions");
+            if (!connector.isBalModule()) {
+                connector.generateConfigInstanceXml(connectorFolder, CONFIG_TEMPLATE_PATH, "config");
+                connector.generateConfigTemplateXml(connectorFolder, CONFIG_TEMPLATE_PATH, "config");
+            }
+
+            // Free init component FunctionParams now that all files are written
+            for (Connection connection : connector.getConnections()) {
+                if (connection.getInitComponent() != null) {
+                    connection.getInitComponent().getFunctionParams().clear();
+                }
             }
 
             // Copy resources and JARs before clearing connector metadata
@@ -782,12 +813,13 @@ public class ConnectorSerializer {
     private static void writeJsonAttributeForFunctionParam(FunctionParam functionParam, int index, int paramLength,
                                                            JsonTemplateBuilder builder,
                                                            boolean isCombo, boolean expandRecords) throws IOException {
-        writeJsonAttributeForFunctionParam(functionParam, index, paramLength, builder, isCombo, expandRecords, null);
+        writeJsonAttributeForFunctionParam(functionParam, index, paramLength, builder, isCombo, expandRecords, null, false);
     }
 
     private static void writeJsonAttributeForFunctionParam(FunctionParam functionParam, int index, int paramLength,
                                                            JsonTemplateBuilder builder,
-                                                           boolean isCombo, boolean expandRecords, String groupName) throws IOException {
+                                                           boolean isCombo, boolean expandRecords, String groupName,
+                                                           boolean isConfigContext) throws IOException {
         String paramType = functionParam.getParamType();
         String originalParamValue = functionParam.getValue();
         String displayParamValue = originalParamValue;
@@ -873,7 +905,26 @@ public class ConnectorSerializer {
                 break;
             case RECORD:
                 if (expandRecords) {
-                    writeRecordFields(functionParam, builder, expandRecords, groupName);
+                    // For optional records in config context, add a checkbox toggle for progressive disclosure.
+                    if (isConfigContext && !functionParam.isRequired()) {
+                        String checkboxName = "enable_" + sanitizedParamName;
+                        String checkboxDisplayName = "Configure " + displayName;
+                        Attribute checkbox = new Attribute(checkboxName, checkboxDisplayName,
+                                INPUT_TYPE_BOOLEAN, "false", false,
+                                "Enable to configure " + displayName + " settings",
+                                "", "", false);
+                        // Inherit parent enable conditions (e.g., from parent union combo)
+                        checkbox.setEnableCondition(functionParam.getEnableCondition());
+                        builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, checkbox);
+                        builder.addSeparator(ATTRIBUTE_SEPARATOR);
+
+                        // Set enableCondition on the record so all children inherit it
+                        String checkboxCondition = "[{\"" + checkboxName + "\":\"true\"}]";
+                        String existingCondition = functionParam.getEnableCondition();
+                        functionParam.setEnableCondition(
+                                mergeEnableConditions(existingCondition, checkboxCondition));
+                    }
+                    writeRecordFields(functionParam, builder, expandRecords, groupName, isConfigContext);
                 } else {
                     // Generate concise hint and validation for non-expanded records
                     String recordHelpTip = functionParam.getDescription();
@@ -980,7 +1031,7 @@ public class ConnectorSerializer {
 
                     // Write simple members first
                     for (int i = 0; i < simpleMembers.size(); i++) {
-                        writeJsonAttributeForFunctionParam(simpleMembers.get(i), index, paramLength, builder, true, expandRecords, effectiveGroupName);
+                        writeJsonAttributeForFunctionParam(simpleMembers.get(i), index, paramLength, builder, true, expandRecords, effectiveGroupName, isConfigContext);
                         if (i < simpleMembers.size() - 1 || !recordMembers.isEmpty()) {
                             builder.addSeparator(ATTRIBUTE_SEPARATOR);
                         }
@@ -1016,7 +1067,7 @@ public class ConnectorSerializer {
                         }
                         
                         // Write combined fields - this will group them correctly under specialized groups (e.g. "Auth")
-                        writeRecordFields(virtualRecordParam, builder, true, effectiveGroupName);
+                        writeRecordFields(virtualRecordParam, builder, true, effectiveGroupName, isConfigContext);
                     }
                 }
                 break;
@@ -1489,7 +1540,7 @@ public class ConnectorSerializer {
      * Otherwise, falls back to a single stringOrExpression field.
      */
     private static void writeRecordFields(FunctionParam functionParam, JsonTemplateBuilder builder,
-                                          boolean expandRecords, String parentGroupName) throws IOException {
+                                          boolean expandRecords, String parentGroupName, boolean isConfigContext) throws IOException {
         if (functionParam instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
             List<FunctionParam> recordFields = recordParam.getRecordFieldParams();
             
@@ -1522,7 +1573,7 @@ public class ConnectorSerializer {
                     fieldParam.setEnableCondition(mergedCondition);
                 }
                 
-                writeJsonAttributeForFunctionParam(fieldParam, i, topLevelFields.size(), builder, false, expandRecords, parentGroupName);
+                writeJsonAttributeForFunctionParam(fieldParam, i, topLevelFields.size(), builder, false, expandRecords, parentGroupName, isConfigContext);
             }
             
             // Write grouped nested fields
@@ -1555,8 +1606,8 @@ public class ConnectorSerializer {
                         }
 
                         // Use groupName to strip the prefix
-                        writeJsonAttributeForFunctionParam(fieldParam, i, groupFields.size(), builder, false, expandRecords, groupName);
-                        
+                        writeJsonAttributeForFunctionParam(fieldParam, i, groupFields.size(), builder, false, expandRecords, groupName, isConfigContext);
+
                         // Add separator if not last element
                          if (i < groupFields.size() - 1) {
                             builder.addSeparator(ATTRIBUTE_SEPARATOR);
@@ -1595,7 +1646,7 @@ public class ConnectorSerializer {
                             builder.addSeparator("                  ");  // 18 spaces to align with template content
                         }
                         // Pass groupName to remove prefix from displayName
-                        writeJsonAttributeForFunctionParam(fieldParam, i, groupFields.size(), builder, false, expandRecords, groupName);
+                        writeJsonAttributeForFunctionParam(fieldParam, i, groupFields.size(), builder, false, expandRecords, groupName, isConfigContext);
 
 
                     }
@@ -2429,11 +2480,11 @@ public class ConnectorSerializer {
         }
     }
 
-    private static void writeAttributeGroup(String groupName, List<FunctionParam> params, boolean isLastGroup, JsonTemplateBuilder builder) {
-        writeAttributeGroup(groupName, params, isLastGroup, builder, false);
+    private static void writeAttributeGroup(String groupName, List<FunctionParam> params, boolean isLastGroup, JsonTemplateBuilder builder, boolean isConfigContext) {
+        writeAttributeGroup(groupName, params, isLastGroup, builder, false, isConfigContext);
     }
 
-    private static void writeAttributeGroup(String groupName, List<FunctionParam> params, boolean isLastGroup, JsonTemplateBuilder builder, boolean collapsed) {
+    private static void writeAttributeGroup(String groupName, List<FunctionParam> params, boolean isLastGroup, JsonTemplateBuilder builder, boolean collapsed, boolean isConfigContext) {
         try {
             AttributeGroup attributeGroup = new AttributeGroup(groupName, collapsed);
             builder.addFromTemplate(ATTRIBUTE_GROUP_TEMPLATE_PATH, attributeGroup);
@@ -2443,7 +2494,7 @@ public class ConnectorSerializer {
                     builder.addSeparator("                  "); // Indentation alignment
                 }
                 // Write param - expand records
-                writeJsonAttributeForFunctionParam(params.get(i), i, params.size(), builder, false, true, groupName);
+                writeJsonAttributeForFunctionParam(params.get(i), i, params.size(), builder, false, true, groupName, isConfigContext);
             }
 
             // Close the attributeGroup
@@ -2460,9 +2511,10 @@ public class ConnectorSerializer {
         }
     }
     /**
-     * Merges two enable conditions (JSON arrays of objects) into a single condition.
-     * Assumes simple [{"key":"value"}] format generated by ParamFactory.
-     * Merges by combining the objects: [{"p":"v"}] + [{"c":"v"}] -> [{"p":"v","c":"v"}]
+     * Merges two enable conditions into a single AND condition.
+     * Uses the MI UI framework's AND format: ["AND", {cond1}, {cond2}, ...]
+     * Simple conditions are in [{"key":"value"}] format.
+     * If the parent is already an AND array, appends the child condition to it.
      */
     private static String mergeEnableConditions(String parentCondition, String childCondition) {
         if (parentCondition == null || parentCondition.isEmpty()) {
@@ -2472,17 +2524,42 @@ public class ConnectorSerializer {
             return parentCondition;
         }
 
-        // Strip outer [{ and }]
-        // Valid condition format from ParamFactory is strict: [{"key":"val"}]
-        // So we can safely substring if checking length
-        if (parentCondition.length() > 4 && childCondition.length() > 4) {
-            String parentContent = parentCondition.substring(2, parentCondition.length() - 2);
-            String childContent = childCondition.substring(2, childCondition.length() - 2);
-            return "[{" + parentContent + "," + childContent + "}]";
+        String parentObj = extractConditionObject(parentCondition);
+        String childObj = extractConditionObject(childCondition);
+
+        if (parentObj == null || childObj == null) {
+            return parentCondition;
         }
-        
-        // Fallback for unexpected format - return parent condition to be safe (hides if parent hidden)
-        return parentCondition;
+
+        // If parent is already an AND array, append child to it
+        if (parentCondition.startsWith("[\"AND\"")) {
+            // parentCondition = ["AND", {...}, {...}]
+            // Insert child before the closing ]
+            return parentCondition.substring(0, parentCondition.length() - 1) + "," + childObj + "]";
+        }
+
+        // Both are simple conditions — combine into AND array
+        return "[\"AND\"," + parentObj + "," + childObj + "]";
+    }
+
+    /**
+     * Extracts the condition object(s) from various enableCondition formats.
+     * For simple format [{"key":"val"}], returns {"key":"val"}.
+     * For AND format ["AND",{...},{...}], returns the full string as-is (for nested AND).
+     */
+    private static String extractConditionObject(String condition) {
+        if (condition == null || condition.isEmpty()) {
+            return null;
+        }
+        // Simple format: [{"key":"val"}] -> {"key":"val"}
+        if (condition.startsWith("[{") && condition.endsWith("}]")) {
+            return condition.substring(1, condition.length() - 1);
+        }
+        // AND format: ["AND",...] -> return as nested array
+        if (condition.startsWith("[\"AND\"")) {
+            return condition;
+        }
+        return null;
     }
 
     /**
