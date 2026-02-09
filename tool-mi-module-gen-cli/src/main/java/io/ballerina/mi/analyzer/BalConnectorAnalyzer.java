@@ -93,7 +93,7 @@ public class BalConnectorAnalyzer implements Analyzer {
             printStream.println("Skipping sub-module: " + module.moduleName());
             return;
         }
-        
+
         SemanticModel semanticModel = compilePackage.getCompilation().getSemanticModel(module.moduleId());
         List<Symbol> moduleSymbols = semanticModel.moduleSymbols();
         List<Symbol> classSymbols = moduleSymbols.stream().filter((s) -> s instanceof BallerinaClassSymbol).toList();
@@ -178,7 +178,7 @@ public class BalConnectorAnalyzer implements Analyzer {
         ModuleSymbol moduleSymbol = classSymbol.getModule().orElseThrow(() -> new IllegalStateException("Client class is outside the module"));
         String moduleName = moduleSymbol.getName().orElseThrow(() -> new IllegalStateException("Module name not defined"));
         String connectionType = String.format("%s_%s", moduleName, clientClassName);
-        
+
         // Replace dots with underscores in connectionType if module name has dots
         if (moduleName.contains(".")) {
             connectionType = connectionType.replace(".", "_");
@@ -211,7 +211,9 @@ public class BalConnectorAnalyzer implements Analyzer {
         // Track generated synapse names to handle duplicates
         Map<String, Integer> synapseNameCount = new HashMap<>();
 
-        methodLoop:
+        int totalOperations = 0;
+        int skippedOperations = 0;
+
         for (Map.Entry<String, MethodSymbol> methodEntry : allMethods.entrySet()) {
             MethodSymbol methodSymbol = methodEntry.getValue();
             List<Qualifier> qualifierList = methodSymbol.qualifiers();
@@ -220,6 +222,8 @@ public class BalConnectorAnalyzer implements Analyzer {
                     Utils.containsToken(qualifierList, Qualifier.RESOURCE))) {
                 continue;
             }
+
+            totalOperations++;
 
             String functionName = methodSymbol.getName().get();
             FunctionType functionType = Utils.getFunctionType(methodSymbol);
@@ -236,7 +240,7 @@ public class BalConnectorAnalyzer implements Analyzer {
 
             // Prepare context for synapse name generation
             SynapseNameContext.Builder contextBuilder = SynapseNameContext.builder().module(module);
-            
+
             // Extract operationId from @openapi:ResourceInfo annotation if present using syntax tree API
             Optional<String> operationIdOpt = Optional.empty();
             try {
@@ -248,10 +252,10 @@ public class BalConnectorAnalyzer implements Analyzer {
                 // If syntax tree access fails, continue without operationId
                 printStream.println("Error extracting operationId for method: " + methodSymbol.getName().orElse("<unknown>") + " - " + e.getMessage());
             }
-            
+
             // Add operationId to context if found
             operationIdOpt.ifPresent(contextBuilder::operationId);
-            
+
             // Extract resource path segments if this is a resource function
             if (functionType == FunctionType.RESOURCE && methodSymbol instanceof ResourceMethodSymbol resourceMethod) {
                 try {
@@ -261,30 +265,24 @@ public class BalConnectorAnalyzer implements Analyzer {
                     // If path extraction fails, continue without path segments
                 }
             }
-            
+
             SynapseNameContext context = contextBuilder.build();
-            
+
             // Use priority-based synapse name generation
             SynapseNameGeneratorManager nameGenerator = new SynapseNameGeneratorManager();
             Optional<String> synapseNameOpt = nameGenerator.generateSynapseName(methodSymbol, functionType, context);
-            
+
             // Fallback to default if no generator succeeded
             String synapseName = synapseNameOpt.orElseGet(() -> Utils.generateSynapseName(methodSymbol, functionType));
-            
+
             // Replace dots with underscores in synapse name if connector module name has dots
             if (connector.getModuleName().contains(".")) {
                 synapseName = synapseName.replace(".", "_");
             }
-            
-            // Handle duplicate names by appending numeric suffix
+
+            // NOTE: Defer duplicate-name bookkeeping until after parameter validation
+            // to avoid reserving names for methods that will be skipped
             String finalSynapseName = synapseName;
-            if (synapseNameCount.containsKey(synapseName)) {
-                int count = synapseNameCount.get(synapseName) + 1;
-                synapseNameCount.put(synapseName, count);
-                finalSynapseName = synapseName + count;
-            } else {
-                synapseNameCount.put(synapseName, 0);
-            }
 
             // Extract path parameters and path segments from resource path (for resource functions)
             List<PathParamType> pathParams = new ArrayList<>();
@@ -324,7 +322,7 @@ public class BalConnectorAnalyzer implements Analyzer {
                     // If path extraction fails, continue without path parameters
                 }
             }
-            
+
             // Now match path parameter names with actual function parameters to get types
             Optional<List<ParameterSymbol>> params = methodSymbol.typeDescriptor().params();
             Map<String, ParameterSymbol> paramMap = new HashMap<>();
@@ -382,10 +380,21 @@ public class BalConnectorAnalyzer implements Analyzer {
 
             // Check if synapse name conflicts with any parameter name and make it unique if needed
             Optional<String> methodNameOpt = methodSymbol.getName();
-            if (allParamNames.contains(finalSynapseName) || 
-                (methodNameOpt.isPresent() && allParamNames.contains(methodNameOpt.get()))) {
+            if (allParamNames.contains(synapseName) ||
+                    (methodNameOpt.isPresent() && allParamNames.contains(methodNameOpt.get()))) {
                 // Add a suffix to make the synapse name unique and avoid conflicts
-                finalSynapseName = finalSynapseName + "_operation";
+                synapseName = synapseName + "_operation";
+            }
+
+            // NOW handle duplicate names by appending numeric suffix
+            // (All parameters are validated, so this method will not be skipped)
+            if (synapseNameCount.containsKey(synapseName)) {
+                int count = synapseNameCount.get(synapseName) + 1;
+                synapseNameCount.put(synapseName, count);
+                finalSynapseName = synapseName + count;
+            } else {
+                synapseNameCount.put(synapseName, 0);
+                finalSynapseName = synapseName;
             }
 
             component = new Component(finalSynapseName, docString, functionType, Integer.toString(i), pathParams, List.of(), returnType);
@@ -403,8 +412,10 @@ public class BalConnectorAnalyzer implements Analyzer {
                 component.setHasOperationId(true);
             }
 
+
             // Now add all function parameters (we keep them all, synapse name is made unique instead)
             int paramIndex = 0;
+            boolean shouldSkipOperation = false;
             if (params.isPresent()) {
                 List<ParameterSymbol> parameterSymbols = params.get();
                 for (ParameterSymbol parameterSymbol : parameterSymbols) {
@@ -413,7 +424,9 @@ public class BalConnectorAnalyzer implements Analyzer {
                         String paramType = parameterSymbol.typeDescriptor().typeKind().getName();
                         printStream.println("Skipping function '" + functionName +
                                 "' due to unsupported parameter type: " + paramType);
-                        continue methodLoop;
+                        skippedOperations++;
+                        shouldSkipOperation = true;
+                        break; // Exit parameter loop, skip this entire operation
                     }
 
                     FunctionParam param = functionParam.get();
@@ -432,20 +445,44 @@ public class BalConnectorAnalyzer implements Analyzer {
                     component.setFunctionParam(param);
                     paramIndex++;
                 }
-                Param sizeParam = new Param("paramSize", Integer.toString(paramIndex));
-                Param functionNameParam = new Param("paramFunctionName", component.getName());
-                component.setParam(sizeParam);
-                component.setParam(functionNameParam);
+
+                // Only add component if we didn't skip due to unsupported parameter
+                if (!shouldSkipOperation) {
+                    Param sizeParam = new Param("paramSize", Integer.toString(paramIndex));
+                    Param functionNameParam = new Param("paramFunctionName", component.getName());
+                    component.setParam(sizeParam);
+                    component.setParam(functionNameParam);
+                }
             }
-            if (functionType == FunctionType.INIT) {
-                // objectTypeName is only needed on Connection, not on Component
-                // to avoid duplication in generated XML
-                connection.setInitComponent(component);
-            } else {
-                connection.setComponent(component);
+
+            // Only add the component if it wasn't skipped
+            if (!shouldSkipOperation) {
+                if (functionType == FunctionType.INIT) {
+                    // objectTypeName is only needed on Connection, not on Component
+                    // to avoid duplication in generated XML
+                    connection.setInitComponent(component);
+                } else {
+                    connection.setComponent(component);
+                }
+                i++;
             }
-            i++;
         }
+
+        // Abort generation only if no operations exist
+        if (totalOperations == 0) {
+            String message = String.format("WARNING: No operations found in class '%s'. Artifact generation will be skipped.", clientClassName);
+            printStream.println(message);
+            connector.setGenerationAborted(true, message);
+            return;
+        }
+
+        if (skippedOperations > 0) {
+            String message = String.format("WARNING: %d out of %d operations were skipped due to " +
+                            "unsupported parameter types for '%s'.",
+                    skippedOperations, totalOperations, clientClassName);
+            printStream.println(message);
+        }
+
         connector.setConnection(connection);
     }
 

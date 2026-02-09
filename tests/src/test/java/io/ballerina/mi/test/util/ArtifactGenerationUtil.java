@@ -115,6 +115,9 @@ public class ArtifactGenerationUtil {
 
         // 2. Programmatically execute MiCmd
         System.out.println("Executing MiCmd for project: " + projectPathStr);
+        // Reset Connector state to avoid pollution from previous tests
+        io.ballerina.mi.connectorModel.Connector.reset();
+        
         MiCmd miCmd = new MiCmd();
         Field sourcePathField = MiCmd.class.getDeclaredField("sourcePath");
         sourcePathField.setAccessible(true);
@@ -153,7 +156,14 @@ public class ArtifactGenerationUtil {
             }
             try (Stream<Path> files = Files.walk(searchPath, 2)) {
                 Optional<Path> found = files
-                        .filter(p -> p.toString().endsWith(".zip"))
+                        .filter(p -> {
+                            try {
+                                return p.toString().endsWith(".zip");
+                            } catch (Exception e) {
+                                // Skip files that can't be accessed
+                                return false;
+                            }
+                        })
                         .filter(p -> {
                             String zipName = p.getFileName().toString();
                             // Match zip files that contain the module name
@@ -169,6 +179,10 @@ public class ArtifactGenerationUtil {
                     generatedZipFile = found;
                     break;
                 }
+            } catch (IOException | UncheckedIOException e) {
+                // Skip directories that can't be accessed (e.g., systemd private directories)
+                // UncheckedIOException wraps IOException that occurs during stream iteration
+                System.out.println("WARN: Unable to walk directory " + searchPath + ": " + e.getMessage());
             }
         }
 
@@ -179,8 +193,17 @@ public class ArtifactGenerationUtil {
                 if (Files.exists(searchPath)) {
                     System.out.println("  In " + searchPath + ":");
                     try (Stream<Path> files = Files.walk(searchPath, 2)) {
-                        files.filter(p -> p.toString().endsWith(".zip"))
+                        files.filter(p -> {
+                                    try {
+                                        return p.toString().endsWith(".zip");
+                                    } catch (Exception e) {
+                                        return false;
+                                    }
+                                })
                                 .forEach(p -> System.out.println("    - " + p.getFileName()));
+                    } catch (IOException | UncheckedIOException e) {
+                        // UncheckedIOException wraps IOException that occurs during stream iteration
+                        System.out.println("    WARN: Unable to access directory: " + e.getMessage());
                     }
                 }
             }

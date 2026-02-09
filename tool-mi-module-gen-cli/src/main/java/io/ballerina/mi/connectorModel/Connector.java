@@ -44,6 +44,8 @@ public class Connector extends ModelElement {
     private final String moduleName;
     private final String majorVersion;
     private boolean isBalModule;
+    private boolean generationAborted = false;
+    private String abortionReason;
 
     public String getOrgName() {
         return orgName;
@@ -94,6 +96,19 @@ public class Connector extends ModelElement {
 
     public static void reset() {
         connector = null;
+    }
+
+    public boolean isGenerationAborted() {
+        return generationAborted;
+    }
+
+    public void setGenerationAborted(boolean generationAborted, String reason) {
+        this.generationAborted = generationAborted;
+        this.abortionReason = reason;
+    }
+
+    public String getAbortionReason() {
+        return abortionReason;
     }
 
     public boolean isBalModule() {
