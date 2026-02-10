@@ -56,16 +56,26 @@
                   }
                 },
                 {
-                  "type": "attribute",
+                  "type": "table",
                   "value": {
                     "name": "fieldNames",
                     "displayName": "fieldNames",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": true,
-                    "helpTip": "The names of the fields to create an index for",
-                    "validateType": "json",
-                    "matchPattern": ""
+                    "title": "fieldNames",
+                    "description": "The names of the fields to create an index for",
+                    "tableKey": "value",
+                    "tableValue": "value",
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "value",
+                          "displayName": "Value",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Array element"
+                        }
+                      }
+                    ]
                   }
                 }
               ]

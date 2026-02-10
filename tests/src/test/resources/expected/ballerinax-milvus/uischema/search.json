@@ -95,16 +95,26 @@
                   }
                 },
                 {
-                  "type": "attribute",
+                  "type": "table",
                   "value": {
                     "name": "outputFields",
                     "displayName": "outputFields",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": false,
-                    "helpTip": "The fields to return in the search result",
-                    "validateType": "json",
-                    "matchPattern": ""
+                    "title": "outputFields",
+                    "description": "The fields to return in the search result",
+                    "tableKey": "value",
+                    "tableValue": "value",
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "value",
+                          "displayName": "Value",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Array element"
+                        }
+                      }
+                    ]
                   }
                 }
               ]

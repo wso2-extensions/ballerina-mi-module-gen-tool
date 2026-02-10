@@ -857,6 +857,21 @@ public class ConnectorSerializer {
                 break;
             case MAP:
                 if (functionParam instanceof MapFunctionParam mapParam && mapParam.isRenderAsTable()) {
+                    if (isConfigContext && !functionParam.isRequired()) {
+                        String checkboxName = "enable_" + sanitizedParamName;
+                        String checkboxDisplayName = "Configure " + displayName;
+                        Attribute checkbox = new Attribute(checkboxName, checkboxDisplayName,
+                                INPUT_TYPE_BOOLEAN, "false", false,
+                                "Enable to configure " + displayName + " settings",
+                                "", "", false);
+                        checkbox.setEnableCondition(functionParam.getEnableCondition());
+                        builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, checkbox);
+                        builder.addSeparator(ATTRIBUTE_SEPARATOR);
+                        String checkboxCondition = "[{\"" + checkboxName + "\":\"true\"}]";
+                        String existingCondition = functionParam.getEnableCondition();
+                        mapParam.setEnableCondition(
+                                mergeEnableConditions(existingCondition, checkboxCondition));
+                    }
                     writeMapAsTable(mapParam, builder, isCombo);
                 } else {
                     // Fall back to JSON input for complex maps
@@ -870,6 +885,21 @@ public class ConnectorSerializer {
                 break;
             case ARRAY:
                 if (functionParam instanceof ArrayFunctionParam arrayParam && arrayParam.isRenderAsTable()) {
+                    if (isConfigContext && !functionParam.isRequired()) {
+                        String checkboxName = "enable_" + sanitizedParamName;
+                        String checkboxDisplayName = "Configure " + displayName;
+                        Attribute checkbox = new Attribute(checkboxName, checkboxDisplayName,
+                                INPUT_TYPE_BOOLEAN, "false", false,
+                                "Enable to configure " + displayName + " settings",
+                                "", "", false);
+                        checkbox.setEnableCondition(functionParam.getEnableCondition());
+                        builder.addFromTemplate(ATTRIBUTE_TEMPLATE_PATH, checkbox);
+                        builder.addSeparator(ATTRIBUTE_SEPARATOR);
+                        String checkboxCondition = "[{\"" + checkboxName + "\":\"true\"}]";
+                        String existingCondition = functionParam.getEnableCondition();
+                        arrayParam.setEnableCondition(
+                                mergeEnableConditions(existingCondition, checkboxCondition));
+                    }
                     if (arrayParam.is2DArray()) {
                         writeNestedArrayAsTable(arrayParam, builder, isCombo);
                     } else if (arrayParam.isUnionArray()) {

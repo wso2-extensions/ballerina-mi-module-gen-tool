@@ -39,40 +39,97 @@
                     "validateType": "",
                     "matchPattern": ""
                   }
-                }
-              ]
-            }
-          },
-          {
-            "type": "attributeGroup",
-            "value": {
-              "groupName": "Advanced",
-              "collapsed": true,
-              "elements": [
+                },
                 {
                   "type": "attribute",
                   "value": {
+                    "name": "enable_defaultHeaders",
+                    "displayName": "Configure defaultHeaders",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure defaultHeaders settings",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "table",
+                  "value": {
                     "name": "defaultHeaders",
                     "displayName": "defaultHeaders",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": false,
-                    "helpTip": "Expecting JSON object with key-value pairs",
-                    "validateType": "json",
-                    "matchPattern": ""
+                    "title": "defaultHeaders",
+                    "description": "Configure defaultHeaders entries",
+                    "tableKey": "key",
+                    "tableValue": "value",
+                    "enableCondition": [
+                      {
+                        "enable_defaultHeaders": "true"
+                      }
+                    ],
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "key",
+                          "displayName": "Key",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Key for the map entry"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "value",
+                          "displayName": "Value",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Value for the map entry"
+                        }
+                      }
+                    ]
                   }
                 },
                 {
                   "type": "attribute",
                   "value": {
+                    "name": "enable_allowedOrigins",
+                    "displayName": "Configure allowedOrigins",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure allowedOrigins settings",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "table",
+                  "value": {
                     "name": "allowedOrigins",
                     "displayName": "allowedOrigins",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": false,
-                    "helpTip": "Expecting JSON array",
-                    "validateType": "json",
-                    "matchPattern": ""
+                    "title": "allowedOrigins",
+                    "description": "Configure allowedOrigins entries",
+                    "tableKey": "value",
+                    "tableValue": "value",
+                    "enableCondition": [
+                      {
+                        "enable_allowedOrigins": "true"
+                      }
+                    ],
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "value",
+                          "displayName": "Value",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Array element"
+                        }
+                      }
+                    ]
                   }
                 }
               ]

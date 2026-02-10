@@ -56,16 +56,28 @@
                   }
                 },
                 {
-                  "type": "attribute",
+                  "type": "table",
                   "value": {
                     "name": "ids",
                     "displayName": "ids",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": false,
-                    "helpTip": "The ids of the entries to delete",
-                    "validateType": "json",
-                    "matchPattern": ""
+                    "title": "ids",
+                    "description": "The ids of the entries to delete",
+                    "tableKey": "value",
+                    "tableValue": "value",
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "value",
+                          "displayName": "Value",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Integer value",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
+                        }
+                      }
+                    ]
                   }
                 },
                 {

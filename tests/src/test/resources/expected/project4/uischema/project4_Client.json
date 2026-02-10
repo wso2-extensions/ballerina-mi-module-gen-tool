@@ -971,13 +971,13 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "circuitBreaker_statusCodes",
-                          "displayName": "statusCodes",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
+                          "name": "enable_circuitBreaker_statusCodes",
+                          "displayName": "Configure statusCodes",
+                          "inputType": "boolean",
+                          "defaultValue": "false",
                           "required": false,
-                          "helpTip": "Array of HTTP response status codes which are considered as failures",
-                          "validateType": "json",
+                          "helpTip": "Enable to configure statusCodes settings",
+                          "validateType": "",
                           "matchPattern": "",
                           "enableCondition": [
                             "AND",
@@ -986,6 +986,43 @@
                             },
                             {
                               "enable_circuitBreaker": "true"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "value": {
+                          "name": "circuitBreaker_statusCodes",
+                          "displayName": "statusCodes",
+                          "title": "statusCodes",
+                          "description": "Array of HTTP response status codes which are considered as failures",
+                          "tableKey": "value",
+                          "tableValue": "value",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_circuitBreaker": "true"
+                            },
+                            {
+                              "enable_circuitBreaker_statusCodes": "true"
+                            }
+                          ],
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "value",
+                                "displayName": "Value",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Integer value",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
+                              }
                             }
                           ]
                         }
@@ -1117,13 +1154,13 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "retryConfig_statusCodes",
-                          "displayName": "statusCodes",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
+                          "name": "enable_retryConfig_statusCodes",
+                          "displayName": "Configure statusCodes",
+                          "inputType": "boolean",
+                          "defaultValue": "false",
                           "required": false,
-                          "helpTip": "Expecting JSON array",
-                          "validateType": "json",
+                          "helpTip": "Enable to configure statusCodes settings",
+                          "validateType": "",
                           "matchPattern": "",
                           "enableCondition": [
                             "AND",
@@ -1132,6 +1169,43 @@
                             },
                             {
                               "enable_retryConfig": "true"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "value": {
+                          "name": "retryConfig_statusCodes",
+                          "displayName": "statusCodes",
+                          "title": "statusCodes",
+                          "description": "Configure statusCodes entries",
+                          "tableKey": "value",
+                          "tableValue": "value",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_retryConfig": "true"
+                            },
+                            {
+                              "enable_retryConfig_statusCodes": "true"
+                            }
+                          ],
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "value",
+                                "displayName": "Value",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Integer value",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
+                              }
                             }
                           ]
                         }
@@ -1623,13 +1697,13 @@
                             {
                               "type": "attribute",
                               "value": {
-                                "name": "secureSocket_protocol_versions",
-                                "displayName": "versions",
-                                "inputType": "stringOrExpression",
-                                "defaultValue": "",
+                                "name": "enable_secureSocket_protocol_versions",
+                                "displayName": "Configure versions",
+                                "inputType": "boolean",
+                                "defaultValue": "false",
                                 "required": false,
-                                "helpTip": "Expecting JSON array",
-                                "validateType": "json",
+                                "helpTip": "Enable to configure versions settings",
+                                "validateType": "",
                                 "matchPattern": "",
                                 "enableCondition": [
                                   "AND",
@@ -1641,6 +1715,44 @@
                                   },
                                   {
                                     "enable_secureSocket_protocol": "true"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "table",
+                              "value": {
+                                "name": "secureSocket_protocol_versions",
+                                "displayName": "versions",
+                                "title": "versions",
+                                "description": "Configure versions entries",
+                                "tableKey": "value",
+                                "tableValue": "value",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket_protocol": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket_protocol_versions": "true"
+                                  }
+                                ],
+                                "elements": [
+                                  {
+                                    "type": "attribute",
+                                    "value": {
+                                      "name": "value",
+                                      "displayName": "Value",
+                                      "inputType": "stringOrExpression",
+                                      "required": true,
+                                      "helpTip": "Array element"
+                                    }
                                   }
                                 ]
                               }
@@ -1769,13 +1881,13 @@
                       {
                         "type": "attribute",
                         "value": {
-                          "name": "secureSocket_ciphers",
-                          "displayName": "ciphers",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
+                          "name": "enable_secureSocket_ciphers",
+                          "displayName": "Configure ciphers",
+                          "inputType": "boolean",
+                          "defaultValue": "false",
                           "required": false,
-                          "helpTip": "Expecting JSON array",
-                          "validateType": "json",
+                          "helpTip": "Enable to configure ciphers settings",
+                          "validateType": "",
                           "matchPattern": "",
                           "enableCondition": [
                             "AND",
@@ -1784,6 +1896,41 @@
                             },
                             {
                               "enable_secureSocket": "true"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "value": {
+                          "name": "secureSocket_ciphers",
+                          "displayName": "ciphers",
+                          "title": "ciphers",
+                          "description": "Configure ciphers entries",
+                          "tableKey": "value",
+                          "tableValue": "value",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            },
+                            {
+                              "enable_secureSocket_ciphers": "true"
+                            }
+                          ],
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "value",
+                                "displayName": "Value",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Array element"
+                              }
                             }
                           ]
                         }

@@ -203,6 +203,75 @@ public class ParamFactory {
                         populateRecordFieldParams(nestedRecordParam, nestedRecordTypeSymbol, nestedParentPath, fieldBudget);
                     }
                     fieldParam = nestedRecordParam;
+                } else if (fieldTypeKind == TypeDescKind.MAP) {
+                    TypeSymbol actualFieldType = Utils.getActualTypeSymbol(fieldTypeSymbol);
+                    MapFunctionParam mapFieldParam = new MapFunctionParam(
+                        Integer.toString(fieldIndex), qualifiedFieldName, fieldType);
+                    mapFieldParam.setTypeSymbol(fieldTypeSymbol);
+                    mapFieldParam.setRequired(isEffectiveRequired);
+
+                    if (actualFieldType instanceof MapTypeSymbol mapTypeSymbol) {
+                        Optional<TypeSymbol> valueTypeOpt = mapTypeSymbol.typeParameter();
+                        if (valueTypeOpt.isPresent()) {
+                            TypeSymbol valueType = valueTypeOpt.get();
+                            mapFieldParam.setValueTypeSymbol(valueType);
+                            TypeDescKind valueTypeKind = Utils.getActualTypeKind(valueType);
+                            boolean shouldRender = shouldMapRenderAsTable(valueType, valueTypeKind);
+                            mapFieldParam.setRenderAsTable(shouldRender);
+                            if (shouldRender && valueTypeKind == TypeDescKind.RECORD) {
+                                TypeSymbol actualValueType = Utils.getActualTypeSymbol(valueType);
+                                if (actualValueType instanceof RecordTypeSymbol recordType) {
+                                    populateMapValueFields(mapFieldParam, recordType);
+                                }
+                            }
+                        }
+                    }
+                    fieldParam = mapFieldParam;
+                } else if (fieldTypeKind == TypeDescKind.ARRAY) {
+                    TypeSymbol actualFieldType = Utils.getActualTypeSymbol(fieldTypeSymbol);
+                    ArrayFunctionParam arrayFieldParam = new ArrayFunctionParam(
+                        Integer.toString(fieldIndex), qualifiedFieldName, fieldType);
+                    arrayFieldParam.setTypeSymbol(fieldTypeSymbol);
+                    arrayFieldParam.setRequired(isEffectiveRequired);
+
+                    if (actualFieldType instanceof ArrayTypeSymbol arrayTypeSymbol) {
+                        TypeSymbol elementType = arrayTypeSymbol.memberTypeDescriptor();
+                        arrayFieldParam.setElementTypeSymbol(elementType);
+                        TypeDescKind elementTypeKind = Utils.getActualTypeKind(elementType);
+                        boolean shouldRender = shouldArrayRenderAsTable(elementType, elementTypeKind);
+                        arrayFieldParam.setRenderAsTable(shouldRender);
+                        if (shouldRender && elementTypeKind == TypeDescKind.RECORD) {
+                            TypeSymbol actualElementType = Utils.getActualTypeSymbol(elementType);
+                            if (actualElementType instanceof RecordTypeSymbol recordType) {
+                                populateArrayElementFields(arrayFieldParam, recordType);
+                            }
+                        }
+                        if (shouldRender && elementTypeKind == TypeDescKind.ARRAY) {
+                            arrayFieldParam.set2DArray(true);
+                            TypeSymbol actualElementType = Utils.getActualTypeSymbol(elementType);
+                            if (actualElementType instanceof ArrayTypeSymbol innerArrayType) {
+                                arrayFieldParam.setInnerElementTypeSymbol(innerArrayType.memberTypeDescriptor());
+                            }
+                        }
+                        if (shouldRender && elementTypeKind == TypeDescKind.UNION) {
+                            arrayFieldParam.setUnionArray(true);
+                            TypeSymbol actualElementType = Utils.getActualTypeSymbol(elementType);
+                            if (actualElementType instanceof UnionTypeSymbol unionType) {
+                                java.util.List<String> memberNames = new java.util.ArrayList<>();
+                                for (TypeSymbol member : unionType.memberTypeDescriptors()) {
+                                    TypeDescKind memberKind = Utils.getActualTypeKind(member);
+                                    if (memberKind != TypeDescKind.NIL) {
+                                        String memberName = Utils.getParamTypeName(memberKind);
+                                        if (memberName != null && !memberNames.contains(memberName)) {
+                                            memberNames.add(memberName);
+                                        }
+                                    }
+                                }
+                                arrayFieldParam.setUnionMemberTypeNames(memberNames);
+                            }
+                        }
+                    }
+                    fieldParam = arrayFieldParam;
                 } else {
                     fieldParam = new FunctionParam(Integer.toString(fieldIndex), qualifiedFieldName, fieldType);
                     fieldParam.setTypeSymbol(fieldTypeSymbol);

@@ -110,16 +110,28 @@
                         }
                       },
                       {
-                        "type": "attribute",
+                        "type": "table",
                         "value": {
                           "name": "data_vectors",
                           "displayName": "vectors",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": true,
-                          "helpTip": "The vectors to upsert into the Milvus collection",
-                          "validateType": "json",
-                          "matchPattern": ""
+                          "title": "vectors",
+                          "description": "The vectors to upsert into the Milvus collection",
+                          "tableKey": "value",
+                          "tableValue": "value",
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "value",
+                                "displayName": "Value",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Decimal value",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                              }
+                            }
+                          ]
                         }
                       },
                       {
