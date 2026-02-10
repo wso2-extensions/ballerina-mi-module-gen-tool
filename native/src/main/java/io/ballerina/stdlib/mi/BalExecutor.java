@@ -870,6 +870,23 @@ public class BalExecutor {
             log.info("DEBUG: Field[" + fieldIndex + "]: path=" + fieldPath + ", sanitized=" + sanitizedFieldPath + ", type=" + fieldType + ", value=" + fieldValue);
 
             if (fieldValue != null) {
+                String valueStr = fieldValue.toString();
+
+                // For MAP type, handle empty table values - treat "[]" as not set
+                // Table UI returns "[]" for empty maps, but maps should be "{}" or not set
+                if (MAP.equals(fieldType) && "[]".equals(valueStr)) {
+                    log.info("DEBUG: Skipping empty map field '" + fieldPath + "' (value is '[]')");
+                    fieldIndex++;
+                    continue;
+                }
+
+                // For ARRAY type, handle empty table values
+                if (ARRAY.equals(fieldType) && "[]".equals(valueStr)) {
+                    log.info("DEBUG: Skipping empty array field '" + fieldPath + "' (value is '[]')");
+                    fieldIndex++;
+                    continue;
+                }
+
                 // Set the nested field value in the JSON object using the original dot-notation path
                 setNestedField(recordJson, fieldPath, fieldValue, fieldType);
                 log.info("DEBUG: Set field '" + fieldPath + "' = " + fieldValue);
@@ -949,6 +966,7 @@ public class BalExecutor {
             case RECORD:
             case UNION:
             case ARRAY:
+            case MAP:
                 // Parse JSON string and add as JsonElement for complex types
                 try {
                     com.google.gson.JsonElement jsonElement = JsonParser.parseString(valueStr);
