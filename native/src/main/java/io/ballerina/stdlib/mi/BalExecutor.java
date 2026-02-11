@@ -835,7 +835,7 @@ public class BalExecutor {
 
                 if (unionValue != null) {
                     log.info("DEBUG: Found direct value for union field '" + fieldPath + "': " + unionValue);
-                    setNestedField(recordJson, fieldPath, unionValue, fieldType);
+                    setNestedField(recordJson, fieldPath, unionValue, fieldType, context);
                     fieldIndex++;
                     continue;
                 }
@@ -888,7 +888,7 @@ public class BalExecutor {
                 }
 
                 // Set the nested field value in the JSON object using the original dot-notation path
-                setNestedField(recordJson, fieldPath, fieldValue, fieldType);
+                setNestedField(recordJson, fieldPath, fieldValue, fieldType, context);
                 log.info("DEBUG: Set field '" + fieldPath + "' = " + fieldValue);
             } else {
                 log.warn("DEBUG: Field '" + fieldPath + "' has NULL value - NOT SETTING");
@@ -931,8 +931,9 @@ public class BalExecutor {
      * @param fieldPath  The dot-notation path (e.g., "http1Settings.proxy.host")
      * @param value      The value to set
      * @param fieldType  The type of the field
+     * @param context    MessageContext for expression resolution
      */
-    private void setNestedField(com.google.gson.JsonObject jsonObject, String fieldPath, Object value, String fieldType) {
+    private void setNestedField(com.google.gson.JsonObject jsonObject, String fieldPath, Object value, String fieldType, MessageContext context) {
         String[] parts = fieldPath.split("\\.");
 
         // Navigate/create nested objects up to the second-to-last part
@@ -947,6 +948,12 @@ public class BalExecutor {
         // Set the final field value with appropriate type
         String finalField = parts[parts.length - 1];
         String valueStr = value.toString();
+
+        // Resolve any ${expression} patterns in the value
+        if (valueStr.contains("${")) {
+            valueStr = resolveSynapseExpressions(valueStr, context);
+            log.info("Resolved expressions in field '" + fieldPath + "': " + valueStr);
+        }
 
         switch (fieldType) {
             case BOOLEAN:
