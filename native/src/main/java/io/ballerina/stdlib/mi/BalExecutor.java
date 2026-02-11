@@ -69,6 +69,7 @@ import static io.ballerina.stdlib.mi.Constants.ARRAY;
 public class BalExecutor {
 
     private static final String TEMP_RESPONSE_PROPERTY_NAME = "TEMP_BAL_RESPONSE_PROPERTY_";
+    private static final Pattern SYNAPSE_EXPRESSION_PATTERN = Pattern.compile("\\$\\{(.+?)\\}");
     protected Log log = LogFactory.getLog(BalExecutor.class);
 
     public boolean execute(Runtime rt, Object callable, MessageContext context) throws AxisFault, BallerinaExecutionException {
@@ -950,7 +951,7 @@ public class BalExecutor {
         String valueStr = value.toString();
 
         // Resolve any ${expression} patterns in the value
-        if (valueStr.contains("${")) {
+        if (SYNAPSE_EXPRESSION_PATTERN.matcher(valueStr).find()) {
             valueStr = resolveSynapseExpressions(valueStr, context);
             log.info("Resolved expressions in field '" + fieldPath + "': " + valueStr);
         }
@@ -1699,8 +1700,7 @@ public class BalExecutor {
      * @return Text with all ${expression} patterns replaced by resolved values
      */
     private String resolveSynapseExpressions(String text, MessageContext context) {
-        Pattern exprPattern = Pattern.compile("\\$\\{(.+?)\\}");
-        Matcher matcher = exprPattern.matcher(text);
+        Matcher matcher = SYNAPSE_EXPRESSION_PATTERN.matcher(text);
         StringBuffer resolved = new StringBuffer();
 
         while (matcher.find()) {
