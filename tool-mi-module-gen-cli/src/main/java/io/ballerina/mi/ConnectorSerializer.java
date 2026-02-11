@@ -261,7 +261,7 @@ public class ConnectorSerializer {
         });
         handlebar.registerHelper("writeFunctionRecordXmlProperties", (context, options) -> {
             FunctionParam functionParam = (FunctionParam) context;
-            int paramIndex = options.param(0) instanceof Integer ? (Integer) options.param(0) : Integer.parseInt(options.param(0).toString());
+
             StringBuilder result = new StringBuilder();
             if (functionParam instanceof RecordFunctionParam recordParam && !recordParam.getRecordFieldParams().isEmpty()) {
                 int[] fieldIndexHolder = {0};
