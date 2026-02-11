@@ -965,15 +965,97 @@ public class BalExecutor {
             case JSON:
             case RECORD:
             case UNION:
-            case ARRAY:
-            case MAP:
                 // Parse JSON string and add as JsonElement for complex types
                 try {
-                    com.google.gson.JsonElement jsonElement = JsonParser.parseString(valueStr);
+                    String cleanedJson = cleanupJsonString(valueStr);
+                    com.google.gson.JsonElement jsonElement = JsonParser.parseString(cleanedJson);
                     jsonObject.add(finalField, jsonElement);
                 } catch (com.google.gson.JsonSyntaxException e) {
                     // If parsing fails, fall back to string
                     log.warn("Failed to parse JSON value for field '" + fieldPath + "', treating as string: " + e.getMessage());
+                    jsonObject.addProperty(finalField, valueStr);
+                }
+                break;
+            case ARRAY:
+                // Parse JSON array - handle table UI format (2D array to flat array)
+                try {
+                    String cleanedJson = cleanupJsonString(valueStr);
+                    com.google.gson.JsonElement jsonElement = JsonParser.parseString(cleanedJson);
+
+                    // Check if it's a 2D array from table UI and transform to flat array
+                    if (jsonElement.isJsonArray()) {
+                        com.google.gson.JsonArray array = jsonElement.getAsJsonArray();
+                        if (array.size() > 0 && array.get(0).isJsonArray()) {
+                            // 2D array format: [["value1"], ["value2"]] -> ["value1", "value2"]
+                            log.info("Transforming 2D array to flat array for field '" + fieldPath + "'");
+                            com.google.gson.JsonArray flatArray = new com.google.gson.JsonArray();
+                            for (com.google.gson.JsonElement outerElem : array) {
+                                if (outerElem.isJsonArray()) {
+                                    com.google.gson.JsonArray innerArray = outerElem.getAsJsonArray();
+                                    // Take all non-null elements from inner array
+                                    for (com.google.gson.JsonElement innerElem : innerArray) {
+                                        if (!innerElem.isJsonNull()) {
+                                            flatArray.add(innerElem);
+                                        }
+                                    }
+                                } else if (!outerElem.isJsonNull()) {
+                                    flatArray.add(outerElem);
+                                }
+                            }
+                            jsonObject.add(finalField, flatArray);
+                        } else {
+                            // Already a flat array, just filter out nulls
+                            com.google.gson.JsonArray cleanArray = new com.google.gson.JsonArray();
+                            for (com.google.gson.JsonElement elem : array) {
+                                if (!elem.isJsonNull()) {
+                                    cleanArray.add(elem);
+                                }
+                            }
+                            jsonObject.add(finalField, cleanArray);
+                        }
+                    } else {
+                        jsonObject.add(finalField, jsonElement);
+                    }
+                } catch (com.google.gson.JsonSyntaxException e) {
+                    log.warn("Failed to parse JSON array for field '" + fieldPath + "', treating as string: " + e.getMessage());
+                    jsonObject.addProperty(finalField, valueStr);
+                }
+                break;
+            case MAP:
+                // Parse JSON map - handle table UI format
+                try {
+                    String cleanedJson = cleanupJsonString(valueStr);
+                    com.google.gson.JsonElement jsonElement = JsonParser.parseString(cleanedJson);
+
+                    // Check if it's a 2D array format from table UI and transform to object
+                    if (jsonElement.isJsonArray()) {
+                        com.google.gson.JsonArray array = jsonElement.getAsJsonArray();
+                        if (array.size() > 0 && array.get(0).isJsonArray()) {
+                            // 2D array format: [["key1", "value1"], ["key2", "value2"]] -> {"key1": "value1", "key2": "value2"}
+                            log.info("Transforming 2D array to map for field '" + fieldPath + "'");
+                            com.google.gson.JsonObject mapObject = new com.google.gson.JsonObject();
+                            for (com.google.gson.JsonElement outerElem : array) {
+                                if (outerElem.isJsonArray()) {
+                                    com.google.gson.JsonArray pair = outerElem.getAsJsonArray();
+                                    if (pair.size() >= 2 && !pair.get(0).isJsonNull()) {
+                                        String key = pair.get(0).getAsString();
+                                        com.google.gson.JsonElement mapValue = pair.get(1);
+                                        if (!mapValue.isJsonNull()) {
+                                            mapObject.add(key, mapValue);
+                                        }
+                                    }
+                                }
+                            }
+                            jsonObject.add(finalField, mapObject);
+                        } else {
+                            // Not in expected format, add as-is
+                            jsonObject.add(finalField, jsonElement);
+                        }
+                    } else {
+                        jsonObject.add(finalField, jsonElement);
+                    }
+                } catch (com.google.gson.JsonSyntaxException e) {
+                    log.warn("Failed to parse JSON map for field '" + fieldPath + "', treating as string: " + e.getMessage());
                     jsonObject.addProperty(finalField, valueStr);
                 }
                 break;
