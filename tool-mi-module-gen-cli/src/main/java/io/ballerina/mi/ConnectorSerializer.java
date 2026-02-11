@@ -500,8 +500,8 @@ public class ConnectorSerializer {
             }
 
             File connectorFolder = new File(destinationPath.toUri());
-            if (!connectorFolder.exists()) {
-                connectorFolder.mkdir();
+            if (!connectorFolder.exists() && !connectorFolder.mkdirs()) {
+                throw new IOException("Failed to create connector folder: " + connectorFolder.getAbsolutePath());
             }
 
             // Phase 1: Generate per-component files (XML template + JSON UI schema) in batches.
