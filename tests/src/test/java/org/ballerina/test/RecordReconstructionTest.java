@@ -59,19 +59,20 @@ public class RecordReconstructionTest {
                 com.google.gson.JsonObject.class,
                 String.class,
                 Object.class,
-                String.class
+                String.class,
+                MessageContext.class
         );
         setNestedFieldMethod.setAccessible(true);
 
         com.google.gson.JsonObject rootObject = new com.google.gson.JsonObject();
 
         // Test simple field
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "httpVersion", "HTTP_1_1", "string");
+        setNestedFieldMethod.invoke(balExecutor, rootObject, "httpVersion", "HTTP_1_1", "string", messageContext);
         Assert.assertTrue(rootObject.has("httpVersion"), "Simple field should be set");
         Assert.assertEquals(rootObject.get("httpVersion").getAsString(), "HTTP_1_1");
 
         // Test nested field (2 levels)
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "http1Settings.keepAlive", "ALWAYS", "string");
+        setNestedFieldMethod.invoke(balExecutor, rootObject, "http1Settings.keepAlive", "ALWAYS", "string", messageContext);
         Assert.assertTrue(rootObject.has("http1Settings"), "Nested object should be created");
         Assert.assertTrue(rootObject.getAsJsonObject("http1Settings").has("keepAlive"),
                 "Nested field should be set");
@@ -79,7 +80,7 @@ public class RecordReconstructionTest {
                 "ALWAYS");
 
         // Test deeply nested field (3 levels)
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "http1Settings.proxy.host", "localhost", "string");
+        setNestedFieldMethod.invoke(balExecutor, rootObject, "http1Settings.proxy.host", "localhost", "string", messageContext);
         Assert.assertTrue(rootObject.getAsJsonObject("http1Settings").has("proxy"),
                 "Second level nested object should be created");
         Assert.assertTrue(rootObject.getAsJsonObject("http1Settings")
@@ -90,17 +91,17 @@ public class RecordReconstructionTest {
                 "localhost");
 
         // Test integer field
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "http1Settings.proxy.port", "8080", "int");
+        setNestedFieldMethod.invoke(balExecutor, rootObject, "http1Settings.proxy.port", "8080", "int", messageContext);
         Assert.assertEquals(rootObject.getAsJsonObject("http1Settings")
                         .getAsJsonObject("proxy").get("port").getAsLong(),
                 8080L);
 
         // Test boolean field
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "cache.enabled", "true", "boolean");
+        setNestedFieldMethod.invoke(balExecutor, rootObject, "cache.enabled", "true", "boolean", messageContext);
         Assert.assertTrue(rootObject.getAsJsonObject("cache").get("enabled").getAsBoolean());
 
         // Test float field
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "cache.evictionFactor", "0.75", "float");
+        setNestedFieldMethod.invoke(balExecutor, rootObject, "cache.evictionFactor", "0.75", "float", messageContext);
         Assert.assertEquals(rootObject.getAsJsonObject("cache").get("evictionFactor").getAsDouble(),
                 0.75, 0.001);
     }

@@ -99,7 +99,7 @@ public class ConnectorValidator {
             // Non-critical — only used for display
         }
         ERROR_STREAM.println("Large connector ZIP detected (" + zipMB +
-                "MB). Using lightweight validation.");
+                "MB). Validating ZIP structure and file entries only (skipping content validation).");
 
         if (!validateZipStructure(zipPath)) {
             return false;
