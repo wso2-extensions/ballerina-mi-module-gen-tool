@@ -45,37 +45,82 @@
                   }
                 },
                 {
-                  "type": "attribute",
+                  "type": "attributeGroup",
                   "value": {
-                    "name": "entityPerson",
-                    "displayName": "entityPerson",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "Expecting JSON object",
-                    "validateType": "json",
-                    "matchPattern": "",
-                    "enableCondition": [
+                    "groupName": "Entity",
+                    "collapsed": false,
+                    "elements": [
                       {
-                        "entityDataType": "Person"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "attribute",
-                  "value": {
-                    "name": "entityCompany",
-                    "displayName": "entityCompany",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "Expecting JSON object",
-                    "validateType": "json",
-                    "matchPattern": "",
-                    "enableCondition": [
+                        "type": "attribute",
+                        "value": {
+                          "name": "entity_name",
+                          "displayName": "name",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": true,
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": "",
+                          "enableCondition": [
+                            {
+                              "entityDataType": "Person"
+                            }
+                          ]
+                        }
+                      },
                       {
-                        "entityDataType": "Company"
+                        "type": "attribute",
+                        "value": {
+                          "name": "entity.age",
+                          "displayName": "age",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": true,
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            {
+                              "entityDataType": "Person"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "entity_companyName",
+                          "displayName": "companyName",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": true,
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": "",
+                          "enableCondition": [
+                            {
+                              "entityDataType": "Company"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "entity.employeeCount",
+                          "displayName": "employeeCount",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": true,
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            {
+                              "entityDataType": "Company"
+                            }
+                          ]
+                        }
                       }
                     ]
                   }

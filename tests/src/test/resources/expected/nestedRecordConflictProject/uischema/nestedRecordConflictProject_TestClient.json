@@ -40,7 +40,7 @@
                           "displayName": "host",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": true,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -53,10 +53,10 @@
                           "displayName": "port",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": true,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
                         }
                       },
                       {
@@ -66,7 +66,7 @@
                           "displayName": "protocol",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": true,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -88,7 +88,7 @@
                           "displayName": "host",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": true,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""
@@ -101,10 +101,10 @@
                           "displayName": "port",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": true,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$"
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
                         }
                       },
                       {
@@ -114,7 +114,7 @@
                           "displayName": "database",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "true",
+                          "required": true,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": ""

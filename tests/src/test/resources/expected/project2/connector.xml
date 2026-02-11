@@ -22,6 +22,6 @@
         <dependency component="functions"/>
         <description>helps to connect with external systems</description>
     </component>
-    <icon>icon/icon-small.gif</icon>
+    <icon>icon/icon-small.png</icon>
     <displayName>project2</displayName>
 </connector>

@@ -22,6 +22,6 @@
         <dependency component="functions"/>
         <description>Ballerina unionProject connector</description>
     </component>
-    <icon>icon/icon-small.gif</icon>
+    <icon>icon/icon-small.png</icon>
     <displayName>unionProject</displayName>
 </connector>

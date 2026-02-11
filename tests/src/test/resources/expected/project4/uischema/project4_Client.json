@@ -30,14 +30,50 @@
                 {
                   "type": "attribute",
                   "value": {
+                    "name": "enable_config",
+                    "displayName": "Configure config",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure config settings",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
                     "name": "httpVersion",
                     "displayName": "httpVersion",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The HTTP version understood by the client",
                     "validateType": "",
-                    "matchPattern": ""
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_http1Settings",
+                    "displayName": "Configure http1Settings",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure http1Settings settings",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
+                      }
+                    ]
                   }
                 },
                 {
@@ -45,6 +81,15 @@
                   "value": {
                     "groupName": "Http1Settings",
                     "collapsed": false,
+                    "enableCondition": [
+                      "AND",
+                      {
+                        "enable_config": "true"
+                      },
+                      {
+                        "enable_http1Settings": "true"
+                      }
+                    ],
                     "elements": [
                       {
                         "type": "attribute",
@@ -53,10 +98,19 @@
                           "displayName": "keepAlive",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "Specifies whether to reuse a connection for multiple requests",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_http1Settings": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -66,10 +120,41 @@
                           "displayName": "chunking",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The chunking behaviour of the request",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_http1Settings": "true"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "enable_http1Settings_proxy",
+                          "displayName": "Configure proxy",
+                          "inputType": "boolean",
+                          "defaultValue": "false",
+                          "required": false,
+                          "helpTip": "Enable to configure proxy settings",
+                          "validateType": "",
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_http1Settings": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -77,6 +162,18 @@
                         "value": {
                           "groupName": "Proxy",
                           "collapsed": false,
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_http1Settings": "true"
+                            },
+                            {
+                              "enable_http1Settings_proxy": "true"
+                            }
+                          ],
                           "elements": [
                             {
                               "type": "attribute",
@@ -85,10 +182,22 @@
                                 "displayName": "host",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "Host name of the proxy server",
                                 "validateType": "",
-                                "matchPattern": ""
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_http1Settings": "true"
+                                  },
+                                  {
+                                    "enable_http1Settings_proxy": "true"
+                                  }
+                                ]
                               }
                             },
                             {
@@ -98,10 +207,22 @@
                                 "displayName": "port",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "Proxy server port",
                                 "validateType": "regex",
-                                "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                                "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_http1Settings": "true"
+                                  },
+                                  {
+                                    "enable_http1Settings_proxy": "true"
+                                  }
+                                ]
                               }
                             },
                             {
@@ -111,10 +232,22 @@
                                 "displayName": "userName",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "Proxy server username",
                                 "validateType": "",
-                                "matchPattern": ""
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_http1Settings": "true"
+                                  },
+                                  {
+                                    "enable_http1Settings_proxy": "true"
+                                  }
+                                ]
                               }
                             },
                             {
@@ -124,10 +257,22 @@
                                 "displayName": "password",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "Proxy server password",
                                 "validateType": "",
-                                "matchPattern": ""
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_http1Settings": "true"
+                                  },
+                                  {
+                                    "enable_http1Settings_proxy": "true"
+                                  }
+                                ]
                               }
                             }
                           ]
@@ -137,10 +282,37 @@
                   }
                 },
                 {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_http2Settings",
+                    "displayName": "Configure http2Settings",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure http2Settings settings",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
+                      }
+                    ]
+                  }
+                },
+                {
                   "type": "attributeGroup",
                   "value": {
                     "groupName": "Http2Settings",
                     "collapsed": false,
+                    "enableCondition": [
+                      "AND",
+                      {
+                        "enable_config": "true"
+                      },
+                      {
+                        "enable_http2Settings": "true"
+                      }
+                    ],
                     "elements": [
                       {
                         "type": "attribute",
@@ -149,10 +321,19 @@
                           "displayName": "http2PriorKnowledge",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_http2Settings": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -162,10 +343,19 @@
                           "displayName": "http2InitialWindowSize",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_http2Settings": "true"
+                            }
+                          ]
                         }
                       }
                     ]
@@ -178,10 +368,15 @@
                     "displayName": "timeout",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "The maximum time to wait (in seconds) for a response before closing the connection",
                     "validateType": "regex",
-                    "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                    "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
+                      }
+                    ]
                   }
                 },
                 {
@@ -191,10 +386,33 @@
                     "displayName": "forwarded",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "The choice of setting &#x60;forwarded&#x60;/&#x60;x-forwarded&#x60; header",
+                    "required": false,
+                    "helpTip": "The choice of setting `forwarded`/`x-forwarded` header",
                     "validateType": "",
-                    "matchPattern": ""
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_poolConfig",
+                    "displayName": "Configure poolConfig",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure poolConfig settings",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
+                      }
+                    ]
                   }
                 },
                 {
@@ -202,6 +420,15 @@
                   "value": {
                     "groupName": "Pool Config",
                     "collapsed": false,
+                    "enableCondition": [
+                      "AND",
+                      {
+                        "enable_config": "true"
+                      },
+                      {
+                        "enable_poolConfig": "true"
+                      }
+                    ],
                     "elements": [
                       {
                         "type": "attribute",
@@ -210,10 +437,19 @@
                           "displayName": "maxActiveConnections",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_poolConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -223,10 +459,19 @@
                           "displayName": "maxIdleConnections",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_poolConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -236,10 +481,19 @@
                           "displayName": "waitTime",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_poolConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -249,10 +503,19 @@
                           "displayName": "maxActiveStreamsPerConnection",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_poolConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -262,10 +525,19 @@
                           "displayName": "minEvictableIdleTime",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_poolConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -275,10 +547,19 @@
                           "displayName": "timeBetweenEvictionRuns",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_poolConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -288,10 +569,19 @@
                           "displayName": "minIdleTimeInStaleState",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_poolConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -301,11 +591,38 @@
                           "displayName": "timeBetweenStaleEviction",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_poolConfig": "true"
+                            }
+                          ]
                         }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_cache",
+                    "displayName": "Configure cache",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure cache settings",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
                       }
                     ]
                   }
@@ -315,6 +632,15 @@
                   "value": {
                     "groupName": "Cache",
                     "collapsed": false,
+                    "enableCondition": [
+                      "AND",
+                      {
+                        "enable_config": "true"
+                      },
+                      {
+                        "enable_cache": "true"
+                      }
+                    ],
                     "elements": [
                       {
                         "type": "attribute",
@@ -323,10 +649,19 @@
                           "displayName": "enabled",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_cache": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -336,10 +671,19 @@
                           "displayName": "isShared",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_cache": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -349,10 +693,19 @@
                           "displayName": "capacity",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_cache": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -362,10 +715,19 @@
                           "displayName": "evictionFactor",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_cache": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -375,10 +737,19 @@
                           "displayName": "policy",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_cache": "true"
+                            }
+                          ]
                         }
                       }
                     ]
@@ -391,10 +762,33 @@
                     "displayName": "compression",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "Specifies the way of handling compression (&#x60;accept-encoding&#x60;) header",
+                    "required": false,
+                    "helpTip": "Specifies the way of handling compression (`accept-encoding`) header",
                     "validateType": "",
-                    "matchPattern": ""
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_circuitBreaker",
+                    "displayName": "Configure circuitBreaker",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure circuitBreaker settings",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
+                      }
+                    ]
                   }
                 },
                 {
@@ -402,12 +796,55 @@
                   "value": {
                     "groupName": "Circuit Breaker",
                     "collapsed": false,
+                    "enableCondition": [
+                      "AND",
+                      {
+                        "enable_config": "true"
+                      },
+                      {
+                        "enable_circuitBreaker": "true"
+                      }
+                    ],
                     "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "enable_circuitBreaker_rollingWindow",
+                          "displayName": "Configure rollingWindow",
+                          "inputType": "boolean",
+                          "defaultValue": "false",
+                          "required": false,
+                          "helpTip": "Enable to configure rollingWindow settings",
+                          "validateType": "",
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_circuitBreaker": "true"
+                            }
+                          ]
+                        }
+                      },
                       {
                         "type": "attributeGroup",
                         "value": {
                           "groupName": "Rolling Window",
                           "collapsed": false,
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_circuitBreaker": "true"
+                            },
+                            {
+                              "enable_circuitBreaker_rollingWindow": "true"
+                            }
+                          ],
                           "elements": [
                             {
                               "type": "attribute",
@@ -416,10 +853,22 @@
                                 "displayName": "requestVolumeThreshold",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
-                                "helpTip": "Minimum number of requests in a &#x60;RollingWindow&#x60; that will trip the circuit.",
+                                "required": false,
+                                "helpTip": "Minimum number of requests in a `RollingWindow` that will trip the circuit.",
                                 "validateType": "regex",
-                                "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                                "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_circuitBreaker": "true"
+                                  },
+                                  {
+                                    "enable_circuitBreaker_rollingWindow": "true"
+                                  }
+                                ]
                               }
                             },
                             {
@@ -429,10 +878,22 @@
                                 "displayName": "timeWindow",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "Time period in seconds for which the failure threshold is calculated",
                                 "validateType": "regex",
-                                "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                                "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_circuitBreaker": "true"
+                                  },
+                                  {
+                                    "enable_circuitBreaker_rollingWindow": "true"
+                                  }
+                                ]
                               }
                             },
                             {
@@ -442,10 +903,22 @@
                                 "displayName": "bucketSize",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "The granularity at which the time window slides. This is measured in seconds.",
                                 "validateType": "regex",
-                                "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                                "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_circuitBreaker": "true"
+                                  },
+                                  {
+                                    "enable_circuitBreaker_rollingWindow": "true"
+                                  }
+                                ]
                               }
                             }
                           ]
@@ -458,10 +931,19 @@
                           "displayName": "failureThreshold",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The threshold for request failures. When this threshold exceeds, the circuit trips. The threshold should be a\nvalue between 0 and 1",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_circuitBreaker": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -471,24 +953,97 @@
                           "displayName": "resetTime",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "The time period (in seconds) to wait before attempting to make another request to the upstream service",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_circuitBreaker": "true"
+                            }
+                          ]
                         }
                       },
                       {
                         "type": "attribute",
                         "value": {
+                          "name": "enable_circuitBreaker_statusCodes",
+                          "displayName": "Configure statusCodes",
+                          "inputType": "boolean",
+                          "defaultValue": "false",
+                          "required": false,
+                          "helpTip": "Enable to configure statusCodes settings",
+                          "validateType": "",
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_circuitBreaker": "true"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "value": {
                           "name": "circuitBreaker_statusCodes",
                           "displayName": "statusCodes",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": "false",
-                          "helpTip": "Array of HTTP response status codes which are considered as failures",
-                          "validateType": "",
-                          "matchPattern": ""
+                          "title": "statusCodes",
+                          "description": "Array of HTTP response status codes which are considered as failures",
+                          "tableKey": "value",
+                          "tableValue": "value",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_circuitBreaker": "true"
+                            },
+                            {
+                              "enable_circuitBreaker_statusCodes": "true"
+                            }
+                          ],
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "value",
+                                "displayName": "Value",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Integer value",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
+                              }
+                            }
+                          ]
                         }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_retryConfig",
+                    "displayName": "Configure retryConfig",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure retryConfig settings",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
                       }
                     ]
                   }
@@ -498,6 +1053,15 @@
                   "value": {
                     "groupName": "Retry Config",
                     "collapsed": false,
+                    "enableCondition": [
+                      "AND",
+                      {
+                        "enable_config": "true"
+                      },
+                      {
+                        "enable_retryConfig": "true"
+                      }
+                    ],
                     "elements": [
                       {
                         "type": "attribute",
@@ -506,10 +1070,19 @@
                           "displayName": "count",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_retryConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -519,10 +1092,19 @@
                           "displayName": "interval",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_retryConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -532,10 +1114,19 @@
                           "displayName": "backOffFactor",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_retryConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -545,24 +1136,97 @@
                           "displayName": "maxWaitInterval",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_retryConfig": "true"
+                            }
+                          ]
                         }
                       },
                       {
                         "type": "attribute",
                         "value": {
+                          "name": "enable_retryConfig_statusCodes",
+                          "displayName": "Configure statusCodes",
+                          "inputType": "boolean",
+                          "defaultValue": "false",
+                          "required": false,
+                          "helpTip": "Enable to configure statusCodes settings",
+                          "validateType": "",
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_retryConfig": "true"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "value": {
                           "name": "retryConfig_statusCodes",
                           "displayName": "statusCodes",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": "false",
-                          "helpTip": "",
-                          "validateType": "",
-                          "matchPattern": ""
+                          "title": "statusCodes",
+                          "description": "Configure statusCodes entries",
+                          "tableKey": "value",
+                          "tableValue": "value",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_retryConfig": "true"
+                            },
+                            {
+                              "enable_retryConfig_statusCodes": "true"
+                            }
+                          ],
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "value",
+                                "displayName": "Value",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Integer value",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
+                              }
+                            }
+                          ]
                         }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_responseLimits",
+                    "displayName": "Configure responseLimits",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure responseLimits settings",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
                       }
                     ]
                   }
@@ -572,6 +1236,15 @@
                   "value": {
                     "groupName": "Response Limits",
                     "collapsed": false,
+                    "enableCondition": [
+                      "AND",
+                      {
+                        "enable_config": "true"
+                      },
+                      {
+                        "enable_responseLimits": "true"
+                      }
+                    ],
                     "elements": [
                       {
                         "type": "attribute",
@@ -580,10 +1253,19 @@
                           "displayName": "maxStatusLineLength",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_responseLimits": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -593,10 +1275,19 @@
                           "displayName": "maxHeaderSize",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_responseLimits": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -606,11 +1297,38 @@
                           "displayName": "maxEntityBodySize",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_responseLimits": "true"
+                            }
+                          ]
                         }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_secureSocket",
+                    "displayName": "Configure secureSocket",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure secureSocket settings",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
                       }
                     ]
                   }
@@ -620,6 +1338,15 @@
                   "value": {
                     "groupName": "Secure Socket",
                     "collapsed": false,
+                    "enableCondition": [
+                      "AND",
+                      {
+                        "enable_config": "true"
+                      },
+                      {
+                        "enable_secureSocket": "true"
+                      }
+                    ],
                     "elements": [
                       {
                         "type": "attribute",
@@ -628,10 +1355,19 @@
                           "displayName": "enable",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -656,7 +1392,7 @@
                           "displayName": "certString",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
                           "matchPattern": "",
@@ -672,6 +1408,15 @@
                         "value": {
                           "groupName": "Cert",
                           "collapsed": false,
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            }
+                          ],
                           "elements": [
                             {
                               "type": "attribute",
@@ -680,11 +1425,18 @@
                                 "displayName": "path",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
                                 "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
                                   {
                                     "secureSocket_certDataType": "TrustStore"
                                   }
@@ -698,11 +1450,18 @@
                                 "displayName": "password",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
                                 "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
                                   {
                                     "secureSocket_certDataType": "TrustStore"
                                   }
@@ -732,6 +1491,15 @@
                         "value": {
                           "groupName": "Key",
                           "collapsed": false,
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            }
+                          ],
                           "elements": [
                             {
                               "type": "attribute",
@@ -740,11 +1508,18 @@
                                 "displayName": "path",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
                                 "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
                                   {
                                     "secureSocket_keyDataType": "KeyStore"
                                   }
@@ -758,11 +1533,18 @@
                                 "displayName": "password",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
                                 "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
                                   {
                                     "secureSocket_keyDataType": "KeyStore"
                                   }
@@ -776,11 +1558,18 @@
                                 "displayName": "certFile",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
                                 "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
                                   {
                                     "secureSocket_keyDataType": "CertKey"
                                   }
@@ -794,11 +1583,18 @@
                                 "displayName": "keyFile",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
                                 "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
                                   {
                                     "secureSocket_keyDataType": "CertKey"
                                   }
@@ -812,11 +1608,18 @@
                                 "displayName": "keyPassword",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
                                 "matchPattern": "",
                                 "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
                                   {
                                     "secureSocket_keyDataType": "CertKey"
                                   }
@@ -827,10 +1630,44 @@
                         }
                       },
                       {
+                        "type": "attribute",
+                        "value": {
+                          "name": "enable_secureSocket_protocol",
+                          "displayName": "Configure protocol",
+                          "inputType": "boolean",
+                          "defaultValue": "false",
+                          "required": false,
+                          "helpTip": "Enable to configure protocol settings",
+                          "validateType": "",
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            }
+                          ]
+                        }
+                      },
+                      {
                         "type": "attributeGroup",
                         "value": {
                           "groupName": "Protocol",
                           "collapsed": false,
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            },
+                            {
+                              "enable_secureSocket_protocol": "true"
+                            }
+                          ],
                           "elements": [
                             {
                               "type": "attribute",
@@ -839,24 +1676,108 @@
                                 "displayName": "name",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
-                                "matchPattern": ""
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket_protocol": "true"
+                                  }
+                                ]
                               }
                             },
                             {
                               "type": "attribute",
                               "value": {
+                                "name": "enable_secureSocket_protocol_versions",
+                                "displayName": "Configure versions",
+                                "inputType": "boolean",
+                                "defaultValue": "false",
+                                "required": false,
+                                "helpTip": "Enable to configure versions settings",
+                                "validateType": "",
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket_protocol": "true"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "table",
+                              "value": {
                                 "name": "secureSocket_protocol_versions",
                                 "displayName": "versions",
-                                "inputType": "stringOrExpression",
-                                "defaultValue": "",
-                                "required": "false",
-                                "helpTip": "",
-                                "validateType": "",
-                                "matchPattern": ""
+                                "title": "versions",
+                                "description": "Configure versions entries",
+                                "tableKey": "value",
+                                "tableValue": "value",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket_protocol": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket_protocol_versions": "true"
+                                  }
+                                ],
+                                "elements": [
+                                  {
+                                    "type": "attribute",
+                                    "value": {
+                                      "name": "value",
+                                      "displayName": "Value",
+                                      "inputType": "stringOrExpression",
+                                      "required": true,
+                                      "helpTip": "Array element"
+                                    }
+                                  }
+                                ]
                               }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "enable_secureSocket_certValidation",
+                          "displayName": "Configure certValidation",
+                          "inputType": "boolean",
+                          "defaultValue": "false",
+                          "required": false,
+                          "helpTip": "Enable to configure certValidation settings",
+                          "validateType": "",
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
                             }
                           ]
                         }
@@ -866,6 +1787,18 @@
                         "value": {
                           "groupName": "Cert Validation",
                           "collapsed": false,
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            },
+                            {
+                              "enable_secureSocket_certValidation": "true"
+                            }
+                          ],
                           "elements": [
                             {
                               "type": "attribute",
@@ -874,10 +1807,22 @@
                                 "displayName": "type",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "",
-                                "matchPattern": ""
+                                "matchPattern": "",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket_certValidation": "true"
+                                  }
+                                ]
                               }
                             },
                             {
@@ -887,10 +1832,22 @@
                                 "displayName": "cacheSize",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "regex",
-                                "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                                "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket_certValidation": "true"
+                                  }
+                                ]
                               }
                             },
                             {
@@ -900,10 +1857,22 @@
                                 "displayName": "cacheValidityPeriod",
                                 "inputType": "stringOrExpression",
                                 "defaultValue": "",
-                                "required": "false",
+                                "required": false,
                                 "helpTip": "",
                                 "validateType": "regex",
-                                "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                                "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                                "enableCondition": [
+                                  "AND",
+                                  {
+                                    "enable_config": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket": "true"
+                                  },
+                                  {
+                                    "enable_secureSocket_certValidation": "true"
+                                  }
+                                ]
                               }
                             }
                           ]
@@ -912,14 +1881,58 @@
                       {
                         "type": "attribute",
                         "value": {
+                          "name": "enable_secureSocket_ciphers",
+                          "displayName": "Configure ciphers",
+                          "inputType": "boolean",
+                          "defaultValue": "false",
+                          "required": false,
+                          "helpTip": "Enable to configure ciphers settings",
+                          "validateType": "",
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "value": {
                           "name": "secureSocket_ciphers",
                           "displayName": "ciphers",
-                          "inputType": "stringOrExpression",
-                          "defaultValue": "",
-                          "required": "false",
-                          "helpTip": "",
-                          "validateType": "",
-                          "matchPattern": ""
+                          "title": "ciphers",
+                          "description": "Configure ciphers entries",
+                          "tableKey": "value",
+                          "tableValue": "value",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            },
+                            {
+                              "enable_secureSocket_ciphers": "true"
+                            }
+                          ],
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "value",
+                                "displayName": "Value",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Array element"
+                              }
+                            }
+                          ]
                         }
                       },
                       {
@@ -929,10 +1942,19 @@
                           "displayName": "verifyHostName",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -942,10 +1964,19 @@
                           "displayName": "shareSession",
                           "inputType": "boolean",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -955,10 +1986,19 @@
                           "displayName": "handshakeTimeout",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -968,10 +2008,19 @@
                           "displayName": "sessionTimeout",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+(\\.\\d+)?|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -981,11 +2030,38 @@
                           "displayName": "serverName",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_secureSocket": "true"
+                            }
+                          ]
                         }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_proxy",
+                    "displayName": "Configure proxy",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure proxy settings",
+                    "validateType": "",
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
                       }
                     ]
                   }
@@ -995,6 +2071,15 @@
                   "value": {
                     "groupName": "Proxy",
                     "collapsed": false,
+                    "enableCondition": [
+                      "AND",
+                      {
+                        "enable_config": "true"
+                      },
+                      {
+                        "enable_proxy": "true"
+                      }
+                    ],
                     "elements": [
                       {
                         "type": "attribute",
@@ -1003,10 +2088,19 @@
                           "displayName": "host",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_proxy": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -1016,10 +2110,19 @@
                           "displayName": "port",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "regex",
-                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_proxy": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -1029,10 +2132,19 @@
                           "displayName": "userName",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_proxy": "true"
+                            }
+                          ]
                         }
                       },
                       {
@@ -1042,10 +2154,19 @@
                           "displayName": "password",
                           "inputType": "stringOrExpression",
                           "defaultValue": "",
-                          "required": "false",
+                          "required": false,
                           "helpTip": "",
                           "validateType": "",
-                          "matchPattern": ""
+                          "matchPattern": "",
+                          "enableCondition": [
+                            "AND",
+                            {
+                              "enable_config": "true"
+                            },
+                            {
+                              "enable_proxy": "true"
+                            }
+                          ]
                         }
                       }
                     ]
@@ -1058,10 +2179,15 @@
                     "displayName": "validation",
                     "inputType": "boolean",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "Enables the inbound payload validation functionality which provided by the constraint package. Enabled by default",
                     "validateType": "",
-                    "matchPattern": ""
+                    "matchPattern": "",
+                    "enableCondition": [
+                      {
+                        "enable_config": "true"
+                      }
+                    ]
                   }
                 },
                 {
@@ -1071,7 +2197,7 @@
                     "displayName": "serviceUrl",
                     "inputType": "stringOrExpression",
                     "defaultValue": "https://disease.sh",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""

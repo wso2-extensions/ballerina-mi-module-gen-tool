@@ -19,6 +19,12 @@
 package io.ballerina.mi.connectorModel.attributeModel;
 
 public class Attribute extends Element {
+
+    @Override
+    public String getElementType() {
+        return "attribute";
+    }
+
     private final String name;
     private final String displayName;
     private final String inputType;
@@ -43,6 +49,7 @@ public class Attribute extends Element {
         this.isCombo = isCombo;
     }
 
+    @Override
     public String getName() {
         return name;
     }

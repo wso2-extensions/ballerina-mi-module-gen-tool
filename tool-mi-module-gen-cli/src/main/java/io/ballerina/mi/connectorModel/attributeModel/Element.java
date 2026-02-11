@@ -19,4 +19,12 @@
 package io.ballerina.mi.connectorModel.attributeModel;
 
 public abstract class Element {
+
+    public abstract String getElementType();
+
+    public abstract String getName();
+
+    public boolean isTable() {
+        return "table".equals(getElementType());
+    }
 }

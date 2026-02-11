@@ -44,7 +44,7 @@ dependencies {
 
 
 def projects = ['project2', 'project3', 'arrayProject', 'recordProject', 'jsonProject', 'mapProject',
-                'primitiveTypeProject', 'unionProject', 'overwriteBodyProject']
+                'primitiveTypeProject', 'unionProject', 'overwriteBodyProject', 'tableProject']
 def toolVersion = stripBallerinaExtensionVersion("${project.version}")
 // Define balCommand to use the test-specific distribution
 ext.balCommand = Os.isFamily(Os.FAMILY_WINDOWS)
@@ -309,7 +309,7 @@ tasks.register("generateExpectedArtifacts", JavaExec) {
 
     doFirst {
         if (!project.hasProperty("artifactTarget")) {
-            throw new GradleException("Provide -PartifactTarget=project1|project2|project3|project4|project5|project6|unionProject|nestedRecordConflictProject|central")
+            throw new GradleException("Provide -PartifactTarget=project1|project2|project3|project4|project5|project6|unionProject|nestedRecordConflictProject|tableProject|central")
         }
         args project.property("artifactTarget")
         if (project.hasProperty("centralPackage")) {

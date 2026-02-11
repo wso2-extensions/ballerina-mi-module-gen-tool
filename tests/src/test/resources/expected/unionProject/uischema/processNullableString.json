@@ -30,16 +30,25 @@
               "groupName": "Input Variables",
               "elements": [
                 {
-                  "type": "attribute",
+                  "type": "attributeGroup",
                   "value": {
-                    "name": "value",
-                    "displayName": "value",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": ""
+                    "groupName": "Advanced",
+                    "collapsed": true,
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "value",
+                          "displayName": "value",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": false,
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": ""
+                        }
+                      }
+                    ]
                   }
                 }
               ]

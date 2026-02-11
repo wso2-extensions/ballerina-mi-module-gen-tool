@@ -21,7 +21,7 @@
                     "displayName": "inputJsonA",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "Expecting JSON object",
                     "validateType": "json",
                     "matchPattern": ""
@@ -34,7 +34,7 @@
                     "displayName": "inputJsonB",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "Expecting JSON object",
                     "validateType": "json",
                     "matchPattern": ""

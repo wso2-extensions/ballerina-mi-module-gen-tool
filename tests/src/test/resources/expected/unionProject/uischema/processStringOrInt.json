@@ -51,7 +51,7 @@
                     "displayName": "valueString",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": "",
@@ -69,10 +69,10 @@
                     "displayName": "valueInt",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "regex",
-                    "matchPattern": "^(-?\\d+|\\$\\{.+\\}\\)$",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\})$",
                     "enableCondition": [
                       {
                         "valueDataType": "int"

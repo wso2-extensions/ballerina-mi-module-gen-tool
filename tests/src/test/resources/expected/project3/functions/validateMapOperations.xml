@@ -24,8 +24,10 @@
     <sequence>
         <property name="param0" value="inputMapA"/>
         <property name="paramType0" value="map"/>
+        <property name="mapValueType0" value=""/>
         <property name="param1" value="inputMapB"/>
         <property name="paramType1" value="map"/>
+        <property name="mapValueType1" value=""/>
         <property name="paramSize" value="2"/>
         <property name="paramFunctionName" value="validateMapOperations"/>
         <property name="returnType" value="map"/>

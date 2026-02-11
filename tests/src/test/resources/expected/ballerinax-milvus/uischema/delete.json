@@ -32,13 +32,64 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "request",
-                    "displayName": "request",
+                    "name": "collectionName",
+                    "displayName": "collectionName",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "Expecting JSON object",
-                    "validateType": "json",
+                    "required": true,
+                    "helpTip": "The name of the collection to delete data from",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "partitionName",
+                    "displayName": "partitionName",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The name of the partition to delete data from",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "table",
+                  "value": {
+                    "name": "ids",
+                    "displayName": "ids",
+                    "title": "ids",
+                    "description": "The ids of the entries to delete",
+                    "tableKey": "value",
+                    "tableValue": "value",
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "value",
+                          "displayName": "Value",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Integer value",
+                          "validateType": "regex",
+                          "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "filter",
+                    "displayName": "filter",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": false,
+                    "helpTip": "The filter to delete data from the Milvus collection",
+                    "validateType": "",
                     "matchPattern": ""
                   }
                 }

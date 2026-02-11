@@ -93,7 +93,6 @@ public class MiCmd implements BLauncherCmd {
     }
 
     private void executeInternal() {
-        Package compilePkg;
         if (sourcePath == null || targetPath == null || helpFlag) {
             StringBuilder stringBuilder = new StringBuilder();
             setHelpMessage(stringBuilder);
@@ -101,15 +100,68 @@ public class MiCmd implements BLauncherCmd {
             return;
         }
 
-        Path projectPath = Path.of(sourcePath).normalize();
         Path miArtifactsPath = Path.of(targetPath);
+
+        // Compile, analyze, and emit in a separate method so that ALL compiler objects
+        // (Project, Package, PackageCompilation, JBallerinaBackend, SemanticModel, BIR, etc.)
+        // go fully out of scope when the method returns. This allows the GC to reclaim the
+        // multi-GB compiler state before serialization begins.
+        Boolean isBuildProject = compileAnalyzeAndEmit(miArtifactsPath);
+        if (isBuildProject == null) {
+            return; // compilation failed or was aborted
+        }
+
+        // Force GC to reclaim compiler memory before serialization
+        System.gc();
+
+        // Generate MI connector artifacts (XML/JSON files and zip package)
+        // Both BuildProject and BalaProject need MI artifacts
+        boolean artifactsGenerated = generateMIArtifacts(executablePath, miArtifactsPath, isBuildProject);
+        if (!artifactsGenerated) {
+            return;
+        }
+
+        // Free serialization memory before validation
+        System.gc();
+        printStream.println("Validating connector artifacts...");
+
+        boolean isValid = ConnectorValidator.validateConnector(miArtifactsPath);
+        if (!isValid) {
+            printStream.println("ERROR: MI " + (isBuildProject ? "module" : "connector") +
+                    " generation failed due to validation errors.");
+            try {
+                Utils.deleteDirectory(miArtifactsPath);
+            } catch (IOException e) {
+                printStream.println("ERROR: Failed to delete invalid MI " + (isBuildProject ?
+                        "module" : "connector") + " artifacts at: " + miArtifactsPath);
+            }
+            return;
+        }
+        printStream.println("MI " + (isBuildProject ? "module" : "connector") +
+                " generation completed successfully.");
+    }
+
+    /**
+     * Compiles the Ballerina project, analyzes it to build the Connector model, and emits the
+     * executable JAR. This method is intentionally separated from executeInternal() so that all
+     * compiler objects (Project, Package, PackageCompilation, JBallerinaBackend, SemanticModel,
+     * BIR, bytecode) go fully out of scope when it returns. For large connectors like Jira
+     * (584 operations), the compiler state can consume multiple GB.
+     *
+     * @param miArtifactsPath Target path for generated artifacts
+     * @return true if the project is a BuildProject, false if BalaProject, null if an error occurred
+     */
+    private Boolean compileAnalyzeAndEmit(Path miArtifactsPath) {
+        Path projectPath = Path.of(sourcePath).normalize();
         BuildOptions buildOptions = BuildOptions.builder().setOffline(false).build();
         ProjectLoadResult projectLoadResult = ProjectLoader.load(projectPath.toAbsolutePath(), buildOptions);
         Project project = projectLoadResult.project();
-        compilePkg = project.currentPackage();
+        Package compilePkg = project.currentPackage();
+        boolean isBuildProject = project instanceof BuildProject;
+
         if (!(project instanceof BuildProject || project instanceof BalaProject)) {
             printStream.println("ERROR: Invalid project path provided");
-            return;
+            return null;
         }
 
         Analyzer balAnalyzer;
@@ -139,14 +191,14 @@ public class MiCmd implements BLauncherCmd {
         }
         if (packageCompilation.diagnosticResult().hasErrors()) {
             printStream.println("ERROR: Ballerina project compilation contains errors");
-            return;
+            return null;
         }
 
         balAnalyzer.analyze(compilePkg);
 
         JBallerinaBackend jBallerinaBackend = JBallerinaBackend.from(packageCompilation, JvmTarget.JAVA_21);
 
-        if (project instanceof BuildProject) {
+        if (isBuildProject) {
             // Project is a build project
             Path bin = miArtifactsPath.resolve("bin");
             try {
@@ -170,26 +222,11 @@ public class MiCmd implements BLauncherCmd {
             emitResult.diagnostics().diagnostics().forEach(d -> printStream.println("\n" + d.toString()));
         }
 
-        // Generate MI connector artifacts (XML/JSON files and zip package)
-        // Both BuildProject and BalaProject need MI artifacts
-        boolean artifactsGenerated = generateMIArtifacts(executablePath, miArtifactsPath, project instanceof BuildProject);
-        if (!artifactsGenerated) {
-            return;
-        }
-        boolean isValid = ConnectorValidator.validateConnector(miArtifactsPath);
-        if (!isValid) {
-            printStream.println("ERROR: MI " + (project instanceof BuildProject ? "module" : "connector") +
-                    " generation failed due to validation errors.");
-            try {
-                Utils.deleteDirectory(miArtifactsPath);
-            } catch (IOException e) {
-                printStream.println("ERROR: Failed to delete invalid MI " + (project instanceof BuildProject ?
-                        "module" : "connector") + " artifacts at: " + miArtifactsPath);
-            }
-            return;
-        }
-        printStream.println("MI " + (project instanceof BuildProject ? "module" : "connector") +
-                " generation completed successfully.");
+        // Pre-compute TypeSymbol-derived values and release TypeSymbol references
+        // so the semantic model graph is not reachable from the Connector model
+        Connector.getConnector().clearTypeSymbols();
+
+        return isBuildProject;
     }
 
     private boolean generateMIArtifacts(Path sourcePath, Path targetPath, boolean isBuildProject) {

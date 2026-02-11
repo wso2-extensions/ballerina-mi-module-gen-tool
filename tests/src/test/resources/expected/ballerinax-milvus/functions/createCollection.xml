@@ -19,11 +19,19 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="createCollection">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="request" description=""/>
+    <parameter name="collectionName" description="The name of the collection to create"/>
+    <parameter name="primaryFieldName" description="The name of the primary field of the collection"/>
+    <parameter name="dimension" description="The dimension of the collection"/>
     <sequence>
         <property name="param0" value="request"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="CreateCollectionRequest" />
+        <property name="request_param0" value="collectionName"/>
+        <property name="request_paramType0" value="string"/>
+        <property name="request_param1" value="primaryFieldName"/>
+        <property name="request_paramType1" value="string"/>
+        <property name="request_param2" value="dimension"/>
+        <property name="request_paramType2" value="int"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="createCollection"/>
         <property name="returnType" value="union"/>

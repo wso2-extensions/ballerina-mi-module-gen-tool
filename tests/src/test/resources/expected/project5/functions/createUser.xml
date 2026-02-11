@@ -19,11 +19,19 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="createUser">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="newUser" description=""/>
+    <parameter name="id" description=""/>
+    <parameter name="name" description=""/>
+    <parameter name="email" description=""/>
     <sequence>
         <property name="param0" value="newUser"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="User" />
+        <property name="newUser_param0" value="id"/>
+        <property name="newUser_paramType0" value="int"/>
+        <property name="newUser_param1" value="name"/>
+        <property name="newUser_paramType1" value="string"/>
+        <property name="newUser_param2" value="email"/>
+        <property name="newUser_paramType2" value="string"/>
         <property name="operationId" value="createUser"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="createUser"/>

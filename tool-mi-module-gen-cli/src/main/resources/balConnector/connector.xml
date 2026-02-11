@@ -22,6 +22,6 @@
         <dependency component="functions"/>
         <description>{{description}}</description>
     </component>
-    <icon>icon/icon-small.gif</icon>
+    <icon>icon/icon-small.png</icon>
     <displayName>{{sanitizeModuleName moduleName}}</displayName>
 </connector>

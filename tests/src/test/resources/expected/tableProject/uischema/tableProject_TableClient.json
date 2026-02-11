@@ -1,0 +1,142 @@
+{
+  "connectorName": "tableProject",
+  "connectionName": "tableProject_TableClient",
+  "title": "Connection Config for tableProject_TableClient connection",
+  "help": "<h1>tableProject_TableClient Connection</h1> <b></b>",
+  "elements": [
+    {
+      "type": "attribute",
+      "value": {
+        "name": "connectionName",
+        "displayName": "Connection Name",
+        "inputType": "string",
+        "defaultValue": "tableProject_TableClient_connection_1",
+        "required": "true",
+        "helpTip": "The name for the tableProject_TableClient connection",
+        "validation": "nameWithoutSpecialCharactors"
+      }
+    },
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Basic",
+              "collapsed": false,
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "baseUrl",
+                    "displayName": "baseUrl",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": true,
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_defaultHeaders",
+                    "displayName": "Configure defaultHeaders",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure defaultHeaders settings",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "table",
+                  "value": {
+                    "name": "defaultHeaders",
+                    "displayName": "defaultHeaders",
+                    "title": "defaultHeaders",
+                    "description": "Configure defaultHeaders entries",
+                    "tableKey": "key",
+                    "tableValue": "value",
+                    "enableCondition": [
+                      {
+                        "enable_defaultHeaders": "true"
+                      }
+                    ],
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "key",
+                          "displayName": "Key",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Key for the map entry"
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "value",
+                          "displayName": "Value",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Value for the map entry"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "enable_allowedOrigins",
+                    "displayName": "Configure allowedOrigins",
+                    "inputType": "boolean",
+                    "defaultValue": "false",
+                    "required": false,
+                    "helpTip": "Enable to configure allowedOrigins settings",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "table",
+                  "value": {
+                    "name": "allowedOrigins",
+                    "displayName": "allowedOrigins",
+                    "title": "allowedOrigins",
+                    "description": "Configure allowedOrigins entries",
+                    "tableKey": "value",
+                    "tableValue": "value",
+                    "enableCondition": [
+                      {
+                        "enable_allowedOrigins": "true"
+                      }
+                    ],
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "value",
+                          "displayName": "Value",
+                          "inputType": "stringOrExpression",
+                          "required": true,
+                          "helpTip": "Array element"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

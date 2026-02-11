@@ -34,21 +34,12 @@
                     "displayName": "baseUrl",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""
                   }
-                }
-              ]
-            }
-          },
-          {
-            "type": "attributeGroup",
-            "value": {
-              "groupName": "Advanced",
-              "collapsed": true,
-              "elements": [
+                },
                 {
                   "type": "attribute",
                   "value": {
@@ -56,7 +47,7 @@
                     "displayName": "apiKey",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "false",
+                    "required": false,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""

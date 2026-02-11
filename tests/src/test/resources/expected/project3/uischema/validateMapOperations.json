@@ -21,9 +21,9 @@
                     "displayName": "inputMapA",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
+                    "required": true,
+                    "helpTip": "Expecting JSON object with key-value pairs",
+                    "validateType": "json",
                     "matchPattern": ""
                   }
                 },
@@ -34,9 +34,9 @@
                     "displayName": "inputMapB",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "",
-                    "validateType": "",
+                    "required": true,
+                    "helpTip": "Expecting JSON object with key-value pairs",
+                    "validateType": "json",
                     "matchPattern": ""
                   }
                 }

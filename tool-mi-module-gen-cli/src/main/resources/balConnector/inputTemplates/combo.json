@@ -7,7 +7,7 @@
                     "comboValues": {{{comboValues}}},
                     "defaultValue": "{{defaultValue}}",
                     "required": "{{required}}",
-                    "helpTip": "{{helpTip}}"{{#if enableCondition}},
+                    "helpTip": "{{{helpTip}}}"{{#if enableCondition}},
                     "enableCondition": {{{enableCondition}}}{{/if}}
                   }
                 }

@@ -19,6 +19,12 @@
 package io.ballerina.mi.connectorModel.attributeModel;
 
 public class AttributeGroup extends Element {
+
+    @Override
+    public String getElementType() {
+        return "attributeGroup";
+    }
+
     private final String name;
 
     private final boolean collapsed;
@@ -41,6 +47,7 @@ public class AttributeGroup extends Element {
         this.enableCondition = enableCondition;
     }
 
+    @Override
     public String getName() {
         return name;
     }

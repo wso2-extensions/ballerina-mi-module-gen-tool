@@ -19,15 +19,34 @@
 <template xmlns="http://ws.apache.org/ns/synapse" name="validateRecordOperations">
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
-    <parameter name="personInput" description=""/>
-    <parameter name="employeeInput" description=""/>
+    <parameter name="name" description=""/>
+    <parameter name="age" description=""/>
+    <parameter name="city" description=""/>
+    <parameter name="employeeId" description=""/>
+    <parameter name="department" description=""/>
+    <parameter name="salary" description=""/>
+    <parameter name="isActive" description=""/>
     <sequence>
         <property name="param0" value="personInput"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="Person" />
+        <property name="personInput_param0" value="name"/>
+        <property name="personInput_paramType0" value="string"/>
+        <property name="personInput_param1" value="age"/>
+        <property name="personInput_paramType1" value="int"/>
+        <property name="personInput_param2" value="city"/>
+        <property name="personInput_paramType2" value="string"/>
         <property name="param1" value="employeeInput"/>
         <property name="paramType1" value="record"/>
         <property name="param1_recordName" value="Employee" />
+        <property name="employeeInput_param0" value="employeeId"/>
+        <property name="employeeInput_paramType0" value="string"/>
+        <property name="employeeInput_param1" value="department"/>
+        <property name="employeeInput_paramType1" value="string"/>
+        <property name="employeeInput_param2" value="salary"/>
+        <property name="employeeInput_paramType2" value="decimal"/>
+        <property name="employeeInput_param3" value="isActive"/>
+        <property name="employeeInput_paramType3" value="boolean"/>
         <property name="paramSize" value="2"/>
         <property name="paramFunctionName" value="validateRecordOperations"/>
         <property name="returnType" value="record"/>

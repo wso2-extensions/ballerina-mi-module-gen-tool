@@ -20,11 +20,19 @@
     <parameter name="responseVariable" description="The target variable in which the output of the operation will be stored"/>
     <parameter name="overwriteBody" description="Replace the Message Body in Message Context with the output payload of the operation"/>
     <parameter name="itemId" description=""/>
-    <parameter name="item" description=""/>
+    <parameter name="id" description=""/>
+    <parameter name="name" description=""/>
+    <parameter name="description" description=""/>
     <sequence>
         <property name="param0" value="item"/>
         <property name="paramType0" value="record"/>
         <property name="param0_recordName" value="Item" />
+        <property name="item_param0" value="id"/>
+        <property name="item_paramType0" value="string"/>
+        <property name="item_param1" value="name"/>
+        <property name="item_paramType1" value="string"/>
+        <property name="item_param2" value="description"/>
+        <property name="item_paramType2" value="string"/>
         <property name="paramSize" value="1"/>
         <property name="paramFunctionName" value="putItemsByItemId"/>
         <property name="pathParam0" value="itemId"/>

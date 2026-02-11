@@ -1,0 +1,117 @@
+{
+  "connectorName": "tableProject",
+  "operationName": "calculateNestedSum",
+  "title": "calculate nested sum",
+  "help": "Calculate sum of nested arrays",
+  "elements": [
+    {
+      "type": "attributeGroup",
+      "value": {
+        "groupName": "General",
+        "elements": [
+          {
+            "type": "attribute",
+            "value": {
+              "name": "configRef",
+              "displayName": "Connection",
+              "inputType": "connection",
+              "allowedConnectionTypes": [
+                "tableProject_TableClient"
+              ],
+              "defaultType": "connection.tableProject_TableClient",
+              "defaultValue": "",
+              "required": "true",
+              "helpTip": "Connection to be used"
+            }
+          },
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Input Variables",
+              "elements": [
+                {
+                  "type": "table",
+                  "value": {
+                    "name": "numbers",
+                    "displayName": "numbers",
+                    "title": "numbers",
+                    "description": "Configure numbers entries",
+                    "tableKey": "Row",
+                    "tableValue": "rowLabel",
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "rowLabel",
+                          "displayName": "Row Label",
+                          "inputType": "stringOrExpression",
+                          "required": false,
+                          "helpTip": "Label for this row (optional)"
+                        }
+                      },
+                      {
+                        "type": "table",
+                        "value": {
+                          "name": "innerArray",
+                          "displayName": "Inner Array",
+                          "title": "Inner Array",
+                          "description": "Inner array elements",
+                          "tableKey": "value",
+                          "tableValue": "value",
+                          "elements": [
+                            {
+                              "type": "attribute",
+                              "value": {
+                                "name": "value",
+                                "displayName": "Value",
+                                "inputType": "stringOrExpression",
+                                "required": true,
+                                "helpTip": "Integer value",
+                                "validateType": "regex",
+                                "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "attributeGroup",
+            "value": {
+              "groupName": "Output",
+              "elements": [
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "responseVariable",
+                    "displayName": "Output Variable Name",
+                    "inputType": "string",
+                    "defaultValue": "",
+                    "required": "false",
+                    "helpTip": "The target variable in which the output of the operation will be stored"
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "overwriteBody",
+                    "displayName": "Overwrite Message Body",
+                    "inputType": "checkbox",
+                    "defaultValue": "false",
+                    "helpTip": "Replace the Message Body in Message Context with the output payload of the operation (This will remove the payload from the above variable. But other elements such as headers and attributes will remain).",
+                    "required": "false"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

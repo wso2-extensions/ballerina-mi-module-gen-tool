@@ -5,8 +5,8 @@
                     "displayName": "{{displayName}}",
                     "inputType": "{{inputType}}",
                     "defaultValue": "{{defaultValue}}",
-                    "required": "{{required}}",
-                    "helpTip": "{{helpTip}}",
+                    "required": {{required}},
+                    "helpTip": "{{{helpTip}}}",
                     "validateType": "{{validateType}}",
                     "matchPattern": "{{matchPattern}}"{{#if enableCondition}},
                     "enableCondition": {{{enableCondition}}}{{/if}}

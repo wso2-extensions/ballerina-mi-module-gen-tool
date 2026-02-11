@@ -36,23 +36,32 @@
                     "displayName": "query",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""
                   }
                 },
                 {
-                  "type": "attribute",
+                  "type": "attributeGroup",
                   "value": {
-                    "name": "&#x27;limit",
-                    "displayName": "limit",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "10",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                    "groupName": "Advanced",
+                    "collapsed": true,
+                    "elements": [
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "&#x27;limit",
+                          "displayName": "limit",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "10",
+                          "required": false,
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$"
+                        }
+                      }
+                    ]
                   }
                 }
               ]

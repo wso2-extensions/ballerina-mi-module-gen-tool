@@ -36,7 +36,7 @@
                     "displayName": "country",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""
@@ -49,7 +49,7 @@
                     "displayName": "subregions",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""

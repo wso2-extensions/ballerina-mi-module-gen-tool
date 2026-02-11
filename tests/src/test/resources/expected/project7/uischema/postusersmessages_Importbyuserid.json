@@ -36,7 +36,7 @@
                     "displayName": "userId",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
+                    "required": true,
                     "helpTip": "",
                     "validateType": "",
                     "matchPattern": ""
@@ -45,13 +45,39 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "message",
-                    "displayName": "message",
+                    "name": "id",
+                    "displayName": "id",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "Expecting JSON object",
-                    "validateType": "json",
+                    "required": true,
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "threadId",
+                    "displayName": "threadId",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": true,
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "snippet",
+                    "displayName": "snippet",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": true,
+                    "helpTip": "",
+                    "validateType": "",
                     "matchPattern": ""
                   }
                 }

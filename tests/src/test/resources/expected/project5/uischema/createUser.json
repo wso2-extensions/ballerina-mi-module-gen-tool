@@ -32,13 +32,39 @@
                 {
                   "type": "attribute",
                   "value": {
-                    "name": "newUser",
-                    "displayName": "newUser",
+                    "name": "id",
+                    "displayName": "id",
                     "inputType": "stringOrExpression",
                     "defaultValue": "",
-                    "required": "true",
-                    "helpTip": "Expecting JSON object",
-                    "validateType": "json",
+                    "required": true,
+                    "helpTip": "",
+                    "validateType": "regex",
+                    "matchPattern": "^(-?\\d+|\\$\\{.+\\})$"
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "name",
+                    "displayName": "name",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": true,
+                    "helpTip": "",
+                    "validateType": "",
+                    "matchPattern": ""
+                  }
+                },
+                {
+                  "type": "attribute",
+                  "value": {
+                    "name": "email",
+                    "displayName": "email",
+                    "inputType": "stringOrExpression",
+                    "defaultValue": "",
+                    "required": true,
+                    "helpTip": "",
+                    "validateType": "",
                     "matchPattern": ""
                   }
                 }

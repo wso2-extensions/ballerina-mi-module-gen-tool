@@ -42,6 +42,6 @@ To report bugs, request new features, start new discussions, view project boards
 - Post all technical questions on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag
 </description>
     </component>
-    <icon>icon/icon-small.gif</icon>
+    <icon>icon/icon-small.png</icon>
     <displayName>project4</displayName>
 </connector>

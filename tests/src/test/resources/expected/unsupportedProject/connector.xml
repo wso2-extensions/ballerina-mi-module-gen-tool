@@ -22,6 +22,6 @@
         <dependency component="functions"/>
         <description>Ballerina unsupportedProject connector</description>
     </component>
-    <icon>icon/icon-small.gif</icon>
+    <icon>icon/icon-small.png</icon>
     <displayName>unsupportedProject</displayName>
 </connector>

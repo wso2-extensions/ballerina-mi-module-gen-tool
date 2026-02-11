@@ -30,52 +30,61 @@
               "groupName": "Input Variables",
               "elements": [
                 {
-                  "type": "attribute",
+                  "type": "attributeGroup",
                   "value": {
-                    "name": "valueDataType",
-                    "displayName": "valueDataType",
-                    "inputType": "combo",
-                    "comboValues": [
-                      "string",
-                      "int"
-                    ],
-                    "defaultValue": "string",
-                    "required": "false",
-                    "helpTip": ""
-                  }
-                },
-                {
-                  "type": "attribute",
-                  "value": {
-                    "name": "valueString",
-                    "displayName": "valueString",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "",
-                    "matchPattern": "",
-                    "enableCondition": [
+                    "groupName": "Advanced",
+                    "collapsed": true,
+                    "elements": [
                       {
-                        "valueDataType": "string"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "attribute",
-                  "value": {
-                    "name": "valueInt",
-                    "displayName": "valueInt",
-                    "inputType": "stringOrExpression",
-                    "defaultValue": "",
-                    "required": "false",
-                    "helpTip": "",
-                    "validateType": "regex",
-                    "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
-                    "enableCondition": [
+                        "type": "attribute",
+                        "value": {
+                          "name": "valueDataType",
+                          "displayName": "valueDataType",
+                          "inputType": "combo",
+                          "comboValues": [
+                            "string",
+                            "int"
+                          ],
+                          "defaultValue": "string",
+                          "required": "false",
+                          "helpTip": ""
+                        }
+                      },
                       {
-                        "valueDataType": "int"
+                        "type": "attribute",
+                        "value": {
+                          "name": "valueString",
+                          "displayName": "valueString",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": false,
+                          "helpTip": "",
+                          "validateType": "",
+                          "matchPattern": "",
+                          "enableCondition": [
+                            {
+                              "valueDataType": "string"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "attribute",
+                        "value": {
+                          "name": "valueInt",
+                          "displayName": "valueInt",
+                          "inputType": "stringOrExpression",
+                          "defaultValue": "",
+                          "required": false,
+                          "helpTip": "",
+                          "validateType": "regex",
+                          "matchPattern": "^$|^(-?\\d+|\\$\\{.+\\})$",
+                          "enableCondition": [
+                            {
+                              "valueDataType": "int"
+                            }
+                          ]
+                        }
                       }
                     ]
                   }
