@@ -22,7 +22,8 @@ import io.ballerina.compiler.api.symbols.*;
 import io.ballerina.compiler.api.symbols.resourcepath.PathSegmentList;
 import io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment;
 
-import io.ballerina.mi.connectorModel.*;
+import io.ballerina.mi.model.*;
+import io.ballerina.mi.model.param.*;
 import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.Utils;
 import io.ballerina.projects.Package;

@@ -16,7 +16,7 @@
 
 package io.ballerina.mi.test.util;
 
-import io.ballerina.mi.MiCmd;
+import io.ballerina.mi.cmd.MiCmd;
 import org.testng.Assert;
 
 import java.io.*;
@@ -116,7 +116,7 @@ public class ArtifactGenerationUtil {
         // 2. Programmatically execute MiCmd
         System.out.println("Executing MiCmd for project: " + projectPathStr);
         // Reset Connector state to avoid pollution from previous tests
-        io.ballerina.mi.connectorModel.Connector.reset();
+        io.ballerina.mi.model.Connector.reset();
         
         MiCmd miCmd = new MiCmd();
         Field sourcePathField = MiCmd.class.getDeclaredField("sourcePath");

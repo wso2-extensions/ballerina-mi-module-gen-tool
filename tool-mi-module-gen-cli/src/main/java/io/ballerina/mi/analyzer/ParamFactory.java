@@ -28,11 +28,11 @@ import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.mi.connectorModel.ArrayFunctionParam;
-import io.ballerina.mi.connectorModel.FunctionParam;
-import io.ballerina.mi.connectorModel.MapFunctionParam;
-import io.ballerina.mi.connectorModel.RecordFunctionParam;
-import io.ballerina.mi.connectorModel.UnionFunctionParam;
+import io.ballerina.mi.model.param.ArrayFunctionParam;
+import io.ballerina.mi.model.param.FunctionParam;
+import io.ballerina.mi.model.param.MapFunctionParam;
+import io.ballerina.mi.model.param.RecordFunctionParam;
+import io.ballerina.mi.model.param.UnionFunctionParam;
 import io.ballerina.mi.util.Utils;
 import org.apache.commons.lang3.StringUtils;
 

@@ -54,6 +54,8 @@ dependencies {
     implementation "org.apache.axis2.wso2:axis2:${axis2Version}"
     implementation "org.apache.synapse:synapse-core:${synapseVersion}"
     testImplementation 'org.testng:testng:7.7.0'
+    testImplementation 'org.mockito:mockito-core:5.3.1'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
 }
 
 def excludePattern = '**/module-info.java'

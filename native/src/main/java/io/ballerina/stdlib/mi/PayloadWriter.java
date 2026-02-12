@@ -42,7 +42,7 @@ public class PayloadWriter {
     private static final String MESSAGE_TYPE = "messageType";
     private static final String CONTENT_TYPE = "contentType";
 
-    protected static void overwriteBody(MessageContext messageContext, Object payload) throws AxisFault {
+    public static void overwriteBody(MessageContext messageContext, Object payload) throws AxisFault {
 
         if (payload == null) {
             return;

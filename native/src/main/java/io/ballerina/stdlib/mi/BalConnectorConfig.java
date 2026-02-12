@@ -17,6 +17,7 @@
  */
  
 package io.ballerina.stdlib.mi;
+import io.ballerina.stdlib.mi.executor.ParamHandler;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.creators.ValueCreator;
@@ -37,9 +38,10 @@ public class BalConnectorConfig extends AbstractConnector {
     private String orgName;
     private String moduleName;
     private String version;
-    private final BalExecutor balExecutor = new BalExecutor();
+    private final ParamHandler paramHandler = new ParamHandler();
 
     public BalConnectorConfig() {
+
     }
 
     // This constructor is added to test the connector
@@ -158,7 +160,7 @@ public class BalConnectorConfig extends AbstractConnector {
 
     private void setParameters(Object[] args, MessageContext context, String connectionType) {
         for (int i = 0; i < args.length; i++) {
-            Object param = balExecutor.getParameter(context, connectionType + "_param" + i, connectionType + "_paramType" + i, i);
+            Object param = paramHandler.getParameter(context, connectionType + "_param" + i, connectionType + "_paramType" + i, i);
             //TODO: check handling null parameters
 //            if (param == null) {
 //                return false;

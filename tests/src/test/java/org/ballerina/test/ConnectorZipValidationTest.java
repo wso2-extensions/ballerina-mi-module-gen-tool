@@ -16,8 +16,8 @@
 
 package org.ballerina.test;
 
-import io.ballerina.mi.MiCmd;
-import io.ballerina.mi.connectorModel.Connector;
+import io.ballerina.mi.cmd.MiCmd;
+import io.ballerina.mi.model.Connector;
 import io.ballerina.mi.test.util.ArtifactGenerationUtil;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;

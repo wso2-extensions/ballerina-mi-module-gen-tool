@@ -18,7 +18,9 @@ package org.ballerina.test;
 
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.stdlib.mi.BalExecutor;
+import io.ballerina.stdlib.mi.executor.BalExecutor;
+import io.ballerina.stdlib.mi.executor.ParamHandler;
+import io.ballerina.stdlib.mi.utils.SynapseUtils;
 import io.ballerina.stdlib.mi.Constants;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -48,11 +50,13 @@ import java.util.Stack;
 public class ResourceFunctionInvocationTest {
 
     private BalExecutor balExecutor;
+    private ParamHandler paramHandler;
     private MessageContext messageContext;
 
     @BeforeMethod
     public void setup() {
         balExecutor = new BalExecutor();
+        paramHandler = new ParamHandler();
         // Create a mock message context
         messageContext = new Axis2MessageContext(
                 new org.apache.axis2.context.MessageContext(),
@@ -99,14 +103,13 @@ public class ResourceFunctionInvocationTest {
     @Test(description = "Verify convertPathParam converts values to correct types",
             dataProvider = "pathParamTypeConversionProvider")
     public void testConvertPathParam(String inputValue, String inputType, Class<?> expectedClass) throws Exception {
-        Method convertPathParamMethod = BalExecutor.class.getDeclaredMethod(
+        Method convertPathParamMethod = ParamHandler.class.getMethod(
                 "convertPathParam",
                 String.class,
                 String.class
         );
-        convertPathParamMethod.setAccessible(true);
 
-        Object result = convertPathParamMethod.invoke(balExecutor, inputValue, inputType);
+        Object result = convertPathParamMethod.invoke(paramHandler, inputValue, inputType);
 
         Assert.assertNotNull(result, "Converted path param should not be null");
         Assert.assertTrue(expectedClass.isInstance(result),
@@ -129,25 +132,24 @@ public class ResourceFunctionInvocationTest {
      */
     @Test(description = "Verify getPropertyAsString returns correct string values")
     public void testGetPropertyAsString() throws Exception {
-        Method getPropertyAsStringMethod = BalExecutor.class.getDeclaredMethod(
+        Method getPropertyAsStringMethod = SynapseUtils.class.getMethod(
                 "getPropertyAsString",
                 MessageContext.class,
                 String.class
         );
-        getPropertyAsStringMethod.setAccessible(true);
 
         // Test with existing property
         messageContext.setProperty("testProperty", "testValue");
-        Object result = getPropertyAsStringMethod.invoke(balExecutor, messageContext, "testProperty");
+        Object result = getPropertyAsStringMethod.invoke(null, messageContext, "testProperty");
         Assert.assertEquals(result, "testValue");
 
         // Test with non-existing property
-        Object nullResult = getPropertyAsStringMethod.invoke(balExecutor, messageContext, "nonExistentProperty");
+        Object nullResult = getPropertyAsStringMethod.invoke(null, messageContext, "nonExistentProperty");
         Assert.assertNull(nullResult);
 
         // Test with non-string property (should convert to string)
         messageContext.setProperty("intProperty", 123);
-        Object intResult = getPropertyAsStringMethod.invoke(balExecutor, messageContext, "intProperty");
+        Object intResult = getPropertyAsStringMethod.invoke(null, messageContext, "intProperty");
         Assert.assertEquals(intResult, "123");
     }
 
@@ -157,18 +159,17 @@ public class ResourceFunctionInvocationTest {
      */
     @Test(description = "Verify prependPathParams returns original args when no path params")
     public void testPrependPathParamsWithNoPathParams() throws Exception {
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
         // Setup: no path params
         messageContext.setProperty(Constants.PATH_PARAM_SIZE, "0");
 
         Object[] originalArgs = new Object[]{"arg1", "arg2"};
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, originalArgs, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, originalArgs, messageContext);
 
         Assert.assertSame(result, originalArgs, "Should return same array when no path params");
         Assert.assertEquals(result.length, 2);
@@ -179,12 +180,11 @@ public class ResourceFunctionInvocationTest {
      */
     @Test(description = "Verify prependPathParams correctly prepends single path param")
     public void testPrependPathParamsWithSinglePathParam() throws Exception {
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
         // Setup: one path param
         messageContext.setProperty(Constants.PATH_PARAM_SIZE, "1");
@@ -197,7 +197,7 @@ public class ResourceFunctionInvocationTest {
         setupTemplateContext(templateParams);
 
         Object[] originalArgs = new Object[]{"existingArg"};
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, originalArgs, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, originalArgs, messageContext);
 
         Assert.assertEquals(result.length, 2, "Result should have path param + original args");
         Assert.assertTrue(result[0] instanceof BString, "First element should be path param (BString)");
@@ -210,12 +210,11 @@ public class ResourceFunctionInvocationTest {
      */
     @Test(description = "Verify prependPathParams correctly prepends multiple path params")
     public void testPrependPathParamsWithMultiplePathParams() throws Exception {
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
         // Setup: two path params
         messageContext.setProperty(Constants.PATH_PARAM_SIZE, "2");
@@ -231,7 +230,7 @@ public class ResourceFunctionInvocationTest {
         setupTemplateContext(templateParams);
 
         Object[] originalArgs = new Object[]{"bodyParam"};
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, originalArgs, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, originalArgs, messageContext);
 
         Assert.assertEquals(result.length, 3, "Result should have 2 path params + 1 original arg");
         Assert.assertTrue(result[0] instanceof Long, "First path param should be Long (int type)");
@@ -246,12 +245,11 @@ public class ResourceFunctionInvocationTest {
      */
     @Test(description = "Verify prependPathParams correctly converts path param types")
     public void testPrependPathParamsWithTypeConversions() throws Exception {
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
         // Setup: path params with different types
         messageContext.setProperty(Constants.PATH_PARAM_SIZE, "4");
@@ -273,7 +271,7 @@ public class ResourceFunctionInvocationTest {
         setupTemplateContext(templateParams);
 
         Object[] originalArgs = new Object[]{};
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, originalArgs, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, originalArgs, messageContext);
 
         Assert.assertEquals(result.length, 4);
         Assert.assertTrue(result[0] instanceof BString);
@@ -291,27 +289,26 @@ public class ResourceFunctionInvocationTest {
      */
     @Test(description = "Verify resource function is detected via functionType property")
     public void testResourceFunctionDetection() throws Exception {
-        Method getPropertyAsStringMethod = BalExecutor.class.getDeclaredMethod(
+        Method getPropertyAsStringMethod = SynapseUtils.class.getMethod(
                 "getPropertyAsString",
                 MessageContext.class,
                 String.class
         );
-        getPropertyAsStringMethod.setAccessible(true);
 
         // Test RESOURCE type
         messageContext.setProperty(Constants.FUNCTION_TYPE, Constants.FUNCTION_TYPE_RESOURCE);
-        String functionType = (String) getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.FUNCTION_TYPE);
+        String functionType = (String) getPropertyAsStringMethod.invoke(null, messageContext, Constants.FUNCTION_TYPE);
         Assert.assertEquals(functionType, "RESOURCE");
         Assert.assertTrue(Constants.FUNCTION_TYPE_RESOURCE.equals(functionType));
 
         // Test REMOTE type
         messageContext.setProperty(Constants.FUNCTION_TYPE, Constants.FUNCTION_TYPE_REMOTE);
-        functionType = (String) getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.FUNCTION_TYPE);
+        functionType = (String) getPropertyAsStringMethod.invoke(null, messageContext, Constants.FUNCTION_TYPE);
         Assert.assertEquals(functionType, "REMOTE");
 
         // Test FUNCTION type
         messageContext.setProperty(Constants.FUNCTION_TYPE, Constants.FUNCTION_TYPE_FUNCTION);
-        functionType = (String) getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.FUNCTION_TYPE);
+        functionType = (String) getPropertyAsStringMethod.invoke(null, messageContext, Constants.FUNCTION_TYPE);
         Assert.assertEquals(functionType, "FUNCTION");
     }
 
@@ -320,19 +317,18 @@ public class ResourceFunctionInvocationTest {
      */
     @Test(description = "Verify resourceAccessor property retrieval for resource functions")
     public void testResourceAccessorRetrieval() throws Exception {
-        Method getPropertyAsStringMethod = BalExecutor.class.getDeclaredMethod(
+        Method getPropertyAsStringMethod = SynapseUtils.class.getMethod(
                 "getPropertyAsString",
                 MessageContext.class,
                 String.class
         );
-        getPropertyAsStringMethod.setAccessible(true);
 
         // Test different HTTP accessors
         String[] accessors = {"get", "post", "put", "delete", "patch", "head", "options"};
 
         for (String accessor : accessors) {
             messageContext.setProperty(Constants.RESOURCE_ACCESSOR, accessor);
-            String result = (String) getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.RESOURCE_ACCESSOR);
+            String result = (String) getPropertyAsStringMethod.invoke(null, messageContext, Constants.RESOURCE_ACCESSOR);
             Assert.assertEquals(result, accessor, "Resource accessor should be: " + accessor);
         }
     }
@@ -358,34 +354,32 @@ public class ResourceFunctionInvocationTest {
         setupTemplateContext(templateParams);
 
         // Verify all properties are set correctly
-        Method getPropertyAsStringMethod = BalExecutor.class.getDeclaredMethod(
+        Method getPropertyAsStringMethod = SynapseUtils.class.getMethod(
                 "getPropertyAsString",
                 MessageContext.class,
                 String.class
         );
-        getPropertyAsStringMethod.setAccessible(true);
 
-        Assert.assertEquals(getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.FUNCTION_TYPE),
+        Assert.assertEquals(getPropertyAsStringMethod.invoke(null, messageContext, Constants.FUNCTION_TYPE),
                 "RESOURCE");
-        Assert.assertEquals(getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.RESOURCE_ACCESSOR),
+        Assert.assertEquals(getPropertyAsStringMethod.invoke(null, messageContext, Constants.RESOURCE_ACCESSOR),
                 "get");
-        Assert.assertEquals(getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.PATH_PARAM_SIZE),
+        Assert.assertEquals(getPropertyAsStringMethod.invoke(null, messageContext, Constants.PATH_PARAM_SIZE),
                 "1");
-        Assert.assertEquals(getPropertyAsStringMethod.invoke(balExecutor, messageContext, "pathParam0"),
+        Assert.assertEquals(getPropertyAsStringMethod.invoke(null, messageContext, "pathParam0"),
                 "itemId");
-        Assert.assertEquals(getPropertyAsStringMethod.invoke(balExecutor, messageContext, "pathParamType0"),
+        Assert.assertEquals(getPropertyAsStringMethod.invoke(null, messageContext, "pathParamType0"),
                 "string");
 
         // Verify prependPathParams works with this setup
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
         Object[] originalArgs = new Object[]{"otherParam"};
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, originalArgs, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, originalArgs, messageContext);
 
         Assert.assertEquals(result.length, 2);
         Assert.assertEquals(result[0].toString(), "item-456");  // path param prepended
@@ -397,16 +391,15 @@ public class ResourceFunctionInvocationTest {
      */
     @Test(description = "Verify prependPathParams handles missing pathParamSize gracefully")
     public void testPrependPathParamsWithMissingPathParamSize() throws Exception {
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
         // Don't set PATH_PARAM_SIZE - it should default to 0
         Object[] originalArgs = new Object[]{"arg1", "arg2"};
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, originalArgs, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, originalArgs, messageContext);
 
         Assert.assertSame(result, originalArgs, "Should return same array when pathParamSize is missing");
     }
@@ -416,14 +409,13 @@ public class ResourceFunctionInvocationTest {
      */
     @Test(description = "Verify decimal path parameter conversion")
     public void testDecimalPathParamConversion() throws Exception {
-        Method convertPathParamMethod = BalExecutor.class.getDeclaredMethod(
+        Method convertPathParamMethod = ParamHandler.class.getMethod(
                 "convertPathParam",
                 String.class,
                 String.class
         );
-        convertPathParamMethod.setAccessible(true);
 
-        Object result = convertPathParamMethod.invoke(balExecutor, "123.456789", "decimal");
+        Object result = convertPathParamMethod.invoke(paramHandler, "123.456789", "decimal");
 
         Assert.assertNotNull(result);
         Assert.assertTrue(result instanceof BDecimal, "Should be BDecimal type");
