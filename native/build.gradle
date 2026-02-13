@@ -18,6 +18,7 @@
 
 plugins {
     id 'java'
+    id 'jacoco'
 }
 
 description = 'WSO2 Micro Integrator Ballerina connector'
@@ -63,3 +64,7 @@ tasks.withType(Checkstyle) {
     exclude excludePattern
 }
 
+
+test {
+    useTestNG()
+}

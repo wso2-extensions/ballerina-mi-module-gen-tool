@@ -449,7 +449,7 @@ public class DataTransformer {
         return jsonBuilder.toString();
     }
 
-    private static String parseInnerTableValues(String innerTableStr, MessageContext context) {
+    static String parseInnerTableValues(String innerTableStr, MessageContext context) {
         if (innerTableStr == null || innerTableStr.trim().isEmpty() || "[]".equals(innerTableStr.trim())) return "[]";
 
         String resolvedStr = SynapseUtils.resolveSynapseExpressions(innerTableStr, context);
@@ -474,7 +474,7 @@ public class DataTransformer {
         return result.toString();
     }
 
-    private static void appendJsonValue(StringBuilder builder, Object value) {
+    static void appendJsonValue(StringBuilder builder, Object value) {
         if (value == null) {
             builder.append("null");
         } else {
@@ -486,7 +486,7 @@ public class DataTransformer {
         }
     }
 
-    private static String escapeJsonString(String value) {
+    static String escapeJsonString(String value) {
         if (value == null) return "";
         return value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
     }

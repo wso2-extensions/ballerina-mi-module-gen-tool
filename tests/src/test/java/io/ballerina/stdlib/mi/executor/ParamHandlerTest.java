@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+ * Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -40,15 +40,15 @@ public class ParamHandlerTest {
     public void testSetParameters() {
         try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
              MockedStatic<StringUtils> stringUtilsMock = Mockito.mockStatic(StringUtils.class)) {
-             
+
             MessageContext context = mock(MessageContext.class);
             Object[] args = new Object[2];
-            
+
             // Mock param0 (String)
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param0")).thenReturn("p0Name");
             synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "p0Name")).thenReturn("value0");
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType0")).thenReturn(Constants.STRING);
-            
+
             BString bStringVal = mock(BString.class);
             stringUtilsMock.when(() -> StringUtils.fromString("value0")).thenReturn(bStringVal);
 
@@ -64,13 +64,13 @@ public class ParamHandlerTest {
             Assert.assertEquals(args[1], 123L);
         }
     }
-    
+
     @Test
     public void testGetParameterTypes() {
        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
             MockedStatic<StringUtils> stringUtilsMock = Mockito.mockStatic(StringUtils.class);
             MockedStatic<DataTransformer> dataTransformerMock = Mockito.mockStatic(DataTransformer.class)) {
-            
+
             MessageContext context = mock(MessageContext.class);
             ParamHandler handler = new ParamHandler();
 
@@ -78,15 +78,15 @@ public class ParamHandlerTest {
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramBool")).thenReturn("boolName");
             synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "boolName")).thenReturn("true");
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "typeBool")).thenReturn(Constants.BOOLEAN);
-            
+
             Object resultBool = handler.getParameter(context, "paramBool", "typeBool", 0);
             Assert.assertEquals(resultBool, true);
-            
+
             // Test FLOAT
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramFloat")).thenReturn("floatName");
             synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "floatName")).thenReturn("10.5");
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "typeFloat")).thenReturn(Constants.FLOAT);
-            
+
             Object resultFloat = handler.getParameter(context, "paramFloat", "typeFloat", 0);
             Assert.assertEquals(resultFloat, 10.5);
 
@@ -94,10 +94,10 @@ public class ParamHandlerTest {
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramJson")).thenReturn("jsonName");
             synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "jsonName")).thenReturn("{}");
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "typeJson")).thenReturn(Constants.JSON);
-            
+
             Object mockJson = new Object();
             dataTransformerMock.when(() -> DataTransformer.getJsonParameter(any())).thenReturn(mockJson);
-            
+
             Object resultJson = handler.getParameter(context, "paramJson", "typeJson", 0);
             Assert.assertSame(resultJson, mockJson);
        }
@@ -107,19 +107,19 @@ public class ParamHandlerTest {
     public void testPrependPathParams() {
         try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
              MockedStatic<StringUtils> stringUtilsMock = Mockito.mockStatic(StringUtils.class)) {
-            
+
             MessageContext context = mock(MessageContext.class);
             ParamHandler handler = new ParamHandler();
             Object[] args = new Object[] { "arg1" };
-            
+
             // PATH_PARAM_SIZE = 2
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, Constants.PATH_PARAM_SIZE)).thenReturn("2");
-            
+
             // Path Param 0: int 100
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "pathParam0")).thenReturn("p0");
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "pathParamType0")).thenReturn(Constants.INT);
             synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "p0")).thenReturn("100");
-            
+
             // Path Param 1: string "hello"
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "pathParam1")).thenReturn("p1");
             synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "pathParamType1")).thenReturn(Constants.STRING);
@@ -128,7 +128,7 @@ public class ParamHandlerTest {
             stringUtilsMock.when(() -> StringUtils.fromString("hello")).thenReturn(helloBStr);
 
             Object[] combined = handler.prependPathParams(args, context);
-            
+
             Assert.assertEquals(combined.length, 3);
             Assert.assertEquals(combined[0], 100L);
             Assert.assertEquals(combined[1], helloBStr);

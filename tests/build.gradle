@@ -38,6 +38,8 @@ dependencies {
     testImplementation 'io.rest-assured:rest-assured:5.4.0'
     testImplementation 'io.rest-assured:json-path:5.4.0'
     testImplementation 'io.rest-assured:xml-path:5.4.0'
+    testImplementation 'org.mockito:mockito-core:5.8.0'
+    testImplementation 'com.google.code.gson:gson:2.10.1'
     implementation project(':mi-native')
     testImplementation project(path: ':tool-mi-module-gen-cli')
 }
@@ -409,7 +411,12 @@ gradle.projectsEvaluated {
             it.sourceSets.main.allSource.srcDirs
         }))
 
-        // Execution data comes from the test task
-        executionData.setFrom(files("${buildDir}/jacoco/test.exec"))
+        // Execution data comes from the test task of each project
+        executionData.setFrom(files(
+            "${buildDir}/jacoco/test.exec",
+            coverageProjects.collect { "${it.buildDir}/jacoco/test.exec" }
+        ))
+        
+        dependsOn(coverageProjects.collect { it.tasks.named('test') })
     }
 }

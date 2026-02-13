@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+ * Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -48,7 +48,7 @@ public class SynapseUtilsTest {
         MessageContext context = mock(MessageContext.class);
         String plain = "plain text";
         Assert.assertEquals(SynapseUtils.resolveSynapseExpressions(plain, context), "plain text");
-        
+
         // This test only covers the no-match path. The match path requires mocking SynapseExpression constructor or external system.
         // Assuming no exception thrown for valid input.
     }
@@ -65,16 +65,16 @@ public class SynapseUtilsTest {
     public void testFindConnectionTypeForParam() {
         MessageContext context = mock(MessageContext.class);
         Stack<TemplateContext> stack = new Stack<>();
-        
+
         TemplateContext tc = mock(TemplateContext.class);
         when(tc.getParameterValue("connectionType")).thenReturn("GMAIL");
-        
+
         stack.push(tc);
 
         when(context.getProperty(Constants.SYNAPSE_FUNCTION_STACK)).thenReturn(stack);
-        
+
         String connectionType = SynapseUtils.findConnectionTypeForParam(context, "someParam");
-        
+
         Assert.assertEquals(connectionType, "GMAIL");
     }
 
