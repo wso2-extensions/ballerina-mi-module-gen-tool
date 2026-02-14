@@ -856,4 +856,283 @@ public class DataTransformerTest {
         String expected = "a\\\\b\\\"c\\nd\\re\\tf";
         Assert.assertEquals(DataTransformer.escapeJsonString(input), expected);
     }
+
+    @Test
+    public void testConvertValueToType_RecordType() {
+        try (MockedStatic<ValueCreator> valueCreatorMock = Mockito.mockStatic(ValueCreator.class);
+             MockedStatic<StringUtils> stringUtilsMock = Mockito.mockStatic(StringUtils.class)) {
+
+            BMap<BString, Object> sourceMap = mock(BMap.class);
+            StructureType targetType = mock(StructureType.class);
+            Field field = mock(Field.class);
+
+            io.ballerina.runtime.api.Module module = mock(io.ballerina.runtime.api.Module.class);
+            when(targetType.getPackage()).thenReturn(module);
+            when(targetType.getName()).thenReturn("TestRecord");
+            when(targetType.getTag()).thenReturn(TypeTags.RECORD_TYPE_TAG);
+
+            Map<String, Field> fields = new HashMap<>();
+            fields.put("name", field);
+            when(targetType.getFields()).thenReturn(fields);
+            when(field.getFieldName()).thenReturn("name");
+
+            Type fieldType = mock(Type.class);
+            when(fieldType.getTag()).thenReturn(TypeTags.STRING_TAG);
+            when(field.getFieldType()).thenReturn(fieldType);
+
+            BString bFieldName = mock(BString.class);
+            stringUtilsMock.when(() -> StringUtils.fromString("name")).thenReturn(bFieldName);
+            when(sourceMap.containsKey(bFieldName)).thenReturn(true);
+            when(sourceMap.get(bFieldName)).thenReturn("testValue");
+
+            BMap<BString, Object> typedRecord = mock(BMap.class);
+            valueCreatorMock.when(() -> ValueCreator.createRecordValue(module, "TestRecord"))
+                    .thenReturn(typedRecord);
+
+            Object result = DataTransformer.convertValueToType(sourceMap, targetType);
+            Assert.assertSame(result, typedRecord);
+        }
+    }
+
+    @Test
+    public void testConvertValueToType_ArrayType() {
+        try (MockedStatic<ValueCreator> valueCreatorMock = Mockito.mockStatic(ValueCreator.class)) {
+            BArray sourceArray = mock(BArray.class);
+            ArrayType targetType = mock(ArrayType.class);
+
+            Type elementType = mock(Type.class);
+            when(elementType.getTag()).thenReturn(TypeTags.STRING_TAG);
+            when(targetType.getTag()).thenReturn(TypeTags.ARRAY_TAG);
+            when(targetType.getElementType()).thenReturn(elementType);
+            when(sourceArray.size()).thenReturn(0);
+
+            Object result = DataTransformer.convertValueToType(sourceArray, targetType);
+            Assert.assertSame(result, sourceArray);
+        }
+    }
+
+    @Test
+    public void testGetMapParameter_TableArray() {
+        try (MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class);
+             MockedStatic<ValueCreator> valueCreatorMock = Mockito.mockStatic(ValueCreator.class);
+             MockedStatic<StringUtils> stringUtilsMock = Mockito.mockStatic(StringUtils.class);
+             MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+
+            MessageContext context = mock(MessageContext.class);
+            BArray tableArray = mock(BArray.class);
+            BMap row = mock(BMap.class);
+
+            BString keyFieldName = mock(BString.class);
+            BString valueFieldName = mock(BString.class);
+            stringUtilsMock.when(() -> StringUtils.fromString("key")).thenReturn(keyFieldName);
+            stringUtilsMock.when(() -> StringUtils.fromString("value")).thenReturn(valueFieldName);
+
+            when(tableArray.size()).thenReturn(1);
+            when(tableArray.get(0)).thenReturn(row);
+            when(row.containsKey(keyFieldName)).thenReturn(true);
+            when(row.containsKey(valueFieldName)).thenReturn(true);
+            when(row.size()).thenReturn(2);
+            when(row.get(keyFieldName)).thenReturn("myKey");
+            when(row.get(valueFieldName)).thenReturn("myValue");
+
+            Object[] keys = { keyFieldName, valueFieldName };
+            when(row.getKeys()).thenReturn(keys);
+
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString("[{\"key\":\"myKey\",\"value\":\"myValue\"}]"))
+                    .thenReturn("[{\"key\":\"myKey\",\"value\":\"myValue\"}]");
+            jsonUtilsMock.when(() -> JsonUtils.parse("[{\"key\":\"myKey\",\"value\":\"myValue\"}]"))
+                    .thenReturn(tableArray);
+
+            BMap resultMap = mock(BMap.class);
+            valueCreatorMock.when(ValueCreator::createMapValue).thenReturn(resultMap);
+
+            BMap result = DataTransformer.getMapParameter("[{\"key\":\"myKey\",\"value\":\"myValue\"}]", context, "param0");
+            Assert.assertSame(result, resultMap);
+        }
+    }
+
+    @Test
+    public void testParseInnerTableValues_ResolvedExpression() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            String innerTableStr = "[{value=item1}]";
+            synapseUtilsMock.when(() -> SynapseUtils.resolveSynapseExpressions(innerTableStr, null))
+                    .thenReturn("[{value=item1}]");
+
+            String result = DataTransformer.parseInnerTableValues(innerTableStr, null);
+            Assert.assertEquals(result, "[\"item1\"]");
+        }
+    }
+
+    @Test
+    public void testParseInnerTableValues_NumericValues() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            String innerTableStr = "[{value=123}, {value=45.67}]";
+            synapseUtilsMock.when(() -> SynapseUtils.resolveSynapseExpressions(innerTableStr, null))
+                    .thenReturn("[{value=123}, {value=45.67}]");
+
+            String result = DataTransformer.parseInnerTableValues(innerTableStr, null);
+            Assert.assertEquals(result, "[123,45.67]");
+        }
+    }
+
+    @Test
+    public void testParseInnerTableValues_BooleanValues() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            String innerTableStr = "[{value=true}, {value=false}]";
+            synapseUtilsMock.when(() -> SynapseUtils.resolveSynapseExpressions(innerTableStr, null))
+                    .thenReturn("[{value=true}, {value=false}]");
+
+            String result = DataTransformer.parseInnerTableValues(innerTableStr, null);
+            Assert.assertEquals(result, "[true,false]");
+        }
+    }
+
+    @Test
+    public void testAppendJsonValue_BooleanTrue() {
+        StringBuilder sb = new StringBuilder();
+        DataTransformer.appendJsonValue(sb, true);
+        Assert.assertEquals(sb.toString(), "true");
+    }
+
+    @Test
+    public void testAppendJsonValue_BooleanFalse() {
+        StringBuilder sb = new StringBuilder();
+        DataTransformer.appendJsonValue(sb, false);
+        Assert.assertEquals(sb.toString(), "false");
+    }
+
+    @Test
+    public void testAppendJsonValue_IntegerZero() {
+        StringBuilder sb = new StringBuilder();
+        DataTransformer.appendJsonValue(sb, 0);
+        Assert.assertEquals(sb.toString(), "0");
+    }
+
+    @Test
+    public void testAppendJsonValue_ZeroPointZero() {
+        StringBuilder sb = new StringBuilder();
+        DataTransformer.appendJsonValue(sb, 0.0);
+        Assert.assertEquals(sb.toString(), "0.0");
+    }
+
+    @Test
+    public void testTransformTableArrayToSimpleArray_NumberValue() {
+        try (MockedStatic<StringUtils> stringUtilsMock = Mockito.mockStatic(StringUtils.class)) {
+            BString valueKey = mock(BString.class);
+            stringUtilsMock.when(() -> StringUtils.fromString("value")).thenReturn(valueKey);
+
+            BArray tableArray = mock(BArray.class);
+            when(tableArray.size()).thenReturn(1);
+
+            BMap row = mock(BMap.class);
+            when(tableArray.get(0)).thenReturn(row);
+            when(row.get(valueKey)).thenReturn(100);
+
+            String result = DataTransformer.transformTableArrayToSimpleArray(tableArray);
+            Assert.assertEquals(result, "[100]");
+        }
+    }
+
+    @Test
+    public void testTransformTableArrayToSimpleArray_BooleanValue() {
+        try (MockedStatic<StringUtils> stringUtilsMock = Mockito.mockStatic(StringUtils.class)) {
+            BString valueKey = mock(BString.class);
+            stringUtilsMock.when(() -> StringUtils.fromString("value")).thenReturn(valueKey);
+
+            BArray tableArray = mock(BArray.class);
+            when(tableArray.size()).thenReturn(1);
+
+            BMap row = mock(BMap.class);
+            when(tableArray.get(0)).thenReturn(row);
+            when(row.get(valueKey)).thenReturn(Boolean.TRUE);
+
+            String result = DataTransformer.transformTableArrayToSimpleArray(tableArray);
+            Assert.assertEquals(result, "[true]");
+        }
+    }
+
+    @Test
+    public void testParseInnerTableValues_EmptyBrackets() {
+        String result = DataTransformer.parseInnerTableValues("[]", null);
+        Assert.assertEquals(result, "[]");
+    }
+
+    @Test
+    public void testParseInnerTableValues_WhitespaceOnly() {
+        String result = DataTransformer.parseInnerTableValues("   ", null);
+        Assert.assertEquals(result, "[]");
+    }
+
+    @Test
+    public void testTransformMIStudioNestedTableTo2DArray_EmptyArray() {
+        BArray outerArray = mock(BArray.class);
+        when(outerArray.size()).thenReturn(0);
+
+        String result = DataTransformer.transformMIStudioNestedTableTo2DArray(outerArray, null);
+        Assert.assertEquals(result, "[]");
+    }
+
+    @Test
+    public void testGetMapParameter_2DArrayWithFieldNames() {
+        try (MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class);
+             MockedStatic<ValueCreator> valueCreatorMock = Mockito.mockStatic(ValueCreator.class);
+             MockedStatic<StringUtils> stringUtilsMock = Mockito.mockStatic(StringUtils.class);
+             MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+
+            MessageContext context = mock(MessageContext.class);
+            BArray array2D = mock(BArray.class);
+            BArray innerRow = mock(BArray.class);
+            BString keyBString = mock(BString.class);
+
+            stringUtilsMock.when(() -> StringUtils.fromString("key")).thenReturn(keyBString);
+            stringUtilsMock.when(() -> StringUtils.fromString("myKey")).thenReturn(mock(BString.class));
+            stringUtilsMock.when(() -> StringUtils.fromString("field0")).thenReturn(mock(BString.class));
+
+            when(array2D.size()).thenReturn(1);
+            when(array2D.get(0)).thenReturn(innerRow);
+            when(innerRow.size()).thenReturn(2);
+            when(innerRow.get(0)).thenReturn("myKey");
+            when(innerRow.get(1)).thenReturn("myValue");
+
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString("[[\"myKey\",\"myValue\"]]"))
+                    .thenReturn("[[\"myKey\",\"myValue\"]]");
+            jsonUtilsMock.when(() -> JsonUtils.parse("[[\"myKey\",\"myValue\"]]"))
+                    .thenReturn(array2D);
+
+            BMap resultMap = mock(BMap.class);
+            valueCreatorMock.when(ValueCreator::createMapValue).thenReturn(resultMap);
+
+            when(context.getProperty("mapRecordFields0")).thenReturn(null);
+
+            BMap result = DataTransformer.getMapParameter("[[\"myKey\",\"myValue\"]]", context, "param0");
+            Assert.assertSame(result, resultMap);
+        }
+    }
+
+    @Test
+    public void testTransformNestedTableTo2DArray_BMapWithNoValueField() {
+        try (MockedStatic<StringUtils> stringUtilsMock = Mockito.mockStatic(StringUtils.class)) {
+            BString innerArrayKey = mock(BString.class);
+            BString valueKey = mock(BString.class);
+
+            stringUtilsMock.when(() -> StringUtils.fromString("innerArray")).thenReturn(innerArrayKey);
+            stringUtilsMock.when(() -> StringUtils.fromString("value")).thenReturn(valueKey);
+
+            BArray outerArray = mock(BArray.class);
+            when(outerArray.size()).thenReturn(1);
+
+            BMap outerRow = mock(BMap.class);
+            when(outerArray.get(0)).thenReturn(outerRow);
+            BArray innerArray = mock(BArray.class);
+            when(outerRow.get(innerArrayKey)).thenReturn(innerArray);
+            when(innerArray.size()).thenReturn(1);
+
+            BMap innerRow = mock(BMap.class);
+            when(innerArray.get(0)).thenReturn(innerRow);
+            when(innerRow.containsKey(valueKey)).thenReturn(false);
+
+            String result = DataTransformer.transformNestedTableTo2DArray(outerArray);
+            Assert.assertTrue(result.startsWith("[["));
+        }
+    }
 }

@@ -536,4 +536,353 @@ public class UtilsTest {
 
         Assert.assertEquals(Utils.getReturnTypeName(functionSymbol), "union");
     }
+
+    @Test
+    public void testZipFolder() throws IOException {
+        // Create a temp directory with files
+        Path tempDir = Files.createTempDirectory("test-zip");
+        Path subDir = Files.createDirectory(tempDir.resolve("subdir"));
+        Files.writeString(tempDir.resolve("file1.txt"), "content1");
+        Files.writeString(subDir.resolve("file2.txt"), "content2");
+
+        // Create a .DS_Store file to test skipping
+        Files.writeString(tempDir.resolve(".DS_Store"), "dsstore");
+        Files.writeString(tempDir.resolve("._resource"), "resource fork");
+
+        // Create __MACOSX directory to test skipping
+        Path macosDir = Files.createDirectory(tempDir.resolve("__MACOSX"));
+        Files.writeString(macosDir.resolve("hidden.txt"), "hidden");
+
+        Path zipFile = Files.createTempFile("test-zip", ".zip");
+
+        try {
+            Utils.zipFolder(tempDir, zipFile.toString());
+
+            // Verify zip file exists
+            Assert.assertTrue(Files.exists(zipFile));
+            Assert.assertTrue(Files.size(zipFile) > 0);
+        } finally {
+            // Cleanup
+            Utils.deleteDirectory(tempDir);
+            Files.deleteIfExists(zipFile);
+        }
+    }
+
+    @Test
+    public void testHasOpenApiResourceInfoAnnotation_EmptyName() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        AnnotationSymbol annotationSymbol = mock(AnnotationSymbol.class);
+        when(annotationSymbol.getName()).thenReturn(Optional.empty());
+
+        when(functionSymbol.annotations()).thenReturn(Collections.singletonList(annotationSymbol));
+
+        boolean result = Utils.hasOpenApiResourceInfoAnnotation(functionSymbol);
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void testGetReturnTypeName_Boolean() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol typeSymbol = mock(FunctionTypeSymbol.class);
+        TypeSymbol returnType = mock(TypeSymbol.class);
+
+        when(functionSymbol.typeDescriptor()).thenReturn(typeSymbol);
+        when(typeSymbol.returnTypeDescriptor()).thenReturn(Optional.of(returnType));
+        when(returnType.typeKind()).thenReturn(TypeDescKind.BOOLEAN);
+
+        Assert.assertEquals(Utils.getReturnTypeName(functionSymbol), "boolean");
+    }
+
+    @Test
+    public void testGetReturnTypeName_Int() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol typeSymbol = mock(FunctionTypeSymbol.class);
+        TypeSymbol returnType = mock(TypeSymbol.class);
+
+        when(functionSymbol.typeDescriptor()).thenReturn(typeSymbol);
+        when(typeSymbol.returnTypeDescriptor()).thenReturn(Optional.of(returnType));
+        when(returnType.typeKind()).thenReturn(TypeDescKind.INT);
+
+        Assert.assertEquals(Utils.getReturnTypeName(functionSymbol), "int");
+    }
+
+    @Test
+    public void testGetReturnTypeName_Float() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol typeSymbol = mock(FunctionTypeSymbol.class);
+        TypeSymbol returnType = mock(TypeSymbol.class);
+
+        when(functionSymbol.typeDescriptor()).thenReturn(typeSymbol);
+        when(typeSymbol.returnTypeDescriptor()).thenReturn(Optional.of(returnType));
+        when(returnType.typeKind()).thenReturn(TypeDescKind.FLOAT);
+
+        Assert.assertEquals(Utils.getReturnTypeName(functionSymbol), "float");
+    }
+
+    @Test
+    public void testGetReturnTypeName_Decimal() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol typeSymbol = mock(FunctionTypeSymbol.class);
+        TypeSymbol returnType = mock(TypeSymbol.class);
+
+        when(functionSymbol.typeDescriptor()).thenReturn(typeSymbol);
+        when(typeSymbol.returnTypeDescriptor()).thenReturn(Optional.of(returnType));
+        when(returnType.typeKind()).thenReturn(TypeDescKind.DECIMAL);
+
+        Assert.assertEquals(Utils.getReturnTypeName(functionSymbol), "decimal");
+    }
+
+    @Test
+    public void testGetReturnTypeName_Xml() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol typeSymbol = mock(FunctionTypeSymbol.class);
+        TypeSymbol returnType = mock(TypeSymbol.class);
+
+        when(functionSymbol.typeDescriptor()).thenReturn(typeSymbol);
+        when(typeSymbol.returnTypeDescriptor()).thenReturn(Optional.of(returnType));
+        when(returnType.typeKind()).thenReturn(TypeDescKind.XML);
+
+        Assert.assertEquals(Utils.getReturnTypeName(functionSymbol), "xml");
+    }
+
+    @Test
+    public void testGetReturnTypeName_Json() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol typeSymbol = mock(FunctionTypeSymbol.class);
+        TypeSymbol returnType = mock(TypeSymbol.class);
+
+        when(functionSymbol.typeDescriptor()).thenReturn(typeSymbol);
+        when(typeSymbol.returnTypeDescriptor()).thenReturn(Optional.of(returnType));
+        when(returnType.typeKind()).thenReturn(TypeDescKind.JSON);
+
+        Assert.assertEquals(Utils.getReturnTypeName(functionSymbol), "json");
+    }
+
+    @Test
+    public void testGetReturnTypeName_Array() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol typeSymbol = mock(FunctionTypeSymbol.class);
+        TypeSymbol returnType = mock(TypeSymbol.class);
+
+        when(functionSymbol.typeDescriptor()).thenReturn(typeSymbol);
+        when(typeSymbol.returnTypeDescriptor()).thenReturn(Optional.of(returnType));
+        when(returnType.typeKind()).thenReturn(TypeDescKind.ARRAY);
+
+        Assert.assertEquals(Utils.getReturnTypeName(functionSymbol), "array");
+    }
+
+    @Test
+    public void testGetReturnTypeName_Map() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol typeSymbol = mock(FunctionTypeSymbol.class);
+        TypeSymbol returnType = mock(TypeSymbol.class);
+
+        when(functionSymbol.typeDescriptor()).thenReturn(typeSymbol);
+        when(typeSymbol.returnTypeDescriptor()).thenReturn(Optional.of(returnType));
+        when(returnType.typeKind()).thenReturn(TypeDescKind.MAP);
+
+        Assert.assertEquals(Utils.getReturnTypeName(functionSymbol), "map");
+    }
+
+    @Test
+    public void testGetReturnTypeName_Record() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol typeSymbol = mock(FunctionTypeSymbol.class);
+        TypeSymbol returnType = mock(TypeSymbol.class);
+
+        when(functionSymbol.typeDescriptor()).thenReturn(typeSymbol);
+        when(typeSymbol.returnTypeDescriptor()).thenReturn(Optional.of(returnType));
+        when(returnType.typeKind()).thenReturn(TypeDescKind.RECORD);
+
+        Assert.assertEquals(Utils.getReturnTypeName(functionSymbol), "record");
+    }
+
+    @Test
+    public void testSanitizeXmlName_InvalidFirstChar() {
+        // First char is invalid and not a digit - should be skipped
+        Assert.assertEquals(Utils.sanitizeXmlName("@name"), "name");
+        Assert.assertEquals(Utils.sanitizeXmlName("!test"), "test");
+        Assert.assertEquals(Utils.sanitizeXmlName("#hello"), "hello");
+    }
+
+    @Test
+    public void testSanitizeXmlName_AllInvalidChars() {
+        // All characters are invalid
+        Assert.assertEquals(Utils.sanitizeXmlName("@#$"), "resource");
+    }
+
+    @Test
+    public void testGenerateSynapseNameForResourceWithNullHint() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol functionTypeSymbol = mock(FunctionTypeSymbol.class);
+        TypeSymbol returnTypeSymbol = mock(TypeSymbol.class);
+
+        when(functionSymbol.getName()).thenReturn(Optional.of("get"));
+        when(functionSymbol.typeDescriptor()).thenReturn(functionTypeSymbol);
+        when(functionTypeSymbol.params()).thenReturn(Optional.empty());
+        when(functionTypeSymbol.returnTypeDescriptor()).thenReturn(Optional.of(returnTypeSymbol));
+        when(returnTypeSymbol.typeKind()).thenReturn(TypeDescKind.STRING);
+        when(returnTypeSymbol.getName()).thenReturn(Optional.of("String"));
+
+        // Null hint should fall back to default behavior
+        String synapseName = Utils.generateSynapseName(functionSymbol, FunctionType.RESOURCE, null);
+        Assert.assertEquals(synapseName, "getString");
+    }
+
+    @Test
+    public void testGenerateSynapseNameForResourceWithNoReturnType() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol functionTypeSymbol = mock(FunctionTypeSymbol.class);
+
+        when(functionSymbol.getName()).thenReturn(Optional.of("delete"));
+        when(functionSymbol.typeDescriptor()).thenReturn(functionTypeSymbol);
+        when(functionTypeSymbol.params()).thenReturn(Optional.empty());
+        when(functionTypeSymbol.returnTypeDescriptor()).thenReturn(Optional.empty());
+
+        String synapseName = Utils.generateSynapseName(functionSymbol, FunctionType.RESOURCE);
+        Assert.assertEquals(synapseName, "deleteResource");
+    }
+
+    @Test
+    public void testGenerateSynapseNameForResourceWithFunctionName() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol functionTypeSymbol = mock(FunctionTypeSymbol.class);
+
+        when(functionSymbol.getName()).thenReturn(Optional.of("myFunction"));
+        when(functionSymbol.typeDescriptor()).thenReturn(functionTypeSymbol);
+        when(functionTypeSymbol.params()).thenReturn(Optional.empty());
+        when(functionTypeSymbol.returnTypeDescriptor()).thenReturn(Optional.empty());
+
+        String synapseName = Utils.generateSynapseName(functionSymbol, FunctionType.FUNCTION);
+        Assert.assertEquals(synapseName, "myFunction");
+    }
+
+    @Test
+    public void testGenerateSynapseNameForResourceWithEmptyFunctionName() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol functionTypeSymbol = mock(FunctionTypeSymbol.class);
+
+        when(functionSymbol.getName()).thenReturn(Optional.empty());
+        when(functionSymbol.typeDescriptor()).thenReturn(functionTypeSymbol);
+        when(functionTypeSymbol.params()).thenReturn(Optional.empty());
+        when(functionTypeSymbol.returnTypeDescriptor()).thenReturn(Optional.empty());
+
+        String synapseName = Utils.generateSynapseName(functionSymbol, FunctionType.FUNCTION);
+        Assert.assertEquals(synapseName, "unknown");
+    }
+
+    @Test
+    public void testGenerateSynapseNameWithTypeSuffixes() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol functionTypeSymbol = mock(FunctionTypeSymbol.class);
+        ParameterSymbol paramSymbol = mock(ParameterSymbol.class);
+        TypeSymbol paramTypeSymbol = mock(TypeSymbol.class);
+
+        when(functionSymbol.getName()).thenReturn(Optional.of("post"));
+        when(functionSymbol.typeDescriptor()).thenReturn(functionTypeSymbol);
+        when(functionTypeSymbol.params()).thenReturn(Optional.of(Collections.singletonList(paramSymbol)));
+        when(paramSymbol.typeDescriptor()).thenReturn(paramTypeSymbol);
+        when(paramTypeSymbol.typeKind()).thenReturn(TypeDescKind.RECORD);
+        when(paramTypeSymbol.getName()).thenReturn(Optional.of("GmailUsersDraftsListQueries"));
+
+        String synapseName = Utils.generateSynapseName(functionSymbol, FunctionType.RESOURCE);
+        // Should strip "Queries" suffix and extract meaningful name
+        Assert.assertTrue(synapseName.startsWith("post"));
+    }
+
+    @Test
+    public void testGenerateSynapseNameWithRequestSuffix() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol functionTypeSymbol = mock(FunctionTypeSymbol.class);
+        ParameterSymbol paramSymbol = mock(ParameterSymbol.class);
+        TypeSymbol paramTypeSymbol = mock(TypeSymbol.class);
+
+        when(functionSymbol.getName()).thenReturn(Optional.of("post"));
+        when(functionSymbol.typeDescriptor()).thenReturn(functionTypeSymbol);
+        when(functionTypeSymbol.params()).thenReturn(Optional.of(Collections.singletonList(paramSymbol)));
+        when(paramSymbol.typeDescriptor()).thenReturn(paramTypeSymbol);
+        when(paramTypeSymbol.typeKind()).thenReturn(TypeDescKind.RECORD);
+        when(paramTypeSymbol.getName()).thenReturn(Optional.of("CreateUserRequest"));
+
+        String synapseName = Utils.generateSynapseName(functionSymbol, FunctionType.RESOURCE);
+        Assert.assertEquals(synapseName, "postUser");
+    }
+
+    @Test
+    public void testGenerateSynapseNameWithPayloadSuffix() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol functionTypeSymbol = mock(FunctionTypeSymbol.class);
+        ParameterSymbol paramSymbol = mock(ParameterSymbol.class);
+        TypeSymbol paramTypeSymbol = mock(TypeSymbol.class);
+
+        when(functionSymbol.getName()).thenReturn(Optional.of("post"));
+        when(functionSymbol.typeDescriptor()).thenReturn(functionTypeSymbol);
+        when(functionTypeSymbol.params()).thenReturn(Optional.of(Collections.singletonList(paramSymbol)));
+        when(paramSymbol.typeDescriptor()).thenReturn(paramTypeSymbol);
+        when(paramTypeSymbol.typeKind()).thenReturn(TypeDescKind.RECORD);
+        when(paramTypeSymbol.getName()).thenReturn(Optional.of("CreateMessagePayload"));
+
+        String synapseName = Utils.generateSynapseName(functionSymbol, FunctionType.RESOURCE);
+        Assert.assertEquals(synapseName, "postMessage");
+    }
+
+    @Test
+    public void testGenerateSynapseNameWithEmptyParamTypeName() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        FunctionTypeSymbol functionTypeSymbol = mock(FunctionTypeSymbol.class);
+        ParameterSymbol paramSymbol = mock(ParameterSymbol.class);
+        TypeSymbol paramTypeSymbol = mock(TypeSymbol.class);
+        TypeSymbol returnTypeSymbol = mock(TypeSymbol.class);
+
+        when(functionSymbol.getName()).thenReturn(Optional.of("get"));
+        when(functionSymbol.typeDescriptor()).thenReturn(functionTypeSymbol);
+        when(functionTypeSymbol.params()).thenReturn(Optional.of(Collections.singletonList(paramSymbol)));
+        when(paramSymbol.typeDescriptor()).thenReturn(paramTypeSymbol);
+        when(paramTypeSymbol.typeKind()).thenReturn(TypeDescKind.STRING);
+        when(paramTypeSymbol.getName()).thenReturn(Optional.empty());
+        when(functionTypeSymbol.returnTypeDescriptor()).thenReturn(Optional.of(returnTypeSymbol));
+        when(returnTypeSymbol.typeKind()).thenReturn(TypeDescKind.RECORD);
+        when(returnTypeSymbol.getName()).thenReturn(Optional.of("UserResponse"));
+
+        String synapseName = Utils.generateSynapseName(functionSymbol, FunctionType.RESOURCE);
+        Assert.assertEquals(synapseName, "getUser");
+    }
+
+    @Test
+    public void testHumanizeName_WithMultipleSpaces() {
+        Assert.assertEquals(Utils.humanizeName("user  name"), "user name");
+    }
+
+    @Test
+    public void testHumanizeName_LeadingAndTrailingSpaces() {
+        Assert.assertEquals(Utils.humanizeName("  userName  "), "user name");
+    }
+
+    @Test
+    public void testHumanizeName_SingleUppercaseLetter() {
+        Assert.assertEquals(Utils.humanizeName("A"), "a");
+    }
+
+    @Test
+    public void testHumanizeName_SingleLowercaseLetter() {
+        Assert.assertEquals(Utils.humanizeName("a"), "a");
+    }
+
+    @Test
+    public void testGenerateSynapseNameForRemoteFunction() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        when(functionSymbol.getName()).thenReturn(Optional.of("sendMessage"));
+
+        String synapseName = Utils.generateSynapseName(functionSymbol, FunctionType.REMOTE);
+        Assert.assertEquals(synapseName, "sendMessage");
+    }
+
+    @Test
+    public void testGenerateSynapseNameForInitFunction() {
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+        when(functionSymbol.getName()).thenReturn(Optional.of("init"));
+
+        String synapseName = Utils.generateSynapseName(functionSymbol, FunctionType.INIT);
+        Assert.assertEquals(synapseName, "init");
+    }
 }

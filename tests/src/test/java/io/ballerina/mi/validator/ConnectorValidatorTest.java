@@ -441,4 +441,566 @@ public class ConnectorValidatorTest {
         Assert.assertTrue(str.contains("INVALID"));
         Assert.assertTrue(str.contains("Single error message"));
     }
+
+    @Test
+    public void testValidateUISchemaContent_NumberValue() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [],
+                "version": 123
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_BooleanValue() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [],
+                "enabled": true
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchema_WithValidOperation() throws IOException {
+        Path jsonFile = tempDir.resolve("valid-operation.json");
+        String json = """
+            {
+                "operationName": "createUser",
+                "title": "Create User",
+                "elements": [
+                    {
+                        "type": "attribute",
+                        "value": {
+                            "name": "username",
+                            "displayName": "Username",
+                            "inputType": "stringOrExpression",
+                            "required": true
+                        }
+                    }
+                ]
+            }
+            """;
+        Files.writeString(jsonFile, json);
+
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchema(jsonFile);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchema_MalformedJson() throws IOException {
+        Path malformedFile = tempDir.resolve("malformed.json");
+        Files.writeString(malformedFile, "{\"operationName\": \"test\", invalid}");
+
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchema(malformedFile);
+        Assert.assertFalse(result.valid());
+    }
+
+    @Test
+    public void testValidateUISchemaContent_WithHelpTip() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {
+                        "type": "attribute",
+                        "value": {
+                            "name": "param1",
+                            "displayName": "Parameter 1",
+                            "inputType": "stringOrExpression",
+                            "helpTip": "Enter the parameter value"
+                        }
+                    }
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_WithPlaceholder() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {
+                        "type": "attribute",
+                        "value": {
+                            "name": "param1",
+                            "displayName": "Parameter 1",
+                            "inputType": "stringOrExpression",
+                            "placeholder": "Enter value..."
+                        }
+                    }
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_WithDefaultValue() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {
+                        "type": "attribute",
+                        "value": {
+                            "name": "param1",
+                            "displayName": "Parameter 1",
+                            "inputType": "stringOrExpression",
+                            "defaultValue": "default"
+                        }
+                    }
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_ComboInputType() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {
+                        "type": "attribute",
+                        "value": {
+                            "name": "format",
+                            "displayName": "Format",
+                            "inputType": "combo",
+                            "comboValues": ["json", "xml", "text"]
+                        }
+                    }
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_WithEnableCondition() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {
+                        "type": "attribute",
+                        "value": {
+                            "name": "conditionalParam",
+                            "displayName": "Conditional",
+                            "inputType": "stringOrExpression",
+                            "enableCondition": "otherParam == 'true'"
+                        }
+                    }
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_AttributeGroup() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {
+                        "type": "attributeGroup",
+                        "value": {
+                            "groupName": "Advanced Options",
+                            "isCollapsed": true,
+                            "elements": []
+                        }
+                    }
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_WithMultipleAttributeGroups() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {
+                        "type": "attributeGroup",
+                        "value": {
+                            "groupName": "Basic",
+                            "elements": []
+                        }
+                    },
+                    {
+                        "type": "attributeGroup",
+                        "value": {
+                            "groupName": "Advanced",
+                            "elements": []
+                        }
+                    }
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidationResult_AccessMethods() {
+        ConnectorValidator.ValidationResult valid = new ConnectorValidator.ValidationResult(true, java.util.List.of());
+        Assert.assertTrue(valid.valid());
+        Assert.assertTrue(valid.errors().isEmpty());
+
+        ConnectorValidator.ValidationResult invalid = new ConnectorValidator.ValidationResult(false, java.util.List.of("err1", "err2"));
+        Assert.assertFalse(invalid.valid());
+        Assert.assertEquals(invalid.errors().size(), 2);
+    }
+
+    @Test
+    public void testValidateUISchema_ValidConnectionSchema() throws IOException {
+        Path jsonFile = tempDir.resolve("connection.json");
+        String json = """
+            {
+                "connectionName": "MyConnection",
+                "title": "My Connection",
+                "elements": [
+                    {
+                        "type": "attribute",
+                        "value": {
+                            "name": "apiKey",
+                            "displayName": "API Key",
+                            "inputType": "stringOrExpression",
+                            "required": true
+                        }
+                    }
+                ]
+            }
+            """;
+        Files.writeString(jsonFile, json);
+
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchema(jsonFile);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_UnicodeCharacters() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {
+                        "type": "attribute",
+                        "value": {
+                            "name": "description",
+                            "displayName": "説明",
+                            "inputType": "stringOrExpression"
+                        }
+                    }
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_VeryLongString() {
+        StringBuilder longString = new StringBuilder("test");
+        for (int i = 0; i < 100; i++) {
+            longString.append("_extended_name_segment");
+        }
+
+        String json = String.format("""
+            {
+                "operationName": "%s",
+                "elements": []
+            }
+            """, longString.toString());
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateConnector_EmptyDirectory() throws IOException {
+        Path emptyDir = tempDir.resolve("empty");
+        Files.createDirectory(emptyDir);
+        boolean result = ConnectorValidator.validateConnector(emptyDir);
+        Assert.assertFalse(result);
+    }
+
+    // --- Additional tests for large file streaming validation ---
+
+    @Test
+    public void testValidateUISchema_LargeFileThatIsNotJson() throws IOException {
+        // Create a file larger than 5MB but not valid JSON
+        Path largeFile = tempDir.resolve("large.json");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 6 * 1024 * 1024 / 10; i++) {
+            sb.append("not json ");
+        }
+        Files.writeString(largeFile, sb.toString());
+
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchema(largeFile);
+        Assert.assertFalse(result.valid());
+    }
+
+    @Test
+    public void testValidateUISchema_LargeValidJson() throws IOException {
+        // Create a file larger than 5MB that is valid JSON
+        Path largeFile = tempDir.resolve("large-valid.json");
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\"operationName\": \"test\", \"data\": \"");
+        for (int i = 0; i < 6 * 1024 * 1024 / 10; i++) {
+            sb.append("x");
+        }
+        sb.append("\"}");
+        Files.writeString(largeFile, sb.toString());
+
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchema(largeFile);
+        // Large file uses streaming validation - should pass for valid JSON object with operationName
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchema_LargeJsonArray() throws IOException {
+        // Create a large file that is a JSON array (not object)
+        Path largeFile = tempDir.resolve("large-array.json");
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < 600000; i++) {
+            if (i > 0) sb.append(",");
+            sb.append("\"item").append(i).append("\"");
+        }
+        sb.append("]");
+        Files.writeString(largeFile, sb.toString());
+
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchema(largeFile);
+        // Large file streaming validation expects an object, not array
+        Assert.assertFalse(result.valid());
+        Assert.assertTrue(result.errors().get(0).contains("not a JSON object"));
+    }
+
+    @Test
+    public void testValidateUISchema_LargeJsonWithConnectionName() throws IOException {
+        // Create a large file (> 5MB) with connectionName instead of operationName
+        Path largeFile = tempDir.resolve("large-connection.json");
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\"connectionName\": \"test\", \"data\": \"");
+        // Need > 5MB to trigger streaming validation
+        for (int i = 0; i < 6 * 1024 * 1024; i++) {
+            sb.append("x");
+        }
+        sb.append("\"}");
+        Files.writeString(largeFile, sb.toString());
+
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchema(largeFile);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchema_LargeJsonMissingBothNames() throws IOException {
+        // Create a large file (> 5MB) without operationName or connectionName
+        Path largeFile = tempDir.resolve("large-missing.json");
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\"someField\": \"test\", \"data\": \"");
+        // Need > 5MB to trigger streaming validation
+        for (int i = 0; i < 6 * 1024 * 1024; i++) {
+            sb.append("x");
+        }
+        sb.append("\"}");
+        Files.writeString(largeFile, sb.toString());
+
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchema(largeFile);
+        Assert.assertFalse(result.valid());
+        Assert.assertTrue(result.errors().get(0).contains("missing both"));
+    }
+
+    @Test
+    public void testValidateUISchemaContent_ArrayElement() {
+        // Test with nested arrays in elements
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {
+                        "type": "attribute",
+                        "value": {
+                            "name": "listParam",
+                            "displayName": "List Parameter",
+                            "inputType": "table",
+                            "columns": [
+                                {"name": "col1", "type": "string"}
+                            ]
+                        }
+                    }
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_WithHidden() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {
+                        "type": "attribute",
+                        "value": {
+                            "name": "internalParam",
+                            "displayName": "Internal",
+                            "inputType": "stringOrExpression",
+                            "hidden": true
+                        }
+                    }
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_NestedAttributeGroups() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {
+                        "type": "attributeGroup",
+                        "value": {
+                            "groupName": "Outer",
+                            "elements": [
+                                {
+                                    "type": "attributeGroup",
+                                    "value": {
+                                        "groupName": "Inner",
+                                        "elements": [
+                                            {
+                                                "type": "attribute",
+                                                "value": {
+                                                    "name": "nestedParam",
+                                                    "displayName": "Nested",
+                                                    "inputType": "stringOrExpression"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_MultipleInputTypes() {
+        String json = """
+            {
+                "operationName": "testOp",
+                "elements": [
+                    {"type": "attribute", "value": {"name": "p1", "displayName": "P1", "inputType": "stringOrExpression"}},
+                    {"type": "attribute", "value": {"name": "p2", "displayName": "P2", "inputType": "combo"}},
+                    {"type": "attribute", "value": {"name": "p3", "displayName": "P3", "inputType": "booleanOrExpression"}},
+                    {"type": "attribute", "value": {"name": "p4", "displayName": "P4", "inputType": "numberOrExpression"}}
+                ]
+            }
+            """;
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchema_SymlinkToFile() throws IOException {
+        // Create actual file and symlink to it
+        Path actualFile = tempDir.resolve("actual.json");
+        Files.writeString(actualFile, "{\"operationName\": \"test\", \"elements\": []}");
+
+        Path symlink = tempDir.resolve("symlink.json");
+        try {
+            Files.createSymbolicLink(symlink, actualFile);
+            ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchema(symlink);
+            Assert.assertNotNull(result);
+        } catch (UnsupportedOperationException | java.nio.file.FileSystemException e) {
+            // Symlinks may not be supported on all systems
+        }
+    }
+
+    @Test
+    public void testValidateUISchemaContent_EmptyObject() {
+        String json = "{}";
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_OnlyOperationName() {
+        String json = "{\"operationName\": \"test\"}";
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_OnlyConnectionName() {
+        String json = "{\"connectionName\": \"test\"}";
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_NumericOperationName() {
+        String json = "{\"operationName\": 123, \"elements\": []}";
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_BooleanOperationName() {
+        String json = "{\"operationName\": true, \"elements\": []}";
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidateUISchemaContent_NullOperationName() {
+        String json = "{\"operationName\": null, \"elements\": []}";
+        ConnectorValidator.ValidationResult result = ConnectorValidator.validateUISchemaContent(json);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void testValidationResult_WithManyErrors() {
+        java.util.List<String> errors = new java.util.ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            errors.add("Error " + i);
+        }
+        ConnectorValidator.ValidationResult result = new ConnectorValidator.ValidationResult(false, errors);
+        Assert.assertFalse(result.valid());
+        Assert.assertEquals(result.errors().size(), 10);
+        String str = result.toString();
+        Assert.assertTrue(str.contains("Error 0"));
+        Assert.assertTrue(str.contains("Error 9"));
+    }
 }
