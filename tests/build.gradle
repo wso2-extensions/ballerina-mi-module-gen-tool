@@ -26,6 +26,9 @@ dependencies {
     implementation 'info.picocli:picocli:4.0.1'
     implementation "org.ballerinalang:ballerina-lang:${ballerinaLangVersion}"
     implementation "org.ballerinalang:ballerina-cli:${ballerinaLangVersion}"
+    implementation "org.ballerinalang:ballerina-parser:${ballerinaLangVersion}"
+    implementation "org.ballerinalang:ballerina-tools-api:${ballerinaLangVersion}"
+    implementation "org.ballerinalang:diagram-util:${ballerinaLangVersion}"
     implementation "org.apache.ws.commons.axiom:axiom-api:${axiomVersion}"
     implementation "org.wso2.carbon.module:module-core:${carbonModuleCoreVersion}"
     implementation "org.wso2.integration.connector.core:mi-connector-core:${integrationConnectorCoreVersion}"

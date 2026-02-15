@@ -1003,4 +1003,54 @@ public class ConnectorValidatorTest {
         Assert.assertTrue(str.contains("Error 0"));
         Assert.assertTrue(str.contains("Error 9"));
     }
+
+    @Test
+    public void testValidateLargeConnector() throws IOException {
+        // Create a simulated large connector zip (> 10MB)
+        Path connectorDir = tempDir.resolve("large_connector");
+        Files.createDirectories(connectorDir);
+        Path zipPath = connectorDir.resolve("connector.zip");
+
+        // Create a zip with valid structure but large size
+        try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(Files.newOutputStream(zipPath))) {
+            // Add connector.xml
+            zos.putNextEntry(new java.util.zip.ZipEntry("connector.xml"));
+            zos.write("<connector>test</connector>".getBytes());
+            zos.closeEntry();
+
+            // Add function XML
+            zos.putNextEntry(new java.util.zip.ZipEntry("functions/test.xml"));
+            zos.write("<function>test</function>".getBytes());
+            zos.closeEntry();
+
+            // Add JAR
+            zos.putNextEntry(new java.util.zip.ZipEntry("lib/test.jar"));
+            zos.write("dummy jar content".getBytes());
+            zos.closeEntry();
+
+            // Add UI Schema
+            zos.putNextEntry(new java.util.zip.ZipEntry("uischema/test.json"));
+            zos.write("{}".getBytes());
+            zos.closeEntry();
+
+            // Add a large dummy entry to increase size > 10MB
+            // 11MB = 11 * 1024 * 1024 bytes
+            zos.setLevel(0);
+            zos.putNextEntry(new java.util.zip.ZipEntry("large_dummy_file.bin"));
+            byte[] buffer = new byte[1024 * 1024]; // 1MB buffer
+            java.util.Arrays.fill(buffer, (byte) 'a');
+            for (int i = 0; i < 11; i++) {
+                zos.write(buffer);
+            }
+            zos.closeEntry();
+        }
+
+        // Create generated/connector.xml for validateConnectorXml check
+        Path generatedDir = connectorDir.resolve("generated");
+        Files.createDirectories(generatedDir);
+        Files.writeString(generatedDir.resolve("connector.xml"), "<connector>content</connector>");
+
+        boolean result = ConnectorValidator.validateConnector(connectorDir);
+        Assert.assertTrue(result, "Large connector validation failed");
+    }
 }

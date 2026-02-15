@@ -200,79 +200,7 @@ public class ConnectorValidator {
         }
     }
 
-    /**
-     * Validates a bounded sample of UI schemas: all connection schemas (identified by having
-     * a "connectionName" top-level key) plus the first few operation schemas.
-     * This avoids loading all schemas into memory while still catching real problems.
-     */
-    private static boolean validateSampledUISchemas(Path connectorPath) {
-        Path uiSchemaDir = connectorPath.resolve("generated").resolve("uischema");
-        if (!Files.exists(uiSchemaDir) || !Files.isDirectory(uiSchemaDir)) {
-            return true;
-        }
 
-        int connectionCount = 0;
-        int operationCount = 0;
-
-        try (DirectoryStream<Path> uiSchemas = Files.newDirectoryStream(uiSchemaDir)) {
-            for (Path path : uiSchemas) {
-                if (!path.toString().endsWith(".json")) {
-                    continue;
-                }
-
-                boolean isConnection = isConnectionUISchema(path);
-                if (isConnection) {
-                    ValidationResult result = validateUISchema(path);
-                    if (!result.valid()) {
-                        ERROR_STREAM.println("UI Schema validation errors in " + path + ":");
-                        ERROR_STREAM.println(result);
-                        return false;
-                    }
-                    connectionCount++;
-                } else if (operationCount < MAX_SAMPLED_OPERATIONS) {
-                    ValidationResult result = validateUISchema(path);
-                    if (!result.valid()) {
-                        ERROR_STREAM.println("UI Schema validation errors in " + path + ":");
-                        ERROR_STREAM.println(result);
-                        return false;
-                    }
-                    operationCount++;
-                }
-            }
-        } catch (IOException e) {
-            ERROR_STREAM.println("Failed to read UI schema directory: " + e.getMessage());
-            return false;
-        }
-
-        ERROR_STREAM.println("Validated " + connectionCount + " connection schema(s) and " +
-                operationCount + " sampled operation schema(s).");
-        return true;
-    }
-
-    /**
-     * Checks whether a UI schema JSON file is a connection schema by looking for
-     * a "connectionName" top-level key. Uses Jackson streaming API to read only the
-     * top-level keys without building a full tree.
-     */
-    private static boolean isConnectionUISchema(Path path) {
-        try (JsonParser parser = objectMapper.getFactory().createParser(path.toFile())) {
-            if (parser.nextToken() != JsonToken.START_OBJECT) {
-                return false;
-            }
-            while (parser.nextToken() != JsonToken.END_OBJECT) {
-                String fieldName = parser.currentName();
-                if ("connectionName".equals(fieldName)) {
-                    return true;
-                }
-                parser.nextToken();
-                parser.skipChildren();
-            }
-        } catch (IOException e) {
-            // If we can't parse it, it's not a connection schema — it will be caught
-            // by full validation if sampled
-        }
-        return false;
-    }
 
     /**
      * Validates all UI schemas in the generated/uischema/ directory.

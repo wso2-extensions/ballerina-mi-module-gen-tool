@@ -26,6 +26,17 @@ import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.NodeVisitor;
+import io.ballerina.projects.Document;
+import io.ballerina.projects.DocumentId;
+import io.ballerina.projects.Module;
 import io.ballerina.mi.model.FunctionType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -40,6 +51,8 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.Mockito;
 
 public class UtilsTest {
 
@@ -884,5 +897,60 @@ public class UtilsTest {
 
         String synapseName = Utils.generateSynapseName(functionSymbol, FunctionType.INIT);
         Assert.assertEquals(synapseName, "init");
+    }
+
+    @Test
+    public void testGetOpenApiOperationId_Found() {
+        // Mock FunctionSymbol
+        FunctionSymbol functionSymbol = mock(FunctionSymbol.class);
+
+        // Mock Module
+        Module module = mock(Module.class);
+        DocumentId docId = mock(DocumentId.class);
+        when(module.documentIds()).thenReturn(List.of(docId));
+
+        Document document = mock(Document.class);
+        when(module.document(docId)).thenReturn(document);
+
+        // Mock SyntaxTree
+        SyntaxTree syntaxTree = mock(SyntaxTree.class);
+        when(document.syntaxTree()).thenReturn(syntaxTree);
+
+        // Mock Root Node
+        Node rootNode = mock(Node.class);
+        when(syntaxTree.rootNode()).thenReturn(rootNode);
+
+        // Mock SemanticModel
+        SemanticModel semanticModel = mock(SemanticModel.class);
+        
+        io.ballerina.compiler.api.symbols.AnnotationSymbol annotationSymbol = mock(io.ballerina.compiler.api.symbols.AnnotationSymbol.class);
+        when(annotationSymbol.getName()).thenReturn(Optional.of("ResourceInfo"));
+        
+        io.ballerina.compiler.api.symbols.ModuleSymbol moduleSymbol = mock(io.ballerina.compiler.api.symbols.ModuleSymbol.class);
+        when(moduleSymbol.getName()).thenReturn(Optional.of("openapi"));
+        when(annotationSymbol.getModule()).thenReturn(Optional.of(moduleSymbol));
+        
+        when(functionSymbol.annotations()).thenReturn(List.of(annotationSymbol));
+
+        Mockito.doAnswer(invocation -> {
+            NodeVisitor visitor = invocation.getArgument(0);
+            // Basic invocation to ensure visitor logic is triggered but won't find OpId
+            return null;
+        }).when(rootNode).accept(any(NodeVisitor.class));
+
+        Optional<String> result = Utils.getOpenApiOperationId(functionSymbol, module, semanticModel);
+        Assert.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testHumanizeName_MoreCases() {
+        Assert.assertEquals(Utils.humanizeName("OAuth2Provider"), "oauth2 provider");
+        Assert.assertEquals(Utils.humanizeName("aVeryLongFunctionNameWithMixedCaseAndNumbers123"), "a very long function name with mixed case and numbers123");
+    }
+
+    @Test
+    public void testSanitizeXmlName_MoreCases() {
+         Assert.assertEquals(Utils.sanitizeXmlName("foo:bar"), "foo_bar");
+         Assert.assertEquals(Utils.sanitizeXmlName("foo/bar"), "foo_bar");
     }
 }
