@@ -20,6 +20,8 @@ package io.ballerina.stdlib.mi.executor;
 
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.*;
 import io.ballerina.runtime.internal.values.MapValueImpl;
 import io.ballerina.stdlib.mi.Constants;
@@ -35,6 +37,7 @@ import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -1139,6 +1142,64 @@ public class BalExecutorTest {
 
             boolean result = executor.execute(runtime, bObject, context);
             Assert.assertTrue(result);
+        }
+    }
+
+    @Test
+    public void testExecute_ResultAsBError_ReturnsTrue() throws Exception {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            BalExecutor executor = new BalExecutor();
+            Runtime runtime = mock(Runtime.class);
+            Module module = mock(Module.class);
+            MessageContext context = mock(MessageContext.class);
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, Constants.SIZE))
+                    .thenReturn("0");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, Constants.FUNCTION_NAME))
+                    .thenReturn("testFunction");
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, Constants.RESPONSE_VARIABLE))
+                    .thenReturn("result");
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, Constants.OVERWRITE_BODY))
+                    .thenReturn("false");
+
+            BError bError = ErrorCreator.createError(StringUtils.fromString("execution failed"));
+            when(runtime.callFunction(any(Module.class), anyString(), isNull(), any())).thenReturn(bError);
+
+            boolean result = executor.execute(runtime, module, context);
+            Assert.assertTrue(result);
+        }
+    }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testExecute_RuntimeFailure_ThrowsSynapseException() throws Exception {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            BalExecutor executor = new BalExecutor();
+            Runtime runtime = mock(Runtime.class);
+            Module module = mock(Module.class);
+            MessageContext context = mock(MessageContext.class);
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, Constants.SIZE))
+                    .thenReturn("0");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, Constants.FUNCTION_NAME))
+                    .thenReturn("testFunction");
+            when(runtime.callFunction(any(Module.class), anyString(), any(), any()))
+                    .thenThrow(new RuntimeException("unexpected"));
+
+            executor.execute(runtime, module, context);
+        }
+    }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testExecute_NullCallable_ThrowsSynapseException() throws Exception {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            BalExecutor executor = new BalExecutor();
+            Runtime runtime = mock(Runtime.class);
+            MessageContext context = mock(MessageContext.class);
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, Constants.SIZE))
+                    .thenReturn("0");
+
+            executor.execute(runtime, null, context);
         }
     }
 

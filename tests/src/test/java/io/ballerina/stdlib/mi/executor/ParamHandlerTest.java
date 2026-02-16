@@ -791,4 +791,160 @@ public class ParamHandlerTest {
             Assert.assertNull(result);
         }
     }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testGetParameter_CatchBlock_ForInvalidIntValue() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            ParamHandler handler = new ParamHandler();
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param0"))
+                    .thenReturn("intParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType0"))
+                    .thenReturn(Constants.INT);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "intParam"))
+                    .thenReturn("not-a-number");
+
+            handler.getParameter(context, "param0", "paramType0", 0);
+        }
+    }
+
+    @Test
+    public void testGetParameter_ArrayType_WithOverflowIndex_ReturnsNull() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            ParamHandler handler = new ParamHandler();
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param999999999999999999999"))
+                    .thenReturn("arrayParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType999999999999999999999"))
+                    .thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "arrayParam"))
+                    .thenReturn("[]");
+
+            Object result = handler.getParameter(
+                    context, "param999999999999999999999", "paramType999999999999999999999", 0);
+            Assert.assertNull(result);
+        }
+    }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testGetParameter_ArrayRecordType_ParseException() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            ParamHandler handler = new ParamHandler();
+            String input = "[{\"name\":\"alice\"}]";
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param0"))
+                    .thenReturn("recordsParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType0"))
+                    .thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "recordsParam"))
+                    .thenReturn(input);
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(input))
+                    .thenReturn(input);
+            when(context.getProperty("arrayElementType0")).thenReturn("record");
+            jsonUtilsMock.when(() -> JsonUtils.parse(input))
+                    .thenThrow(new RuntimeException("invalid record array"));
+
+            handler.getParameter(context, "param0", "paramType0", 0);
+        }
+    }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testGetParameter_ArrayFloatType_ParseException() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            ParamHandler handler = new ParamHandler();
+            String input = "[1.2,2.3]";
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param1"))
+                    .thenReturn("floatArrayParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType1"))
+                    .thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "floatArrayParam"))
+                    .thenReturn(input);
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(input))
+                    .thenReturn(input);
+            when(context.getProperty("arrayElementType1")).thenReturn("float");
+            jsonUtilsMock.when(() -> JsonUtils.parse(input))
+                    .thenThrow(new RuntimeException("invalid float array"));
+
+            handler.getParameter(context, "param1", "paramType1", 1);
+        }
+    }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testGetParameter_Array2DType_ParseException() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            ParamHandler handler = new ParamHandler();
+            String input = "[{\"innerArray\":[1,2]}]";
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param2"))
+                    .thenReturn("twoDParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType2"))
+                    .thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "twoDParam"))
+                    .thenReturn(input);
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(input))
+                    .thenReturn(input);
+            when(context.getProperty("arrayElementType2")).thenReturn("array");
+            jsonUtilsMock.when(() -> JsonUtils.parse(input))
+                    .thenThrow(new RuntimeException("invalid 2d array"));
+
+            handler.getParameter(context, "param2", "paramType2", 2);
+        }
+    }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testGetParameter_ArrayUnionType_ParseException() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            ParamHandler handler = new ParamHandler();
+            String input = "[{\"type\":\"int\",\"value\":\"1\"}]";
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param3"))
+                    .thenReturn("unionParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType3"))
+                    .thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "unionParam"))
+                    .thenReturn(input);
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(input))
+                    .thenReturn(input);
+            when(context.getProperty("arrayElementType3")).thenReturn("union");
+            jsonUtilsMock.when(() -> JsonUtils.parse(input))
+                    .thenThrow(new RuntimeException("invalid union array"));
+
+            handler.getParameter(context, "param3", "paramType3", 3);
+        }
+    }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testGetParameter_ArrayDefaultType_ParseException() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            ParamHandler handler = new ParamHandler();
+            String input = "[1,2,3]";
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param4"))
+                    .thenReturn("defaultArrayParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType4"))
+                    .thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "defaultArrayParam"))
+                    .thenReturn(input);
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(input))
+                    .thenReturn(input);
+            when(context.getProperty("arrayElementType4")).thenReturn("int");
+            jsonUtilsMock.when(() -> JsonUtils.parse(input))
+                    .thenThrow(new RuntimeException("invalid default array"));
+
+            handler.getParameter(context, "param4", "paramType4", 4);
+        }
+    }
 }

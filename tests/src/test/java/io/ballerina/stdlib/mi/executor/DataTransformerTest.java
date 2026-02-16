@@ -1583,4 +1583,28 @@ public class DataTransformerTest {
             Assert.assertSame(result, resultMap);
         }
     }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testCreateRecordValue_NullJson_MissingRecordName() {
+        try (MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            // No flattened fields; reconstruction still calls JsonUtils.parse("{}")
+            jsonUtilsMock.when(() -> JsonUtils.parse(anyString())).thenReturn(new Object());
+            when(context.getProperty("param0_recordName")).thenReturn(null);
+
+            DataTransformer.createRecordValue(null, "param0", context, 0);
+        }
+    }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testCreateRecordValue_InvalidJson_ThrowsSynapseException() {
+        try (MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            when(context.getProperty("param0_recordName")).thenReturn(null);
+            jsonUtilsMock.when(() -> JsonUtils.parse("{invalid-json"))
+                    .thenThrow(new RuntimeException("invalid json"));
+
+            DataTransformer.createRecordValue("{invalid-json", "param0", context, 0);
+        }
+    }
 }

@@ -21,6 +21,9 @@ package io.ballerina.stdlib.mi.utils;
 import io.ballerina.stdlib.mi.Constants;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.template.TemplateContext;
+import org.apache.synapse.util.xpath.SynapseExpression;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -234,5 +237,27 @@ public class SynapseUtilsTest {
         MessageContext context = mock(MessageContext.class);
         String result = SynapseUtils.resolveSynapseExpressions("", context);
         Assert.assertEquals(result, "");
+    }
+
+    @Test
+    public void testResolveSynapseExpressions_WithMatchedExpression() {
+        MessageContext context = mock(MessageContext.class);
+        try (MockedConstruction<SynapseExpression> ignored = Mockito.mockConstruction(
+                SynapseExpression.class,
+                (mock, ctx) -> when(mock.stringValueOf(context)).thenReturn("42"))) {
+            String result = SynapseUtils.resolveSynapseExpressions("value=${payload.count}", context);
+            Assert.assertEquals(result, "value=42");
+        }
+    }
+
+    @Test
+    public void testResolveSynapseExpressions_FallbackToExpressionBodyOnError() {
+        MessageContext context = mock(MessageContext.class);
+        try (MockedConstruction<SynapseExpression> ignored = Mockito.mockConstruction(
+                SynapseExpression.class,
+                (mock, ctx) -> when(mock.stringValueOf(context)).thenThrow(new RuntimeException("bad expr")))) {
+            String result = SynapseUtils.resolveSynapseExpressions("x=${payload.invalid}", context);
+            Assert.assertEquals(result, "x=payload.invalid");
+        }
     }
 }
