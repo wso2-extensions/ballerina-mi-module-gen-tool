@@ -729,4 +729,66 @@ public class ParamHandlerTest {
             Assert.assertEquals(combined[1], "arg1");
         }
     }
+
+    @Test
+    public void testGetParameter_ArrayRecordType() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            ParamHandler handler = new ParamHandler();
+            String input = "[{\"name\":\"alice\"}]";
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param0"))
+                    .thenReturn("recordsParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType0"))
+                    .thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "recordsParam"))
+                    .thenReturn(input);
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(input))
+                    .thenReturn(input);
+            when(context.getProperty("arrayElementType0")).thenReturn("record");
+
+            Object result = handler.getParameter(context, "param0", "paramType0", 0);
+            Assert.assertNotNull(result);
+        }
+    }
+
+    @Test
+    public void testGetParameter_ArrayUnionTypeTable() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            ParamHandler handler = new ParamHandler();
+            String input = "[{\"type\":\"int\",\"value\":\"10\"},{\"type\":\"string\",\"value\":\"abc\"}]";
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param0"))
+                    .thenReturn("unionArrayParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType0"))
+                    .thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "unionArrayParam"))
+                    .thenReturn(input);
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(input)).thenReturn(input);
+            when(context.getProperty("arrayElementType0")).thenReturn("union");
+
+            Object result = handler.getParameter(context, "param0", "paramType0", 0);
+            Assert.assertNotNull(result);
+            Assert.assertTrue(result instanceof BArray);
+        }
+    }
+
+    @Test
+    public void testGetParameter_ArrayNoIndexInValueKey() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            ParamHandler handler = new ParamHandler();
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramX"))
+                    .thenReturn("arrayParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramTypeX"))
+                    .thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "arrayParam"))
+                    .thenReturn("[]");
+
+            Object result = handler.getParameter(context, "paramX", "paramTypeX", 0);
+            Assert.assertNull(result);
+        }
+    }
 }

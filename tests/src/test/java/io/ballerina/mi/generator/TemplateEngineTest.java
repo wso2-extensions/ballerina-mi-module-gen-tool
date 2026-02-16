@@ -20,6 +20,10 @@ package io.ballerina.mi.generator;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
+import io.ballerina.mi.model.ModelElement;
+import io.ballerina.mi.util.Utils;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -104,5 +108,38 @@ public class TemplateEngineTest {
             public String[] getItems() { return new String[]{"a", "b", "c"}; }
         });
         Assert.assertEquals(result, "a,b,c,");
+    }
+
+    @Test
+    public void testGetTemplateUsesCache() throws Exception {
+        try (MockedStatic<Utils> utilsMock = Mockito.mockStatic(Utils.class)) {
+            TemplateEngine engine = new TemplateEngine();
+            utilsMock.when(() -> Utils.readFile("templates/sample.hbs")).thenReturn("Hello {{name}}");
+
+            Template t1 = engine.getTemplate("templates/sample.hbs");
+            Template t2 = engine.getTemplate("templates/sample.hbs");
+
+            Assert.assertNotNull(t1);
+            Assert.assertSame(t1, t2);
+            utilsMock.verify(() -> Utils.readFile("templates/sample.hbs"), Mockito.times(1));
+        }
+    }
+
+    @Test
+    public void testRenderToFileWritesRenderedContent() throws Exception {
+        try (MockedStatic<Utils> utilsMock = Mockito.mockStatic(Utils.class)) {
+            TemplateEngine engine = new TemplateEngine();
+            utilsMock.when(() -> Utils.readFile("templates/render.hbs")).thenReturn("Hello {{name}}");
+
+            ModelElement element = new ModelElement() {
+                public String getName() {
+                    return "Ballerina";
+                }
+            };
+
+            engine.renderToFile("templates/render.hbs", "/tmp/output/path", element, "txt");
+
+            utilsMock.verify(() -> Utils.writeFile("/tmp/output/path.txt", "Hello Ballerina"), Mockito.times(1));
+        }
     }
 }

@@ -27,12 +27,17 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -896,5 +901,105 @@ public class ResourcePackagerTest {
         // The copyResources method should check if scheme equals "file"
         Assert.assertTrue("file".equals(fileUri.getScheme()));
         Assert.assertFalse("file".equals(jarUri.getScheme()));
+    }
+
+    @Test
+    public void testCopyResourcesByExtension_CopiesFromJarFs() throws Exception {
+        Path zipPath = tempSourceDir.resolve("mock-resources.zip");
+        try (FileSystem zipFs = FileSystems.newFileSystem(URI.create("jar:" + zipPath.toUri()),
+                Map.of("create", "true"))) {
+            Path iconDir = zipFs.getPath("icon");
+            Files.createDirectories(iconDir);
+            Files.write(iconDir.resolve("icon-small.png"), new byte[]{1, 2, 3});
+
+            ClassLoader classLoader = mock(ClassLoader.class);
+            when(classLoader.getResourceAsStream("icon/icon-small.png"))
+                    .thenReturn(new ByteArrayInputStream(new byte[]{9, 8, 7}));
+
+            Method method = ResourcePackager.class.getDeclaredMethod(
+                    "copyResourcesByExtension", ClassLoader.class, FileSystem.class, Path.class, String.class, String.class);
+            method.setAccessible(true);
+            method.invoke(null, classLoader, zipFs, tempDestinationDir, Connector.ICON_FOLDER, ".png");
+        }
+
+        Path copied = tempDestinationDir.resolve("icon").resolve("icon-small.png");
+        Assert.assertTrue(Files.exists(copied));
+        Assert.assertEquals(Files.readAllBytes(copied), new byte[]{9, 8, 7});
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testCopyResourcesByExtension_MissingResourceStream() throws Throwable {
+        Path zipPath = tempSourceDir.resolve("mock-missing-resources.zip");
+        try (FileSystem zipFs = FileSystems.newFileSystem(URI.create("jar:" + zipPath.toUri()),
+                Map.of("create", "true"))) {
+            Path iconDir = zipFs.getPath("icon");
+            Files.createDirectories(iconDir);
+            Files.write(iconDir.resolve("icon-small.png"), new byte[]{1});
+
+            ClassLoader classLoader = mock(ClassLoader.class);
+            when(classLoader.getResourceAsStream("icon/icon-small.png")).thenReturn(null);
+
+            Method method = ResourcePackager.class.getDeclaredMethod(
+                    "copyResourcesByExtension", ClassLoader.class, FileSystem.class, Path.class, String.class, String.class);
+            method.setAccessible(true);
+            try {
+                method.invoke(null, classLoader, zipFs, tempDestinationDir, Connector.ICON_FOLDER, ".png");
+            } catch (java.lang.reflect.InvocationTargetException e) {
+                throw e.getCause();
+            }
+        }
+    }
+
+    @Test
+    public void testCopyIcons_UsesDefaultIconsWhenIconPathNull() throws Exception {
+        createTestConnector("TestModule", "wso2", "1.0.0");
+
+        Path zipPath = tempSourceDir.resolve("mock-icons-default.zip");
+        try (FileSystem zipFs = FileSystems.newFileSystem(URI.create("jar:" + zipPath.toUri()),
+                Map.of("create", "true"))) {
+            Path iconDir = zipFs.getPath("icon");
+            Files.createDirectories(iconDir);
+            Files.write(iconDir.resolve("icon-small.png"), new byte[]{1});
+            Files.write(iconDir.resolve("icon-large.png"), new byte[]{1, 2});
+
+            ClassLoader classLoader = mock(ClassLoader.class);
+            when(classLoader.getResourceAsStream("icon/icon-small.png"))
+                    .thenReturn(new ByteArrayInputStream(new byte[]{5}));
+            when(classLoader.getResourceAsStream("icon/icon-large.png"))
+                    .thenReturn(new ByteArrayInputStream(new byte[]{6, 7}));
+
+            Method method = ResourcePackager.class.getDeclaredMethod(
+                    "copyIcons", ClassLoader.class, FileSystem.class, Path.class);
+            method.setAccessible(true);
+            method.invoke(null, classLoader, zipFs, tempDestinationDir);
+        }
+
+        Assert.assertTrue(Files.exists(tempDestinationDir.resolve(Connector.ICON_FOLDER).resolve(Connector.SMALL_ICON_NAME)));
+        Assert.assertTrue(Files.exists(tempDestinationDir.resolve(Connector.ICON_FOLDER).resolve(Connector.LARGE_ICON_NAME)));
+    }
+
+    @Test
+    public void testCopyIcons_RelativeRegularFilePath() throws Exception {
+        Connector connector = createTestConnector("TestModule", "wso2", "1.0.0");
+        Path relativeIcon = tempDestinationDir.getParent().resolve("relative-icon.png");
+        Files.write(relativeIcon, new byte[]{4, 5, 6, 7});
+        connector.setIconPath("relative-icon.png");
+
+        Path zipPath = tempSourceDir.resolve("mock-icons-relative.zip");
+        try (FileSystem zipFs = FileSystems.newFileSystem(URI.create("jar:" + zipPath.toUri()),
+                Map.of("create", "true"))) {
+            ClassLoader classLoader = mock(ClassLoader.class);
+            Method method = ResourcePackager.class.getDeclaredMethod(
+                    "copyIcons", ClassLoader.class, FileSystem.class, Path.class);
+            method.setAccessible(true);
+            method.invoke(null, classLoader, zipFs, tempDestinationDir);
+        }
+
+        Path small = tempDestinationDir.resolve(Connector.ICON_FOLDER).resolve(Connector.SMALL_ICON_NAME);
+        Path large = tempDestinationDir.resolve(Connector.ICON_FOLDER).resolve(Connector.LARGE_ICON_NAME);
+        Assert.assertTrue(Files.exists(small));
+        Assert.assertTrue(Files.exists(large));
+        Assert.assertEquals(Files.readAllBytes(small), new byte[]{4, 5, 6, 7});
+        Assert.assertEquals(Files.readAllBytes(large), new byte[]{4, 5, 6, 7});
     }
 }

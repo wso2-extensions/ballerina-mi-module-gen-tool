@@ -23,6 +23,7 @@
         <packages>
             <package name="org.ballerina.test.*"/>
             <package name="io.ballerina.mi.model.*"/>
+            <package name="io.ballerina.mi.cmd.*"/>
             <package name="io.ballerina.mi.util.*"/>
             <package name="io.ballerina.mi.validator.*"/>
             <package name="io.ballerina.mi.analyzer.*"/>
