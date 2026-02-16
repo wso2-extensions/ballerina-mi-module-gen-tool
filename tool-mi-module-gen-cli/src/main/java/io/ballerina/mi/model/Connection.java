@@ -25,7 +25,7 @@ public class Connection {
     private final String connectionType;
     private String description;
     private final String objectTypeName;
-    //TODO: remove if not needed
+    // Stable positional identifier used in generated config/template property names.
     private final String index;
     private final ArrayList<Component> components = new ArrayList<>();
     private Component initComponent;

@@ -32,6 +32,7 @@ import java.util.Map;
 
 public class BXmlConverter {
     private static final OMFactory factory = OMAbstractFactory.getOMFactory();
+    private static final String XMLNS_PREFIX = "xmlns:";
 
     static Pair<String, String> extractNamespace(String value) {
 
@@ -68,22 +69,21 @@ public class BXmlConverter {
         namespaceMap.put("", null);
 
         for (Map.Entry<BString, BString> entry : bMap.entrySet()) {
-            //TODO: handle namespace
-            if (entry.getKey().getValue().startsWith(BXmlItem.XMLNS_NS_URI_PREFIX)) {
-                //if this is a namespace
-                Pair<String, String> pair = extractNamespace(entry.getKey().getValue());
-                OMNamespace omNamespace = factory.createOMNamespace(entry.getValue().getValue(), pair.getRight());
+            String attributeName = entry.getKey().getValue();
+            if (attributeName.equals(BXmlItem.XMLNS_PREFIX) || attributeName.startsWith(XMLNS_PREFIX)) {
+                String prefix = attributeName.equals(BXmlItem.XMLNS_PREFIX) ? "" :
+                        attributeName.substring(XMLNS_PREFIX.length());
+                OMNamespace omNamespace = factory.createOMNamespace(entry.getValue().getValue(), prefix);
                 namespaceMap.put(entry.getValue().getValue(), omNamespace);
             }
         }
         for (Map.Entry<BString, BString> attribute : bMap.entrySet()) {
-            if (!attribute.getKey().getValue().startsWith(BXmlItem.XMLNS_NS_URI_PREFIX)) {
-                //if this is a namespace
+            String attributeName = attribute.getKey().getValue();
+            if (!attributeName.equals(BXmlItem.XMLNS_PREFIX) && !attributeName.startsWith(XMLNS_PREFIX)) {
                 Pair<String, String> pair = extractNamespace(attribute.getKey().getValue());
                 OMAttribute omattribute = factory.createOMAttribute(pair.getRight(), namespaceMap.get(pair.getLeft()),
                         attribute.getValue().getValue());
                 rootElement.addAttribute(omattribute);
-                //TODO: previously used OMAttribute creation method research why it was changed to attribute.
             }
 
         }
@@ -122,4 +122,3 @@ public class BXmlConverter {
         }
     }
 }
-

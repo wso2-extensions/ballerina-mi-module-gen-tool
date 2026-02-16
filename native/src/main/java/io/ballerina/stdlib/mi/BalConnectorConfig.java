@@ -55,15 +55,8 @@ public class BalConnectorConfig extends AbstractConnector {
 
     @Override
     public void connect(MessageContext messageContext) throws ConnectException {
-        /**
-         * TODO:
-         * Get the connection name
-         * There are several ways to create RecordValue
-         * Handle connectionType
-         * How to access the connection local entry from the message context
-         */
-        // get name parameter value
-        //TODO: Make any updated to support multiple clients
+        // Connection metadata is resolved from template parameters and message properties.
+        // A distinct connection entry is created per connector/module and connection name.
         if (rt == null) {
             synchronized (BalConnectorConfig.class) {
                 if (rt == null) {
@@ -74,10 +67,6 @@ public class BalConnectorConfig extends AbstractConnector {
         String connectorName = module.getName();
         String connectionName = lookupTemplateParamater(messageContext, "name");
         String connectionType = lookupTemplateParamater(messageContext, "connectionType");
-        //TODO: read parameter args and default values
-        //TODO: Use the NodeParser API to generate the argument values
-
-        //TODO: Set fields not set inside the method
         BObject clientObject = null;
         ConnectionHandler handler = ConnectionHandler.getConnectionHandler();
         if (!handler.checkIfConnectionExists(connectorName, connectionName)) {
@@ -162,10 +151,7 @@ public class BalConnectorConfig extends AbstractConnector {
     private void setParameters(Object[] args, MessageContext context, String connectionType) {
         for (int i = 0; i < args.length; i++) {
             Object param = paramHandler.getParameter(context, connectionType + "_param" + i, connectionType + "_paramType" + i, i);
-            //TODO: check handling null parameters
-//            if (param == null) {
-//                return false;
-//            }
+            // Null is preserved for optional/nil-capable parameters and validated by object construction.
             args[i] = param;
         }
     }

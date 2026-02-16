@@ -107,8 +107,7 @@ public class OMElementConverter {
             attributesMap.put(xmlnsPrefix, StringUtils.fromString(namespaceURI));
         }
 
-        //TODO: There is still another part in the code that referred
-        //NOTE: This is for the namespaces that are declared but not used in its attributes
+        // Add declared namespaces even when they are not referenced by element/attribute QNames.
         for (Iterator it = omElement.getAllDeclaredNamespaces(); it.hasNext(); ) {
 
             OMNamespace omNamespace = (OMNamespace) it.next();
@@ -124,7 +123,6 @@ public class OMElementConverter {
     }
 
     private static BXml getXmlItem(OMElement omElement) {
-        // TODO: find the issue that fail and put it here
         QName qName = getQNameOMElement(omElement);
         BXmlItem xmlItem = ValueCreator.createXmlItem(qName, false);
 

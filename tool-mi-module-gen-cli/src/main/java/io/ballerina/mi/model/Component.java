@@ -33,10 +33,10 @@ import java.util.List;
 public class Component extends ModelElement {
     private String name;
     private final String documentation;
-    //TODO: remove if not needed
+    // Object type used for object-attached function dispatch when applicable.
     private String objectTypeName;
     private final FunctionType functionType;
-    //TODO: remove
+    // Stable positional identifier used in generated property naming and ordering.
     private final String index;
     private Connection parent;
     private final ArrayList<Param> params = new ArrayList<>();
