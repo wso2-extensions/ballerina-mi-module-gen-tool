@@ -23,22 +23,27 @@ import io.ballerina.runtime.api.types.*;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.internal.values.MapValueImpl;
 import io.ballerina.stdlib.mi.Constants;
 import io.ballerina.stdlib.mi.utils.SynapseUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
+import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -1605,6 +1610,295 @@ public class DataTransformerTest {
                     .thenThrow(new RuntimeException("invalid json"));
 
             DataTransformer.createRecordValue("{invalid-json", "param0", context, 0);
+        }
+    }
+
+    @Test
+    public void testCreateTypedArrayFromGeneric_AddFailure_IsHandled() {
+        try (MockedStatic<ValueCreator> valueCreatorMock = Mockito.mockStatic(ValueCreator.class)) {
+            BArray genericArray = mock(BArray.class);
+            when(genericArray.size()).thenReturn(1);
+            BMap<BString, Object> sourceMap = mock(BMap.class);
+            when(genericArray.get(0)).thenReturn(sourceMap);
+            Mockito.doThrow(new RuntimeException("cannot mutate"))
+                    .when(genericArray).add(eq(0L), (Object) any());
+
+            ArrayType arrayType = mock(ArrayType.class);
+            StructureType elementType = mock(StructureType.class);
+            when(arrayType.getElementType()).thenReturn(elementType);
+            when(elementType.getTag()).thenReturn(TypeTags.RECORD_TYPE_TAG);
+            when(elementType.getFields()).thenReturn(new HashMap<>());
+            when(elementType.getName()).thenReturn("Rec");
+            BMap<BString, Object> emptyRecord = mock(BMap.class);
+            valueCreatorMock.when(() -> ValueCreator.createRecordValue(any(), Mockito.eq("Rec")))
+                    .thenReturn(emptyRecord);
+
+            BArray result = DataTransformer.createTypedArrayFromGeneric(genericArray, arrayType);
+            Assert.assertSame(result, genericArray);
+        }
+    }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testCreateRecordValue_NullJson_WithConnectionType_ReconstructFailure() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<DataTransformer> dataTransformerMock =
+                     Mockito.mockStatic(DataTransformer.class, Mockito.CALLS_REAL_METHODS);
+             MockedStatic<ValueCreator> valueCreatorMock = Mockito.mockStatic(ValueCreator.class)) {
+            MessageContext context = mock(MessageContext.class);
+            synapseUtilsMock.when(() -> SynapseUtils.findConnectionTypeForParam(context, "param0"))
+                    .thenReturn("http");
+            dataTransformerMock.when(() -> DataTransformer.reconstructRecordFromFields("http_param0", context))
+                    .thenReturn("not-a-map");
+            when(context.getProperty("http_param0_recordName")).thenReturn("Rec");
+            BMap<BString, Object> record = mock(BMap.class);
+            Type recordType = mock(Type.class);
+            when(record.getType()).thenReturn(recordType);
+            valueCreatorMock.when(() -> ValueCreator.createRecordValue(any(), eq("Rec"))).thenReturn(record);
+
+            DataTransformer.createRecordValue(null, "param0", context, 0);
+        }
+    }
+
+    @Test
+    public void testCreateRecordValue_WithRecordName_DeepConversionFails_FallsBackToParse() {
+        try (MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class);
+             MockedStatic<FromJsonStringWithType> fromJsonMock = Mockito.mockStatic(FromJsonStringWithType.class)) {
+            MessageContext context = mock(MessageContext.class);
+            when(context.getProperty("param0_recordName")).thenReturn("Rec");
+            fromJsonMock.when(() -> FromJsonStringWithType.fromJsonStringWithType(any(), any()))
+                    .thenThrow(new RuntimeException("fromJson fail"));
+
+            Object expected = new Object();
+            jsonUtilsMock.when(() -> JsonUtils.parse("{\"id\":1}"))
+                    .thenThrow(new RuntimeException("deep parse fail"))
+                    .thenReturn(expected);
+
+            Object result = DataTransformer.createRecordValue("{\"id\":1}", "param0", context, 0);
+            Assert.assertSame(result, expected);
+        }
+    }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testCreateRecordValue_ParseReturnsBError_ThrowsSynapseException() {
+        try (MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            when(context.getProperty("param0_recordName")).thenReturn(null);
+            BError bError = mock(BError.class);
+            when(bError.getMessage()).thenReturn("bad json");
+            jsonUtilsMock.when(() -> JsonUtils.parse("{\"bad\":true}")).thenReturn(bError);
+
+            DataTransformer.createRecordValue("{\"bad\":true}", "param0", context, 0);
+        }
+    }
+
+    @Test
+    public void testReconstructRecordFromFields_UnionAndArraySkipBranches() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            String prefix = "pref";
+
+            when(context.getProperty(prefix + "_param0")).thenReturn("choice");
+            when(context.getProperty(prefix + "_paramType0")).thenReturn(Constants.UNION);
+            when(context.getProperty(prefix + "_unionMember0")).thenReturn(null);
+            when(context.getProperty(prefix + "_dataType0")).thenReturn("choiceDataType");
+
+            when(context.getProperty(prefix + "_param1")).thenReturn("choice.member");
+            when(context.getProperty(prefix + "_paramType1")).thenReturn(Constants.STRING);
+            when(context.getProperty(prefix + "_unionMember1")).thenReturn("int");
+
+            when(context.getProperty(prefix + "_param2")).thenReturn("items");
+            when(context.getProperty(prefix + "_paramType2")).thenReturn(Constants.ARRAY);
+            when(context.getProperty(prefix + "_unionMember2")).thenReturn(null);
+            when(context.getProperty(prefix + "_param3")).thenReturn(null);
+
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "choiceDataType"))
+                    .thenReturn("string");
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "choice"))
+                    .thenReturn(null);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "items"))
+                    .thenReturn("[]");
+            synapseUtilsMock.when(() -> SynapseUtils.findParentUnionPath(anyString(), any()))
+                    .thenReturn("choice");
+
+            Object expected = new Object();
+            jsonUtilsMock.when(() -> JsonUtils.parse(anyString())).thenReturn(expected);
+
+            Object result = DataTransformer.reconstructRecordFromFields(prefix, context);
+            Assert.assertSame(result, expected);
+        }
+    }
+
+    @Test
+    public void testReconstructRecordFromFields_JsonAndMapInvalidSyntax_FallbackToString() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            String prefix = "pref";
+
+            when(context.getProperty(prefix + "_param0")).thenReturn("payload");
+            when(context.getProperty(prefix + "_paramType0")).thenReturn(Constants.JSON);
+            when(context.getProperty(prefix + "_param1")).thenReturn("tableMap");
+            when(context.getProperty(prefix + "_paramType1")).thenReturn(Constants.MAP);
+            when(context.getProperty(prefix + "_param2")).thenReturn(null);
+
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "payload"))
+                    .thenReturn("{bad");
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "tableMap"))
+                    .thenReturn("not-json");
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(anyString()))
+                    .thenAnswer(i -> i.getArgument(0));
+
+            Object expected = new Object();
+            jsonUtilsMock.when(() -> JsonUtils.parse(anyString())).thenAnswer(invocation -> {
+                String serialized = invocation.getArgument(0);
+                Assert.assertTrue(serialized.contains("\"payload\":\"{bad\""));
+                Assert.assertTrue(serialized.contains("\"tableMap\":\"not-json\""));
+                return expected;
+            });
+
+            Object result = DataTransformer.reconstructRecordFromFields(prefix, context);
+            Assert.assertSame(result, expected);
+        }
+    }
+
+    @Test(expectedExceptions = SynapseException.class)
+    public void testGetMapParameter_TableRowWithoutKey_ThrowsSynapseException() {
+        try (MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class);
+             MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<StringUtils> stringUtilsMock = Mockito.mockStatic(StringUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            BArray table = mock(BArray.class);
+            BMap row = mock(BMap.class);
+            BString keyToken = mock(BString.class);
+
+            when(table.size()).thenReturn(1);
+            when(table.get(0)).thenReturn(row);
+            when(row.containsKey(keyToken)).thenReturn(true);
+            when(row.get(keyToken)).thenReturn(null);
+            stringUtilsMock.when(() -> StringUtils.fromString("key")).thenReturn(keyToken);
+
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(anyString()))
+                    .thenAnswer(i -> i.getArgument(0));
+            jsonUtilsMock.when(() -> JsonUtils.parse(anyString())).thenReturn(table);
+
+            DataTransformer.getMapParameter("[{\"key\":null}]", context, "param0");
+        }
+    }
+
+    @Test
+    public void testGetMapParameter_2DArrayWithOverflowIndex_UsesDefaultFieldNames() {
+        try (MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class);
+             MockedStatic<ValueCreator> valueCreatorMock = Mockito.mockStatic(ValueCreator.class);
+             MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            BArray outer = mock(BArray.class);
+            BArray row = mock(BArray.class);
+            BMap resultMap = mock(BMap.class);
+
+            when(outer.size()).thenReturn(1);
+            when(outer.get(0)).thenReturn(row);
+            when(row.size()).thenReturn(3);
+            when(row.get(0)).thenReturn("id1");
+            when(row.get(1)).thenReturn("v1");
+            when(row.get(2)).thenReturn("v2");
+
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(anyString()))
+                    .thenAnswer(i -> i.getArgument(0));
+            jsonUtilsMock.when(() -> JsonUtils.parse(anyString())).thenReturn(outer);
+            valueCreatorMock.when(ValueCreator::createMapValue).thenReturn(resultMap);
+
+            BMap actual = DataTransformer.getMapParameter("[[\"id1\",\"v1\",\"v2\"]]", context,
+                    "param999999999999999999999");
+            Assert.assertSame(actual, resultMap);
+        }
+    }
+
+    @Test
+    public void testSetNestedField_Array2D_FlattensValues() throws Exception {
+        Method method = DataTransformer.class.getDeclaredMethod("setNestedField",
+                com.google.gson.JsonObject.class, String.class, Object.class, String.class, MessageContext.class);
+        method.setAccessible(true);
+
+        com.google.gson.JsonObject root = new com.google.gson.JsonObject();
+        MessageContext context = mock(MessageContext.class);
+        method.invoke(null, root, "payload.items", "[[1,2],[3,null]]", Constants.ARRAY, context);
+
+        Assert.assertTrue(root.getAsJsonObject("payload").get("items").isJsonArray());
+        Assert.assertEquals(root.getAsJsonObject("payload").getAsJsonArray("items").size(), 3);
+    }
+
+    @Test
+    public void testSetNestedField_Map2D_BuildsObjectFromPairs() throws Exception {
+        Method method = DataTransformer.class.getDeclaredMethod("setNestedField",
+                com.google.gson.JsonObject.class, String.class, Object.class, String.class, MessageContext.class);
+        method.setAccessible(true);
+
+        com.google.gson.JsonObject root = new com.google.gson.JsonObject();
+        MessageContext context = mock(MessageContext.class);
+        method.invoke(null, root, "payload.mapValues", "[[\"k1\",\"v1\"],[\"k2\",2]]", Constants.MAP, context);
+
+        com.google.gson.JsonObject mapObj = root.getAsJsonObject("payload").getAsJsonObject("mapValues");
+        Assert.assertEquals(mapObj.get("k1").getAsString(), "v1");
+        Assert.assertEquals(mapObj.get("k2").getAsInt(), 2);
+    }
+
+    @Test
+    public void testSetNestedField_MapInvalidJson_FallsBackToString() throws Exception {
+        Method method = DataTransformer.class.getDeclaredMethod("setNestedField",
+                com.google.gson.JsonObject.class, String.class, Object.class, String.class, MessageContext.class);
+        method.setAccessible(true);
+
+        com.google.gson.JsonObject root = new com.google.gson.JsonObject();
+        MessageContext context = mock(MessageContext.class);
+        method.invoke(null, root, "payload.raw", "{bad", Constants.MAP, context);
+
+        Assert.assertEquals(root.getAsJsonObject("payload").get("raw").getAsString(), "{bad");
+    }
+
+    @Test
+    public void testCreateRecordValue_NullJson_FromJsonWithTypeSuccess() {
+        try (MockedStatic<DataTransformer> dataTransformerMock =
+                     Mockito.mockStatic(DataTransformer.class, Mockito.CALLS_REAL_METHODS);
+             MockedStatic<ValueCreator> valueCreatorMock = Mockito.mockStatic(ValueCreator.class);
+             MockedStatic<FromJsonStringWithType> fromJsonMock = Mockito.mockStatic(FromJsonStringWithType.class)) {
+            MessageContext context = mock(MessageContext.class);
+            MapValueImpl<?, ?> reconstructed = mock(MapValueImpl.class);
+            BMap record = mock(BMap.class);
+            Type recordType = mock(Type.class);
+            Object typedValue = new Object();
+
+            when(context.getProperty("param0_recordName")).thenReturn("Rec");
+            when(record.getType()).thenReturn(recordType);
+            when(reconstructed.getJSONString()).thenReturn("{\"id\":1}");
+
+            dataTransformerMock.when(() -> DataTransformer.reconstructRecordFromFields("param0", context))
+                    .thenReturn(reconstructed);
+            valueCreatorMock.when(() -> ValueCreator.createRecordValue(any(), eq("Rec"))).thenReturn(record);
+            fromJsonMock.when(() -> FromJsonStringWithType.fromJsonStringWithType(any(), any())).thenReturn(typedValue);
+
+            Object result = DataTransformer.createRecordValue(null, "param0", context, 0);
+            Assert.assertSame(result, typedValue);
+        }
+    }
+
+    @Test
+    public void testCreateRecordValue_WithRecordName_FromJsonWithTypeSuccess() {
+        try (MockedStatic<ValueCreator> valueCreatorMock = Mockito.mockStatic(ValueCreator.class);
+             MockedStatic<FromJsonStringWithType> fromJsonMock = Mockito.mockStatic(FromJsonStringWithType.class)) {
+            MessageContext context = mock(MessageContext.class);
+            BMap record = mock(BMap.class);
+            Type recordType = mock(Type.class);
+            Object typedValue = new Object();
+
+            when(context.getProperty("param0_recordName")).thenReturn("Rec");
+            when(record.getType()).thenReturn(recordType);
+
+            valueCreatorMock.when(() -> ValueCreator.createRecordValue(any(), eq("Rec"))).thenReturn(record);
+            fromJsonMock.when(() -> FromJsonStringWithType.fromJsonStringWithType(any(), any())).thenReturn(typedValue);
+
+            Object result = DataTransformer.createRecordValue("{\"id\":1}", "param0", context, 0);
+            Assert.assertSame(result, typedValue);
         }
     }
 }

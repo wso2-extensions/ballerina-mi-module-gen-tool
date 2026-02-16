@@ -25,14 +25,20 @@ import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.api.values.BXml;
 import io.ballerina.stdlib.mi.Constants;
 import io.ballerina.stdlib.mi.utils.SynapseUtils;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -946,5 +952,256 @@ public class ParamHandlerTest {
 
             handler.getParameter(context, "param4", "paramType4", 4);
         }
+    }
+
+    @Test
+    public void testGetParameter_ArrayType_FloatElementType_NonArrayParsedObject() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class)) {
+            MessageContext context = mock(MessageContext.class);
+            ParamHandler handler = new ParamHandler();
+            String input = "{\"n\":1}";
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param5"))
+                    .thenReturn("floatArrayAsObject");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType5"))
+                    .thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "floatArrayAsObject"))
+                    .thenReturn(input);
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(input))
+                    .thenReturn(input);
+            when(context.getProperty("arrayElementType5")).thenReturn("float");
+
+            Object parsedObj = new Object();
+            jsonUtilsMock.when(() -> JsonUtils.parse(input)).thenReturn(parsedObj);
+
+            Object result = handler.getParameter(context, "param5", "paramType5", 5);
+            Assert.assertSame(result, parsedObj);
+        }
+    }
+
+    @Test
+    public void testTransformUnionTableToArray_InvalidBranches() throws Exception {
+        try (MockedStatic<StringUtils> stringUtilsMock = Mockito.mockStatic(StringUtils.class)) {
+            ParamHandler handler = new ParamHandler();
+            Method method = ParamHandler.class.getDeclaredMethod("transformUnionTableToArray", BArray.class);
+            method.setAccessible(true);
+
+            BString typeKey = mock(BString.class);
+            BString valueKey = mock(BString.class);
+            stringUtilsMock.when(() -> StringUtils.fromString("type")).thenReturn(typeKey);
+            stringUtilsMock.when(() -> StringUtils.fromString("value")).thenReturn(valueKey);
+
+            BArray rows = mock(BArray.class);
+            when(rows.size()).thenReturn(5);
+
+            BMap row0 = mock(BMap.class);
+            when(rows.get(0)).thenReturn(row0);
+            when(row0.get(typeKey)).thenReturn("int");
+            when(row0.get(valueKey)).thenReturn("x");
+
+            BMap row1 = mock(BMap.class);
+            when(rows.get(1)).thenReturn(row1);
+            when(row1.get(typeKey)).thenReturn("float");
+            when(row1.get(valueKey)).thenReturn("y");
+
+            BMap row2 = mock(BMap.class);
+            when(rows.get(2)).thenReturn(row2);
+            when(row2.get(typeKey)).thenReturn("boolean");
+            when(row2.get(valueKey)).thenReturn("not-bool");
+
+            BMap row3 = mock(BMap.class);
+            when(rows.get(3)).thenReturn(row3);
+            when(row3.get(typeKey)).thenReturn(null);
+            when(row3.get(valueKey)).thenReturn(null);
+
+            BMap row4 = mock(BMap.class);
+            when(rows.get(4)).thenReturn(row4);
+            when(row4.get(typeKey)).thenReturn("decimal");
+            when(row4.get(valueKey)).thenReturn("12.5");
+
+            String output = (String) method.invoke(handler, rows);
+            Assert.assertEquals(output, "[\"x\",\"y\",\"not-bool\",\"\",12.5]");
+        }
+    }
+
+    @Test
+    public void testConvertDecimalArrayToFloatArray_ParseFailureDefaultsToZero() throws Exception {
+        try (MockedStatic<ValueCreator> valueCreatorMock = Mockito.mockStatic(ValueCreator.class)) {
+            ParamHandler handler = new ParamHandler();
+            Method method = ParamHandler.class.getDeclaredMethod("convertDecimalArrayToFloatArray", BArray.class);
+            method.setAccessible(true);
+
+            BArray input = mock(BArray.class);
+            when(input.size()).thenReturn(1);
+            when(input.get(0)).thenReturn("not-a-number");
+
+            BArray outputArray = mock(BArray.class);
+            valueCreatorMock.when(() -> ValueCreator.createArrayValue(any(double[].class))).thenReturn(outputArray);
+
+            BArray result = (BArray) method.invoke(handler, input);
+            Assert.assertSame(result, outputArray);
+        }
+    }
+
+    @Test
+    public void testGetOMElement_InvalidXmlString_ReturnsNull() throws Exception {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            ParamHandler handler = new ParamHandler();
+            Method method = ParamHandler.class.getDeclaredMethod("getOMElement", MessageContext.class, String.class);
+            method.setAccessible(true);
+
+            MessageContext context = mock(MessageContext.class);
+            when(context.getProperty("param0")).thenReturn("templateKey");
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "templateKey"))
+                    .thenReturn("<bad");
+
+            Object result = method.invoke(handler, context, "param0");
+            Assert.assertNull(result);
+        }
+    }
+
+    @Test
+    public void testGetParameter_XmlType_WithOMElementTemplateValue() throws Exception {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            ParamHandler handler = new ParamHandler();
+            MessageContext context = mock(MessageContext.class);
+            OMElement omElement = AXIOMUtil.stringToOM("<root><a>1</a></root>");
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param0"))
+                    .thenReturn("xmlParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType0"))
+                    .thenReturn(Constants.XML);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "xmlParam"))
+                    .thenReturn(omElement);
+            when(context.getProperty("param0")).thenReturn("xmlParam");
+
+            Object result = handler.getParameter(context, "param0", "paramType0", 0);
+            Assert.assertNotNull(result);
+            Assert.assertTrue(result instanceof BXml);
+        }
+    }
+
+    @Test
+    public void testGetParameter_XmlType_WithXmlStringTemplateValue() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            ParamHandler handler = new ParamHandler();
+            MessageContext context = mock(MessageContext.class);
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param0"))
+                    .thenReturn("xmlParam");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType0"))
+                    .thenReturn(Constants.XML);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "xmlParam"))
+                    .thenReturn("<root><a>2</a></root>");
+            when(context.getProperty("param0")).thenReturn("xmlParam");
+
+            Object result = handler.getParameter(context, "param0", "paramType0", 0);
+            Assert.assertNotNull(result);
+            Assert.assertTrue(result instanceof BXml);
+        }
+    }
+
+    @Test
+    public void testGetParameter_ArrayType_NestedTableBMap_UsesTransformNestedTableTo2DArray() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class);
+             MockedStatic<DataTransformer> dataTransformerMock = Mockito.mockStatic(DataTransformer.class)) {
+            ParamHandler handler = new ParamHandler();
+            MessageContext context = mock(MessageContext.class);
+            String raw = "[{\"innerArray\":[{\"value\":1}]}]";
+            String transformed = "[[1]]";
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param6")).thenReturn("nested2d");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType6")).thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "nested2d")).thenReturn(raw);
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(raw)).thenReturn(raw);
+            when(context.getProperty("arrayElementType6")).thenReturn("array");
+
+            BArray parsedOuter = mock(BArray.class);
+            BMap firstRow = mock(BMap.class);
+            when(parsedOuter.size()).thenReturn(1);
+            when(parsedOuter.get(0)).thenReturn(firstRow);
+            when(firstRow.containsKey(any(BString.class))).thenReturn(true);
+
+            Object transformedParsed = new Object();
+            jsonUtilsMock.when(() -> JsonUtils.parse(raw)).thenReturn(parsedOuter);
+            dataTransformerMock.when(() -> DataTransformer.transformNestedTableTo2DArray(parsedOuter)).thenReturn(transformed);
+            jsonUtilsMock.when(() -> JsonUtils.parse(transformed)).thenReturn(transformedParsed);
+
+            Object result = handler.getParameter(context, "param6", "paramType6", 6);
+            Assert.assertSame(result, transformedParsed);
+        }
+    }
+
+    @Test
+    public void testGetParameter_ArrayType_MiStudioNestedTable_UsesTransformMIStudioNestedTableTo2DArray() {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class);
+             MockedStatic<JsonUtils> jsonUtilsMock = Mockito.mockStatic(JsonUtils.class);
+             MockedStatic<DataTransformer> dataTransformerMock = Mockito.mockStatic(DataTransformer.class)) {
+            ParamHandler handler = new ParamHandler();
+            MessageContext context = mock(MessageContext.class);
+            String raw = "[[\"a\",\"b\"]]";
+            String transformed = "[[\"a\",\"b\"]]";
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "param7")).thenReturn("nestedMi");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, "paramType7")).thenReturn(Constants.ARRAY);
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, "nestedMi")).thenReturn(raw);
+            synapseUtilsMock.when(() -> SynapseUtils.cleanupJsonString(raw)).thenReturn(raw);
+            when(context.getProperty("arrayElementType7")).thenReturn("array");
+
+            BArray parsedOuter = mock(BArray.class);
+            BArray firstRow = mock(BArray.class);
+            when(parsedOuter.size()).thenReturn(1);
+            when(parsedOuter.get(0)).thenReturn(firstRow);
+            when(firstRow.size()).thenReturn(2);
+
+            Object transformedParsed = new Object();
+            jsonUtilsMock.when(() -> JsonUtils.parse(raw)).thenReturn(parsedOuter);
+            dataTransformerMock.when(() -> DataTransformer.transformMIStudioNestedTableTo2DArray(parsedOuter, context))
+                    .thenReturn(transformed);
+            jsonUtilsMock.when(() -> JsonUtils.parse(transformed)).thenReturn(transformedParsed);
+
+            Object result = handler.getParameter(context, "param7", "paramType7", 7);
+            Assert.assertSame(result, transformedParsed);
+        }
+    }
+
+    @Test
+    public void testConvertDecimalArrayToFloatArray_BDecimalAndNumberBranches() throws Exception {
+        try (MockedStatic<ValueCreator> valueCreatorMock = Mockito.mockStatic(ValueCreator.class)) {
+            ParamHandler handler = new ParamHandler();
+            Method method = ParamHandler.class.getDeclaredMethod("convertDecimalArrayToFloatArray", BArray.class);
+            method.setAccessible(true);
+
+            BArray input = mock(BArray.class);
+            when(input.size()).thenReturn(2);
+
+            BDecimal decimal = mock(BDecimal.class);
+            when(decimal.decimalValue()).thenReturn(new BigDecimal("1.5"));
+
+            when(input.get(0)).thenReturn(decimal);
+            when(input.get(1)).thenReturn(2);
+
+            BArray outputArray = mock(BArray.class);
+            valueCreatorMock.when(() -> ValueCreator.createArrayValue(any(double[].class))).thenReturn(outputArray);
+
+            BArray result = (BArray) method.invoke(handler, input);
+            Assert.assertSame(result, outputArray);
+        }
+    }
+
+    @Test
+    public void testTransformUnionTableToArray_IgnoresNonBMapRows() throws Exception {
+        ParamHandler handler = new ParamHandler();
+        Method method = ParamHandler.class.getDeclaredMethod("transformUnionTableToArray", BArray.class);
+        method.setAccessible(true);
+
+        BArray rows = mock(BArray.class);
+        when(rows.size()).thenReturn(1);
+        when(rows.get(0)).thenReturn("not-a-map");
+
+        String output = (String) method.invoke(handler, rows);
+        Assert.assertEquals(output, "[]");
     }
 }

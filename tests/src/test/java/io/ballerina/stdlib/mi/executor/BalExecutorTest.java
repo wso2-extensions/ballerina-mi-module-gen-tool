@@ -24,7 +24,10 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.*;
 import io.ballerina.runtime.internal.values.MapValueImpl;
+import io.ballerina.stdlib.mi.BallerinaExecutionException;
+import io.ballerina.stdlib.mi.BXmlConverter;
 import io.ballerina.stdlib.mi.Constants;
+import io.ballerina.stdlib.mi.TypeConverter;
 import io.ballerina.stdlib.mi.utils.SynapseUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
@@ -33,6 +36,7 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -1189,6 +1193,31 @@ public class BalExecutorTest {
         }
     }
 
+    @Test
+    public void testExecute_RuntimeThrowsBError_ConvertedToBallerinaExecutionException() throws Exception {
+        try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
+            BalExecutor executor = new BalExecutor();
+            Runtime runtime = mock(Runtime.class);
+            Module module = mock(Module.class);
+            MessageContext context = mock(MessageContext.class);
+
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, Constants.SIZE))
+                    .thenReturn("0");
+            synapseUtilsMock.when(() -> SynapseUtils.getPropertyAsString(context, Constants.FUNCTION_NAME))
+                    .thenReturn("testFunction");
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, Constants.RESPONSE_VARIABLE))
+                    .thenReturn("result");
+            synapseUtilsMock.when(() -> SynapseUtils.lookupTemplateParameter(context, Constants.OVERWRITE_BODY))
+                    .thenReturn("false");
+
+            BError bError = ErrorCreator.createError(StringUtils.fromString("panic"));
+            when(runtime.callFunction(any(Module.class), anyString(), isNull(), any())).thenThrow(bError);
+
+            boolean result = executor.execute(runtime, module, context);
+            Assert.assertTrue(result);
+        }
+    }
+
     @Test(expectedExceptions = SynapseException.class)
     public void testExecute_NullCallable_ThrowsSynapseException() throws Exception {
         try (MockedStatic<SynapseUtils> synapseUtilsMock = Mockito.mockStatic(SynapseUtils.class)) {
@@ -1200,6 +1229,46 @@ public class BalExecutorTest {
                     .thenReturn("0");
 
             executor.execute(runtime, null, context);
+        }
+    }
+
+    @Test
+    public void testProcessResponse_PrivateCoversAllSupportedAndFallbackTypes() throws Exception {
+        try (MockedStatic<BXmlConverter> bXmlConverterMock = Mockito.mockStatic(BXmlConverter.class);
+             MockedStatic<TypeConverter> typeConverterMock = Mockito.mockStatic(TypeConverter.class)) {
+            BalExecutor executor = new BalExecutor();
+            Method method = BalExecutor.class.getDeclaredMethod("processResponse", Object.class);
+            method.setAccessible(true);
+
+            Assert.assertNull(method.invoke(executor, new Object[] { null }));
+
+            BXml bXml = mock(BXml.class);
+            org.apache.axiom.om.OMElement xmlObj = mock(org.apache.axiom.om.OMElement.class);
+            bXmlConverterMock.when(() -> BXmlConverter.toOMElement(bXml)).thenReturn(xmlObj);
+            Assert.assertSame(method.invoke(executor, bXml), xmlObj);
+
+            BDecimal decimal = mock(BDecimal.class);
+            when(decimal.value()).thenReturn(new BigDecimal("10.25"));
+            Assert.assertEquals(method.invoke(executor, decimal), "10.25");
+
+            BString bString = mock(BString.class);
+            when(bString.getValue()).thenReturn("value");
+            Assert.assertEquals(method.invoke(executor, bString), "value");
+
+            BArray bArray = mock(BArray.class);
+            typeConverterMock.when(() -> TypeConverter.arrayToJsonString(bArray)).thenReturn("[1,2]");
+            Assert.assertEquals(method.invoke(executor, bArray).toString(), "[1,2]");
+
+            MapValueImpl<?, ?> bMap = mock(MapValueImpl.class);
+            when(bMap.getJSONString()).thenReturn("{\"k\":\"v\"}");
+            Assert.assertEquals(method.invoke(executor, bMap).toString(), "{\"k\":\"v\"}");
+
+            Assert.assertEquals(method.invoke(executor, 123).toString(), "123");
+            Assert.assertEquals(method.invoke(executor, true).toString(), "true");
+            Assert.assertEquals(method.invoke(executor, 2.5d).toString(), "2.5");
+
+            Object other = new Object();
+            Assert.assertSame(method.invoke(executor, other), other);
         }
     }
 
