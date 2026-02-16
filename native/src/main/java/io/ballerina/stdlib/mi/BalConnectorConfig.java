@@ -17,12 +17,13 @@
  */
  
 package io.ballerina.stdlib.mi;
-import io.ballerina.stdlib.mi.executor.ParamHandler;
+
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.stdlib.mi.executor.ParamHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.mediators.template.TemplateContext;

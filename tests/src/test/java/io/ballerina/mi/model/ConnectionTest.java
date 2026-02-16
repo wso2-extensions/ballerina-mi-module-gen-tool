@@ -18,11 +18,7 @@
 
 package io.ballerina.mi.model;
 
-import io.ballerina.projects.PackageDescriptor;
-import io.ballerina.projects.PackageName;
-import io.ballerina.projects.PackageOrg;
-import io.ballerina.projects.PackageVersion;
-import io.ballerina.projects.SemanticVersion;
+import io.ballerina.projects.*;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;

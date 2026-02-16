@@ -23,11 +23,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.types.ArrayType;
-import io.ballerina.runtime.api.types.Field;
-import io.ballerina.runtime.api.types.StructureType;
-import io.ballerina.runtime.api.types.Type;
-import io.ballerina.runtime.api.types.TypeTags;
+import io.ballerina.runtime.api.types.*;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
@@ -36,7 +32,6 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.internal.values.MapValueImpl;
 import io.ballerina.stdlib.mi.BalConnectorConfig;
-import io.ballerina.stdlib.mi.Constants;
 import io.ballerina.stdlib.mi.utils.SynapseUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,15 +46,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.ballerina.stdlib.mi.Constants.ARRAY;
-import static io.ballerina.stdlib.mi.Constants.BOOLEAN;
-import static io.ballerina.stdlib.mi.Constants.DECIMAL;
-import static io.ballerina.stdlib.mi.Constants.FLOAT;
-import static io.ballerina.stdlib.mi.Constants.INT;
-import static io.ballerina.stdlib.mi.Constants.JSON;
-import static io.ballerina.stdlib.mi.Constants.MAP;
-import static io.ballerina.stdlib.mi.Constants.RECORD;
-import static io.ballerina.stdlib.mi.Constants.UNION;
+import static io.ballerina.stdlib.mi.Constants.*;
 
 public class DataTransformer {
 

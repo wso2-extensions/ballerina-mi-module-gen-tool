@@ -19,7 +19,6 @@
 package io.ballerina.mi.model;
 
 import io.ballerina.mi.generator.ConnectorSerializer;
-
 import io.ballerina.mi.model.param.FunctionParam;
 import io.ballerina.mi.model.param.Param;
 import io.ballerina.mi.model.param.ResourcePathSegment;

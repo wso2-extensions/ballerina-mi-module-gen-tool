@@ -34,18 +34,12 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.util.AXIOMUtils;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import javax.xml.namespace.QName;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests for PayloadWriter utility class.

@@ -19,19 +19,14 @@
 package io.ballerina.mi.generator;
 
 import io.ballerina.compiler.api.symbols.TypeDescKind;
-import io.ballerina.mi.model.param.ArrayFunctionParam;
-import io.ballerina.mi.model.param.FunctionParam;
-import io.ballerina.mi.model.param.MapFunctionParam;
-import io.ballerina.mi.model.param.RecordFunctionParam;
-import io.ballerina.mi.model.param.UnionFunctionParam;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.mi.model.param.*;
 import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.JsonTemplateBuilder;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import io.ballerina.compiler.api.symbols.TypeSymbol;
 
 import java.io.IOException;
 import java.util.ArrayList;

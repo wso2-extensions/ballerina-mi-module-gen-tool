@@ -21,10 +21,10 @@ package io.ballerina.mi.generator;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
-
-import io.ballerina.mi.model.*;
-import io.ballerina.mi.model.param.*;
-
+import io.ballerina.mi.model.Component;
+import io.ballerina.mi.model.Connection;
+import io.ballerina.mi.model.Connector;
+import io.ballerina.mi.model.ModelElement;
 import io.ballerina.mi.util.Constants;
 import io.ballerina.mi.util.JsonTemplateBuilder;
 import io.ballerina.mi.util.ResourceLifecycleManager;
@@ -43,8 +43,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static io.ballerina.mi.util.Constants.*;
 
 /**
  * Orchestrates the connector serialization pipeline.

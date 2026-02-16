@@ -17,10 +17,10 @@
 package org.ballerina.test;
 
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.mi.Constants;
 import io.ballerina.stdlib.mi.executor.BalExecutor;
 import io.ballerina.stdlib.mi.executor.ParamHandler;
 import io.ballerina.stdlib.mi.utils.SynapseUtils;
-import io.ballerina.stdlib.mi.Constants;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.template.TemplateContext;

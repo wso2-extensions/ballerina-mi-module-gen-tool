@@ -21,7 +21,6 @@ package io.ballerina.mi.model;
 import io.ballerina.mi.generator.ConnectorSerializer;
 import io.ballerina.mi.model.param.*;
 import io.ballerina.mi.util.Constants;
-import io.ballerina.mi.util.Utils;
 import io.ballerina.projects.PackageDescriptor;
 import io.ballerina.projects.SemanticVersion;
 

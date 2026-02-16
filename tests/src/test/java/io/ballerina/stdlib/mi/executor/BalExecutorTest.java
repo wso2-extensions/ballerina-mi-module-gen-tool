@@ -20,11 +20,7 @@ package io.ballerina.stdlib.mi.executor;
 
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.values.BArray;
-import io.ballerina.runtime.api.values.BDecimal;
-import io.ballerina.runtime.api.values.BObject;
-import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.api.values.BXml;
+import io.ballerina.runtime.api.values.*;
 import io.ballerina.runtime.internal.values.MapValueImpl;
 import io.ballerina.stdlib.mi.Constants;
 import io.ballerina.stdlib.mi.utils.SynapseUtils;

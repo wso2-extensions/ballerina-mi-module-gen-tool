@@ -19,11 +19,7 @@
 package io.ballerina.stdlib.mi.executor;
 
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.types.ArrayType;
-import io.ballerina.runtime.api.types.Field;
-import io.ballerina.runtime.api.types.StructureType;
-import io.ballerina.runtime.api.types.Type;
-import io.ballerina.runtime.api.types.TypeTags;
+import io.ballerina.runtime.api.types.*;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
@@ -33,7 +29,6 @@ import io.ballerina.stdlib.mi.Constants;
 import io.ballerina.stdlib.mi.utils.SynapseUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
-import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.testng.Assert;
@@ -45,7 +40,6 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**

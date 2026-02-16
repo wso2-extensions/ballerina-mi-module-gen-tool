@@ -21,23 +21,10 @@ package io.ballerina.stdlib.mi.executor;
 import com.google.gson.JsonParser;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.types.ClientType;
-import io.ballerina.runtime.api.types.MethodType;
-import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.Type;
-import io.ballerina.runtime.api.values.BArray;
-import io.ballerina.runtime.api.values.BDecimal;
-import io.ballerina.runtime.api.values.BError;
-import io.ballerina.runtime.api.values.BMap;
-import io.ballerina.runtime.api.values.BObject;
-import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.api.values.BXml;
+import io.ballerina.runtime.api.values.*;
 import io.ballerina.runtime.internal.values.MapValueImpl;
-import io.ballerina.stdlib.mi.BXmlConverter;
-import io.ballerina.stdlib.mi.BallerinaExecutionException;
-import io.ballerina.stdlib.mi.Constants;
-import io.ballerina.stdlib.mi.PayloadWriter;
-import io.ballerina.stdlib.mi.TypeConverter;
+import io.ballerina.stdlib.mi.*;
 import io.ballerina.stdlib.mi.utils.SynapseUtils;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
@@ -46,8 +33,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.data.connector.ConnectorResponse;
 import org.apache.synapse.data.connector.DefaultConnectorResponse;
-
-import java.util.Arrays;
 
 import static io.ballerina.stdlib.mi.Constants.FUNCTION_NAME;
 

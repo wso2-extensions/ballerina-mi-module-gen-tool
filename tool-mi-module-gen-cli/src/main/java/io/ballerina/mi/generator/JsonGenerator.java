@@ -20,43 +20,19 @@ package io.ballerina.mi.generator;
 
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.mi.model.param.ArrayFunctionParam;
-import io.ballerina.mi.model.param.FunctionParam;
-import io.ballerina.mi.model.param.MapFunctionParam;
-import io.ballerina.mi.model.param.RecordFunctionParam;
-import io.ballerina.mi.model.param.UnionFunctionParam;
-import io.ballerina.mi.model.attribute.Attribute;
-import io.ballerina.mi.model.attribute.AttributeGroup;
-import io.ballerina.mi.model.attribute.Combo;
-import io.ballerina.mi.model.attribute.Element;
-import io.ballerina.mi.model.attribute.Table;
+import io.ballerina.mi.model.attribute.*;
+import io.ballerina.mi.model.param.*;
 import io.ballerina.mi.util.JsonTemplateBuilder;
 import io.ballerina.mi.util.Utils;
-import org.ballerinalang.diagramutil.connector.models.connector.types.PathParamType;
 import org.apache.commons.lang3.StringUtils;
+import org.ballerinalang.diagramutil.connector.models.connector.types.PathParamType;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-import static io.ballerina.mi.util.Constants.ATTRIBUTE_GROUP_TEMPLATE_PATH;
-import static io.ballerina.mi.util.Constants.ATTRIBUTE_SEPARATOR;
-import static io.ballerina.mi.util.Constants.ATTRIBUTE_TEMPLATE_PATH;
-import static io.ballerina.mi.util.Constants.COMBO_TEMPLATE_PATH;
-import static io.ballerina.mi.util.Constants.DECIMAL_REGEX;
-import static io.ballerina.mi.util.Constants.DECIMAL_REGEX_OPTIONAL;
-import static io.ballerina.mi.util.Constants.INPUT_TYPE_BOOLEAN;
-import static io.ballerina.mi.util.Constants.INPUT_TYPE_COMBO;
-import static io.ballerina.mi.util.Constants.INPUT_TYPE_STRING_OR_EXPRESSION;
-import static io.ballerina.mi.util.Constants.INTEGER_REGEX;
-import static io.ballerina.mi.util.Constants.INTEGER_REGEX_OPTIONAL;
-import static io.ballerina.mi.util.Constants.JSON;
-import static io.ballerina.mi.util.Constants.JSON_OBJECT_REGEX_OPTIONAL;
-import static io.ballerina.mi.util.Constants.RECORD;
-import static io.ballerina.mi.util.Constants.TABLE_TEMPLATE_PATH;
-import static io.ballerina.mi.util.Constants.UNION;
-import static io.ballerina.mi.util.Constants.VALIDATE_TYPE_REGEX;
+import static io.ballerina.mi.util.Constants.*;
 
 /**
  * Generates JSON UI schema for the connector.

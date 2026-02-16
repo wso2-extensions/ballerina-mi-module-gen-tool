@@ -19,8 +19,6 @@
 package io.ballerina.stdlib.mi;
 
 import io.ballerina.runtime.api.Module;
-import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BObject;
 import org.wso2.integration.connector.core.ConnectException;
 import org.wso2.integration.connector.core.connection.Connection;

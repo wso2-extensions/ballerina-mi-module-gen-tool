@@ -21,11 +21,7 @@ package io.ballerina.stdlib.mi.executor;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
-import io.ballerina.runtime.api.values.BArray;
-import io.ballerina.runtime.api.values.BDecimal;
-import io.ballerina.runtime.api.values.BMap;
-import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.api.values.BXml;
+import io.ballerina.runtime.api.values.*;
 import io.ballerina.stdlib.mi.Constants;
 import io.ballerina.stdlib.mi.OMElementConverter;
 import io.ballerina.stdlib.mi.utils.SynapseUtils;
@@ -36,17 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 
-import static io.ballerina.stdlib.mi.Constants.ARRAY;
-import static io.ballerina.stdlib.mi.Constants.BOOLEAN;
-import static io.ballerina.stdlib.mi.Constants.DECIMAL;
-import static io.ballerina.stdlib.mi.Constants.FLOAT;
-import static io.ballerina.stdlib.mi.Constants.INT;
-import static io.ballerina.stdlib.mi.Constants.JSON;
-import static io.ballerina.stdlib.mi.Constants.MAP;
-import static io.ballerina.stdlib.mi.Constants.RECORD;
-import static io.ballerina.stdlib.mi.Constants.STRING;
-import static io.ballerina.stdlib.mi.Constants.UNION;
-import static io.ballerina.stdlib.mi.Constants.XML;
+import static io.ballerina.stdlib.mi.Constants.*;
 
 public class ParamHandler {
 

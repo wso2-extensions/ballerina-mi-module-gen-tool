@@ -25,7 +25,6 @@ import io.ballerina.mi.util.Utils;
 import org.ballerinalang.diagramutil.connector.models.connector.Type;
 import org.ballerinalang.diagramutil.connector.models.connector.types.PathParamType;
 
-
 import java.util.Set;
 
 import static io.ballerina.mi.util.Constants.RECORD;

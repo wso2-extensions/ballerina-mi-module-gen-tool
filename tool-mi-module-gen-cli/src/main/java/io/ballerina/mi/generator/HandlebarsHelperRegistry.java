@@ -36,11 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.diagramutil.connector.models.connector.Type;
 import org.ballerinalang.diagramutil.connector.models.connector.types.PathParamType;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.ballerina.mi.util.Constants.ATTRIBUTE_SEPARATOR;
