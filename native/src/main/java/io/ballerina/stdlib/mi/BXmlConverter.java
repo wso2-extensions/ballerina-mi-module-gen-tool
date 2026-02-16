@@ -34,6 +34,26 @@ public class BXmlConverter {
     private static final OMFactory factory = OMAbstractFactory.getOMFactory();
     private static final String XMLNS_PREFIX = "xmlns:";
 
+    private static boolean isNamespaceDeclarationAttribute(String attributeName) {
+        return attributeName.equals(BXmlItem.XMLNS_PREFIX)
+                || attributeName.startsWith(XMLNS_PREFIX)
+                || attributeName.equals(BXmlItem.XMLNS_NS_URI_PREFIX)
+                || attributeName.startsWith(BXmlItem.XMLNS_NS_URI_PREFIX);
+    }
+
+    private static String getNamespacePrefix(String attributeName) {
+        if (attributeName.equals(BXmlItem.XMLNS_PREFIX) || attributeName.equals(BXmlItem.XMLNS_NS_URI_PREFIX)) {
+            return "";
+        }
+        if (attributeName.startsWith(XMLNS_PREFIX)) {
+            return attributeName.substring(XMLNS_PREFIX.length());
+        }
+        if (attributeName.startsWith(BXmlItem.XMLNS_NS_URI_PREFIX)) {
+            return attributeName.substring(BXmlItem.XMLNS_NS_URI_PREFIX.length());
+        }
+        return "";
+    }
+
     static Pair<String, String> extractNamespace(String value) {
 
         if (value.startsWith("{")) {
@@ -67,19 +87,21 @@ public class BXmlConverter {
         // create a map of namespaces with key:"" and value:null
         Map<String, OMNamespace> namespaceMap = new HashMap<>();
         namespaceMap.put("", null);
+        if (namespace != null && namespace.getNamespaceURI() != null && !namespace.getNamespaceURI().isEmpty()) {
+            namespaceMap.put(namespace.getNamespaceURI(), namespace);
+        }
 
         for (Map.Entry<BString, BString> entry : bMap.entrySet()) {
             String attributeName = entry.getKey().getValue();
-            if (attributeName.equals(BXmlItem.XMLNS_PREFIX) || attributeName.startsWith(XMLNS_PREFIX)) {
-                String prefix = attributeName.equals(BXmlItem.XMLNS_PREFIX) ? "" :
-                        attributeName.substring(XMLNS_PREFIX.length());
+            if (isNamespaceDeclarationAttribute(attributeName)) {
+                String prefix = getNamespacePrefix(attributeName);
                 OMNamespace omNamespace = factory.createOMNamespace(entry.getValue().getValue(), prefix);
                 namespaceMap.put(entry.getValue().getValue(), omNamespace);
             }
         }
         for (Map.Entry<BString, BString> attribute : bMap.entrySet()) {
             String attributeName = attribute.getKey().getValue();
-            if (!attributeName.equals(BXmlItem.XMLNS_PREFIX) && !attributeName.startsWith(XMLNS_PREFIX)) {
+            if (!isNamespaceDeclarationAttribute(attributeName)) {
                 Pair<String, String> pair = extractNamespace(attribute.getKey().getValue());
                 OMAttribute omattribute = factory.createOMAttribute(pair.getRight(), namespaceMap.get(pair.getLeft()),
                         attribute.getValue().getValue());
