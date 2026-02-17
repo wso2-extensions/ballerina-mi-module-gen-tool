@@ -29,7 +29,6 @@ import org.apache.synapse.mediators.AbstractMediator;
 
 public class Mediator extends AbstractMediator {
 
-
     private static volatile Runtime rt = null;
     private static Module module = null;
     private String orgName;
