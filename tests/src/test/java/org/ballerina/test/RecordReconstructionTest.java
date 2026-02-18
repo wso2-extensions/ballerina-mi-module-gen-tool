@@ -16,7 +16,8 @@
 
 package org.ballerina.test;
 
-import io.ballerina.stdlib.mi.BalExecutor;
+import io.ballerina.stdlib.mi.executor.DataTransformer;
+import io.ballerina.stdlib.mi.utils.SynapseUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.testng.Assert;
@@ -33,12 +34,10 @@ import java.lang.reflect.Method;
  */
 public class RecordReconstructionTest {
 
-    private BalExecutor balExecutor;
     private MessageContext messageContext;
 
     @BeforeMethod
     public void setup() {
-        balExecutor = new BalExecutor();
         // Create a mock message context
         messageContext = new Axis2MessageContext(
                 new org.apache.axis2.context.MessageContext(),
@@ -54,7 +53,7 @@ public class RecordReconstructionTest {
     @Test(description = "Verify setNestedField creates proper nested structure")
     public void testSetNestedField() throws Exception {
         // Use reflection to access the private setNestedField method
-        Method setNestedFieldMethod = BalExecutor.class.getDeclaredMethod(
+        Method setNestedFieldMethod = DataTransformer.class.getDeclaredMethod(
                 "setNestedField",
                 com.google.gson.JsonObject.class,
                 String.class,
@@ -67,12 +66,12 @@ public class RecordReconstructionTest {
         com.google.gson.JsonObject rootObject = new com.google.gson.JsonObject();
 
         // Test simple field
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "httpVersion", "HTTP_1_1", "string", messageContext);
+        setNestedFieldMethod.invoke(null, rootObject, "httpVersion", "HTTP_1_1", "string", messageContext);
         Assert.assertTrue(rootObject.has("httpVersion"), "Simple field should be set");
         Assert.assertEquals(rootObject.get("httpVersion").getAsString(), "HTTP_1_1");
 
         // Test nested field (2 levels)
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "http1Settings.keepAlive", "ALWAYS", "string", messageContext);
+        setNestedFieldMethod.invoke(null, rootObject, "http1Settings.keepAlive", "ALWAYS", "string", messageContext);
         Assert.assertTrue(rootObject.has("http1Settings"), "Nested object should be created");
         Assert.assertTrue(rootObject.getAsJsonObject("http1Settings").has("keepAlive"),
                 "Nested field should be set");
@@ -80,7 +79,7 @@ public class RecordReconstructionTest {
                 "ALWAYS");
 
         // Test deeply nested field (3 levels)
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "http1Settings.proxy.host", "localhost", "string", messageContext);
+        setNestedFieldMethod.invoke(null, rootObject, "http1Settings.proxy.host", "localhost", "string", messageContext);
         Assert.assertTrue(rootObject.getAsJsonObject("http1Settings").has("proxy"),
                 "Second level nested object should be created");
         Assert.assertTrue(rootObject.getAsJsonObject("http1Settings")
@@ -91,17 +90,17 @@ public class RecordReconstructionTest {
                 "localhost");
 
         // Test integer field
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "http1Settings.proxy.port", "8080", "int", messageContext);
+        setNestedFieldMethod.invoke(null, rootObject, "http1Settings.proxy.port", "8080", "int", messageContext);
         Assert.assertEquals(rootObject.getAsJsonObject("http1Settings")
                         .getAsJsonObject("proxy").get("port").getAsLong(),
                 8080L);
 
         // Test boolean field
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "cache.enabled", "true", "boolean", messageContext);
+        setNestedFieldMethod.invoke(null, rootObject, "cache.enabled", "true", "boolean", messageContext);
         Assert.assertTrue(rootObject.getAsJsonObject("cache").get("enabled").getAsBoolean());
 
         // Test float field
-        setNestedFieldMethod.invoke(balExecutor, rootObject, "cache.evictionFactor", "0.75", "float", messageContext);
+        setNestedFieldMethod.invoke(null, rootObject, "cache.evictionFactor", "0.75", "float", messageContext);
         Assert.assertEquals(rootObject.getAsJsonObject("cache").get("evictionFactor").getAsDouble(),
                 0.75, 0.001);
     }
@@ -146,18 +145,17 @@ public class RecordReconstructionTest {
         messageContext.setProperty("timeout", "60.0");
         messageContext.setProperty("cache_enabled", "true");
 
-        // Use reflection to access the private reconstructRecordFromFields method
+        // Use reflection to access the reconstructRecordFromFields method
         // The method now takes a propertyPrefix (connectionType + "_" + recordParamName) and context
-        Method reconstructMethod = BalExecutor.class.getDeclaredMethod(
+        Method reconstructMethod = DataTransformer.class.getMethod(
                 "reconstructRecordFromFields",
                 String.class,
                 MessageContext.class
         );
-        reconstructMethod.setAccessible(true);
 
         // Call the reconstruction method with the combined prefix
         String propertyPrefix = connectionType + "_" + recordParamName;
-        Object result = reconstructMethod.invoke(balExecutor, propertyPrefix, messageContext);
+        Object result = reconstructMethod.invoke(null, propertyPrefix, messageContext);
 
         // Verify the result is a BMap (Ballerina map)
         Assert.assertNotNull(result, "Reconstructed record should not be null");
@@ -212,18 +210,20 @@ public class RecordReconstructionTest {
         messageContext.setProperty(connectionType + "_param0", recordParamName);
         messageContext.setProperty(connectionType + "_" + recordParamName + "_param0", "someField");
 
-        // Use reflection to access the private findConnectionTypeForParam method
-        Method findConnectionTypeMethod = BalExecutor.class.getDeclaredMethod(
+        // Use reflection to access the findConnectionTypeForParam method
+        Method findConnectionTypeMethod = SynapseUtils.class.getMethod(
                 "findConnectionTypeForParam",
                 MessageContext.class,
                 String.class
         );
-        findConnectionTypeMethod.setAccessible(true);
 
         // Note: This method currently has hardcoded values, so it will return null
         // or a hardcoded value. This test documents the expected behavior for when
         // it's made more dynamic.
-        Object result = findConnectionTypeMethod.invoke(balExecutor, messageContext, recordParamName);
+        // Note: This method currently has hardcoded values, so it will return null
+        // or a hardcoded value. This test documents the expected behavior for when
+        // it's made more dynamic.
+        Object result = findConnectionTypeMethod.invoke(null, messageContext, recordParamName);
 
         // The current implementation returns null or a hardcoded value
         // This test serves as documentation for future enhancement
@@ -250,15 +250,14 @@ public class RecordReconstructionTest {
         messageContext.setProperty("httpVersion", "HTTP_2_0");
         // timeout deliberately not set
 
-        Method reconstructMethod = BalExecutor.class.getDeclaredMethod(
+        Method reconstructMethod = DataTransformer.class.getMethod(
                 "reconstructRecordFromFields",
                 String.class,
                 MessageContext.class
         );
-        reconstructMethod.setAccessible(true);
 
         String propertyPrefix = connectionType + "_" + recordParamName;
-        Object result = reconstructMethod.invoke(balExecutor, propertyPrefix, messageContext);
+        Object result = reconstructMethod.invoke(null, propertyPrefix, messageContext);
 
         Assert.assertNotNull(result, "Should handle optional fields gracefully");
         io.ballerina.runtime.api.values.BMap<?, ?> reconstructedRecord =

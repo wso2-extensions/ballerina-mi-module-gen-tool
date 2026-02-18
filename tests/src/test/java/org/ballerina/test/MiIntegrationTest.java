@@ -16,12 +16,6 @@
 
 package org.ballerina.test;
 
-import io.restassured.RestAssured;
-import io.restassured.response.Response;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.URI;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
@@ -32,6 +26,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -71,7 +69,7 @@ public class MiIntegrationTest {
         if (!dockerAvailable) {
             throw new SkipException("Docker is not available. Skipping integration tests.");
         }
-        
+
         // Get the project root directory from system property set by Gradle
         String projectRoot = System.getProperty("project.root");
         if (projectRoot == null || projectRoot.isEmpty()) {

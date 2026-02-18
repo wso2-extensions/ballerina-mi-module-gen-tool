@@ -20,6 +20,7 @@ package io.ballerina.stdlib.mi;
 
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.stdlib.mi.executor.BalExecutor;
 import org.apache.axis2.AxisFault;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;

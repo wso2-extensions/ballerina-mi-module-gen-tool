@@ -22,6 +22,15 @@
     <test name="ballerina-mi-module-gen-tool-test">
         <packages>
             <package name="org.ballerina.test.*"/>
+            <package name="io.ballerina.mi.model.*"/>
+            <package name="io.ballerina.mi.cmd.*"/>
+            <package name="io.ballerina.mi.util.*"/>
+            <package name="io.ballerina.mi.validator.*"/>
+            <package name="io.ballerina.mi.analyzer.*"/>
+            <package name="io.ballerina.mi.generator.*"/>
+            <package name="io.ballerina.stdlib.mi.*"/>
+            <package name="io.ballerina.stdlib.mi.executor.*"/>
+            <package name="io.ballerina.stdlib.mi.utils.*"/>
         </packages>
     </test>
 </suite>

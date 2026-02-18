@@ -24,20 +24,13 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BXml;
 import io.ballerina.runtime.api.values.BXmlItem;
-import org.apache.axiom.om.OMAttribute;
-import org.apache.axiom.om.OMComment;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.OMNode;
-import org.apache.axiom.om.OMProcessingInstruction;
-import org.apache.axiom.om.OMText;
+import org.apache.axiom.om.*;
 
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import javax.xml.namespace.QName;
 
 public class OMElementConverter {
 
@@ -114,8 +107,7 @@ public class OMElementConverter {
             attributesMap.put(xmlnsPrefix, StringUtils.fromString(namespaceURI));
         }
 
-        //TODO: There is still another part in the code that referred
-        //NOTE: This is for the namespaces that are declared but not used in its attributes
+        // Add declared namespaces even when they are not referenced by element/attribute QNames.
         for (Iterator it = omElement.getAllDeclaredNamespaces(); it.hasNext(); ) {
 
             OMNamespace omNamespace = (OMNamespace) it.next();
@@ -131,7 +123,6 @@ public class OMElementConverter {
     }
 
     private static BXml getXmlItem(OMElement omElement) {
-        // TODO: find the issue that fail and put it here
         QName qName = getQNameOMElement(omElement);
         BXmlItem xmlItem = ValueCreator.createXmlItem(qName, false);
 

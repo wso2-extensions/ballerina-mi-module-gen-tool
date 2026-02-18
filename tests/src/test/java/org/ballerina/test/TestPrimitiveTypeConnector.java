@@ -20,14 +20,9 @@ import io.ballerina.stdlib.mi.BalConnectorConfig;
 import io.ballerina.stdlib.mi.BalConnectorFunction;
 import io.ballerina.stdlib.mi.ModuleInfo;
 import org.apache.synapse.data.connector.DefaultConnectorResponse;
-import org.apache.synapse.mediators.template.TemplateContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Stack;
 
 /**
  * Tests for primitive type support in BalConnectorFunction (connectors).

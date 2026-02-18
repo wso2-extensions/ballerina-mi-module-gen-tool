@@ -1,6 +1,9 @@
 # Ballerina tool for WSO2 Micro Integrator module generator
 
 [![codecov](https://codecov.io/gh/wso2-extensions/ballerina-mi-module-gen-tool/branch/main/graph/badge.svg)](https://codecov.io/gh/wso2-extensions/ballerina-mi-module-gen-tool)
+[![GitHub Release](https://img.shields.io/github/v/release/wso2-extensions/ballerina-mi-module-gen-tool)](https://github.com/wso2-extensions/ballerina-mi-module-gen-tool/releases)
+![Last Commit](https://img.shields.io/github/last-commit/wso2-extensions/ballerina-mi-module-gen-tool)
+[![Publish Release Workflow](https://github.com/wso2-extensions/ballerina-mi-module-gen-tool/actions/workflows/publish-release.yml/badge.svg)](https://github.com/wso2-extensions/ballerina-mi-module-gen-tool/actions/workflows/publish-release.yml)
 
 ## Overview
 
@@ -62,6 +65,16 @@ Above command generates the connector zip in the same location.
 1. Clone the repository [ballerina-mi-module-gen-tool](https://github.com/wso2-extensions/ballerina-mi-module-gen-tool.git)
 
 2. Build the tool and publish locally:
+
+   > [!IMPORTANT]
+   > You need to set the `packageUser` and `packagePAT` environment variables to your GitHub username and Personal Access Token (PAT) respectively. These are required to publish the tool to your local repository.
+
+   ```bash
+   $ export packageUser=<your_github_username>
+   $ export packagePAT=<your_github_pat>
+   ```
+
+   Then run the build command:
 
    ```bash
    $ ./gradlew clean :tool-mi-module-gen:localPublish

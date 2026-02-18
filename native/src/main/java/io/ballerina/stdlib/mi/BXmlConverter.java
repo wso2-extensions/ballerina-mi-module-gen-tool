@@ -24,14 +24,7 @@ import io.ballerina.runtime.api.values.BXml;
 import io.ballerina.runtime.api.values.BXmlItem;
 import io.ballerina.runtime.internal.values.XmlPi;
 import io.ballerina.runtime.internal.values.XmlSequence;
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMAttribute;
-import org.apache.axiom.om.OMComment;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.OMProcessingInstruction;
-import org.apache.axiom.om.OMText;
+import org.apache.axiom.om.*;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
@@ -39,6 +32,27 @@ import java.util.Map;
 
 public class BXmlConverter {
     private static final OMFactory factory = OMAbstractFactory.getOMFactory();
+    private static final String XMLNS_PREFIX = "xmlns:";
+
+    private static boolean isNamespaceDeclarationAttribute(String attributeName) {
+        return attributeName.equals(BXmlItem.XMLNS_PREFIX)
+                || attributeName.startsWith(XMLNS_PREFIX)
+                || attributeName.equals(BXmlItem.XMLNS_NS_URI_PREFIX)
+                || attributeName.startsWith(BXmlItem.XMLNS_NS_URI_PREFIX);
+    }
+
+    private static String getNamespacePrefix(String attributeName) {
+        if (attributeName.equals(BXmlItem.XMLNS_PREFIX) || attributeName.equals(BXmlItem.XMLNS_NS_URI_PREFIX)) {
+            return "";
+        }
+        if (attributeName.startsWith(XMLNS_PREFIX)) {
+            return attributeName.substring(XMLNS_PREFIX.length());
+        }
+        if (attributeName.startsWith(BXmlItem.XMLNS_NS_URI_PREFIX)) {
+            return attributeName.substring(BXmlItem.XMLNS_NS_URI_PREFIX.length());
+        }
+        return "";
+    }
 
     static Pair<String, String> extractNamespace(String value) {
 
@@ -73,24 +87,25 @@ public class BXmlConverter {
         // create a map of namespaces with key:"" and value:null
         Map<String, OMNamespace> namespaceMap = new HashMap<>();
         namespaceMap.put("", null);
+        if (namespace != null && namespace.getNamespaceURI() != null && !namespace.getNamespaceURI().isEmpty()) {
+            namespaceMap.put(namespace.getNamespaceURI(), namespace);
+        }
 
         for (Map.Entry<BString, BString> entry : bMap.entrySet()) {
-            //TODO: handle namespace
-            if (entry.getKey().getValue().startsWith(BXmlItem.XMLNS_NS_URI_PREFIX)) {
-                //if this is a namespace
-                Pair<String, String> pair = extractNamespace(entry.getKey().getValue());
-                OMNamespace omNamespace = factory.createOMNamespace(entry.getValue().getValue(), pair.getRight());
+            String attributeName = entry.getKey().getValue();
+            if (isNamespaceDeclarationAttribute(attributeName)) {
+                String prefix = getNamespacePrefix(attributeName);
+                OMNamespace omNamespace = factory.createOMNamespace(entry.getValue().getValue(), prefix);
                 namespaceMap.put(entry.getValue().getValue(), omNamespace);
             }
         }
         for (Map.Entry<BString, BString> attribute : bMap.entrySet()) {
-            if (!attribute.getKey().getValue().startsWith(BXmlItem.XMLNS_NS_URI_PREFIX)) {
-                //if this is a namespace
+            String attributeName = attribute.getKey().getValue();
+            if (!isNamespaceDeclarationAttribute(attributeName)) {
                 Pair<String, String> pair = extractNamespace(attribute.getKey().getValue());
                 OMAttribute omattribute = factory.createOMAttribute(pair.getRight(), namespaceMap.get(pair.getLeft()),
                         attribute.getValue().getValue());
                 rootElement.addAttribute(omattribute);
-                //TODO: previously used OMAttribute creation method research why it was changed to attribute.
             }
 
         }
@@ -129,4 +144,3 @@ public class BXmlConverter {
         }
     }
 }
-

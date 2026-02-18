@@ -20,7 +20,7 @@ package io.ballerina.mi.util;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import io.ballerina.mi.connectorModel.attributeModel.Element;
+import io.ballerina.mi.model.attribute.Element;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

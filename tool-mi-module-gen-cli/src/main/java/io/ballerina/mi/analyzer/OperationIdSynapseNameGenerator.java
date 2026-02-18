@@ -18,8 +18,7 @@
 package io.ballerina.mi.analyzer;
 
 import io.ballerina.compiler.api.symbols.FunctionSymbol;
-import io.ballerina.mi.connectorModel.FunctionType;
-import io.ballerina.mi.util.Utils;
+import io.ballerina.mi.model.FunctionType;
 
 import java.util.Optional;
 

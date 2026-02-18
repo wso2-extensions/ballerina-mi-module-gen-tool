@@ -19,8 +19,6 @@
 package io.ballerina.stdlib.mi;
 
 import io.ballerina.runtime.api.Module;
-import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BObject;
 import org.wso2.integration.connector.core.ConnectException;
 import org.wso2.integration.connector.core.connection.Connection;
@@ -35,12 +33,12 @@ public class BalConnectorConnection implements Connection {
 
     @Override
     public void connect(ConnectionConfig connectionConfig) throws ConnectException {
-        //TODO
+        // No-op: the Ballerina client object is constructed during connection creation.
     }
 
     @Override
     public void close() throws ConnectException {
-        //TODO
+        // No-op: managed runtime does not require explicit connector-level teardown here.
     }
 
     public BObject getBalConnectorObj() {

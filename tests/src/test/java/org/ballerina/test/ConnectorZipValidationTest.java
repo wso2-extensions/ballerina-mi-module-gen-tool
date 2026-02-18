@@ -16,25 +16,20 @@
 
 package org.ballerina.test;
 
-import io.ballerina.mi.MiCmd;
-import io.ballerina.mi.connectorModel.Connector;
+import io.ballerina.mi.cmd.MiCmd;
+import io.ballerina.mi.model.Connector;
 import io.ballerina.mi.test.util.ArtifactGenerationUtil;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 

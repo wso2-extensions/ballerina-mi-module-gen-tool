@@ -17,10 +17,7 @@
 package org.ballerina.test;
 
 import io.ballerina.mi.test.util.ArtifactGenerationUtil;
-import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.io.File;
 
 public class AbortionTest {
 

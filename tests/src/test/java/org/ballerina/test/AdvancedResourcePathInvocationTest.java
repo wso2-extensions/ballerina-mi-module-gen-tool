@@ -17,8 +17,10 @@
 package org.ballerina.test;
 
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.stdlib.mi.BalExecutor;
 import io.ballerina.stdlib.mi.Constants;
+import io.ballerina.stdlib.mi.executor.BalExecutor;
+import io.ballerina.stdlib.mi.executor.ParamHandler;
+import io.ballerina.stdlib.mi.utils.SynapseUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.template.TemplateContext;
@@ -58,11 +60,13 @@ import java.util.Stack;
 public class AdvancedResourcePathInvocationTest {
 
     private BalExecutor balExecutor;
+    private ParamHandler paramHandler;
     private MessageContext messageContext;
 
     @BeforeMethod
     public void setup() {
         balExecutor = new BalExecutor();
+        paramHandler = new ParamHandler();
         messageContext = new Axis2MessageContext(
                 new org.apache.axis2.context.MessageContext(),
                 null,
@@ -120,12 +124,11 @@ public class AdvancedResourcePathInvocationTest {
             dataProvider = "multiSegmentMethodNames")
     public void testJvmMethodNameProperty(String functionName, String accessor, String expectedJvmMethodName,
                                           int pathParamCount, String pathParam0, String pathParam1) throws Exception {
-        Method getPropertyAsStringMethod = BalExecutor.class.getDeclaredMethod(
+        Method getPropertyAsStringMethod = SynapseUtils.class.getMethod(
                 "getPropertyAsString",
                 MessageContext.class,
                 String.class
         );
-        getPropertyAsStringMethod.setAccessible(true);
 
         // Setup resource function properties
         messageContext.setProperty(Constants.FUNCTION_TYPE, Constants.FUNCTION_TYPE_RESOURCE);
@@ -135,12 +138,12 @@ public class AdvancedResourcePathInvocationTest {
         messageContext.setProperty(Constants.FUNCTION_NAME, functionName);
 
         // Verify JVM method name is correctly retrieved
-        String jvmMethodName = (String) getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.JVM_METHOD_NAME);
+        String jvmMethodName = (String) getPropertyAsStringMethod.invoke(null, messageContext, Constants.JVM_METHOD_NAME);
         Assert.assertEquals(jvmMethodName, expectedJvmMethodName,
                 "JVM method name should match for function: " + functionName);
 
         // Verify accessor is still available
-        String retrievedAccessor = (String) getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.RESOURCE_ACCESSOR);
+        String retrievedAccessor = (String) getPropertyAsStringMethod.invoke(null, messageContext, Constants.RESOURCE_ACCESSOR);
         Assert.assertEquals(retrievedAccessor, accessor);
     }
 
@@ -197,15 +200,14 @@ public class AdvancedResourcePathInvocationTest {
         setupTemplateContext(templateParams);
 
         // Verify path parameter prepending
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
         Object[] originalArgs = new Object[]{};  // No body params for GET
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, originalArgs, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, originalArgs, messageContext);
 
         Assert.assertEquals(result.length, 1, "Should have 1 path param");
         Assert.assertTrue(result[0] instanceof BString);
@@ -236,15 +238,14 @@ public class AdvancedResourcePathInvocationTest {
         setupTemplateContext(templateParams);
 
         // Verify path parameter prepending
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
         Object[] originalArgs = new Object[]{};
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, originalArgs, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, originalArgs, messageContext);
 
         Assert.assertEquals(result.length, 2, "Should have 2 path params");
         Assert.assertTrue(result[0] instanceof BString);
@@ -277,14 +278,13 @@ public class AdvancedResourcePathInvocationTest {
         setupTemplateContext(templateParams);
 
         // Verify JVM method name contains 'import' without escape character
-        Method getPropertyAsStringMethod = BalExecutor.class.getDeclaredMethod(
+        Method getPropertyAsStringMethod = SynapseUtils.class.getMethod(
                 "getPropertyAsString",
                 MessageContext.class,
                 String.class
         );
-        getPropertyAsStringMethod.setAccessible(true);
 
-        String jvmMethodName = (String) getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.JVM_METHOD_NAME);
+        String jvmMethodName = (String) getPropertyAsStringMethod.invoke(null, messageContext, Constants.JVM_METHOD_NAME);
         Assert.assertTrue(jvmMethodName.contains("$import"),
                 "JVM method name should contain $import (without escape): " + jvmMethodName);
         Assert.assertFalse(jvmMethodName.contains("'import"),
@@ -314,16 +314,15 @@ public class AdvancedResourcePathInvocationTest {
         setupTemplateContext(templateParams);
 
         // Verify path parameter prepending with existing body args
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
         // Simulate body param (would be converted elsewhere)
         Object[] originalArgs = new Object[]{"draftBodyParam"};
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, originalArgs, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, originalArgs, messageContext);
 
         Assert.assertEquals(result.length, 2, "Should have 1 path param + 1 body param");
         Assert.assertTrue(result[0] instanceof BString, "First should be path param");
@@ -355,26 +354,24 @@ public class AdvancedResourcePathInvocationTest {
         setupTemplateContext(templateParams);
 
         // Verify JVM method name ends with $trash
-        Method getPropertyAsStringMethod = BalExecutor.class.getDeclaredMethod(
+        Method getPropertyAsStringMethod = SynapseUtils.class.getMethod(
                 "getPropertyAsString",
                 MessageContext.class,
                 String.class
         );
-        getPropertyAsStringMethod.setAccessible(true);
 
-        String jvmMethodName = (String) getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.JVM_METHOD_NAME);
+        String jvmMethodName = (String) getPropertyAsStringMethod.invoke(null, messageContext, Constants.JVM_METHOD_NAME);
         Assert.assertTrue(jvmMethodName.endsWith("$trash"),
                 "JVM method name should end with $trash: " + jvmMethodName);
 
         // Verify path params
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, new Object[]{}, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, new Object[]{}, messageContext);
 
         Assert.assertEquals(result.length, 2);
         Assert.assertEquals(result[0].toString(), "msg-456", "id should be first");
@@ -386,12 +383,11 @@ public class AdvancedResourcePathInvocationTest {
      */
     @Test(description = "Verify resource function detection with JVM method name")
     public void testResourceFunctionDetectionWithJvmMethodName() throws Exception {
-        Method getPropertyAsStringMethod = BalExecutor.class.getDeclaredMethod(
+        Method getPropertyAsStringMethod = SynapseUtils.class.getMethod(
                 "getPropertyAsString",
                 MessageContext.class,
                 String.class
         );
-        getPropertyAsStringMethod.setAccessible(true);
 
         // Setup resource function
         messageContext.setProperty(Constants.FUNCTION_TYPE, Constants.FUNCTION_TYPE_RESOURCE);
@@ -399,12 +395,12 @@ public class AdvancedResourcePathInvocationTest {
         messageContext.setProperty(Constants.JVM_METHOD_NAME, "$get$users$$userId$drafts");
 
         // Verify function type is RESOURCE
-        String functionType = (String) getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.FUNCTION_TYPE);
+        String functionType = (String) getPropertyAsStringMethod.invoke(null, messageContext, Constants.FUNCTION_TYPE);
         Assert.assertEquals(functionType, Constants.FUNCTION_TYPE_RESOURCE);
         Assert.assertTrue(Constants.FUNCTION_TYPE_RESOURCE.equals(functionType));
 
         // Verify JVM method name is available
-        String jvmMethodName = (String) getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.JVM_METHOD_NAME);
+        String jvmMethodName = (String) getPropertyAsStringMethod.invoke(null, messageContext, Constants.JVM_METHOD_NAME);
         Assert.assertNotNull(jvmMethodName);
         Assert.assertTrue(jvmMethodName.startsWith("$get$"));
     }
@@ -433,26 +429,24 @@ public class AdvancedResourcePathInvocationTest {
         setupTemplateContext(templateParams);
 
         // Verify JVM method name
-        Method getPropertyAsStringMethod = BalExecutor.class.getDeclaredMethod(
+        Method getPropertyAsStringMethod = SynapseUtils.class.getMethod(
                 "getPropertyAsString",
                 MessageContext.class,
                 String.class
         );
-        getPropertyAsStringMethod.setAccessible(true);
 
-        String jvmMethodName = (String) getPropertyAsStringMethod.invoke(balExecutor, messageContext, Constants.JVM_METHOD_NAME);
+        String jvmMethodName = (String) getPropertyAsStringMethod.invoke(null, messageContext, Constants.JVM_METHOD_NAME);
         Assert.assertTrue(jvmMethodName.startsWith("$delete$"),
                 "DELETE method should have $delete$ prefix: " + jvmMethodName);
 
         // Verify path params
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, new Object[]{}, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, new Object[]{}, messageContext);
 
         Assert.assertEquals(result.length, 2);
         Assert.assertEquals(result[0].toString(), "draft-to-delete");
@@ -522,14 +516,13 @@ public class AdvancedResourcePathInvocationTest {
         setupTemplateContext(templateParams);
 
         // Verify path params are correctly handled
-        Method prependPathParamsMethod = BalExecutor.class.getDeclaredMethod(
+        Method prependPathParamsMethod = ParamHandler.class.getMethod(
                 "prependPathParams",
                 Object[].class,
                 MessageContext.class
         );
-        prependPathParamsMethod.setAccessible(true);
 
-        Object[] result = (Object[]) prependPathParamsMethod.invoke(balExecutor, new Object[]{}, messageContext);
+        Object[] result = (Object[]) prependPathParamsMethod.invoke(paramHandler, new Object[]{}, messageContext);
 
         Assert.assertEquals(result.length, 1);
         Assert.assertEquals(result[0].toString(), "user+test@example.com",
